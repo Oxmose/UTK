@@ -50,48 +50,10 @@
 /** @brief Redefinition of serial COM4 base port ID for ease of use. */
 #define COM4 SERIAL_COM4_BASE
 
-/** 
- * @brief Computes the data port for the serial port which base port ID is 
- * given as parameter.
- * 
- * @param[in] port The base port ID of the serial port.
- */
-#define SERIAL_DATA_PORT(port)          (port)
-/** 
- * @brief Computes the aux data port for the serial port which base port ID is 
- * given as parameter.
- * 
- * @param[in] port The base port ID of the serial port.
- */
-#define SERIAL_DATA_PORT_2(port)        (port + 1)
-/** 
- * @brief Computes the fifo command port for the serial port which base port ID 
- * is given as parameter.
- * 
- * @param[in] port The base port ID of the serial port.
- */
-#define SERIAL_FIFO_COMMAND_PORT(port)  (port + 2)
-/** 
- * @brief Computes the line command port for the serial port which base port ID 
- * is given as parameter.
- * 
- * @param[in] port The base port ID of the serial port.
- */
-#define SERIAL_LINE_COMMAND_PORT(port)  (port + 3)
-/** 
- * @brief Computes the modem command port for the serial port which base port ID 
- * is given as parameter.
- * 
- * @param[in] port The base port ID of the serial port.
- */
-#define SERIAL_MODEM_COMMAND_PORT(port) (port + 4)
-/** 
- * @brief Computes the line status port for the serial port which base port ID 
- * is given as parameter.
- * 
- * @param[in] port The base port ID of the serial port.
- */
-#define SERIAL_LINE_STATUS_PORT(port)   (port + 5)
+/** @brief Serial COM2-4 IRQ number. */
+#define SERIAL_2_4_IRQ_LINE       3
+/** @brief Serial COM1-3 IRQ number. */
+#define SERIAL_1_3_IRQ_LINE       4
 
 /** @brief Serial data length flag: 5 bits. */
 #define SERIAL_DATA_LENGTH_5 0x00
@@ -141,6 +103,49 @@
 #define SERIAL_FIFO_DEPTH_14     0x00
 /** @brief Serial fifo depth flag: 64 bits. */
 #define SERIAL_FIFO_DEPTH_64     0x10
+
+/** 
+ * @brief Computes the data port for the serial port which base port ID is 
+ * given as parameter.
+ * 
+ * @param[in] port The base port ID of the serial port.
+ */
+#define SERIAL_DATA_PORT(port)          (port)
+/** 
+ * @brief Computes the aux data port for the serial port which base port ID is 
+ * given as parameter.
+ * 
+ * @param[in] port The base port ID of the serial port.
+ */
+#define SERIAL_DATA_PORT_2(port)        (port + 1)
+/** 
+ * @brief Computes the fifo command port for the serial port which base port ID 
+ * is given as parameter.
+ * 
+ * @param[in] port The base port ID of the serial port.
+ */
+#define SERIAL_FIFO_COMMAND_PORT(port)  (port + 2)
+/** 
+ * @brief Computes the line command port for the serial port which base port ID 
+ * is given as parameter.
+ * 
+ * @param[in] port The base port ID of the serial port.
+ */
+#define SERIAL_LINE_COMMAND_PORT(port)  (port + 3)
+/** 
+ * @brief Computes the modem command port for the serial port which base port ID 
+ * is given as parameter.
+ * 
+ * @param[in] port The base port ID of the serial port.
+ */
+#define SERIAL_MODEM_COMMAND_PORT(port) (port + 4)
+/** 
+ * @brief Computes the line status port for the serial port which base port ID 
+ * is given as parameter.
+ * 
+ * @param[in] port The base port ID of the serial port.
+ */
+#define SERIAL_LINE_STATUS_PORT(port)   (port + 5)
 
 /*******************************************************************************
  * STRUCTURES

@@ -38,6 +38,9 @@ uint64_t cpu_idt[IDT_ENTRY_COUNT] __attribute__((aligned(16)));
 /** @brief Kernel IDT structure */
 idt_ptr_t cpu_idt_ptr;
 
+/** @brief CPU TSS structures */
+cpu_tss_entry_t cpu_tss[MAX_CPU_COUNT] __attribute__((aligned(16)));
+
 /** @brief Kernel stacks */
 uint8_t cpu_stacks[MAX_CPU_COUNT][KERNEL_STACK_SIZE] __attribute__((aligned(8)));
 
