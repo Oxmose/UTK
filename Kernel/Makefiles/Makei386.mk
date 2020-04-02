@@ -15,16 +15,15 @@ ARCH_DEP = x86
 CPU_DEP  = i386
 MODULES  = . io lib
 
-SRC_DEP = arch/cpu/$(CPU_DEP) arch/$(ARCH_DEP) $(MODULES)
-
-TESTS_DIR  = ../Tests/Tests 
-TEST_ARCH_DIR = ../Tests/Tests/i386
+TESTS_DIR  = Tests/Tests
+TEST_ARCH_DIR = Tests/Tests/i386
 TESTS_INC  = Tests
 
-
 ifeq ($(TESTS), TRUE)
-MODULES += $(TESTS_DIR) $(TEST_ARCH_DIR)
+MODULES += ../$(TESTS_DIR) ../$(TEST_ARCH_DIR)
 endif
+
+SRC_DEP = arch/cpu/$(CPU_DEP) arch/$(ARCH_DEP) $(MODULES)
 
 ######################### Files options
 # Kernel name
@@ -121,7 +120,8 @@ clean:
 	@echo
 
 	@$(RM) -rf $(BIN_DIR) $(BUILD_DIR)
-	@$(RM) -f $(TESTS_DIR)/Tests/*.o $(TESTS_DIR)/Tests/*.d
+	@$(RM) -f $(TESTS_DIR)/*.o $(TESTS_DIR)/*.d 
+	@$(RM) -f $(TEST_ARCH_DIR)/*.o $(TEST_ARCH_DIR)/*.d
 	@$(RM) -rf ./GRUB
 
 # Check header files modifications
