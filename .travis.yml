@@ -7,8 +7,8 @@ addons:
         packages:
             - g++
             - nasm
-            - xorisso
-            - grub-mkrescue
+            - xorriso
+            - grub-common
             - mtools
 
 cache:
