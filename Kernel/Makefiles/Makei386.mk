@@ -17,12 +17,13 @@ MODULES  = . io lib
 
 SRC_DEP = arch/cpu/$(CPU_DEP) arch/$(ARCH_DEP) $(MODULES)
 
-TESTS_DIR  = ../Tests/Tests
+TESTS_DIR  = ../Tests/Tests 
+TEST_ARCH_DIR = ../Tests/Tests/i386
 TESTS_INC  = Tests
 
 
 ifeq ($(TESTS), TRUE)
-MODULES += $(TESTS_DIR)
+MODULES += $(TESTS_DIR) $(TEST_ARCH_DIR)
 endif
 
 ######################### Files options

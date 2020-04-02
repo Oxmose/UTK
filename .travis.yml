@@ -21,6 +21,8 @@ matrix:
       env: COMPILER=g++
 
 before_install:
+    - sudo apt-get update
+    - sudo apt-get -y install xorisso grub-mkrescue nasm
     - export ARCH=$TRAVIS_ARCH
     - if [ "$TRAVIS_OS_NAME" = "linux"  ]; then sudo apt-get -qq update;    fi
 
