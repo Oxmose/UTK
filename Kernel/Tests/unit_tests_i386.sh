@@ -12,14 +12,14 @@ function testcase() {
     sed -i "s/$filename_up 0/$filename_up 1/g" Tests/test_bank.h
     sed -i 's/TEST_MODE_ENABLED 0/TEST_MODE_ENABLED 1/g' ../Config/i386/config.h
     # Execute the test
-    {
+    # {
     rm -f *.out
     cd ../
-    make arch=i386 TESTS=TRUE && (make arch=i386 qemu-test-mode > test.out)
+    make arch=i386 TESTS=TRUE && (make arch=i386 qemu-test-mode | tee test.out)
     mv test.out ./Tests/test.out
     
     cd Tests
-    } > /dev/null
+    # } > /dev/null
     # Filter output
     grep "\[TESTMODE\]\|ERROR" test.out > filtered.out
     #Compare output
@@ -54,14 +54,14 @@ function testcase_arch() {
     sed -i "s/$filename_up 0/$filename_up 1/g" Tests/test_bank.h
     sed -i 's/TEST_MODE_ENABLED 0/TEST_MODE_ENABLED 1/g' ../Config/i386/config.h
     # Execute the test
-    {
+    # {
     rm -f *.out
     cd ../
-    make arch=i386 TESTS=TRUE && (make arch=i386 qemu-test-mode > test.out)
+    make arch=i386 TESTS=TRUE && (make arch=i386 qemu-test-mode | tee test.out)
     mv test.out ./Tests/test.out
     
     cd Tests
-    } > /dev/null
+    # } > /dev/null
     # Filter output
     grep "\[TESTMODE\]\|ERROR" test.out > filtered.out
     #Compare output

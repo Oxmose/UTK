@@ -11,6 +11,7 @@ void gdt_test(void)
 
     /* Kill QEMU */
     cpu_outw(0x2000, 0x604);
+    cpu_outw(0x2000, 0xB004);
     while(1)
     {
         __asm__ ("hlt");
