@@ -22,6 +22,8 @@
 #define TSS_TEST 0
 #define BOOT_TEST 0
 #define OUTPUT_TEST 0
+#define VGA_TEST 0
+#define KHEAP_TEST 0
 
 /* Put tests declarations here */
 void serial_test(void);
@@ -30,5 +32,7 @@ void gdt_test(void);
 void tss_test(void);
 void boot_test(void);
 void output_test(void);
+void vga_test(void);
+void kheap_test(void);
 
 #endif /* __TEST_BANK_H_ */

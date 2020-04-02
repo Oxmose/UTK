@@ -28,13 +28,13 @@
 #include <io/graphic.h>       /* Graphic definitions */
 #include <io/kernel_output.h> /* Kernel output methods */
 
+/* UTK configuration file */
+#include <config.h>
+
 /* Tests header file */
 #if TEST_MODE_ENABLED
 #include <Tests/test_bank.h>
 #endif
-
-/* UTK configuration file */
-#include <config.h>
 
 /* Header */
 #include <serial.h>

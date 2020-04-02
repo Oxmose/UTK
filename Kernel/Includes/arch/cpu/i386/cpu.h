@@ -35,6 +35,25 @@
 /** @brief CPUID capable flags. */
 #define CPU_FLAG_CPU_CPUID_CAPABLE 0x00200000
 
+/** @brief Request vendor string. */
+#define CPUID_GETVENDORSTRING          0x00000000
+/** @brief Request capabled CPUID features. */
+#define CPUID_GETFEATURES              0x00000001
+/** @brief Request TLB. */
+#define CPUID_GETTLB                   0x00000002
+/** @brief Request serial. */
+#define CPUID_GETSERIAL                0x00000003
+/** @brief Request extended CPUID features. */
+#define CPUID_INTELEXTENDED_AVAILABLE  0x80000000
+/** @brief Request Intel CPUID features. */
+#define CPUID_INTELFEATURES            0x80000001
+/** @brief Request Intel brand string. */
+#define CPUID_INTELBRANDSTRING         0x80000002
+/** @brief Request Intel brand string extended. */
+#define CPUID_INTELBRANDSTRINGMORE     0x80000003
+/** @brief Request Intel brand string end. */
+#define CPUID_INTELBRANDSTRINGEND      0x80000004
+
 /****************************
  * General Features
  ***************************/
@@ -461,7 +480,7 @@ __inline__ static uint32_t cpu_get_cpuid_max (const uint32_t ext)
  * @return 1 in case of succes, 0 otherwise.
  */
 __inline__ static int32_t cpu_cpuid(const uint32_t code,
-                                 uint32_t regs[4])
+                                    uint32_t regs[4])
 {
     if(cpu_cpuid_capable() == 0)
     {
