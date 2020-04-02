@@ -1,0 +1,33 @@
+language: c
+sudo: required
+dist: bionic
+
+addons:
+    apt:
+        packages:
+            - g++
+            - nasm
+
+cache:
+    directories:
+        - $HOME/qemu
+
+env:
+    - TRAVIS_ARCH=i386 QEMU_ARCHES=i386
+
+matrix:
+  include:
+    - compiler: gcc
+      env: COMPILER=g++
+
+before_install:
+    - export ARCH=$TRAVIS_ARCH
+    - if [ "$TRAVIS_OS_NAME" = "linux"  ]; then sudo apt-get -qq update;    fi
+
+before_script:
+    - chmod +x travis-qemu/travis-qemu.sh
+    - bash -e travis-qemu/travis-qemu.sh
+    - export PATH=$PATH:$HOME/qemu/bin
+    - qemu-system-i386 --version
+
+script: ./.build-travis.sh

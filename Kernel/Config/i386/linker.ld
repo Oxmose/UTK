@@ -2,7 +2,7 @@ ENTRY(__kinit)                /* the name of the entry label */
 SECTIONS
 {
     /* Kernel starts at 1M in physical addresse space
-     * Add the offset DO NOT FORGET TO CHANGE IT IN config.h AND kinit.S
+     * Add the offset, to fit with values in config.h AND kinit.S
      */
     KERNEL_MEM_OFFSET = 0xE0000000;
 

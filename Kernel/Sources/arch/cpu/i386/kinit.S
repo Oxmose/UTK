@@ -42,6 +42,7 @@ __kinit_low          equ (__kinit - KERNEL_MEM_OFFSET)
 ; EXTERN DATA
 ;-------------------------------------------------------------------------------
 extern cpu_stacks
+extern cpu_info
 extern init_cpu_count
 
 extern _kernel_bss_start
@@ -55,6 +56,7 @@ extern serial_init
 extern cpu_setup_gdt
 extern cpu_setup_idt
 extern cpu_setup_tss
+extern kernel_kickstart
 
 ;-------------------------------------------------------------------------------
 ; EXPORTED FUNCTIONS
@@ -125,21 +127,37 @@ __bss_init:
     mov [init_cpu_count], eax
 
     ; Setup system pre-kickstart
+    call __get_cpuid_flag
     call serial_init
     call cpu_setup_gdt
     call cpu_setup_idt
     call cpu_setup_tss
 
     ; Kickstart kernel
-
+    call kernel_kickstart
 
 __kinit_end:
     ; Disable interrupt and loop forever
     cli 
     hlt
     jmp __kinit_end
-
    
+;-------------------------------------------------------------------------------
+; CPUID probing function
+__get_cpuid_flag:
+    pushfd                                  ;Save EFLAGS
+    pushfd                                  ;Store EFLAGS
+    xor    dword [esp], 0x00200000          ;Invert the ID bit in stored EFLAGS
+    popfd                                   ;Load stored EFLAGS
+    pushfd                                  ;Store EFLAGS again
+    pop    eax                              ;eax = modified EFLAGS
+    xor    eax, [esp]                       ;eax = whichever bits were changed
+    popfd                                   ;Restore original EFLAGS
+    and    eax, 0x00200000                  ;eax = 0 CPUID is not available
+    mov    edi, cpu_info
+    or     [edi], eax                       ; Store information in the structure
+    ret
+
 ;-------------------------------------------------------------------------------
 ; DATA
 ;-------------------------------------------------------------------------------

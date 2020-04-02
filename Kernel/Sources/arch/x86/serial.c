@@ -28,6 +28,11 @@
 #include <io/graphic.h>       /* Graphic definitions */
 #include <io/kernel_output.h> /* Kernel output methods */
 
+/* Tests header file */
+#if TEST_MODE_ENABLED
+#include <Tests/test_bank.h>
+#endif
+
 /* UTK configuration file */
 #include <config.h>
 
@@ -204,6 +209,10 @@ OS_RETURN_E serial_init(void)
 
     #if SERIAL_KERNEL_DEBUG == 1
     kernel_serial_debug("[SERIAL] Serial initialization end\n");
+    #endif
+
+    #if TEST_MODE_ENABLED
+    serial_test();
     #endif
 
     return err;

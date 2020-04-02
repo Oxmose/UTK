@@ -17,6 +17,7 @@
  ******************************************************************************/
 
 #include <lib/stdint.h>       /* Generic int types */
+#include <cpu.h>              /* CPU related structures */
 
 /* UTK configuration file */
 #include <config.h>
@@ -46,3 +47,6 @@ uint8_t cpu_stacks[MAX_CPU_COUNT][KERNEL_STACK_SIZE] __attribute__((aligned(8)))
 
 /** @brief Booted CPU count */
 uint32_t init_cpu_count;
+
+/** @brief CPU info storage, stores basix CPU information. */
+cpu_info_t cpu_info;
