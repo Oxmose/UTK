@@ -12,6 +12,10 @@ addons:
             - mtools
             - libmount-dev
             - libselinux-dev
+            - build-essential 
+            - libtool 
+            - pkg-config 
+            - intltool
 
 cache:
     directories:
