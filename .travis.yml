@@ -47,6 +47,7 @@ addons:
             - xfslibs-dev
             - libpulse-dev 
             - libpulse0
+            - grub-pc-bin
 
 cache:
     directories:
