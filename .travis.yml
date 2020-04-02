@@ -1,5 +1,5 @@
 language: c
-sudo: required
+os: linux
 dist: bionic
 
 addons:
@@ -18,7 +18,7 @@ cache:
 env:
     - TRAVIS_ARCH=i386 QEMU_ARCHES=i386
 
-matrix:
+jobs:
   include:
     - compiler: gcc
       env: COMPILER=g++
