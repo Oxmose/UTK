@@ -21,7 +21,8 @@
 #ifndef __I386_CPU_SETTINGS_H_
 #define __I386_CPU_SETTINGS_H_
 
-#include <lib/stdint.h> /* Generic int types */
+#include <lib/stdint.h>  /* Generic int types */
+#include <cpu_structs.h> /* CPU structures */
 
 /*******************************************************************************
  * CONSTANTS
@@ -151,6 +152,9 @@
 #define MIN_INTERRUPT_LINE     0x20
 /** @brief Maximal customizable accepted interrupt line. */
 #define MAX_INTERRUPT_LINE     (IDT_ENTRY_COUNT - 1)
+
+/** @brief Defines the number of possible interrupt on the i386 processor. */
+#define INT_ENTRY_COUNT IDT_ENTRY_COUNT
 
 /*******************************************************************************
  * STRUCTURES

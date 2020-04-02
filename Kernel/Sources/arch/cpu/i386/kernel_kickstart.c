@@ -18,12 +18,13 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#include <io/kernel_output.h> /* Kernel output methods */ 
-#include <lib/stddef.h>       /* Standard definitions */
-#include <lib/string.h>       /* String manipulation */
-#include <vga_text.h>         /* VGA display driver */
-#include <memory/kheap.h>     /* Kernel heap */
-#include <cpu.h>              /* CPU management */
+#include <io/kernel_output.h>     /* Kernel output methods */ 
+#include <lib/stddef.h>           /* Standard definitions */
+#include <lib/string.h>           /* String manipulation */
+#include <vga_text.h>             /* VGA display driver */
+#include <memory/kheap.h>         /* Kernel heap */
+#include <cpu.h>                  /* CPU management */
+#include <interrupt/interrupts.h> /* Kernel interrupt manager */
 
 /* UTK configuration file */
 #include <config.h>
@@ -90,13 +91,19 @@ void kernel_kickstart(void)
     kernel_serial_debug("Kickstarting the kernel\n");
     #endif
     graphic_clear_screen();
-    kernel_printf("\r ============================== Kickstarting UTK ==============================\n");
+    kernel_printf("\r ============================== Kickstarting UTK "
+                  "==============================\n");
 
     err = cpu_detect(1);
     INIT_MSG("", "Error while detecting CPU: %d. HALTING\n",err, 1);
 
     err = kheap_init(); 
     INIT_MSG("Kernel heap initialized\n", "Could not initialize kernel heap\n", 
+             err, 1);
+
+    err = kernel_interrupt_init(); 
+    INIT_MSG("Kernel interrupt manager initialized\n", 
+             "Could not initialize kernel interrupt manager\n",
              err, 1);
 
 }

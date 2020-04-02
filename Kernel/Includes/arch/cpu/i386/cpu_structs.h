@@ -168,6 +168,28 @@ struct cpu_tss_entry
  */
 typedef struct cpu_tss_entry cpu_tss_entry_t;
 
+/**
+ * @brief Defines he virtual CPU context for the i386 CPU.
+ */
+struct virtual_cpu_context
+{
+    /** @brief Thread's specific ESP registers. */
+    uint32_t esp;
+    /** @brief Thread's specific EBP registers. */
+    uint32_t ebp;
+    /** @brief Thread's specific EIP registers. */
+    uint32_t eip;
+
+     /** @brief Thread's CR3 page directory pointer. */
+    uint32_t cr3;    
+};
+
+/** @brief Shortcut name for the struct virtual_cpu_context structure. */
+typedef struct virtual_cpu_context virtual_cpu_context_t;
+
+struct kernel_thread;
+typedef struct kernel_thread kernel_thread_t;
+
 /*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/

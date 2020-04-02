@@ -20,6 +20,9 @@
 #ifndef __CONFIG_H_
 #define __CONFIG_H_
 
+/* TODO: remove */
+#include <placeholder.h>
+
 /**
  * @brief Kernel's main stack size in bytes.
  *
@@ -53,7 +56,7 @@
  * Features settings
  ******************************************************************************/
 /** @brief Maximal number of CPU to be supported by the kernel. */
-#define MAX_CPU_COUNT  4
+#define MAX_CPU_COUNT  1
 
 /** @brief Display with serial driver. */
 #define DISPLAY_SERIAL   0
