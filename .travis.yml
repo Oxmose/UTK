@@ -45,6 +45,7 @@ addons:
             - liblzo2-dev 
             - valgrind 
             - xfslibs-dev
+            - libpulse-dev 
 
 cache:
     directories:
