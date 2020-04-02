@@ -13,7 +13,7 @@
 ######################### Modules selection
 ARCH_DEP = x86
 CPU_DEP  = i386
-MODULES  = . io lib
+MODULES  = . io lib memory
 
 TESTS_DIR  = Tests/Tests
 TEST_ARCH_DIR = Tests/Tests/i386

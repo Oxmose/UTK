@@ -1,0 +1,6 @@
+[TESTMODE] This tag should be empty: 0.
+[ERROR] [TESTMODE] This tag should be ERROR: 1.
+[OK] [TESTMODE] This tag should be OK: 2.
+[INFO] [TESTMODE] This tag should be INFO: 3.
+[DEBUG] [TESTMODE] This tag should be DEBUG: 4.
+[DEBUG] [TESTMODE] This should only out in serial: 5.
