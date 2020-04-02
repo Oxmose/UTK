@@ -17,7 +17,9 @@ MODULES  = . io lib
 
 SRC_DEP = arch/cpu/$(CPU_DEP) arch/$(ARCH_DEP) $(MODULES)
 
-TESTS_DIR  = ../Tests
+TESTS_DIR  = ../Tests/Tests
+TESTS_INC  = Tests
+
 
 ifeq ($(TESTS), TRUE)
 MODULES += $(TESTS_DIR)
@@ -78,6 +80,8 @@ all: init kernel.bin
 
 init:
 	@echo "\e[1m\e[34m=== Building UTK for i386 architecture\e[22m\e[39m"
+	@echo "\e[1m\e[34mModules: $(MODULES)\e[22m\e[39m"
+
 	@mkdir -p $(OBJ_DIRS)
 	@mkdir -p $(BIN_DIR)
 
@@ -101,7 +105,7 @@ ifeq ($(DEBUG), TRUE)
 endif
 ifeq ($(TESTS), TRUE)
 	@echo  "\e[32m$< \e[22m\e[39m-> \e[1m\e[94m$@\e[22m\e[39m"
-	$(CC) $(CFLAGS) $< -o $@ -I $(INC_DIR) -I $(INC_ARCH) -I $(INC_CPU) -I $(CONFIG_DIR) -I $(TESTS_DIR)
+	$(CC) $(CFLAGS) $< -o $@ -I $(INC_DIR) -I $(INC_ARCH) -I $(INC_CPU) -I $(CONFIG_DIR) -I $(TESTS_INC)
 else
 	@echo  "\e[32m$< \e[22m\e[39m-> \e[1m\e[94m$@\e[22m\e[39m"
 	$(CC) $(CFLAGS) $< -o $@ -I $(INC_DIR) -I $(INC_ARCH) -I $(INC_CPU) -I $(CONFIG_DIR)
@@ -140,7 +144,7 @@ qemu-test-mode:
 	cp $(BIN_DIR)/$(KERNEL) ./GRUB/boot/
 	@$(RM) -f ./$(BIN_DIR)/bootable.iso
 	grub-mkrescue -o ./$(BIN_DIR)/bootable.iso ./GRUB
-	@$(QEMU) $(QEMUOPTS) -boot d -cdrom ./$(BIN_DIR)/bootable.iso -serial stdio -nographic
+	@$(QEMU) $(QEMUOPTS) -boot d -cdrom ./$(BIN_DIR)/bootable.iso -serial stdio -nographic -monitor none
 
 debug:
 	@echo "\e[1m\e[94m=== Running on Qemu TEST MODE\e[22m\e[39m"
@@ -149,7 +153,7 @@ debug:
 	cp $(BIN_DIR)/$(KERNEL) ./GRUB/boot/
 	@$(RM) -f ./$(BIN_DIR)/bootable.iso
 	grub-mkrescue -o ./$(BIN_DIR)/bootable.iso ./GRUB
-	@$(QEMU) $(QEMUOPTS) -boot d -cdrom ./$(BIN_DIR)/bootable.iso -serial stdio -S
+	@$(QEMU) $(QEMUOPTS) -boot d -cdrom ./$(BIN_DIR)/bootable.iso -serial stdio -S -no-reboot -no-shutdown
 
 ######################### Image file options
 bootable: all

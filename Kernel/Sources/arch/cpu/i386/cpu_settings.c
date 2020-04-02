@@ -23,6 +23,11 @@
 #include <io/kernel_output.h> /* Kernel output methods */
 #include <cpu_structs.h>      /* CPU related structures */
 
+/* Tests header file */
+#if TEST_MODE_ENABLED
+#include <Tests/test_bank.h>
+#endif
+
 /* UTK configuration file */
 #include <config.h>
 
@@ -765,9 +770,13 @@ void cpu_setup_gdt(void)
                          "movw %w0,%%fs\n\t"
                          "movw %w0,%%gs\n\t"
                          "movw %w0,%%ss\n\t" :: "r" (KERNEL_DS_32));
-    __asm__ __volatile__("ljmp %0, $flab \n\t flab: \n\t" :: "i" (KERNEL_CS_32));
+    __asm__ __volatile__("ljmp %0, $new_gdt \n\t new_gdt: \n\t" :: "i" (KERNEL_CS_32));
 
     kernel_success("GDT Initialized at 0x%p\n", cpu_gdt_ptr.base);
+
+    #if TEST_MODE_ENABLED
+    gdt_test();
+    #endif
 }
 
 void cpu_setup_idt(void)
@@ -799,6 +808,10 @@ void cpu_setup_idt(void)
     __asm__ __volatile__("lidt %0" :: "m" (cpu_idt_ptr.size), "m" (cpu_idt_ptr.base));
 
     kernel_success("IDT Initialized at 0x%p\n", cpu_idt_ptr.base);
+
+    #if TEST_MODE_ENABLED
+    idt_test();
+    #endif
 }
 
 void cpu_setup_tss(void)
@@ -831,4 +844,8 @@ void cpu_setup_tss(void)
     __asm__ __volatile__("ltr %0" : : "rm" ((uint16_t)(TSS_SEGMENT)));
 
     kernel_success("TSS Initialized at 0x%p\n", cpu_tss);
+
+    #if TEST_MODE_ENABLED
+    tss_test();
+    #endif
 }
