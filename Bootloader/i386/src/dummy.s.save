@@ -1,0 +1,61 @@
+
+[bits 32]
+MODULEALIGN    equ 1<<0
+MEMINFO        equ 1<<1
+
+FLAGS       equ MODULEALIGN | MEMINFO
+MAGIC       equ 0x1BADB002
+CHECKSUM    equ -(MAGIC + FLAGS)
+
+section .multiboot
+  align 4
+  multiboot_header:
+    dd MAGIC
+    dd FLAGS
+    dd CHECKSUM
+
+entry:
+    hlt
+    jmp entry
+times 65024 db 0xAA
+times 65024 db 0xBB
+times 65024 db 0xCC
+times 65024 db 0xDD
+times 65024 db 0xEE
+times 65024 db 0x99
+times 65024 db 0x88
+times 65024 db 0x77
+times 65024 db 0x66
+times 65024 db 0x55
+times 65024 db 0x44
+times 65024 db 0x33
+times 65024 db 0x22
+times 65024 db 0x11
+times 65024 db 0xAB
+times 65024 db 0xAC
+times 65024 db 0xAD
+times 65024 db 0xAE
+times 65024 db 0xAF
+times 65024 db 0xBA
+times 65024 db 0xBC
+times 65024 db 0xBD
+times 65024 db 0xBE
+times 65024 db 0xBF
+times 65024 db 0xCA
+times 65024 db 0xCB
+times 65024 db 0xCD
+times 65024 db 0xCE
+times 65024 db 0xCF
+times 65024 db 0xDA
+times 65024 db 0xDB
+times 65024 db 0xDC
+times 65024 db 0xDE
+times 65024 db 0xDF
+times 65024 db 0xEA
+times 65024 db 0xEB
+times 65024 db 0xEC
+times 65024 db 0xED
+times 65024 db 0xEF
+times 65024 db 0xFA
+times 65024 db 0xFB
+times 0x10000 dd 0x12345678
