@@ -10,6 +10,9 @@ addons:
             - xorriso
             - grub-common
             - mtools
+            - libselinux
+            - libmount-dev
+            - libmount
 
 cache:
     directories:
