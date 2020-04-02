@@ -23,13 +23,13 @@
 #include <io/kernel_output.h> /* Kernel output methods */
 #include <cpu_structs.h>      /* CPU related structures */
 
+/* UTK configuration file */
+#include <config.h>
+
 /* Tests header file */
 #if TEST_MODE_ENABLED
 #include <Tests/test_bank.h>
 #endif
-
-/* UTK configuration file */
-#include <config.h>
 
 /* Header file */
 #include <cpu_settings.h>

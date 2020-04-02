@@ -27,6 +27,11 @@
 /* UTK configuration file */
 #include <config.h>
 
+/* Tests header file */
+#if TEST_MODE_ENABLED
+#include <Tests/test_bank.h>
+#endif
+
 /* Header file */
 #include <vga_text.h>
 
@@ -258,10 +263,18 @@ OS_RETURN_E vga_init(void)
 {
     OS_RETURN_E err; 
 
+    #if VGA_DEBUG
+    kernel_serial_debug("Initializing VGA text driver\n");
+    #endif 
+
     /* Init framebuffer */
     vga_framebuffer = (uint16_t*)VGA_TEXT_FRAMEBUFFER;
 
     err = OS_NO_ERR;
+
+    #if TEST_MODE_ENABLED
+    vga_test();
+    #endif
 
     return err;
 }

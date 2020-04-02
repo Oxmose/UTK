@@ -22,10 +22,13 @@
 #include <lib/stddef.h>       /* Standard definitions */
 #include <lib/string.h>       /* String manipulation */
 #include <vga_text.h>         /* VGA display driver */
+#include <memory/kheap.h>     /* Kernel heap */
+#include <cpu.h>              /* CPU management */
 
 /* UTK configuration file */
 #include <config.h>
 
+/* Tests header file */
 #if TEST_MODE_ENABLED
 #include <Tests/test_bank.h>
 #endif
@@ -88,5 +91,12 @@ void kernel_kickstart(void)
     #endif
     graphic_clear_screen();
     kernel_printf("\r ============================== Kickstarting UTK ==============================\n");
+
+    err = cpu_detect(1);
+    INIT_MSG("", "Error while detecting CPU: %d. HALTING\n",err, 1);
+
+    err = kheap_init(); 
+    INIT_MSG("Kernel heap initialized\n", "Could not initialize kernel heap\n", 
+             err, 1);
 
 }
