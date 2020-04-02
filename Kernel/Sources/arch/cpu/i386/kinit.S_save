@@ -1,0 +1,239 @@
+;-------------------------------------------------------------------------------
+;
+; File: kinit.S
+;
+; Author: Alexy Torres Aurora Dugo
+;
+; Date: 14/12/2017
+;
+; Version: 1.0
+;
+; Kernel entry point and cpu initialization
+;-------------------------------------------------------------------------------
+
+;-----------------------------------------
+; EXTERN FUNCTIONS
+;-----------------------------------------
+extern cpu_setup_gdt
+extern cpu_setup_idt
+extern cpu_setup_tss
+extern setup_kheap
+extern graphic_clear_screen
+extern init_cpu_count
+
+extern serial_init
+
+extern kernel_kickstart
+
+extern _kernel_bss_start
+extern _kernel_bss_end
+
+extern kernel_heap_end
+
+extern multiboot_data_ptr
+
+extern cpu_info                 ; CPU INFO structure
+
+global kernel_stack             ; Kernel first stack
+global low_loader               ; Kernel entry point
+global loader                   ; Kernelk high mem entry point
+;-----------------------------
+; KERNEL STACK SETTINGS
+;-----------------------------
+KERNEL_STACK_SIZE equ 16384     ; DO NOT FORGET TO MODIFY IN CONFIG.H
+
+;-----------------------------
+; PAGING SETTINGS
+;-----------------------------
+KERNEL_MEM_OFFSET    equ 0xE0000000 ; DO NOT FORGET TO MODIFY IN CONFIG.H
+KERNEL_START_PAGE_ID equ (KERNEL_MEM_OFFSET >> 22)
+
+low_loader equ (loader - KERNEL_MEM_OFFSET)
+
+;-----------------------------
+; MULTIBOOT SETTINGS
+;-----------------------------
+MODULEALIGN    equ 1<<0
+MEMINFO        equ 1<<1
+
+FLAGS       equ MODULEALIGN | MEMINFO
+MAGIC       equ 0x1BADB002
+CHECKSUM    equ -(MAGIC + FLAGS)
+
+section .multiboot
+  align 4
+  multiboot_header:
+    dd MAGIC
+    dd FLAGS
+    dd CHECKSUM
+  
+  ; In case it is not grub that loaded us
+  mov eax, low_loader
+  jmp eax
+
+section .text
+
+  align 4
+  loader:
+    ; Make sure interrupts are disabled and clear flags
+    push  dword 0
+    popfd
+
+    ; Blank all uninitialized memory
+    mov  edi, (_kernel_bss_start - KERNEL_MEM_OFFSET)
+    xor  eax, eax
+    blank_mem:
+        mov  [edi], eax
+        add  edi, 4
+        cmp  edi, (_kernel_bss_end - KERNEL_MEM_OFFSET)
+        jl  blank_mem
+
+    ; Map the first 4M of the kernel 1:1
+    mov ecx, (pgdir_boot - KERNEL_MEM_OFFSET)
+    mov cr3, ecx
+
+    ; Enable 4MB pages
+    mov ecx, cr4
+    or  ecx, 0x00000010
+    mov cr4, ecx
+
+    ; Enable paging
+    mov ecx, cr0
+    or  ecx, 0x80000000
+    mov cr0, ecx
+
+    ; Load high mem kernel entry point
+    lea ecx, [high_loader]
+    jmp ecx
+
+  high_loader:
+    ; Save Multiboot info to Memory
+    mov edi, multiboot_data_ptr
+    mov [edi], ebx
+
+    ; Init stack pointer
+    mov  esp, kernel_stack + KERNEL_STACK_SIZE
+
+    ; Init base pointer
+    mov ebp, esp
+
+    ; Init CPU info structure
+    mov  edi, cpu_info
+    mov  esi, cpu_info ; Compute the
+    add  esi, 4        ; end address of the structure
+    xor  eax, eax
+    clear_cpu_info:
+        mov  [edi], eax
+        add  edi, 4
+        cmp  edi, esi
+        jl   clear_cpu_info
+
+    call get_cpuid_flag ; Get CPUID instruction availability
+
+    ; Clear screen
+    call graphic_clear_screen
+
+    ; Init serial for debug
+    call serial_init
+
+    ; Setup kernel GDT
+    call cpu_setup_gdt
+
+    ; Setup kernel IDT
+    call cpu_setup_idt
+
+    ; Setup kernel TSS
+    call cpu_setup_tss
+
+    ; Setup the kernel heap
+    call setup_kheap
+
+    ; Update booted CPU count
+    mov eax, 1
+    mov [init_cpu_count], eax
+
+    ; Kickstart the kernel, we should never return from here.
+    call kernel_kickstart
+
+  ; Hang forever, this should never happen
+  .loop:
+    cli
+    hlt
+    jmp .loop                   ; loop forever
+
+
+  get_cpuid_flag:
+    pushfd                                  ;Save EFLAGS
+    pushfd                                  ;Store EFLAGS
+    xor    dword [esp],0x00200000           ;Invert the ID bit in stored EFLAGS
+    popfd                                   ;Load stored EFLAGS
+    pushfd                                  ;Store EFLAGS again
+    pop    eax                              ;eax = modified EFLAGS
+    xor    eax,[esp]                        ;eax = whichever bits were changed
+    popfd                                   ;Restore original EFLAGS
+    and    eax,0x00200000                   ;eax = 0 CPUID is not available
+    mov    edi, cpu_info
+    or     [edi], eax                       ; Store information in the structure
+    ret
+
+;-----------------------
+; THE STACK SPACE
+;-----------------------
+section .bss
+  align 32
+  kernel_stack:
+    resb KERNEL_STACK_SIZE
+
+section .data
+  align 0x1000
+  pgdir_boot:
+    ; 4MB R/W Present.
+    dd 0x00000083
+    times (KERNEL_START_PAGE_ID - 1) dd 0         ; Pages before kernel space.
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x00000083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x00400083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x00800083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x00C00083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x01000083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x01400083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x018000083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x01C00083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x02000083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x02400083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x02800083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x02C00083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x0300083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x03400083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x03800083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x03C00083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x04000083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x04400083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x04800083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x04C00083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x05000083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x05400083
+    ; This page directory entry defines a 4MB page containing the kernel.
+    dd 0x05800083
+    times (1024 - KERNEL_START_PAGE_ID - 23) dd 0  ; Pages after the kernel image.
