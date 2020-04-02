@@ -13,7 +13,7 @@
 ######################### Modules selection
 ARCH_DEP = x86
 CPU_DEP  = i386
-MODULES  = io lib
+MODULES  = . io lib
 
 SRC_DEP = arch/cpu/$(CPU_DEP) arch/$(ARCH_DEP) $(MODULES)
 
@@ -117,6 +117,7 @@ clean:
 
 	@$(RM) -rf $(BIN_DIR) $(BUILD_DIR)
 	@$(RM) -f $(TESTS_DIR)/Tests/*.o $(TESTS_DIR)/Tests/*.d
+	@$(RM) -rf ./GRUB
 
 # Check header files modifications
 -include $(C_OBJS:.o=.d)

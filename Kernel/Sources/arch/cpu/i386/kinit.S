@@ -52,6 +52,9 @@ extern _kernel_bss_end
 ;-------------------------------------------------------------------------------
 
 extern serial_init
+extern cpu_setup_gdt
+extern cpu_setup_idt
+extern cpu_setup_tss
 
 ;-------------------------------------------------------------------------------
 ; EXPORTED FUNCTIONS
@@ -72,8 +75,6 @@ align 4
     ; In case it is not grub that loaded us
     mov eax, __kinit_low
     jmp eax
-
-
 
 section .text
 align 4
@@ -125,6 +126,9 @@ __bss_init:
 
     ; Setup system pre-kickstart
     call serial_init
+    call cpu_setup_gdt
+    call cpu_setup_idt
+    call cpu_setup_tss
 
     ; Kickstart kernel
 
