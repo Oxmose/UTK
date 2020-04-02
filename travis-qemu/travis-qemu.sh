@@ -30,8 +30,7 @@ cd "qemu-$VERSION"
   --disable-gnutls \
   --disable-gcrypt \
   --disable-nettle \
-  --disable-curses \
-  --static
+  --disable-curses
 
 make -j4
 make install
