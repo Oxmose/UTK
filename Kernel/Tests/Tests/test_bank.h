@@ -21,6 +21,7 @@
 #define GDT_TEST 0
 #define TSS_TEST 0
 #define BOOT_TEST 0
+#define OUTPUT_TEST 0
 
 /* Put tests declarations here */
 void serial_test(void);
@@ -28,4 +29,6 @@ void idt_test(void);
 void gdt_test(void);
 void tss_test(void);
 void boot_test(void);
+void output_test(void);
+
 #endif /* __TEST_BANK_H_ */

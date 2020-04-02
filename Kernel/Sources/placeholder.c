@@ -11,10 +11,8 @@ void kernel_interrupt_handler(void)
     
 }
 
-void kernel_kickstart(void)
+void kernel_panic(unsigned int error)
 {
-    #if TEST_MODE_ENABLED
-    boot_test();
-    #endif
+    (void)error;
     while(1);
 }
