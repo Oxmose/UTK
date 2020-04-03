@@ -36,10 +36,10 @@
 struct mem_range
 {
     /** @brief Range's base address. */
-    address_t base;
+    uintptr_t base;
 
     /** @brief Range's limit. */
-    address_t limit;
+    uintptr_t limit;
 
     /** @brief Range's memory type. */
     uint32_t type;

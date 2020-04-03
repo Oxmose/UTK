@@ -387,15 +387,15 @@ int32_t cpu_get_id(void)
 }
 
 void cpu_init_thread_context(void (*entry_point)(void), 
-                             const address_t stack_index, 
-                             const address_t free_table_page,
-                             const address_t page_table_address,
+                             const uintptr_t stack_index, 
+                             const uintptr_t free_table_page,
+                             const uintptr_t page_table_address,
                              kernel_thread_t* thread)
 {
     /* Set EIP, ESP and EBP */
-    thread->cpu_context.eip = (address_t)entry_point;
-    thread->cpu_context.esp = (address_t)&thread->stack[stack_index - 17];
-    thread->cpu_context.ebp = (address_t)&thread->stack[stack_index - 1];
+    thread->cpu_context.eip = (uintptr_t)entry_point;
+    thread->cpu_context.esp = (uintptr_t)&thread->stack[stack_index - 17];
+    thread->cpu_context.ebp = (uintptr_t)&thread->stack[stack_index - 1];
 
     /* Set CR3 and free page table */
     thread->cpu_context.cr3 = page_table_address;
@@ -422,9 +422,9 @@ void cpu_init_thread_context(void (*entry_point)(void),
     thread->stack[stack_index - 18] = thread->cpu_context.esp;
 }
 
-address_t cpu_get_current_pgdir(void)
+uintptr_t cpu_get_current_pgdir(void)
 {
-    address_t current_pgdir;
+    uintptr_t current_pgdir;
 
         /* Init thread context */
     __asm__ __volatile__(
@@ -470,7 +470,7 @@ void cpu_restore_context(cpu_state_t* cpu_state,
     :::"eax");
 }
 
-void cpu_update_pgdir(const address_t new_pgdir)
+void cpu_update_pgdir(const uintptr_t new_pgdir)
 {
     /* Update CR3 */
     __asm__ __volatile__("mov %%eax, %%cr3": :"a"(new_pgdir));
@@ -478,7 +478,7 @@ void cpu_update_pgdir(const address_t new_pgdir)
 
 void cpu_set_next_thread_instruction(const cpu_state_t* cpu_state,
                                      stack_state_t* stack_state, 
-                                     const address_t next_inst)
+                                     const uintptr_t next_inst)
 {
     (void) cpu_state;
     /* Set next instruction */

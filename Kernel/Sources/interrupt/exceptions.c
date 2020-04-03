@@ -63,7 +63,7 @@ extern custom_handler_t kernel_interrupt_handlers[INT_ENTRY_COUNT];
  * @param stack_state The stack state before the exception that contain cs, eip,
  * error code and the eflags register value.
  */
-static void div_by_zero_handler(cpu_state_t* cpu_state, address_t int_id,
+static void div_by_zero_handler(cpu_state_t* cpu_state, uintptr_t int_id,
                                 stack_state_t* stack_state)
 {
     (void)cpu_state;
@@ -76,7 +76,7 @@ static void div_by_zero_handler(cpu_state_t* cpu_state, address_t int_id,
     }
     sched_set_thread_termination_cause(THREAD_TERMINATE_CAUSE_DIV_BY_ZERO);
     cpu_set_next_thread_instruction(cpu_state, stack_state, 
-                                    (address_t)sched_terminate_thread);
+                                    (uintptr_t)sched_terminate_thread);
     
 }
 
@@ -105,7 +105,7 @@ OS_RETURN_E kernel_exception_init(void)
 OS_RETURN_E kernel_exception_register_handler(const uint32_t exception_line,
                                        void(*handler)(
                                              cpu_state_t*,
-                                             address_t,
+                                             uintptr_t,
                                              stack_state_t*
                                              )
                                        )

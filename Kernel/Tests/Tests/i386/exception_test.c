@@ -25,7 +25,7 @@ static void dummy(cpu_state_t* cpu,  uint32_t int_id,
 {
     (void)cpu;
     (void)int_id;
-    stack->eip = (address_t)end;
+    stack->eip = (uintptr_t)end;
     kernel_printf("[TESTMODE] EXCEPTION CATCHED\n");
 }
 

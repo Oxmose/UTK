@@ -117,28 +117,28 @@ OS_RETURN_E memory_map_init(void)
                             ((uint8_t*)multiboot_data_ptr + KERNEL_MEM_OFFSET);
 
     /* Copy multiboot data in upper memory */
-    mmap = (multiboot_memory_map_t*)(address_t)(multiboot_data_ptr->mmap_addr +
+    mmap = (multiboot_memory_map_t*)(uintptr_t)(multiboot_data_ptr->mmap_addr +
                                      KERNEL_MEM_OFFSET);
-    mmap_end = (multiboot_memory_map_t*)((address_t)mmap +
+    mmap_end = (multiboot_memory_map_t*)((uintptr_t)mmap +
                                          multiboot_data_ptr->mmap_length);
     i = 0;
     while(mmap < mmap_end)
     {
         /* Everything over the 4G limit is not registered on 32 bits systems */
-        if(sizeof(address_t) <= 4 && i != 0 && (address_t)mmap->addr == 0)
+        if(sizeof(uintptr_t) <= 4 && i != 0 && (uintptr_t)mmap->addr == 0)
         {
             break;
         }
 
         total_memory += mmap->len;
 
-        memory_map_data[i].base  = (address_t)mmap->addr;
-        memory_map_data[i].limit = (address_t)mmap->addr + (address_t)mmap->len;
+        memory_map_data[i].base  = (uintptr_t)mmap->addr;
+        memory_map_data[i].limit = (uintptr_t)mmap->addr + (uintptr_t)mmap->len;
         memory_map_data[i].type  = mmap->type;
 
         ++i;
         mmap = (multiboot_memory_map_t*)
-               ((address_t)mmap + mmap->size + sizeof(mmap->size));
+               ((uintptr_t)mmap + mmap->size + sizeof(mmap->size));
     }
     memory_map_size = i;
 
@@ -150,7 +150,7 @@ OS_RETURN_E memory_map_init(void)
                     memory_map_data[i].base,
                     memory_map_data[i].limit,
                     memory_map_data[i].type,
-                    (address_t)(memory_map_data[i].limit - 
+                    (uintptr_t)(memory_map_data[i].limit - 
                                 memory_map_data[i].base) >> 10
                     );
     }
@@ -159,33 +159,33 @@ OS_RETURN_E memory_map_init(void)
     kernel_info("Code    0x%p -> 0x%p | %17uKB\n",
                     &_kernel_code_start,
                     &_kernel_code_end,
-                    ((address_t)&_kernel_code_end - 
-                    (address_t)&_kernel_code_start) >> 10);
+                    ((uintptr_t)&_kernel_code_end - 
+                    (uintptr_t)&_kernel_code_start) >> 10);
     kernel_info("RO-Data 0x%p -> 0x%p | %17uKB\n",
                     &_kernel_rodata_start,
                     &_kernel_rodata_end,
-                    ((address_t)&_kernel_rodata_end - 
-                    (address_t)&_kernel_rodata_start) >> 10);
+                    ((uintptr_t)&_kernel_rodata_end - 
+                    (uintptr_t)&_kernel_rodata_start) >> 10);
     kernel_info("Data    0x%p -> 0x%p | %17uKB\n",
                     &_kernel_data_start,
                     &_kernel_data_end,
-                    ((address_t)&_kernel_data_end - 
-                    (address_t)&_kernel_data_start) >> 10);
+                    ((uintptr_t)&_kernel_data_end - 
+                    (uintptr_t)&_kernel_data_start) >> 10);
     kernel_info("BSS     0x%p -> 0x%p | %17uKB\n",
                     &_kernel_bss_start,
                     &_kernel_bss_end,
-                    ((address_t)&_kernel_bss_end - 
-                    (address_t)&_kernel_bss_start) >> 10);
+                    ((uintptr_t)&_kernel_bss_end - 
+                    (uintptr_t)&_kernel_bss_start) >> 10);
     kernel_info("Config  0x%p -> 0x%p | %17uKB\n",
                     &_kernel_struct_start,
                     &_kernel_struct_end,
-                    ((address_t)&_kernel_struct_end - 
-                    (address_t)&_kernel_struct_start) >> 10);
+                    ((uintptr_t)&_kernel_struct_end - 
+                    (uintptr_t)&_kernel_struct_start) >> 10);
     kernel_info("Heap    0x%p -> 0x%p | %17uKB\n",
                     &_kernel_heap_start,
                     &_kernel_heap_end,
-                    ((address_t)&_kernel_heap_end - 
-                    (address_t)&_kernel_heap_start) >> 10);
+                    ((uintptr_t)&_kernel_heap_end - 
+                    (uintptr_t)&_kernel_heap_start) >> 10);
 
 
     return OS_NO_ERR;
@@ -198,7 +198,7 @@ uint64_t meminfo_kernel_heap_usage(void)
 
 uint64_t meminfo_kernel_heap_size(void)
 {
-    return (address_t)&_kernel_heap_end - (address_t)&_kernel_heap_start;
+    return (uintptr_t)&_kernel_heap_end - (uintptr_t)&_kernel_heap_start;
 }
 
 uint64_t meminfo_kernel_memory_usage(void)
@@ -208,7 +208,7 @@ uint64_t meminfo_kernel_memory_usage(void)
 
 uint64_t meminfo_kernel_total_size(void)
 {
-    return (address_t)&_kernel_end - KERNEL_MEM_OFFSET;
+    return (uintptr_t)&_kernel_end - KERNEL_MEM_OFFSET;
 }
 
 uint64_t meminfo_get_memory_size(void)

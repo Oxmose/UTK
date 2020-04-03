@@ -41,7 +41,7 @@ struct custom_handler
     /** @brief Handler's state.*/
     int32_t  enabled;
     /** @brief Handler's entry point. */
-    void(*handler)(cpu_state_t*, address_t, stack_state_t*);
+    void(*handler)(cpu_state_t*, uintptr_t, stack_state_t*);
 };
 
 /** 
@@ -186,7 +186,7 @@ OS_RETURN_E kernel_interrupt_set_driver(const interrupt_driver_t* driver);
 OS_RETURN_E kernel_interrupt_register_irq_handler(const uint32_t irq_number,
                                        void(*handler)(
                                              cpu_state_t*,
-                                             address_t,
+                                             uintptr_t,
                                              stack_state_t*
                                              )
                                        );
@@ -232,7 +232,7 @@ OS_RETURN_E kernel_interrupt_remove_irq_handler(const uint32_t irq_number);
 OS_RETURN_E kernel_interrupt_register_int_handler(const uint32_t interrupt_line,
                                        void(*handler)(
                                              cpu_state_t*,
-                                             address_t,
+                                             uintptr_t,
                                              stack_state_t*
                                              )
                                        );
