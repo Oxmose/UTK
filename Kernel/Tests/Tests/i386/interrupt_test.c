@@ -1,5 +1,5 @@
 #include <interrupt/interrupts.h>
-#include <panic.h>
+#include <core/panic.h>
 #include <io/kernel_output.h>
 #include <cpu.h>
 #include <Tests/test_bank.h>
