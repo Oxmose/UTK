@@ -1,4 +1,4 @@
-ENTRY(__kinit)                /* the name of the entry label */
+ENTRY(__kinit)  /* Entry label */
 SECTIONS
 {
     /* Kernel starts at 1M in physical addresse space
