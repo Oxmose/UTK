@@ -25,6 +25,7 @@
 #include <cpu.h>                  /* CPU management */
 #include <memory/kheap.h>         /* Kernel heap */
 #include <memory/meminfo.h>       /* Memory information */
+#include <memory/memalloc.h>      /* Memory pools */
 #include <interrupt/interrupts.h> /* Kernel interrupt manager */
 #include <interrupt/exceptions.h> /* Kernel exception manager */
 
@@ -116,5 +117,10 @@ void kernel_kickstart(void)
     err = memory_map_init(); 
     INIT_MSG("", 
              "Could not get memory map\n",
+             err, 1);
+    
+    err = memalloc_init(); 
+    INIT_MSG("Memory pools initialized\n", 
+             "Could not initialize memory pools\n",
              err, 1);
 }

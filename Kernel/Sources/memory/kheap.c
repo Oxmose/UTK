@@ -68,7 +68,7 @@ static uint32_t mem_meta;
  * FUNCTIONS
  ******************************************************************************/
 
-#define CONTAINER(C, l, v) ((C*)(((char*)v) - (address_t)&(((C*)0)->l)))
+#define CONTAINER(C, l, v) ((C*)(((char*)v) - (uintptr_t)&(((C*)0)->l)))
 
 #define LIST_INIT(v, l) list_init(&v->l)
 
@@ -292,8 +292,8 @@ OS_RETURN_E kheap_init(void)
 
     void* mem = &_kernel_heap_start;
     uint32_t size = &_kernel_heap_end - &_kernel_heap_start;
-    int8_t* mem_start = (int8_t*)(((address_t)mem + ALIGN - 1) & (~(ALIGN - 1)));
-    int8_t* mem_end = (int8_t*)(((address_t)mem + size) & (~(ALIGN - 1)));
+    int8_t* mem_start = (int8_t*)(((uintptr_t)mem + ALIGN - 1) & (~(ALIGN - 1)));
+    int8_t* mem_end = (int8_t*)(((uintptr_t)mem + size) & (~(ALIGN - 1)));
 
     mem_free = 0;
     kheap_mem_used = 0;

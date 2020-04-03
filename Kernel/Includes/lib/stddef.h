@@ -208,12 +208,12 @@ typedef __SIZE_TYPE__ size_t;
 typedef __PTRDIFF_TYPE__ ptrdiff_t;
 
 /**
- * @brief Defines address_t type as a renaming for int32_t.
+ * @brief Defines uintptr_t type as address type.
  */
 #if ARCH_X86_64
-typedef uint64_t address_t;
+typedef uint64_t uintptr_t;
 #elif ARCH_I386
-typedef uint32_t address_t;
+typedef uint32_t uintptr_t;
 #endif
 
 #endif /* __STDDEF_H_ */

@@ -840,9 +840,9 @@ int32_t cpu_get_id(void);
  * @param[out] thread The thread to initialize.
  */
 void cpu_init_thread_context(void (*entry_point)(void), 
-                             const address_t stack_index, 
-                             const address_t free_table_page,
-                             const address_t page_table_address,
+                             const uintptr_t stack_index, 
+                             const uintptr_t free_table_page,
+                             const uintptr_t page_table_address,
                              kernel_thread_t* thread);
 
 /** 
@@ -852,7 +852,7 @@ void cpu_init_thread_context(void (*entry_point)(void),
  * 
  * @return The current CR3 value.
  */
-address_t cpu_get_current_pgdir(void);
+uintptr_t cpu_get_current_pgdir(void);
 
 /**
  * @brief Saves the current thread CPU context.
@@ -879,7 +879,7 @@ void cpu_save_context(const uint32_t first_sched,
  * 
  * @param[in] new_pgdir The physical address of the new page directory.
  */
-void cpu_update_pgdir(const address_t new_pgdir);
+void cpu_update_pgdir(const uintptr_t new_pgdir);
 
 /**
  * @brief Restores the thread's CPU context.
@@ -909,7 +909,7 @@ void cpu_restore_context(cpu_state_t* cpu_state,
  */
 void cpu_set_next_thread_instruction(const cpu_state_t* cpu_state,
                                      stack_state_t* stack_state, 
-                                     const address_t next_inst);
+                                     const uintptr_t next_inst);
 
 /**
  * @brief Raises CPU interrupt.

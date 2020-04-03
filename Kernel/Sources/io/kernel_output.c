@@ -234,9 +234,9 @@ static void formater(const char* str, __builtin_va_list args,
                     upper_mod = 1;
                     __attribute__ ((fallthrough));
                 case 'p':
-                    padding_mod  = 2 * sizeof(address_t);
+                    padding_mod  = 2 * sizeof(uintptr_t);
                     pad_char_mod = '0';
-                    length_mod = sizeof(address_t);
+                    length_mod = sizeof(uintptr_t);
                     GET_SEQ_VAL(seq_val, args, length_mod);
 					memset(tmp_seq, 0, sizeof(tmp_seq));
 					uitoa(seq_val, tmp_seq, 16);

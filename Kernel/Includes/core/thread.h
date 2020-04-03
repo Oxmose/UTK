@@ -177,7 +177,7 @@ struct kernel_thread
     uint32_t stack_size;
 
     /** @brief Thread's free page table address. */
-    address_t free_page_table;
+    uintptr_t free_page_table;
 
     /** @brief Wake up time limit for the sleeping thread. */
     uint64_t wakeup_time;

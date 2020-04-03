@@ -47,7 +47,7 @@ struct gdt_ptr
     uint16_t size;
 
     /** @brief The GDT address. */
-    address_t base;
+    uintptr_t base;
 }__attribute__((packed));
 
 /** 
@@ -64,7 +64,7 @@ struct idt_ptr
     uint16_t size;
 
     /** @brief The IDT address. */
-    address_t base;
+    uintptr_t base;
 }__attribute__((packed));
 
 /** 
