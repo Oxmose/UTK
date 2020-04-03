@@ -22,8 +22,9 @@
 #include <lib/stddef.h>           /* Standard definitions */
 #include <lib/string.h>           /* String manipulation */
 #include <vga_text.h>             /* VGA display driver */
-#include <memory/kheap.h>         /* Kernel heap */
 #include <cpu.h>                  /* CPU management */
+#include <memory/kheap.h>         /* Kernel heap */
+#include <memory/meminfo.h>       /* Memory information */
 #include <interrupt/interrupts.h> /* Kernel interrupt manager */
 #include <interrupt/exceptions.h> /* Kernel exception manager */
 
@@ -110,5 +111,10 @@ void kernel_kickstart(void)
     err = kernel_exception_init(); 
     INIT_MSG("Kernel exception manager initialized\n", 
              "Could not initialize kernel exception manager\n",
+             err, 1);
+
+    err = memory_map_init(); 
+    INIT_MSG("", 
+             "Could not get memory map\n",
              err, 1);
 }

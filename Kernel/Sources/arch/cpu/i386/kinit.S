@@ -20,7 +20,7 @@
 ;-------------------------------------------------------------------------------
 
 ; Multiboot header values
-FLAGS       equ (1<<0) | (1<<1)
+FLAGS       equ ((1<<0) | (1<<1))
 MAGIC       equ 0x1BADB002
 CHECKSUM    equ -(MAGIC + FLAGS)
 
@@ -44,6 +44,8 @@ __kinit_low          equ (__kinit - KERNEL_MEM_OFFSET)
 extern cpu_stacks
 extern cpu_info
 extern init_cpu_count
+
+extern multiboot_data_ptr
 
 extern _kernel_bss_start
 extern _kernel_bss_end
@@ -101,18 +103,6 @@ __kinit:
     or  eax, 0x80000000
     mov cr0, eax
 
-    ; Load high mem kernel entry point
-    mov eax, __kinit_high
-    jmp eax
-
-; High memory loader 
-__kinit_high:
-    ; Init stack
-    mov eax, cpu_stacks
-    add eax, KERNEL_STACK_SIZE
-    mov esp, eax 
-    mov ebp, esp
-
     ; Init BSS
     mov  edi, _kernel_bss_start
     xor  esi, esi
@@ -121,6 +111,21 @@ __bss_init:
     add  edi, 4
     cmp  edi, _kernel_bss_end
     jb   __bss_init
+
+    ; Load high mem kernel entry point
+    mov eax, __kinit_high
+    jmp eax
+
+; High memory loader 
+__kinit_high:
+    ; Save Multiboot info to memory
+    mov [multiboot_data_ptr], ebx
+
+    ; Init stack
+    mov eax, cpu_stacks
+    add eax, KERNEL_STACK_SIZE
+    mov esp, eax 
+    mov ebp, esp
 
     ; Update the booted CPU count
     mov eax, 1

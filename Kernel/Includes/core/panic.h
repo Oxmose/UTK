@@ -17,8 +17,8 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#ifndef __I386_PANIC_H_
-#define __I386_PANIC_H_
+#ifndef __CORE_PANIC_H_
+#define __CORE_PANIC_H_
 
 #include <cpu_structs.h> /* CPU structures */
 #include <lib/stdint.h>  /* Generic int types */
@@ -67,4 +67,4 @@ void panic(cpu_state_t* cpu_state, uint32_t int_id, stack_state_t* stack_state);
  */
 void kernel_panic(const uint32_t error_code);
 
-#endif /* #ifndef __I386_PANIC_H_ */
+#endif /* #ifndef __CORE_PANIC_H_ */

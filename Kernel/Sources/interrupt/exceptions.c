@@ -22,7 +22,7 @@
 
 #include <lib/stdint.h>         /* Generic int types */
 #include <lib/stddef.h>         /* Standard definitions */
-#include <panic.h>              /* Kernel panic */
+#include <core/panic.h>              /* Kernel panic */
 #include <cpu_settings.h>       /* CPU settings */
 #include <interrupt_settings.h> /* CPU interrupts settings */
 #include <cpu.h>                /* CPU management */
@@ -83,6 +83,10 @@ static void div_by_zero_handler(cpu_state_t* cpu_state, address_t int_id,
 OS_RETURN_E kernel_exception_init(void)
 {
     OS_RETURN_E err;
+
+    #if EXCEPTION_KERNEL_DEBUG == 1
+    kernel_serial_debug("Initializing exception manager.\n");
+    #endif
 
     err = kernel_exception_register_handler(DIV_BY_ZERO_LINE,
                                             div_by_zero_handler);

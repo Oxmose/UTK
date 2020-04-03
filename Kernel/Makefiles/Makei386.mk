@@ -154,7 +154,7 @@ debug:
 	cp $(BIN_DIR)/$(KERNEL) ./GRUB/boot/
 	@$(RM) -f ./$(BIN_DIR)/bootable.iso
 	grub-mkrescue -o ./$(BIN_DIR)/bootable.iso ./GRUB
-	@$(QEMU) $(QEMUOPTS) -boot d -cdrom ./$(BIN_DIR)/bootable.iso -serial stdio -S -no-reboot -no-shutdown
+	@$(QEMU) $(QEMUOPTS) -boot d -cdrom ./$(BIN_DIR)/bootable.iso -serial stdio -S 
 
 ######################### Image file options
 bootable: all

@@ -25,7 +25,7 @@
 #include <cpu_structs.h>        /* CPU structures */
 #include <cpu.h>                /* CPU management */
 #include <interrupt_settings.h> /* CPU interrupts settings */
-#include <panic.h>              /* Kernel panic */
+#include <core/panic.h>              /* Kernel panic */
 #include <io/kernel_output.h>   /* Kernel output methods */
 
 /* UTK configuration file */
@@ -176,6 +176,10 @@ void kernel_interrupt_handler(cpu_state_t cpu_state,
 
 OS_RETURN_E kernel_interrupt_init(void)
 {
+    #if INTERRUPT_KERNEL_DEBUG == 1
+    kernel_serial_debug("Initializing interrupt manager.\n");
+    #endif
+
     /* Blank custom interrupt handlers */
     memset(kernel_interrupt_handlers, 0,
            sizeof(custom_handler_t) * INT_ENTRY_COUNT);
@@ -193,10 +197,6 @@ OS_RETURN_E kernel_interrupt_init(void)
     interrupt_driver.driver_handle_spurious  = init_driver_handle_spurious;
     interrupt_driver.driver_set_irq_eoi      = init_driver_set_irq_eoi;
     interrupt_driver.driver_set_irq_mask     = init_driver_set_irq_mask;
-
-     #if INTERRUPT_KERNEL_DEBUG == 1
-    kernel_serial_debug("Initialized interrupt manager.\n");
-    #endif
 
     #if TEST_MODE_ENABLED 
     interrupt_test();

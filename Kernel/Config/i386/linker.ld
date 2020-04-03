@@ -65,7 +65,7 @@ SECTIONS
     /* Beginning of kernel memory heap */
     _kernel_heap_start = .;
     /* End of kernel memory heap */
-    _kernel_heap_end = _kernel_heap_start + 0x05000000;
+    _kernel_heap_end = _kernel_heap_start + 0x00800000;
     . = _kernel_heap_end;
     _kernel_end = .;
 
