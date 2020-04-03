@@ -4,6 +4,7 @@
 #include <cpu.h>
 #include <Tests/test_bank.h>
 #include <cpu_settings.h>
+#include <interrupt_settings.h>
 
 #if INTERRUPT_TEST == 1
 static volatile uint32_t counter = 0;

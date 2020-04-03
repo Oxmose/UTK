@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file cpu.c
  *
  * @see cpu.h
@@ -22,6 +22,8 @@
 #include <lib/string.h>           /* String manipulation */
 #include <io/kernel_output.h>     /* Kernel output methods */
 #include <thread.h>               /* CPU specific thread settings */
+
+#include <placeholder.h>
 
 /* UTK configuration file */
 #include <config.h>

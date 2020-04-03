@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file config.h
  *
  * @see loader.S
@@ -19,9 +19,6 @@
 
 #ifndef __CONFIG_H_
 #define __CONFIG_H_
-
-/* TODO: remove */
-#include <placeholder.h>
 
 /**
  * @brief Kernel's main stack size in bytes.

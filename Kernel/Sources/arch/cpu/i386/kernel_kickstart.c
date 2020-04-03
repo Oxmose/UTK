@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file kernel_kickstart.c
  *
  * @author Alexy Torres Aurora Dugo
@@ -25,6 +25,7 @@
 #include <memory/kheap.h>         /* Kernel heap */
 #include <cpu.h>                  /* CPU management */
 #include <interrupt/interrupts.h> /* Kernel interrupt manager */
+#include <interrupt/exceptions.h> /* Kernel exception manager */
 
 /* UTK configuration file */
 #include <config.h>
@@ -106,4 +107,8 @@ void kernel_kickstart(void)
              "Could not initialize kernel interrupt manager\n",
              err, 1);
 
+    err = kernel_exception_init(); 
+    INIT_MSG("Kernel exception manager initialized\n", 
+             "Could not initialize kernel exception manager\n",
+             err, 1);
 }

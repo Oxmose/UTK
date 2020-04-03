@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file panic.h
  *
  * @see panic.c
@@ -31,11 +31,6 @@
  * @brief Defines the NMI Panic code.
  */
 #define PANIC_NMI_CODE 0xFFFFFFFF
-
-/**
- * @brief Defines the panic interrupt line.
- */
-#define PANIC_INT_LINE 0x2A
 
 /*******************************************************************************
  * STRUCTURES

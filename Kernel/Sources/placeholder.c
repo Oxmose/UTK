@@ -1,6 +1,9 @@
 /* UTK configuration file */
 #include <config.h>
-
+#include <cpu.h>
+#include <cpu_structs.h>
+#include <lib/stddef.h>
+#include <placeholder.h>
 /* Tests header file */
 #if TEST_MODE_ENABLED
 #include <Tests/test_bank.h>
@@ -38,4 +41,14 @@ const local_apic_t** acpi_get_cpu_lapics(void)
 int lapic_get_id(void)
 {
     return 0;
+}
+
+void sched_set_thread_termination_cause(int value)
+{
+    (void) value;
+}
+
+void sched_terminate_thread(void)
+{
+
 }

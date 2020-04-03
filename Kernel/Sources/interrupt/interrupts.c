@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file interrupts.c
  * 
  * @see interrupts.h
@@ -18,14 +18,15 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#include <lib/stdint.h>       /* Generic int types */
-#include <lib/stddef.h>       /* Standard definitions */
-#include <lib/string.h>       /* memset */
-#include <cpu_settings.h>     /* CPU settings */
-#include <cpu_structs.h>      /* CPU structures */
-#include <cpu.h>              /* CPU management */
-#include <panic.h>            /* Kernel panic */
-#include <io/kernel_output.h> /* Kernel output methods */
+#include <lib/stdint.h>         /* Generic int types */
+#include <lib/stddef.h>         /* Standard definitions */
+#include <lib/string.h>         /* String manipulation */
+#include <cpu_settings.h>       /* CPU settings */
+#include <cpu_structs.h>        /* CPU structures */
+#include <cpu.h>                /* CPU management */
+#include <interrupt_settings.h> /* CPU interrupts settings */
+#include <panic.h>              /* Kernel panic */
+#include <io/kernel_output.h>   /* Kernel output methods */
 
 /* UTK configuration file */
 #include <config.h>
@@ -253,7 +254,7 @@ OS_RETURN_E kernel_interrupt_register_int_handler(const uint32_t interrupt_line,
     kernel_interrupt_handlers[interrupt_line].enabled = 1;
 
     #if INTERRUPT_KERNEL_DEBUG == 1
-    kernel_serial_debug("Added INT %d handler at 0x%08x\n",
+    kernel_serial_debug("Added INT %u handler at 0x%p\n",
                         interrupt_line, handler);
     #endif
 
@@ -277,7 +278,7 @@ OS_RETURN_E kernel_interrupt_remove_int_handler(const uint32_t interrupt_line)
     kernel_interrupt_handlers[interrupt_line].enabled = 0;
 
     #if INTERRUPT_KERNEL_DEBUG == 1
-    kernel_serial_debug("Removed INT %d handle\n", interrupt_line);
+    kernel_serial_debug("Removed INT %u handle\n", interrupt_line);
     #endif
 
     return OS_NO_ERR;
@@ -359,7 +360,7 @@ OS_RETURN_E kernel_interrupt_set_irq_mask(const uint32_t irq_number,
                                           const uint32_t enabled)
 {
     #if INTERRUPT_KERNEL_DEBUG == 1
-    kernel_serial_debug("IRQ Mask change: %d %d\n", irq_number, enabled);
+    kernel_serial_debug("IRQ Mask change: %u %u\n", irq_number, enabled);
     #endif
     return interrupt_driver.driver_set_irq_mask(irq_number, enabled);
 }
@@ -367,7 +368,7 @@ OS_RETURN_E kernel_interrupt_set_irq_mask(const uint32_t irq_number,
 OS_RETURN_E kernel_interrupt_set_irq_eoi(const uint32_t irq_number)
 {
     #if INTERRUPT_KERNEL_DEBUG == 1
-    kernel_serial_debug("IRQ EOI: %d\n", irq_number);
+    kernel_serial_debug("IRQ EOI: %u\n", irq_number);
     #endif
     return interrupt_driver.driver_set_irq_eoi(irq_number);
 }
