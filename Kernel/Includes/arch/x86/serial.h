@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file serial.h
  * 
  * @see serial.c
@@ -49,11 +49,6 @@
 #define COM3 SERIAL_COM3_BASE
 /** @brief Redefinition of serial COM4 base port ID for ease of use. */
 #define COM4 SERIAL_COM4_BASE
-
-/** @brief Serial COM2-4 IRQ number. */
-#define SERIAL_2_4_IRQ_LINE       3
-/** @brief Serial COM1-3 IRQ number. */
-#define SERIAL_1_3_IRQ_LINE       4
 
 /** @brief Serial data length flag: 5 bits. */
 #define SERIAL_DATA_LENGTH_5 0x00
