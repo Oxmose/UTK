@@ -29,6 +29,7 @@
 #define MEMALLOC_TEST 0
 #define PAGING_TEST 0
 #define ACPI_TEST 0
+#define PIC_TEST 0
 
 /* Put tests declarations here */
 void serial_test(void);
@@ -44,5 +45,6 @@ void exception_test(void);
 void memalloc_test(void);
 void paging_test(void);
 void acpi_test(void);
+void pic_test(void);
 
 #endif /* __TEST_BANK_H_ */

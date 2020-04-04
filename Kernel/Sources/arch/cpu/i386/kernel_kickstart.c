@@ -24,6 +24,7 @@
 #include <vga_text.h>             /* VGA display driver */
 #include <cpu.h>                  /* CPU management */
 #include <acpi.h>                 /* ACPI management */
+#include <pic.h>                  /* PIC driver */
 #include <memory/kheap.h>         /* Kernel heap */
 #include <memory/meminfo.h>       /* Memory information */
 #include <memory/memalloc.h>      /* Memory pools */
@@ -149,5 +150,10 @@ void kernel_kickstart(void)
     err = acpi_init(); 
     INIT_MSG("ACPI initialized\n", 
              "Could not initialize ACPI [%u]\n",
+             err, 1);
+
+    err = pic_init(); 
+    INIT_MSG("PIC initialized\n", 
+             "Could not initialize PIC [%u]\n",
              err, 1);
 }

@@ -696,9 +696,3 @@ OS_RETURN_E kernel_munmap(const void* virt_addr, const size_t mapping_size)
 
     return OS_NO_ERR;
 }
-
-void* paging_get_phys_address(const void* virt_addr)
-{
-    (void) virt_addr;
-    return NULL;
-}
