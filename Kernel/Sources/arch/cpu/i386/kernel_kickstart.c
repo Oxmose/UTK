@@ -25,6 +25,7 @@
 #include <cpu.h>                  /* CPU management */
 #include <acpi.h>                 /* ACPI management */
 #include <pic.h>                  /* PIC driver */
+#include <io_apic.h>              /* IO-APIC driver */
 #include <memory/kheap.h>         /* Kernel heap */
 #include <memory/meminfo.h>       /* Memory information */
 #include <memory/memalloc.h>      /* Memory pools */
@@ -156,4 +157,11 @@ void kernel_kickstart(void)
     INIT_MSG("PIC initialized\n", 
              "Could not initialize PIC [%u]\n",
              err, 1);
+
+    #if ENABLE_IO_APIC
+    err = io_apic_init(); 
+    INIT_MSG("IO-APIC initialized\n", 
+             "Could not initialize IO-APIC [%u]\n",
+             err, 1);
+    #endif
 }
