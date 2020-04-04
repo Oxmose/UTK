@@ -384,12 +384,13 @@ OS_RETURN_E memalloc_init(void)
 
 void* memalloc_alloc_kframes(const size_t frame_count, OS_RETURN_E* err)
 {
-    uintptr_t* address;
+    
+    void* address;
 
     address = get_block(&kernel_free_frames, frame_count, err);
 
     #if MEMORY_KERNEL_DEBUG == 1
-    kernel_serial_debug("Allocated %llu frames, at 0x%p \n", frame_count, address);
+    kernel_serial_debug("Allocated %u frames, at 0x%p \n", frame_count, address);
     #endif
 
     return (void*)address;
@@ -403,7 +404,7 @@ OS_RETURN_E memalloc_free_kframes(void* frame_addr, const size_t frame_count)
                     &kernel_free_frames);
 
     #if MEMORY_KERNEL_DEBUG == 1
-    kernel_serial_debug("Deallocated %llu frames, at 0x%p \n", frame_count, frame_addr);
+    kernel_serial_debug("Deallocated %u frames, at 0x%p \n", frame_count, frame_addr);
     #endif
 
     return err;
@@ -411,12 +412,12 @@ OS_RETURN_E memalloc_free_kframes(void* frame_addr, const size_t frame_count)
 
 void* memalloc_alloc_kpages(const size_t page_count, OS_RETURN_E* err)
 {
-    uintptr_t* address;
+    void* address;
 
     address = get_block(&kernel_free_pages, page_count, err);
 
     #if MEMORY_KERNEL_DEBUG == 1
-    kernel_serial_debug("Allocated %llu pages, at 0x%p \n", page_count, address);
+    kernel_serial_debug("Allocated %u pages, at 0x%p \n", page_count, address);
     #endif
 
     return (void*)address;
@@ -435,7 +436,7 @@ OS_RETURN_E memalloc_free_kpages(void* page_addr, const size_t page_count)
                    &kernel_free_pages);
 
     #if MEMORY_KERNEL_DEBUG == 1
-    kernel_serial_debug("Deallocated %llu pages, at 0x%p \n", page_count, page_addr);
+    kernel_serial_debug("Deallocated %u pages, at 0x%p \n", page_count, page_addr);
     #endif
 
     return err;

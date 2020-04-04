@@ -1,7 +1,7 @@
 [TESTMODE] Paging Alloc Tests
 [TESTMODE] Init page, frame list 
 [TESTMODE] Page range 0x00100000 -> 0x0ffdf000
-[TESTMODE] Frame range 0x00914000 -> 0x0ffdf000
+[TESTMODE] Frame range 0x0091c000 -> 0x0ffdf000
 [TESTMODE] Test pages 
 [TESTMODE] Page range 0x00000004 -> 0x00000009
 [TESTMODE] Page range 0x0000000d -> 0x00000021
@@ -25,14 +25,6 @@
 [TESTMODE] Page range 0x00000065 -> 0x00000066
 [TESTMODE]Now testing frame allocation 
 [TESTMODE]Silent alloc
-[TESTMODE]Allocated 0x00978000
-[TESTMODE]Allocated 0x00979000
-[TESTMODE]Allocated 0x0097a000
-[TESTMODE]Allocated 0x0097b000
-[TESTMODE]Allocated 0x0097c000
-[TESTMODE]Allocated 0x0097d000
-[TESTMODE]Allocated 0x0097e000
-[TESTMODE]Allocated 0x0097f000
 [TESTMODE]Allocated 0x00980000
 [TESTMODE]Allocated 0x00981000
 [TESTMODE]Allocated 0x00982000
@@ -55,10 +47,18 @@
 [TESTMODE]Allocated 0x00993000
 [TESTMODE]Allocated 0x00994000
 [TESTMODE]Allocated 0x00995000
-[TESTMODE] Frame range 0x00996000 -> 0x0ffdf000
-[TESTMODE] Frame range 0x00996000 -> 0x0ffdf000
 [TESTMODE]Allocated 0x00996000
 [TESTMODE]Allocated 0x00997000
+[TESTMODE]Allocated 0x00998000
+[TESTMODE]Allocated 0x00999000
+[TESTMODE]Allocated 0x0099a000
+[TESTMODE]Allocated 0x0099b000
+[TESTMODE]Allocated 0x0099c000
+[TESTMODE]Allocated 0x0099d000
+[TESTMODE] Frame range 0x0099e000 -> 0x0ffdf000
+[TESTMODE] Frame range 0x0099e000 -> 0x0ffdf000
+[TESTMODE]Allocated 0x0099e000
+[TESTMODE]Allocated 0x0099f000
 [TESTMODE]Now testing page allocation 
 [TESTMODE]Silent alloc
 [TESTMODE]Allocated 0x0015a000

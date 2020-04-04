@@ -26,6 +26,7 @@
 #include <memory/kheap.h>         /* Kernel heap */
 #include <memory/meminfo.h>       /* Memory information */
 #include <memory/memalloc.h>      /* Memory pools */
+#include <memory/paging.h>        /* Memory paging management */
 #include <interrupt/interrupts.h> /* Kernel interrupt manager */
 #include <interrupt/exceptions.h> /* Kernel exception manager */
 
@@ -87,7 +88,7 @@ void kernel_kickstart(void)
     /* Init VGA display */
     err = vga_init();
     err |= graphic_set_selected_driver(&vga_text_driver); 
-    INIT_MSG("VGA driver initialized", "Could not initialize VGA driver", 
+    INIT_MSG("VGA driver initialized", "Could not initialize VGA driver [%u]",
              err, 1);
 
     #if KERNEL_DEBUG == 1
@@ -98,29 +99,49 @@ void kernel_kickstart(void)
                   "==============================\n");
 
     err = cpu_detect(1);
-    INIT_MSG("", "Error while detecting CPU: %d. HALTING\n",err, 1);
+    INIT_MSG("", "Error while detecting CPU [%u]\n",err, 1);
 
     err = kheap_init(); 
-    INIT_MSG("Kernel heap initialized\n", "Could not initialize kernel heap\n", 
+    INIT_MSG("Kernel heap initialized\n", 
+             "Could not initialize kernel heap [%u]\n", 
              err, 1);
 
     err = kernel_interrupt_init(); 
     INIT_MSG("Kernel interrupt manager initialized\n", 
-             "Could not initialize kernel interrupt manager\n",
+             "Could not initialize kernel interrupt manager [%u]\n",
              err, 1);
 
     err = kernel_exception_init(); 
     INIT_MSG("Kernel exception manager initialized\n", 
-             "Could not initialize kernel exception manager\n",
+             "Could not initialize kernel exception manager [%u]\n",
              err, 1);
 
     err = memory_map_init(); 
     INIT_MSG("", 
-             "Could not get memory map\n",
+             "Could not get memory map [%u]\n",
              err, 1);
     
     err = memalloc_init(); 
     INIT_MSG("Memory pools initialized\n", 
-             "Could not initialize memory pools\n",
+             "Could not initialize memory pools [%u]\n",
              err, 1);
+
+    err = paging_init(); 
+    INIT_MSG("", 
+             "Could not initialize kernel page directory [%u]\n",
+             err, 1);
+
+    err = vga_map_memory();
+    INIT_MSG("", 
+             "Could not map VGA memory [%u]\n",
+             err, 1);
+
+    err = paging_enable(); 
+    INIT_MSG("Paging enabled\n", 
+             "Could not enable paging [%u]\n",
+             err, 1);
+
+    #if TEST_MODE_ENABLED
+    paging_test();
+    #endif
 }
