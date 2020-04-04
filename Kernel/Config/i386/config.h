@@ -80,15 +80,6 @@
  * I386 Arch Settings
  ******************************************************************************/
 
-/** @brief Enables the use of an IO-APIC instead of the PIC if present if the
- * system.
- */
-#define ENABLE_IO_APIC     1
-
-/** @brief If the system allows it, use the LAPIC timer as main timer source.
- */
-#define ENABLE_LAPIC_TIMER 1
-
 /** @brief Enables support for graphic drivers. */
 #define DISPLAY_TYPE       DISPLAY_VGA
 

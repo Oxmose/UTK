@@ -26,12 +26,10 @@
 #include <lib/stddef.h>           /* Standard definitions */
 #include <io/kernel_output.h>     /* Kernel output methods */
 #include <acpi.h>                 /* ACPI driver */
-//#include <lapic.h>                /* LAPIC driver */
+#include <lapic.h>                /* LAPIC driver */
 #include <pic.h>                  /* PIC driver */
 #include <memory/paging.h>        /* Memory management */
 #include <memory/memalloc.h>      /* Page allocation */
-
-#include <placeholder.h>
 
 /* UTK configuration file */
 #include <config.h>
@@ -47,6 +45,9 @@
 /*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
+
+/** @brief Stores the IO APIC state. */
+static uint8_t enabled = 0;
 
 /** @brief The IO APIC base address */
 static const uint8_t* io_apic_base_addr;
@@ -106,9 +107,6 @@ OS_RETURN_E io_apic_init(void)
     OS_RETURN_E err;
 
     /* Check IO-APIC support */
-    #if ENABLE_IO_APIC == 0
-    return OS_ERR_NOT_SUPPORTED;
-    #endif
     if(acpi_get_io_apic_available() == 0 || acpi_get_lapic_available() == 0)
     {
         return OS_ERR_NOT_SUPPORTED;
@@ -148,6 +146,8 @@ OS_RETURN_E io_apic_init(void)
     #if TEST_MODE_ENABLED
     io_apic_test();
     #endif
+
+    enabled = 1;
 
     return OS_NO_ERR;
 }
@@ -240,4 +240,15 @@ int32_t io_apic_get_irq_int_line(const uint32_t irq_number)
     }
 
     return irq_number + INT_IOAPIC_IRQ_OFFSET;
+}
+
+uint8_t io_apic_capable(void)
+{
+    /* Check IO-APIC support */
+    if(acpi_get_io_apic_available() == 0 || acpi_get_lapic_available() == 0)
+    {
+        
+        return 0;
+    }
+    return 1;
 }

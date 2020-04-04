@@ -13,7 +13,7 @@
 ######################### Modules selection
 ARCH_DEP = x86
 CPU_DEP  = i386
-MODULES  = . io lib memory interrupt core
+MODULES  = . io lib memory interrupt core time
 
 TESTS_DIR  = Tests/Tests
 TEST_ARCH_DIR = Tests/Tests/i386

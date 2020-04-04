@@ -23,8 +23,8 @@
 #include <io/kernel_output.h>     /* Kernel output methods */
 #include <thread.h>               /* CPU specific thread settings */
 #include <interrupt_settings.h>   /* Interrupt settings */
-
-#include <placeholder.h>
+#include <acpi.h>                 /* ACPI driver */
+#include <lapic.h>                /* LAPIC driver */
 
 /* UTK configuration file */
 #include <config.h>

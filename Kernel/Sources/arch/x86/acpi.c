@@ -258,8 +258,6 @@ static OS_RETURN_E acpi_parse_apic(acpi_madt_t* madt_ptr)
         madt_entry += header->length;
     }
 
-    acpi_initialized = 1;
-
     return err;
 }
 
@@ -874,11 +872,10 @@ OS_RETURN_E acpi_init(void)
     }
 
     #if TEST_MODE_ENABLED
-    if(err == OS_NO_ERR)
-    {
-        acpi_test();
-    }
+    acpi_test();
     #endif
+
+    acpi_initialized = 1;
     
     return err;
 }
@@ -890,7 +887,7 @@ int32_t acpi_get_io_apic_available(void)
         return -1;
     }
 
-    return io_apic_count > 0;
+    return ((io_apic_count > 0) ? 1 : 0);
 }
 
 int32_t acpi_get_lapic_available(void)
@@ -900,7 +897,7 @@ int32_t acpi_get_lapic_available(void)
         return -1;
     }
 
-    return cpu_count > 0;
+    return ((cpu_count > 0) ? 1 : 0);
 }
 
 int32_t acpi_get_remmaped_irq(const uint32_t irq_number)
