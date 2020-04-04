@@ -130,4 +130,13 @@ INTERRUPT_TYPE_E io_apic_handle_spurious_irq(const uint32_t int_number);
  */
 int32_t io_apic_get_irq_int_line(const uint32_t irq_number);
 
+/** 
+ * @brief Returns the IO-APIC availability.
+ * 
+ * @details Returns is the IO APIC is available (1) or not (0).
+ * 
+ * @return Returns is the IO APIC is available (1) or not (0).
+ */
+uint8_t io_apic_capable(void);
+
 #endif /* #ifndef __X86_IO_APIC_H_ */

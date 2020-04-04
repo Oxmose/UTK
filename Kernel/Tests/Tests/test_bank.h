@@ -31,6 +31,11 @@
 #define ACPI_TEST 0
 #define PIC_TEST 0
 #define IO_APIC_TEST 0
+#define LAPIC_TEST 0
+#define PIT_TEST 0
+#define RTC_TEST 0
+#define LAPIC_TIMER_TEST 0
+#define TIME_TEST 0
 
 /* Put tests declarations here */
 void serial_test(void);
@@ -48,5 +53,10 @@ void paging_test(void);
 void acpi_test(void);
 void pic_test(void);
 void io_apic_test(void);
+void lapic_test(void);
+void pit_test(void);
+void rtc_test(void);
+void lapic_timer_test(void);
+void time_test(void);
 
 #endif /* __TEST_BANK_H_ */

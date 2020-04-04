@@ -26,6 +26,9 @@
 #include <acpi.h>                 /* ACPI management */
 #include <pic.h>                  /* PIC driver */
 #include <io_apic.h>              /* IO-APIC driver */
+#include <lapic.h>                /* LAPIC driver */
+#include <pit.h>                  /* PIT driver */
+#include <rtc.h>                  /* RTC driver */
 #include <memory/kheap.h>         /* Kernel heap */
 #include <memory/meminfo.h>       /* Memory information */
 #include <memory/memalloc.h>      /* Memory pools */
@@ -88,7 +91,6 @@ void kernel_kickstart(void)
     output_test();
     #endif
 
-    /* Init VGA display */
     err = vga_init();
     err |= graphic_set_selected_driver(&vga_text_driver); 
     INIT_MSG("VGA driver initialized", "Could not initialize VGA driver [%u]",
@@ -158,10 +160,64 @@ void kernel_kickstart(void)
              "Could not initialize PIC [%u]\n",
              err, 1);
 
-    #if ENABLE_IO_APIC
-    err = io_apic_init(); 
-    INIT_MSG("IO-APIC initialized\n", 
-             "Could not initialize IO-APIC [%u]\n",
+    if(io_apic_capable())
+    {
+        err = io_apic_init(); 
+        INIT_MSG("IO-APIC initialized\n", 
+                 "Could not initialize IO-APIC [%u]\n",
+                err, 1);
+
+        err = kernel_interrupt_set_driver(&io_apic_driver);
+        INIT_MSG("", 
+                 "Could not set IO-APIC driver [%u]\n", 
+                err, 1);
+
+        err = pic_disable();
+        INIT_MSG("", 
+                 "Could not disable PIC [%u]\n", 
+                err, 1);
+
+        err = lapic_init();
+        INIT_MSG("LAPIC initialized\n", 
+                 "Could not disable LAPIC [%u]\n", 
+                err, 1);
+    }
+    else 
+    {
+        err = kernel_interrupt_set_driver(&pic_driver);
+        INIT_MSG("", 
+                 "Could not set PIC driver [%u]\n", 
+                err, 1);
+    }
+
+    err = pit_init();
+    INIT_MSG("PIT initialized\n", 
+             "Could not initialize PIT driver [%u]\n", 
              err, 1);
-    #endif
+
+    err = rtc_init();
+    INIT_MSG("RTC initialized\n", 
+             "Could not initialize RTC driver [%u]\n", 
+             err, 1);
+
+    if(io_apic_capable())
+    {
+        err = lapic_timer_init();
+        INIT_MSG("LAPIC timer initialized\n", 
+                 "Could not initialize LAPIC timer driver [%u]\n", 
+                 err, 1);
+
+        err = time_init(&lapic_timer_driver, &rtc_driver, &pit_driver);
+        INIT_MSG("Timer factory initialized\n", 
+                 "Could not initialize timer factory [%u]\n", 
+                 err, 1);
+    }
+    else 
+    {
+        err = time_init(&pit_driver, &rtc_driver, NULL);
+        INIT_MSG("Timer factory initialized\n", 
+                 "Could not initialize timer factory [%u]\n", 
+                 err, 1);
+    }
+
 }
