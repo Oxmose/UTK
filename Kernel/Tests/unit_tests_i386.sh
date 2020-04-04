@@ -109,6 +109,8 @@ do
     sed -i "s/$filename_up 1/$filename_up 0/g" Tests/test_bank.h
 done
 
+make -C .. clean
+
 for entry in "./Tests/i386"/*.c
 do
     testcase_arch $entry

@@ -32,7 +32,6 @@
 #include <Tests/test_bank.h>
 #endif
 
-
 /* Header file */
 #include <acpi.h>
 
@@ -227,7 +226,8 @@ static OS_RETURN_E acpi_parse_apic(acpi_madt_t* madt_ptr)
             }
             else
             {
-                kernel_info("Exceeded CPU count, ignoring CPU %d.\n",
+                kernel_info("Exceeded CPU count (%u), ignoring CPU %d\n",
+                            MAX_CPU_COUNT,
                             ((local_apic_t*)madt_entry)->acpi_cpu_id);
             }
         }
