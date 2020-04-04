@@ -89,6 +89,7 @@ void kernel_kickstart(void)
     #if TEST_MODE_ENABLED
     boot_test();
     output_test();
+    panic_test();
     #endif
 
     err = vga_init();

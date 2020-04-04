@@ -36,6 +36,7 @@
 #define RTC_TEST 0
 #define LAPIC_TIMER_TEST 0
 #define TIME_TEST 0
+#define PANIC_TEST 0
 
 /* Put tests declarations here */
 void serial_test(void);
@@ -58,5 +59,6 @@ void pit_test(void);
 void rtc_test(void);
 void lapic_timer_test(void);
 void time_test(void);
+void panic_test(void);
 
 #endif /* __TEST_BANK_H_ */

@@ -10,17 +10,6 @@
 #include <Tests/test_bank.h>
 #endif
 
-void kernel_panic(unsigned int error)
-{
-    (void)error;
-    while(1);
-}
-
-void panic(void)
-{
-    while(1);
-}
-
 void sched_set_thread_termination_cause(int value)
 {
     (void) value;
