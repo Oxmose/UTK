@@ -149,6 +149,7 @@ void kernel_kickstart(void)
 
     #if TEST_MODE_ENABLED
     paging_test();
+    bios_call_test();
     #endif
 
     err = acpi_init(); 
