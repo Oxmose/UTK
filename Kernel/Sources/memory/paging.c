@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file paging.c
  *
  * @see paginh.h
@@ -22,6 +22,7 @@
 #include <interrupt/exceptions.h> /* Exception management */
 #include <core/panic.h>           /* Kernel panic */
 #include <memory/kheap.h>         /* Kernel heap */
+#include <io/kernel_output.h>     /* Kernel output methods */
 
 /* UTK configuration file */
 #include <config.h>

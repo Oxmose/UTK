@@ -477,11 +477,7 @@ OS_RETURN_E vga_map_memory(void)
     }
 
     /* Get memory pages */
-    vga_framebuffer = memalloc_alloc_kpages(page_count, &err);
-    if(err != OS_NO_ERR)
-    {
-        return err;
-    }
+    vga_framebuffer = (void*)VGA_TEXT_FRAMEBUFFER;
 
     /* Ask for the kernel to map the buffer */
     err = kernel_mmap_hw(vga_framebuffer, (void*)VGA_TEXT_FRAMEBUFFER, 

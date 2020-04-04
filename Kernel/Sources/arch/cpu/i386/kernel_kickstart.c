@@ -23,6 +23,7 @@
 #include <lib/string.h>           /* String manipulation */
 #include <vga_text.h>             /* VGA display driver */
 #include <cpu.h>                  /* CPU management */
+#include <acpi.h>                 /* ACPI management */
 #include <memory/kheap.h>         /* Kernel heap */
 #include <memory/meminfo.h>       /* Memory information */
 #include <memory/memalloc.h>      /* Memory pools */
@@ -144,4 +145,9 @@ void kernel_kickstart(void)
     #if TEST_MODE_ENABLED
     paging_test();
     #endif
+
+    err = acpi_init(); 
+    INIT_MSG("ACPI initialized\n", 
+             "Could not initialize ACPI [%u]\n",
+             err, 1);
 }
