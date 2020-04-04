@@ -27,6 +27,7 @@
 #define INTERRUPT_TEST 0
 #define EXCEPTION_TEST 0
 #define MEMALLOC_TEST 0
+#define PAGING_TEST 0
 
 /* Put tests declarations here */
 void serial_test(void);
@@ -40,5 +41,6 @@ void kheap_test(void);
 void interrupt_test(void);
 void exception_test(void);
 void memalloc_test(void);
+void paging_test(void);
 
 #endif /* __TEST_BANK_H_ */

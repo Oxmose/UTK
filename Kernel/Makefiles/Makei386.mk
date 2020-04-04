@@ -154,7 +154,7 @@ debug:
 	cp $(BIN_DIR)/$(KERNEL) ./GRUB/boot/
 	@$(RM) -f ./$(BIN_DIR)/bootable.iso
 	grub-mkrescue -o ./$(BIN_DIR)/bootable.iso ./GRUB
-	@$(QEMU) $(QEMUOPTS) -boot d -cdrom ./$(BIN_DIR)/bootable.iso -serial stdio -S 
+	@$(QEMU) $(QEMUOPTS) -boot d -cdrom ./$(BIN_DIR)/bootable.iso -monitor telnet:127.0.0.1:1235,server,nowait -serial stdio -S 
 
 ######################### Image file options
 bootable: all

@@ -20,6 +20,10 @@
 #ifndef __CONFIG_H_
 #define __CONFIG_H_
 
+/*******************************************************************************
+ * Memory settings
+ ******************************************************************************/
+
 /**
  * @brief Kernel's main stack size in bytes.
  *
@@ -34,6 +38,14 @@
  * @warning Must be 4MB aligned.
  */
 #define KERNEL_MEM_OFFSET 0xE0000000
+
+
+/** @brief Defines the minimal amount of memory blocks reserved for kernel paging.
+ * One block is 4Kb and can map 4MB. Set this number to map the entierety of the
+ * kernel.
+ */
+#define KERNEL_RESERVED_PAGING 4
+
 
 /*******************************************************************************
  * Architecture settings

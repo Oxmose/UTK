@@ -18,11 +18,14 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#include <lib/stdint.h>     /* Generic int types */
-#include <lib/stddef.h>     /* Standard definitions */
-#include <lib/string.h>     /* String manipualtion */
-#include <cpu.h>            /* CPU port manipulation */
-#include <serial.h>         /* serial_write */
+#include <lib/stdint.h>      /* Generic int types */
+#include <lib/stddef.h>      /* Standard definitions */
+#include <lib/string.h>      /* String manipualtion */
+#include <cpu.h>             /* CPU port manipulation */
+#include <serial.h>          /* serial_write */
+#include <memory/memalloc.h> /* Memory allocation */
+#include <memory/paging.h>   /* Paging management */
+#include <arch_paging.h>     /* Memory paging settings */
 
 /* UTK configuration file */
 #include <config.h>
@@ -456,4 +459,33 @@ void vga_console_write_keyboard(const char* string, const size_t size)
     {
         vga_process_char(string[i]);
     }
+}
+
+OS_RETURN_E vga_map_memory(void)
+{
+    uint32_t    page_count;
+    uint32_t    size;
+    OS_RETURN_E err;
+
+    size       = sizeof(uint16_t) * 
+                 VGA_TEXT_SCREEN_COL_SIZE * 
+                 VGA_TEXT_SCREEN_LINE_SIZE;
+    page_count = size / KERNEL_PAGE_SIZE;
+    if(size % KERNEL_PAGE_SIZE)
+    {
+        ++page_count;
+    }
+
+    /* Get memory pages */
+    vga_framebuffer = memalloc_alloc_kpages(page_count, &err);
+    if(err != OS_NO_ERR)
+    {
+        return err;
+    }
+
+    /* Ask for the kernel to map the buffer */
+    err = kernel_mmap_hw(vga_framebuffer, (void*)VGA_TEXT_FRAMEBUFFER, 
+                         size, 0, 0);
+
+    return err;
 }

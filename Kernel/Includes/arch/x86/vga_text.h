@@ -212,4 +212,16 @@ void vga_put_char(const char character);
  */
 void vga_console_write_keyboard(const char* str, const size_t len);
 
+/** 
+ * @brief Allocates memory of the VGA driver.
+ * 
+ * @details Allocates memory for the VGA text framebuffer. The driver will
+ * request kernel pages to map its buffer. The previous buffer is not 
+ * released nor unmapped.
+ * 
+ * @return OS_NO_ERR is returned in case of success. Otherwise an error code
+ * is returned.
+ */
+OS_RETURN_E vga_map_memory(void);
+
 #endif /* #ifndef __X86_VGA_TEXT_H_ */

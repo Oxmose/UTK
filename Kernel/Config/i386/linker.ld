@@ -56,6 +56,7 @@ SECTIONS
     .kernel_struct ALIGN(4K) : AT(ADDR(.kernel_struct) - KERNEL_MEM_OFFSET)
     {
         _kernel_struct_start = .;
+        *(.conf_data)
         _kernel_struct_end = .;
     }
     _kernel_static_limit = .;
