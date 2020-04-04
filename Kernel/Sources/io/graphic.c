@@ -73,6 +73,11 @@ OS_RETURN_E graphic_set_selected_driver(const kernel_graphic_driver_t* driver)
     return OS_NO_ERR;
 }
 
+const kernel_graphic_driver_t* graphic_get_selected_driver(void)
+{
+    return &graphic_driver;
+}
+
 void graphic_clear_screen(void)
 {
 	graphic_driver.clear_screen();

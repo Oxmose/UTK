@@ -190,6 +190,9 @@ enum SERIAL_BAUDRATE
  */
 typedef enum SERIAL_BAUDRATE SERIAL_BAUDRATE_E;
 
+/** @brief Serial driver structure. */
+extern kernel_graphic_driver_t serial_text_driver;
+
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/

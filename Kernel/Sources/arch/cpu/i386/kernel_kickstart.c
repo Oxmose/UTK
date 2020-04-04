@@ -18,7 +18,6 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#include <io/kernel_output.h>     /* Kernel output methods */ 
 #include <lib/stddef.h>           /* Standard definitions */
 #include <lib/string.h>           /* String manipulation */
 #include <vga_text.h>             /* VGA display driver */
@@ -29,12 +28,16 @@
 #include <lapic.h>                /* LAPIC driver */
 #include <pit.h>                  /* PIT driver */
 #include <rtc.h>                  /* RTC driver */
+#include <vesa.h>                 /* VESA driver */
+#include <serial.h>               /* Serial driver */
 #include <memory/kheap.h>         /* Kernel heap */
 #include <memory/meminfo.h>       /* Memory information */
 #include <memory/memalloc.h>      /* Memory pools */
 #include <memory/paging.h>        /* Memory paging management */
 #include <interrupt/interrupts.h> /* Kernel interrupt manager */
 #include <interrupt/exceptions.h> /* Kernel exception manager */
+#include <io/kernel_output.h>     /* Kernel output methods */ 
+#include <core/panic.h>           /* Kernel panic */
 
 /* UTK configuration file */
 #include <config.h>
@@ -53,9 +56,6 @@
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
-
-/* TODO: remove */
-extern void kernel_panic(uint32_t);
 
 #define INIT_MSG(msg_success, msg_error, error, panic) {     \
     if(error != OS_NO_ERR)                                   \
@@ -92,10 +92,17 @@ void kernel_kickstart(void)
     panic_test();
     #endif
 
+    #if DISPLAY_TYPE != DISPLAY_SERIAL
     err = vga_init();
     err |= graphic_set_selected_driver(&vga_text_driver); 
     INIT_MSG("VGA driver initialized", "Could not initialize VGA driver [%u]",
              err, 1);
+    #else 
+    err = graphic_set_selected_driver(&serial_text_driver); 
+    INIT_MSG("Serial driver initialized", 
+             "Could not initialize serial driver [%u]",
+             err, 1);
+    #endif 
 
     #if KERNEL_DEBUG == 1
     kernel_serial_debug("Kickstarting the kernel\n");
@@ -150,6 +157,23 @@ void kernel_kickstart(void)
     #if TEST_MODE_ENABLED
     paging_test();
     bios_call_test();
+    #endif
+
+    #if ((DISPLAY_TYPE == DISPLAY_VESA || DISPLAY_TYPE == DISPLAY_VESA_BUF) || \
+         (TEST_MODE_ENABLED == 1 && VESA_TEXT_TEST == 1))
+    err = vesa_init();
+    INIT_MSG("VESA driver initialized\n", 
+             "Could not initialize VESA driver [%u]\n",
+             err, 1);
+
+    err = vesa_text_vga_to_vesa();
+    INIT_MSG("", 
+             "Could not switch to VESA driver [%u]\n",
+             err, 1);
+
+    #if TEST_MODE_ENABLED
+    vesa_text_test();
+    #endif
     #endif
 
     err = acpi_init(); 

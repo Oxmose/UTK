@@ -315,6 +315,15 @@ typedef struct kernel_graphic_driver kernel_graphic_driver_t;
 OS_RETURN_E graphic_set_selected_driver(const kernel_graphic_driver_t* driver);
 
 /**
+ * @brief Returns the current graphic driver used in the kernel.
+ *
+ * @details Returns the current graphic driver used in the kernel.
+ * 
+ * @return The current graphic driver used in the kernel.
+ */
+const kernel_graphic_driver_t* graphic_get_selected_driver(void);
+
+/**
  * @brief Clears the screen, the background color is set to black.
  */
 void graphic_clear_screen(void);
