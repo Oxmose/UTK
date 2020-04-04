@@ -27,17 +27,6 @@ void panic(void)
     while(1);
 }
 
-int acpi_check_lapic_id(int al)
-{
-    (void) al;
-    return 0;
-}
-
-const local_apic_t** acpi_get_cpu_lapics(void)
-{
-    return place0;
-}
-
 int lapic_get_id(void)
 {
     return 0;

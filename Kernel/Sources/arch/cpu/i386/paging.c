@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file paging.h
  *
  * @see paging.c
@@ -100,14 +100,18 @@ extern uint8_t _kernel_heap_end;
  * FUNCTIONS
  ******************************************************************************/
 
-/**
- * @brief Invalidates the TLB.
- */
-__inline__ static void invalidate_tlb(void)
-{
-    /* Invalidate the TLB */
-    __asm__ __volatile__("mov %%cr3, %%eax\n\t"
-	                     "mov %%eax, %%cr3" ::: "eax");
+#define INVAL_PAGE(virt_addr)            \
+{                                        \
+    __asm__ __volatile__(                \
+        "invlpg (%0)": :"r"(virt_addr) : "memory"     \
+    );                                   \
+}
+
+#define INVAL_TLB(virt_addr)            \
+{                                        \
+    __asm__ __volatile__(                \
+        "mov %%cr3, %%eax\n\tmov %%eax, %%cr3": :"r"(virt_addr) : "memory"     \
+    );                                   \
 }
 
 /** 
@@ -132,7 +136,7 @@ static void map_kernel_section(const void* start_addr, size_t size,
 
 
     /* Align start addr */
-    start_addr_align = (uintptr_t)start_addr & PG_ENTRY_MASK;
+    start_addr_align = (uintptr_t)start_addr & PAGE_ALIGN_MASK;
 
     /* Map pages */
     to_map = (uintptr_t)start_addr - start_addr_align + size;
@@ -164,7 +168,7 @@ static void map_kernel_section(const void* start_addr, size_t size,
     }
 
     #if PAGING_KERNEL_DEBUG == 1
-    start_addr_align = (uintptr_t)start_addr & PG_ENTRY_MASK;
+    start_addr_align = (uintptr_t)start_addr & PAGE_ALIGN_MASK;
     to_map = (uintptr_t)start_addr - start_addr_align + size;
     kernel_serial_debug("Mapped kernel section at 0x%p -> 0x%p\n", start_addr_align, 
                         start_addr_align + to_map);
@@ -244,7 +248,7 @@ uint32_t is_mapped(const uintptr_t start_addr, const size_t size)
     uint32_t* pgtable;
 
      /* Align addresses */
-    start_align = start_addr & PG_ENTRY_MASK;
+    start_align = start_addr & PAGE_ALIGN_MASK;
 
     /* Get mapping size */
     to_check = size + (start_addr - start_align);
@@ -264,7 +268,7 @@ uint32_t is_mapped(const uintptr_t start_addr, const size_t size)
             pgtable = (uint32_t*)(pgdir_rec_addr[pgdir_entry] & PG_ENTRY_MASK);
             pgtable = (uint32_t*)(PAGING_RECUR_PG_TABLE + 
                                   KERNEL_PAGE_SIZE * 
-                                  ((uintptr_t)pgtable >> PG_DIR_OFFSET));
+                                  pgdir_entry);
             if((pgtable[pgtable_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
             {
                 found = 1;
@@ -325,8 +329,8 @@ static OS_RETURN_E kernel_mmap_internal(const void* virt_addr,
     uint32_t    i;
 
     /* Align addresses */
-    virt_align = (uintptr_t)virt_addr & PG_ENTRY_MASK;
-    phys_align = (uintptr_t)phys_addr & PG_ENTRY_MASK;
+    virt_align = (uintptr_t)virt_addr & PAGE_ALIGN_MASK;
+    phys_align = (uintptr_t)phys_addr & PAGE_ALIGN_MASK;
 
     /* Get mapping size */
     to_map = mapping_size + ((uintptr_t)virt_addr - virt_align);
@@ -336,6 +340,8 @@ static OS_RETURN_E kernel_mmap_internal(const void* virt_addr,
     {
         return OS_ERR_MAPPING_ALREADY_EXISTS;
     }
+
+    err = OS_NO_ERR;
 
     while(to_map)
     {
@@ -564,20 +570,13 @@ OS_RETURN_E kernel_mmap(const void* virt_addr,
     size_t      page_count;
     OS_RETURN_E err;
 
-    #if PAGING_KERNEL_DEBUG == 1
-    kernel_serial_debug("Request regular mappping at 0x%p -> 0x%p (%uB)\n",
-                        virt_addr, 
-                        phys_addr,
-                        mapping_size);
-    #endif
-
     /* Compute physical memory size */
     end_map   = (uintptr_t)virt_addr + mapping_size;
-    start_map = (uintptr_t)virt_addr & PG_ENTRY_MASK;
+    start_map = (uintptr_t)virt_addr & PAGE_ALIGN_MASK;
 
     if(end_map % KERNEL_PAGE_SIZE)
     {
-        end_map &= PG_ENTRY_MASK;
+        end_map &= PAGE_ALIGN_MASK;
         end_map += KERNEL_PAGE_SIZE;
     }
     page_count = (end_map - start_map) / KERNEL_PAGE_SIZE;
@@ -588,6 +587,13 @@ OS_RETURN_E kernel_mmap(const void* virt_addr,
     {
         return err;
     }
+
+    #if PAGING_KERNEL_DEBUG == 1
+    kernel_serial_debug("Request regular mappping at 0x%p -> 0x%p (%uB)\n",
+                        virt_addr, 
+                        frames,
+                        mapping_size);
+    #endif
 
     err = kernel_mmap_internal(virt_addr, frames, 
                                mapping_size, read_only, exec, 1, 0);
@@ -602,15 +608,92 @@ OS_RETURN_E kernel_mmap(const void* virt_addr,
 
 OS_RETURN_E kernel_munmap(const void* virt_addr, const size_t mapping_size)
 {
+    uintptr_t   end_map;
+    uintptr_t   start_map;
+    uint32_t    pgdir_entry;
+    uint32_t    pgtable_entry;
+    uint32_t*   pgdir_rec_addr;
+    uint32_t*   pgtable;
+    size_t      to_unmap;
+    uint32_t    i;
+    uint32_t    acc;
+
     #if PAGING_KERNEL_DEBUG == 1
-    kernel_serial_debug("Request unmappping at 0x%p -> 0x%p (%uB)\n",
+    kernel_serial_debug("Request unmappping at 0x%p (%uB)\n",
                         virt_addr, 
-                        phys_addr,
                         mapping_size);
     #endif
 
-    (void) virt_addr;
-    (void) mapping_size;
+    /* Compute physical memory size */
+    end_map   = (uintptr_t)virt_addr + mapping_size;
+    start_map = (uintptr_t)virt_addr & PAGE_ALIGN_MASK;
+
+    if(end_map % KERNEL_PAGE_SIZE)
+    {
+        end_map &= PAGE_ALIGN_MASK;
+        end_map += KERNEL_PAGE_SIZE;
+    }
+    to_unmap = end_map - start_map;
+
+    while(to_unmap)
+    {
+        /* Get entries */
+        pgdir_entry   = (start_map >> PG_DIR_OFFSET);
+        pgtable_entry = (start_map >> PG_TABLE_OFFSET) & 0x3FF;
+
+        /* Check page directory presence and allocate if not present */
+        pgdir_rec_addr = (uint32_t*)PAGING_RECUR_PG_DIR;
+        if((pgdir_rec_addr[pgdir_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
+        {
+            pgtable = (uint32_t*)(pgdir_rec_addr[pgdir_entry] & PG_ENTRY_MASK);
+
+            /* Get recursive virtual address */
+            pgtable = (uint32_t*)(PAGING_RECUR_PG_TABLE + 
+                                  KERNEL_PAGE_SIZE * 
+                                  pgdir_entry);
+
+            if((pgtable[pgtable_entry] & PAGE_FLAG_PRESENT) != 0)
+            {
+                /* Check if it was hardware mapping, release otherwise */
+                if((pgtable[pgtable_entry] & PAGE_FLAG_HARDWARE) == 0)
+                {
+                    memalloc_free_kframes(
+                        (void*)(pgtable[pgtable_entry] & PG_ENTRY_MASK), 1);
+                }
+                /* Unmap */
+                pgtable[pgtable_entry] = 0;
+                INVAL_PAGE(start_map);
+            }
+
+            /* If pagetable is empty, remove from pg dir */
+            acc = 0;
+            for(i = 0; i < KERNEL_PGDIR_SIZE; ++i)
+            {
+                acc |= pgtable[i] & PAGE_FLAG_PRESENT;
+                if(acc)
+                {
+                    break;
+                }
+            }
+            if(acc == 0)
+            {
+                memalloc_free_kframes(
+                    (void*)(pgdir_rec_addr[pgdir_entry] & PG_ENTRY_MASK), 1);
+                pgdir_rec_addr[pgdir_entry] = 0;
+            }
+        }
+
+        start_map += KERNEL_PAGE_SIZE;
+        if(to_unmap >= KERNEL_PAGE_SIZE)
+        {
+            to_unmap -= KERNEL_PAGE_SIZE;
+        }
+        else 
+        {
+            to_unmap = 0;
+        }
+    }
+
     return OS_NO_ERR;
 }
 

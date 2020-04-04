@@ -61,7 +61,7 @@ extern uint8_t     _kernel_end;
  * FUNCTIONS
  ******************************************************************************/
 
-static OS_RETURN_E add_free(const uintptr_t start, const uint64_t size,
+static OS_RETURN_E add_free(const uintptr_t start, const size_t size,
                             mem_area_t** list)
 {
     mem_area_t* cursor;
@@ -232,7 +232,7 @@ static void remove_free(mem_area_t* node, mem_area_t** list)
     }
 }
 
-static void* get_block(mem_area_t** list, const uint64_t block_count,
+static void* get_block(mem_area_t** list, const size_t block_count,
                        OS_RETURN_E* err)
 {
     mem_area_t* cursor;

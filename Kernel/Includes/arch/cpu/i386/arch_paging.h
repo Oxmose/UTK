@@ -24,6 +24,8 @@
 /** @brief Kernel's page size in Bytes. */
 #define KERNEL_PAGE_SIZE 4096
 
+#define PAGE_ALIGN_MASK (~(KERNEL_PAGE_SIZE - 1))
+
 /** @brief Kernel's page directory entry count. */
 #define KERNEL_PGDIR_SIZE 1024
 

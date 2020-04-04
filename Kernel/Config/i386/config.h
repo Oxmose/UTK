@@ -229,7 +229,7 @@
 #define USERQUEUE_KERNEL_DEBUG 0
 
 /** @brief Enables kernel paging debuging feature. */
-#define PAGING_KERNEL_DEBUG 0
+#define PAGING_KERNEL_DEBUG 1
 
 /** @brief Enables test mode features. */
 #define TEST_MODE_ENABLED 0
