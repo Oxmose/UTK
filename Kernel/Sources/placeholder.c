@@ -19,3 +19,7 @@ void sched_terminate_thread(void)
 {
 
 }
+void sched_sleep(int val)
+{
+    (void)val;
+}

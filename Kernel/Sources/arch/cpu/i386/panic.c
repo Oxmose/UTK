@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file panic.c
  *
  * @see panic.h
@@ -24,12 +24,13 @@
 #include <lib/stdint.h>           /* Generic int types */
 #include <lib/stdio.h>            /* Error string */
 #include <cpu.h>                  /* CPU management */
-//#include <bios_call.h>            /* BIOS call */
+#include <bios_call.h>            /* BIOS call */
 //#include <scheduler.h>            /* Scheduler  */
 #include <lapic.h>                /* LAPIC driver */
 #include <acpi.h>                 /* ACPI driver */
 #include <vga_text.h>             /* VGA driver */
 #include <rtc.h>                  /* RTC driver */
+#include <serial.h>               /* Serial driver */
 
 /* UTK configuration file */
 #include <config.h>
@@ -130,14 +131,19 @@ void panic(cpu_state_t* cpu_state, uint32_t int_id, stack_state_t* stack_state)
     }
 
     /* VGA switch */
-    #if 0 /* TODO */
-    bios_int_regs_t regs;
+    if((uintptr_t)graphic_get_selected_driver()->clear_screen != 
+       (uintptr_t)vga_text_driver.clear_screen 
+       &&
+       (uintptr_t)graphic_get_selected_driver()->clear_screen != 
+       (uintptr_t)serial_text_driver.clear_screen)
+    {
+        bios_int_regs_t regs;
 
-    regs.ax = BIOS_CALL_SET_VGA_TEXT_MODE;
-    bios_call(BIOS_INTERRUPT_VGA, &regs);
-    #endif
+        regs.ax = BIOS_CALL_SET_VGA_TEXT_MODE;
+        bios_call(BIOS_INTERRUPT_VGA, &regs);
 
-    graphic_set_selected_driver(&vga_text_driver);
+        graphic_set_selected_driver(&vga_text_driver);
+    }
     
     panic_scheme.background = BG_BLACK;
     panic_scheme.foreground = FG_CYAN;
