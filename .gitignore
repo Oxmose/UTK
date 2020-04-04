@@ -56,3 +56,6 @@ dkms.conf
 
 .vscode/*
 .vscode 
+
+Kernel/GRUB
+Kermel/GRUB/*
