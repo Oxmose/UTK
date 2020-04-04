@@ -41,3 +41,9 @@ void sched_terminate_thread(void)
 {
 
 }
+
+OS_RETURN_E lapic_set_int_eoi(int irq)
+{
+    (void)irq;
+    return OS_NO_ERR;
+}

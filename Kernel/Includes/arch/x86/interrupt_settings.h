@@ -15,14 +15,27 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+#ifndef __X86_INTERRUPT_SETTINGS_
+#define __X86_INTERRUPT_SETTINGS_
+
+#include <cpu_structs.h> /* CPU structures */
+
 /*******************************************************************************
  * DEFINITIONS
  ******************************************************************************/
 
+/** @brief Minimal customizable accepted interrupt line. */
+#define MIN_INTERRUPT_LINE     0x20
+/** @brief Maximal customizable accepted interrupt line. */
+#define MAX_INTERRUPT_LINE     (IDT_ENTRY_COUNT - 1)
+
+/** @brief Defines the number of possible interrupt on the i386 processor. */
+#define INT_ENTRY_COUNT IDT_ENTRY_COUNT
+
 /** @brief Minimal customizable accepted exception line. */
-#define MIN_EXCEPTION_LINE 0
+#define MIN_EXCEPTION_LINE 0x0
 /** @brief Maximal customizable accepted exception line. */
-#define MAX_EXCEPTION_LINE 31
+#define MAX_EXCEPTION_LINE 0x1F
 
 /** @brief Divide by zero exception line. */
 #define DIV_BY_ZERO_LINE 0
@@ -48,6 +61,25 @@
 
 /** @brief Offset of the first line of an IRQ interrupt from PIC. */
 #define INT_PIC_IRQ_OFFSET     0x30
+/** @brief Offset of the first line of an IRQ interrupt from IO-APIC. */
+#define INT_IOAPIC_IRQ_OFFSET  0x40
 
 /** @brief Scheduler interrupt line. */
 #define SCHEDULER_SW_INT_LINE 0x40
+
+/** @brief LAPIC spurious interrupt vector. */
+#define LAPIC_SPURIOUS_INT_LINE MAX_INTERRUPT_LINE
+
+/*******************************************************************************
+ * STRUCTURES
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
+
+/* None */
+
+#endif /* #ifndef __X86_INTERRUPT_SETTINGS_ */

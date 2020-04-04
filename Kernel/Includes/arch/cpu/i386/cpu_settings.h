@@ -144,17 +144,6 @@
 /** @brief IDT flag: interrupt type trap gate. */
 #define IDT_TYPE_TRAP_GATE 0x0F
 
-/***************************
- * INT/IRQ Settings
- **************************/
-
-/** @brief Minimal customizable accepted interrupt line. */
-#define MIN_INTERRUPT_LINE     0x20
-/** @brief Maximal customizable accepted interrupt line. */
-#define MAX_INTERRUPT_LINE     (IDT_ENTRY_COUNT - 1)
-
-/** @brief Defines the number of possible interrupt on the i386 processor. */
-#define INT_ENTRY_COUNT IDT_ENTRY_COUNT
 
 /*******************************************************************************
  * STRUCTURES
