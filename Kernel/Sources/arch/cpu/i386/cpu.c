@@ -27,11 +27,18 @@
 #include <lapic.h>                /* LAPIC driver */
 #include <core/panic.h>           /* Kernel panic */
 #include <interrupt/exceptions.h> /* Expection management */
+#include <cpu_structs.h>          /* CPU structures */
+#include <memory/paging.h>        /* Memory management */
 
 #include <placeholder.h>
 
 /* UTK configuration file */
 #include <config.h>
+
+/* Tests header file */
+#if TEST_MODE_ENABLED
+#include <Tests/test_bank.h>
+#endif
 
 /* Header file */
 #include <cpu.h>
@@ -40,21 +47,44 @@
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* May not be static since is used as extern in ASM */
 /** @brief CPU info storage, stores basix CPU information. */
 cpu_info_t cpu_info;
 
-/** @brief Stores the SSE state */
+/** @brief Stores the SSE state. */
 uint8_t sse_enabled = 0;
 
 /** @brief Stores a pointer to the SSE region that should be used to save the
  * SSE registers.
  */
-uint8_t* sse_save_region[MAX_CPU_COUNT] = {NULL};
+static uint8_t* sse_save_region[MAX_CPU_COUNT] = {NULL};
+
+/** @brief Number of detected CPU. */
+static int32_t  cpu_count;
+
+/** @brief Main kernel CPU id. */
+uint32_t main_core_id;
+
+/** @brief CPU IDs array. */
+static const uint32_t* cpu_ids;
+
+/** @brief CPU LAPICs array. */
+static const local_apic_t** cpu_lapics;
+
+/** @brief Number of CPU that completed the init sequence. */
+static volatile uint32_t init_seq_end;
+
+/** @brief AP boot code location. */
+extern uint8_t init_ap_code;
+
+/** @brief Booted CPU count */
+uint32_t init_cpu_count;
 
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
+
+/** @brief Extern ASM function to relocate AP boot code. */
+extern void __cpu_smp_loader_init(void);
 
 
 /**
@@ -1379,4 +1409,150 @@ OS_RETURN_E cpu_enable_sse(void)
     /* Sets the SSE exception to catch SSE uses */
     return kernel_exception_register_handler(DEVICE_NOT_FOUND_LINE,
                                              sse_use_exception_handler);
+}
+
+OS_RETURN_E cpu_smp_init(void)
+{
+    uint32_t i;
+    OS_RETURN_E err;
+
+    /* Get the number of core of the system */
+    cpu_count = acpi_get_detected_cpu_count();
+
+    /* One core detected, nothing to do */
+    if(cpu_count <= 1)
+    {
+        return OS_NO_ERR;
+    }
+
+    init_seq_end = 0;
+
+    kernel_info("Init %d CPU cores\n", cpu_count);
+
+    main_core_id = cpu_get_id();
+
+    kernel_info("Main core ID %d\n", main_core_id);
+
+    /* Get LAPIC ids */
+    cpu_ids    = acpi_get_cpu_ids();
+    cpu_lapics = acpi_get_cpu_lapics();
+
+    /* Map needed memory */
+    err = kernel_mmap_hw((void*)&init_ap_code, 
+                         (void*)&init_ap_code, 0x1000, 0, 1);
+
+    if(OS_NO_ERR != err)
+    {
+        return err;
+    }
+
+    /* Init startup code in low mem */
+    __cpu_smp_loader_init();
+
+    /* Init each sleeping core */
+    for(i = 0; i < (uint32_t)cpu_count; ++i)
+    {
+        uint32_t current_cpu_init;
+
+        current_cpu_init = init_cpu_count;
+        if(i == main_core_id) continue;
+
+
+        err = lapic_send_ipi_init(cpu_lapics[i]->apic_id);
+        if(err != OS_NO_ERR)
+        {
+            kernel_error("Cannot send INIT IPI [%d]\n", err);
+            kernel_panic(err);
+        }
+
+        kernel_interrupt_restore(1);
+        time_wait_no_sched(20);
+        kernel_interrupt_disable();
+
+        /* Send startup */
+        err = lapic_send_ipi_startup(cpu_lapics[i]->apic_id, 
+                                     ((uintptr_t)&init_ap_code) >> 12);
+        if(err != OS_NO_ERR)
+        {
+            kernel_error("Cannot send STARTUP IPI [%d]\n", err);
+            kernel_panic(err);
+        }
+
+        kernel_interrupt_restore(1);
+        time_wait_no_sched(30);
+        kernel_interrupt_disable();
+
+        if(current_cpu_init == init_cpu_count)
+        {
+            /* Send startup */
+            err = lapic_send_ipi_startup(cpu_lapics[i]->apic_id,
+                                         ((uintptr_t)&init_ap_code) >> 12);
+            if(err != OS_NO_ERR)
+            {
+                kernel_error("Cannot send STARTUP IPI [%d]\n", err);
+                kernel_panic(err);
+            }
+        }
+
+        /* Wait for the current AP to Init */
+        while(current_cpu_init == init_cpu_count);
+    }
+
+    init_seq_end = 1;
+
+    /* Make sure all the AP are initialized, we should never block here */
+    while(init_cpu_count < (uint32_t)cpu_count);
+
+    #if TEST_MODE_ENABLED
+    cpu_smp_test();
+    #endif
+
+    return OS_NO_ERR;
+}
+
+uint32_t cpu_get_booted_cpu_count(void)
+{
+    return init_cpu_count;
+}
+
+void cpu_ap_core_init(void)
+{
+    OS_RETURN_E err;
+    uint32_t cpu_id = cpu_get_id();
+
+    /* Init local APIC */
+    err = lapic_init();
+    if(err != OS_NO_ERR)
+    {
+        kernel_error("Local APIC Initialization error %d [CPU %d]\n", err,
+                     cpu_id);
+        kernel_panic(err);
+    }
+
+    /* Init LAPIC TIMER */
+    err = lapic_ap_timer_init();
+    if(err != OS_NO_ERR)
+    {
+        kernel_error("Local APIC TIMER Initialization error %d [CPU %d]\n",
+                     err, cpu_id);
+        kernel_panic(err);
+    }
+
+    /* Update booted cpu count */
+    ++init_cpu_count;
+
+    kernel_info("CPU %d booted, idling...\n", cpu_id);
+
+    #if TEST_MODE_ENABLED
+    cpu_smp_test();
+    #endif
+
+    while(init_seq_end == 0); 
+
+    /* Init Scheduler */
+    err = sched_init_ap();
+
+    kernel_error("End of kernel reached by AP Core %d [%d]\n", cpu_id, err);
+    kernel_panic(err);
+
 }

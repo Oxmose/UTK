@@ -821,4 +821,30 @@ uint32_t cpu_get_interrupt_state(void);
 uint32_t cpu_get_saved_interrupt_state(const cpu_state_t* cpu_state,
                                        const stack_state_t* stack_state);
 
+/**
+  * @brief Initialize the system cores. The function will boot each cores and
+  * set them to a normal protected mode state. Then each core will be running an
+  * idle thread until the system is initialized.
+  *
+  * @return The success state or the error code.
+  * - OS_NO_ERR is returned if no error is encountered.
+  * - Other possible return code, returned by internally called functions.
+  */
+OS_RETURN_E cpu_smp_init(void);
+
+/**
+ * @brief Returns the number of booted CPU.
+ *
+ * @return uint32_t The number of booted CPU.
+ */
+uint32_t cpu_get_booted_cpu_count(void);
+
+/**
+ * @brief Entry point for AP CPUs.
+ * 
+ * @details Entry point for AP CPUs. Initializes the CPU before
+ * calling the scheduler.
+ */
+void cpu_ap_core_init(void);
+
 #endif /* #ifndef __I386_CPU_H_ */

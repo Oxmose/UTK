@@ -37,7 +37,7 @@
 #include <memory/paging.h>        /* Memory paging management */
 #include <memory/meminfo.h>       /* Memory information */
 #include <memory/memalloc.h>      /* Memory pools */
-#include <io/kernel_output.h>     /* Kernel output methods */ 
+#include <io/kernel_output.h>     /* Kernel output methods */
 #include <interrupt/interrupts.h> /* Kernel interrupt manager */
 #include <interrupt/exceptions.h> /* Kernel exception manager */
 
@@ -59,20 +59,21 @@
  * FUNCTIONS
  ******************************************************************************/
 
-#define INIT_MSG(msg_success, msg_error, error, panic) {     \
-    if(error != OS_NO_ERR)                                   \
-    {                                                        \
-        kernel_error(msg_error, error);                      \
-        if(panic == 1)                                       \
-        {                                                    \
-            kernel_panic(error);                             \
-        }                                                    \
-    }                                                        \
-    else if(strlen(msg_success) != 0)                        \
-    {                                                        \
-        kernel_success(msg_success);                         \
-    }                                                        \
-}
+#define INIT_MSG(msg_success, msg_error, error, panic) \
+    {                                                  \
+        if (error != OS_NO_ERR)                        \
+        {                                              \
+            kernel_error(msg_error, error);            \
+            if (panic == 1)                            \
+            {                                          \
+                kernel_panic(error);                   \
+            }                                          \
+        }                                              \
+        else if (strlen(msg_success) != 0)             \
+        {                                              \
+            kernel_success(msg_success);               \
+        }                                              \
+    }
 
 /**
  * @brief Main boot sequence, C kernel entry point.
@@ -88,178 +89,183 @@ void kernel_kickstart(void)
     OS_RETURN_E err;
     (void)err;
 
-    #if TEST_MODE_ENABLED
+#if TEST_MODE_ENABLED
     boot_test();
     output_test();
     panic_test();
-    #endif
+#endif
 
-    #if DISPLAY_TYPE != DISPLAY_SERIAL
+#if DISPLAY_TYPE != DISPLAY_SERIAL
     err = vga_init();
-    err |= graphic_set_selected_driver(&vga_text_driver); 
+    err |= graphic_set_selected_driver(&vga_text_driver);
     INIT_MSG("VGA driver initialized", "Could not initialize VGA driver [%u]",
              err, 1);
-    #else 
-    err = graphic_set_selected_driver(&serial_text_driver); 
-    INIT_MSG("Serial driver initialized", 
+#else
+    err = graphic_set_selected_driver(&serial_text_driver);
+    INIT_MSG("Serial driver initialized",
              "Could not initialize serial driver [%u]",
              err, 1);
-    #endif 
+#endif
 
-    #if KERNEL_DEBUG == 1
+#if KERNEL_DEBUG == 1
     kernel_serial_debug("Kickstarting the kernel\n");
-    #endif
+#endif
     graphic_clear_screen();
     kernel_printf("\r ============================== Kickstarting UTK "
                   "==============================\n");
 
     err = cpu_detect(1);
-    INIT_MSG("", "Error while detecting CPU [%u]\n",err, 1);
+    INIT_MSG("", "Error while detecting CPU [%u]\n", err, 1);
 
-    err = kheap_init(); 
-    INIT_MSG("Kernel heap initialized\n", 
-             "Could not initialize kernel heap [%u]\n", 
+    err = kheap_init();
+    INIT_MSG("Kernel heap initialized\n",
+             "Could not initialize kernel heap [%u]\n",
              err, 1);
 
-    err = kernel_interrupt_init(); 
-    INIT_MSG("Kernel interrupt manager initialized\n", 
+    err = kernel_interrupt_init();
+    INIT_MSG("Kernel interrupt manager initialized\n",
              "Could not initialize kernel interrupt manager [%u]\n",
              err, 1);
 
-    err = kernel_exception_init(); 
-    INIT_MSG("Kernel exception manager initialized\n", 
+    err = kernel_exception_init();
+    INIT_MSG("Kernel exception manager initialized\n",
              "Could not initialize kernel exception manager [%u]\n",
              err, 1);
 
-    err = memory_map_init(); 
-    INIT_MSG("", 
+    err = memory_map_init();
+    INIT_MSG("",
              "Could not get memory map [%u]\n",
              err, 1);
-    
-    err = memalloc_init(); 
-    INIT_MSG("Memory pools initialized\n", 
+
+    err = memalloc_init();
+    INIT_MSG("Memory pools initialized\n",
              "Could not initialize memory pools [%u]\n",
              err, 1);
 
-    err = paging_init(); 
-    INIT_MSG("", 
+    err = paging_init();
+    INIT_MSG("",
              "Could not initialize kernel page directory [%u]\n",
              err, 1);
 
     err = vga_map_memory();
-    INIT_MSG("", 
+    INIT_MSG("",
              "Could not map VGA memory [%u]\n",
              err, 1);
 
-    err = paging_enable(); 
-    INIT_MSG("Paging enabled\n", 
+    err = paging_enable();
+    INIT_MSG("Paging enabled\n",
              "Could not enable paging [%u]\n",
              err, 1);
 
-    #if TEST_MODE_ENABLED
+#if TEST_MODE_ENABLED
     paging_test();
     bios_call_test();
-    #endif
+#endif
 
-    #if ((DISPLAY_TYPE == DISPLAY_VESA || DISPLAY_TYPE == DISPLAY_VESA_BUF) || \
-         (TEST_MODE_ENABLED == 1 && VESA_TEXT_TEST == 1))
+#if ((DISPLAY_TYPE == DISPLAY_VESA || DISPLAY_TYPE == DISPLAY_VESA_BUF) || \
+     (TEST_MODE_ENABLED == 1 && VESA_TEXT_TEST == 1))
     err = vesa_init();
-    INIT_MSG("VESA driver initialized\n", 
+    INIT_MSG("VESA driver initialized\n",
              "Could not initialize VESA driver [%u]\n",
              err, 1);
 
     err = vesa_text_vga_to_vesa();
-    INIT_MSG("", 
+    INIT_MSG("",
              "Could not switch to VESA driver [%u]\n",
              err, 1);
 
-    #if TEST_MODE_ENABLED
+#if TEST_MODE_ENABLED
     vesa_text_test();
-    #endif
-    #endif
+#endif
+#endif
 
-    err = acpi_init(); 
-    INIT_MSG("ACPI initialized\n", 
+    err = acpi_init();
+    INIT_MSG("ACPI initialized\n",
              "Could not initialize ACPI [%u]\n",
              err, 1);
 
-    err = pic_init(); 
-    INIT_MSG("PIC initialized\n", 
+    err = pic_init();
+    INIT_MSG("PIC initialized\n",
              "Could not initialize PIC [%u]\n",
              err, 1);
 
-    if(io_apic_capable())
+    if (io_apic_capable())
     {
-        err = io_apic_init(); 
-        INIT_MSG("IO-APIC initialized\n", 
+        err = io_apic_init();
+        INIT_MSG("IO-APIC initialized\n",
                  "Could not initialize IO-APIC [%u]\n",
-                err, 1);
+                 err, 1);
 
         err = kernel_interrupt_set_driver(&io_apic_driver);
-        INIT_MSG("", 
-                 "Could not set IO-APIC driver [%u]\n", 
-                err, 1);
+        INIT_MSG("",
+                 "Could not set IO-APIC driver [%u]\n",
+                 err, 1);
 
         err = pic_disable();
-        INIT_MSG("", 
-                 "Could not disable PIC [%u]\n", 
-                err, 1);
+        INIT_MSG("",
+                 "Could not disable PIC [%u]\n",
+                 err, 1);
 
         err = lapic_init();
-        INIT_MSG("LAPIC initialized\n", 
-                 "Could not disable LAPIC [%u]\n", 
-                err, 1);
+        INIT_MSG("LAPIC initialized\n",
+                 "Could not disable LAPIC [%u]\n",
+                 err, 1);
     }
-    else 
+    else
     {
         err = kernel_interrupt_set_driver(&pic_driver);
-        INIT_MSG("", 
-                 "Could not set PIC driver [%u]\n", 
-                err, 1);
+        INIT_MSG("",
+                 "Could not set PIC driver [%u]\n",
+                 err, 1);
     }
 
     err = pit_init();
-    INIT_MSG("PIT initialized\n", 
-             "Could not initialize PIT driver [%u]\n", 
+    INIT_MSG("PIT initialized\n",
+             "Could not initialize PIT driver [%u]\n",
              err, 1);
 
     err = rtc_init();
-    INIT_MSG("RTC initialized\n", 
-             "Could not initialize RTC driver [%u]\n", 
+    INIT_MSG("RTC initialized\n",
+             "Could not initialize RTC driver [%u]\n",
              err, 1);
 
-    if(io_apic_capable())
+    if (io_apic_capable())
     {
         err = lapic_timer_init();
-        INIT_MSG("LAPIC timer initialized\n", 
-                 "Could not initialize LAPIC timer driver [%u]\n", 
+        INIT_MSG("LAPIC timer initialized\n",
+                 "Could not initialize LAPIC timer driver [%u]\n",
                  err, 1);
 
         err = time_init(&lapic_timer_driver, &rtc_driver, &pit_driver);
-        INIT_MSG("Timer factory initialized\n", 
-                 "Could not initialize timer factory [%u]\n", 
+        INIT_MSG("Timer factory initialized\n",
+                 "Could not initialize timer factory [%u]\n",
                  err, 1);
     }
-    else 
+    else
     {
         err = time_init(&pit_driver, &rtc_driver, NULL);
-        INIT_MSG("Timer factory initialized\n", 
-                 "Could not initialize timer factory [%u]\n", 
+        INIT_MSG("Timer factory initialized\n",
+                 "Could not initialize timer factory [%u]\n",
                  err, 1);
     }
 
     err = cpu_enable_sse();
-    INIT_MSG("SSE initialized\n", 
-             "Could not initialize SSE support [%u]\n", 
+    INIT_MSG("SSE initialized\n",
+             "Could not initialize SSE support [%u]\n",
              err, 1);
 
     err = keyboard_init();
-    INIT_MSG("Keyboard initialized\n", 
-             "Could not initialize keyboard driver [%u]\n", 
+    INIT_MSG("Keyboard initialized\n",
+             "Could not initialize keyboard driver [%u]\n",
              err, 1);
 
     err = ata_pio_init();
-    INIT_MSG("ATA-PIO initialized\n", 
-             "Could not initialize ATA-PIO driver [%u]\n", 
+    INIT_MSG("ATA-PIO initialized\n",
+             "Could not initialize ATA-PIO driver [%u]\n",
+             err, 1);
+
+    err = cpu_smp_init();
+    INIT_MSG("SMP initialized\n",
+             "Could not initialize SMP [%u]\n",
              err, 1);
 }

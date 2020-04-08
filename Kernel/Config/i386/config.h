@@ -65,7 +65,7 @@
  * Features settings
  ******************************************************************************/
 /** @brief Maximal number of CPU to be supported by the kernel. */
-#define MAX_CPU_COUNT  1
+#define MAX_CPU_COUNT  4
 
 /** @brief Display with serial driver. */
 #define DISPLAY_SERIAL   0

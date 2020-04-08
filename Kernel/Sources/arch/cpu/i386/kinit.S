@@ -32,7 +32,12 @@ KERNEL_STACK_SIZE    equ 0x2000 ; WARNING This value should be updated to fit
 KERNEL_START_PAGE_ID equ (KERNEL_MEM_OFFSET >> 22)
 __kinit_low          equ (__kinit - KERNEL_MEM_OFFSET)
 
+; Kernel's 32 bits code and data segment descriptor
+KERNEL_CS_32 equ 0x08
+KERNEL_DS_32 equ 0x10
 
+CODE_LOCATION equ 0x4000
+%define OFFSET_ADDR(addr)  (((addr) - __ap_loader_start) + CODE_LOCATION)
 
 ;-------------------------------------------------------------------------------
 ; MACRO DEFINE
@@ -50,6 +55,16 @@ extern multiboot_data_ptr
 extern _kernel_bss_start
 extern _kernel_bss_end
 
+extern cpu_gdt_ptr
+extern cpu_idt_ptr
+
+extern cpu_stacks
+extern cpu_stack_size
+
+extern init_cpu_count
+
+extern kernel_pgdir
+
 ;-------------------------------------------------------------------------------
 ; EXTERN FUNCTIONS
 ;-------------------------------------------------------------------------------
@@ -59,11 +74,13 @@ extern cpu_setup_gdt
 extern cpu_setup_idt
 extern cpu_setup_tss
 extern kernel_kickstart
+extern cpu_ap_core_init
 
 ;-------------------------------------------------------------------------------
 ; EXPORTED FUNCTIONS
 ;-------------------------------------------------------------------------------
 global __kinit
+global __cpu_smp_loader_init
 
 ;-------------------------------------------------------------------------------
 ; CODE
@@ -163,6 +180,139 @@ __get_cpuid_flag:
     or     [edi], eax                       ; Store information in the structure
     ret
 
+
+;-------------------------------------------------------------------------------
+; Loader initialization
+__cpu_smp_loader_init:
+    push esi 
+    push edi 
+    push ecx 
+
+    ; Relocate boot code to low memory space
+
+    mov  esi, __ap_loader_start                     ; Source address
+    mov  edi, CODE_LOCATION                         ; Destination address
+    mov  ecx, (__ap_loader_end - __ap_loader_start) ; Size
+
+    cld                                ; Clear direction flag
+    rep  movsb                         ; Copy the code to low memory space
+    
+    pop ecx 
+    pop esi 
+    pop edi        
+    ret
+
+;-------------------------------------------------------------------------------
+; AP CPU bootstrap code
+[bits 16]
+__ap_loader_start:
+
+    cli
+    ; Set the GDT for the current CPU
+    lgdt [OFFSET_ADDR(gdt16_ptr)]
+
+    ; Set PM
+    mov eax, cr0
+    ; set PE (Protection Enable) bit in CR0 (Control Register 0)
+    or eax, 0x1
+    mov cr0, eax
+
+    jmp  dword KERNEL_CS_32:OFFSET_ADDR(__ap_loader_pm)  ; Jump to PM mode
+
+[bits 32]
+__ap_loader_pm:
+
+    ; Init segment registers
+    mov ax, KERNEL_DS_32
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+
+    ; Set CR3
+    mov eax, kernel_pgdir
+    add eax, -KERNEL_MEM_OFFSET
+    mov cr3, eax
+
+    ; Enable paging and set correct CR0
+    mov eax, 0x80010001
+    mov cr0, eax
+
+    ; Get stack index
+    mov ebx, [init_cpu_count]
+    add ebx, 1
+
+    ; Now set the cpu stack
+    mov eax, [cpu_stack_size]
+    mul ebx
+
+    ; Init stack pointer
+    mov ebx, cpu_stacks
+    add eax, ebx
+    mov esp, eax
+
+    ; Init base pointer
+    mov ebp, esp
+
+    ; Init CPU IDT
+    lidt [cpu_idt_ptr]
+
+    ; Init CPU GDT
+    lgdt [cpu_gdt_ptr]
+
+    mov eax, cpu_ap_core_init
+    call eax
+
+__ap_loader_error:
+    ; Disable interrupt and loop forever
+    cli 
+    hlt
+    jmp __ap_loader_error
+
+    gdt16:                                     ; GDT descriptor table
+        .null:
+            dd 0x00000000
+            dd 0x00000000
+
+        .code_32:
+            dw 0xFFFF
+            dw 0x0000
+            db 0x00
+            db 0x9A
+            db 0xCF
+            db 0x00
+
+        .data_32:
+            dw 0xFFFF
+            dw 0x0000
+            db 0x00
+            db 0x92
+            db 0xCF
+            db 0x00
+
+        .code_16:
+            dw 0xFFFF
+            dw 0x0000
+            db 0x00
+            db 0x9A
+            db 0x0F
+            db 0x00
+
+        .data_16:
+            dw 0xFFFF
+            dw 0x0000
+            db 0x00
+            db 0x92
+            db 0x0F
+            db 0x00
+
+    gdt16_ptr:                                 ; GDT pointer for 16bit access
+        dw gdt16_ptr - gdt16 - 1               ; GDT limit
+        dd gdt16                               ; GDT base address
+
+__ap_loader_end:
+    
 ;-------------------------------------------------------------------------------
 ; DATA
 ;-------------------------------------------------------------------------------

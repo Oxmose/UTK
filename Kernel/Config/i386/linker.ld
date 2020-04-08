@@ -79,7 +79,7 @@ SECTIONS
     vbe_mode_info_base = 0x3000; /* SIZE = 2048bits, ends at 0x3800 */
 
     /* Init AP relocated code */
-    init_ap_code = 0x4000; /* SIZE = 2048bits, ends at 0x4800 */
+    init_ap_code = 0x4000; /* SIZE = 2048bits, ends at 0x4800, also define in kinit.S */
 
     /* Bios calls */
     bios_call_memory = 0x7000; /* 4096bits, ends at 0x8000 */

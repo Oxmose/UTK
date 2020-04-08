@@ -45,7 +45,7 @@ extern uint32_t    memory_map_size;
 extern mem_range_t memory_map_data[];
 
 /** @brief Kernel page directory. */
-static uint32_t kernel_pgdir[KERNEL_PGDIR_SIZE] __attribute__((aligned(4096)));
+uint32_t kernel_pgdir[KERNEL_PGDIR_SIZE] __attribute__((aligned(4096)));
 
 /** @brief Kernel reserved page tables. */
 static uint32_t min_pgtable[KERNEL_RESERVED_PAGING][1024]
