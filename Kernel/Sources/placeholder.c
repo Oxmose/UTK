@@ -23,3 +23,8 @@ void sched_sleep(int val)
 {
     (void)val;
 }
+
+kernel_thread_t* sched_get_self()
+{
+    return NULL;
+}
