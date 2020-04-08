@@ -40,6 +40,7 @@
 #define BIOS_CALL_TEST 0
 #define VESA_TEXT_TEST 0
 #define ATA_PIO_TEST 0
+#define CPU_SMP_TEST 0
 
 /* Put tests declarations here */
 void serial_test(void);
@@ -66,5 +67,6 @@ void panic_test(void);
 void bios_call_test(void);
 void vesa_text_test(void);
 void ata_pio_test(void);
+void cpu_smp_test(void);
 
 #endif /* __TEST_BANK_H_ */

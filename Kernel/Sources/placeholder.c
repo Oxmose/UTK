@@ -28,3 +28,9 @@ kernel_thread_t* sched_get_self()
 {
     return NULL;
 }
+
+OS_RETURN_E sched_init_ap(void)
+{
+    while(1);
+    return OS_NO_ERR;
+}

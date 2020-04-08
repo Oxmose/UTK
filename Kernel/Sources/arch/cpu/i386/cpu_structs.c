@@ -45,8 +45,8 @@ cpu_tss_entry_t cpu_tss[MAX_CPU_COUNT] __attribute__((aligned(16)));
 /** @brief Kernel stacks */
 uint8_t cpu_stacks[MAX_CPU_COUNT][KERNEL_STACK_SIZE] __attribute__((aligned(8)));
 
-/** @brief Booted CPU count */
-uint32_t init_cpu_count;
+/** @brief Kernel stack size */
+uint32_t cpu_stack_size = KERNEL_STACK_SIZE;
 
 /** @brief CPU info storage, stores basix CPU information. */
 cpu_info_t cpu_info;

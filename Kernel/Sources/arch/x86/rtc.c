@@ -33,7 +33,6 @@
 #include <Tests/test_bank.h>
 #endif
 
-
 /* Header include */
 #include <rtc.h>
 
@@ -64,11 +63,6 @@ kernel_timer_t rtc_driver = {
     .get_irq        = rtc_get_irq
 
 };
-
-#if MAX_CPU_COUNT > 1
-/** @brief Critical section spinlock. */
-static spinlock_t lock = SPINLOCK_INIT_VALUE;
-#endif
 
 /*******************************************************************************
  * FUNCTIONS
