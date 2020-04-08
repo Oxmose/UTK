@@ -18,26 +18,28 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#include <lib/stddef.h>           /* Standard definitions */
-#include <lib/string.h>           /* String manipulation */
-#include <vga_text.h>             /* VGA display driver */
 #include <cpu.h>                  /* CPU management */
-#include <acpi.h>                 /* ACPI management */
 #include <pic.h>                  /* PIC driver */
-#include <io_apic.h>              /* IO-APIC driver */
-#include <lapic.h>                /* LAPIC driver */
 #include <pit.h>                  /* PIT driver */
 #include <rtc.h>                  /* RTC driver */
+#include <acpi.h>                 /* ACPI management */
 #include <vesa.h>                 /* VESA driver */
+#include <lapic.h>                /* LAPIC driver */
 #include <serial.h>               /* Serial driver */
+#include <io_apic.h>              /* IO-APIC driver */
+#include <ata_pio.h>              /* ATA PIO driver */
+#include <keyboard.h>             /* Keyboard driver */
+#include <vga_text.h>             /* VGA display driver */
+#include <core/panic.h>           /* Kernel panic */
+#include <lib/stddef.h>           /* Standard definitions */
+#include <lib/string.h>           /* String manipulation */
 #include <memory/kheap.h>         /* Kernel heap */
+#include <memory/paging.h>        /* Memory paging management */
 #include <memory/meminfo.h>       /* Memory information */
 #include <memory/memalloc.h>      /* Memory pools */
-#include <memory/paging.h>        /* Memory paging management */
+#include <io/kernel_output.h>     /* Kernel output methods */ 
 #include <interrupt/interrupts.h> /* Kernel interrupt manager */
 #include <interrupt/exceptions.h> /* Kernel exception manager */
-#include <io/kernel_output.h>     /* Kernel output methods */ 
-#include <core/panic.h>           /* Kernel panic */
 
 /* UTK configuration file */
 #include <config.h>
@@ -246,4 +248,18 @@ void kernel_kickstart(void)
                  err, 1);
     }
 
+    err = cpu_enable_sse();
+    INIT_MSG("SSE initialized\n", 
+             "Could not initialize SSE support [%u]\n", 
+             err, 1);
+
+    err = keyboard_init();
+    INIT_MSG("Keyboard initialized\n", 
+             "Could not initialize keyboard driver [%u]\n", 
+             err, 1);
+
+    err = ata_pio_init();
+    INIT_MSG("ATA-PIO initialized\n", 
+             "Could not initialize ATA-PIO driver [%u]\n", 
+             err, 1);
 }

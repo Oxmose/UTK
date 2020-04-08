@@ -72,7 +72,7 @@ endif
 ASFLAGS = -g -f elf -w+gnu-elf-extensions
 LDFLAGS = -T $(LINKER_FILE) -melf_i386 -no-pie
 QEMUOPTS = -cpu Nehalem -d guest_errors -rtc base=localtime -m 256M \
-           -gdb tcp::1234 -smp 4
+           -gdb tcp::1234 -smp 4 -drive format=raw,file=../Peripherals/hdd_primary_master.img
 
 ######################### Compile options
 .PHONY: all

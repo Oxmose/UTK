@@ -25,6 +25,10 @@
 #include <interrupt_settings.h>   /* Interrupt settings */
 #include <acpi.h>                 /* ACPI driver */
 #include <lapic.h>                /* LAPIC driver */
+#include <core/panic.h>           /* Kernel panic */
+#include <interrupt/exceptions.h> /* Expection management */
+
+#include <placeholder.h>
 
 /* UTK configuration file */
 #include <config.h>
@@ -51,6 +55,77 @@ uint8_t* sse_save_region[MAX_CPU_COUNT] = {NULL};
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
+
+
+/**
+ * @brief Handles a sse use exception (coprocessor not available)
+ *
+ * @details Handles a sse use exception (coprocessor not available). This will
+ * clear the CR0.TS bit to allow the use of SSE and save the old SSE content
+ * if needed.
+ *
+ * @param cpu_state The cpu registers structure.
+ * @param int_id The exception number.
+ * @param stack_state The stack state before the exception that contain cs, eip,
+ * error code and the eflags register value.
+ */
+static void sse_use_exception_handler(cpu_state_t* cpu_state,
+                                      uint32_t int_id,
+                                      stack_state_t* stack_state)
+{
+    uint8_t* fxregs_addr;
+    uint32_t cpu_id;
+    kernel_thread_t* current_thread;
+
+    (void)cpu_state;
+    (void)stack_state;
+    /* Check the interrupt line */
+    if(int_id != DEVICE_NOT_FOUND_LINE)
+    {
+        kernel_panic(OR_ERR_UNAUTHORIZED_INTERRUPT_LINE);
+    }
+
+    /* Update the CR0.TS bit */
+    __asm__ __volatile__(
+        "mov %%cr0, %%eax\n\t"
+        "and $0xFFFFFFF7, %%eax\n\t"
+        "mov %%eax, %%cr0\n\t"
+    :::"eax");
+
+    cpu_id = cpu_get_id();
+    current_thread = sched_get_self();
+
+    /* Check if there is a SSE to save */
+    if(sse_save_region[cpu_id] != NULL && 
+       sse_save_region[cpu_id] != current_thread->thread_storage)
+    {
+        /* Align */
+        fxregs_addr = (uint8_t*)((((uintptr_t)current_thread->thread_storage) & 
+                                0xFFFFFFF0) +
+                                16);
+        __asm__ __volatile__("fxsave %0"::"m"(*fxregs_addr));
+        #if TEST_MODE_ENABLED
+        kernel_serial_debug("[TESTMODE] SSE Context switch SAVE\n");
+        #endif
+    }
+
+    if(sse_save_region[cpu_id] != current_thread->thread_storage)
+    {
+
+        /* Restore the current SSE context */
+        fxregs_addr = (uint8_t*)((((uintptr_t)current_thread->thread_storage) & 
+                                0xFFFFFFF0) +
+                                16);
+        __asm__ __volatile__("fxsave %0"::"m"(*fxregs_addr));
+
+        /* Update the save region */
+        sse_save_region[cpu_id] = current_thread->thread_storage;
+
+        #if TEST_MODE_ENABLED
+        kernel_serial_debug("[TESTMODE] SSE Context switch RESTORE\n");
+        #endif
+    }
+}
 
 OS_RETURN_E cpu_get_info(cpu_info_t* info)
 {
@@ -1278,4 +1353,30 @@ uint32_t cpu_get_saved_interrupt_state(const cpu_state_t* cpu_state,
 {
     (void) cpu_state;
     return stack_state->eflags & CPU_EFLAGS_IF;
+}
+
+OS_RETURN_E cpu_enable_sse(void)
+{
+    /* Check for SSE support */
+    if((cpu_info.cpuid_data[1] & EDX_SSE) != EDX_SSE) 
+    {
+        return OS_ERR_UNAUTHORIZED_ACTION;
+    }
+    /* Enables SSE and FPU */
+    __asm__ __volatile__(
+        "fninit\t\n"
+        "mov %%cr0, %%eax\n\t"
+        "and $0xFFFFFFFB, %%eax\n\t"
+        "or  $0x00000002, %%eax\n\t"
+        "mov %%eax, %%cr0\n\t"
+        "mov %%cr4, %%eax\n\t"
+        "or  $0x00000600, %%eax\n\t"
+        "mov %%eax, %%cr4\n\t"
+    :::"eax");
+
+    sse_enabled = 1;
+
+    /* Sets the SSE exception to catch SSE uses */
+    return kernel_exception_register_handler(DEVICE_NOT_FOUND_LINE,
+                                             sse_use_exception_handler);
 }
