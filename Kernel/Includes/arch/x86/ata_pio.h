@@ -23,6 +23,7 @@
 
 #include <lib/stdint.h>    /* Generic int types */
 #include <lib/stddef.h>    /* Standard definitions */
+#include <sync/critical.h> /* Critical sections */
 
 /* UTK Configuration file */
 #include <config.h>
@@ -119,6 +120,11 @@ struct ata_pio_device
     ATA_PIO_PORT_E port;
     /** @brief Device type. */
     ATA_PIO_TYPE_E type;
+
+#if MAX_CPU_COUNT > 1
+    /** @brief Critical section spinlock. */
+    spinlock_t lock;
+#endif
 };
 
 /**

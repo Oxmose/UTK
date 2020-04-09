@@ -84,9 +84,9 @@ OS_RETURN_E time_init(const kernel_timer_t* main_timer,
 {
     OS_RETURN_E err;
 
-    #if TIME_KERNEL_DEBUG == 1
+#if TIME_KERNEL_DEBUG == 1
     kernel_serial_debug("Time manager Initialization\n");
-    #endif
+#endif
 
     /* Check the main timer integrity */
     if(main_timer == NULL ||
@@ -208,9 +208,9 @@ OS_RETURN_E time_init(const kernel_timer_t* main_timer,
         }
     }
 
-    #if TEST_MODE_ENABLED
+#if TEST_MODE_ENABLED
     time_test();
-    #endif
+#endif
 
 
     return OS_NO_ERR;
@@ -254,9 +254,9 @@ void time_main_timer_handler(cpu_state_t* cpu_state, uintptr_t int_id,
         }
     }
 
-    #if TIME_KERNEL_DEBUG == 1
+#if TIME_KERNEL_DEBUG == 1
     kernel_serial_debug("Time manager main handler\n");
-    #endif
+#endif
 
     /* EOI */
     kernel_interrupt_set_irq_eoi(sys_main_timer.get_irq());
@@ -271,9 +271,9 @@ void time_rtc_timer_handler(cpu_state_t* cpu_state, uintptr_t int_id,
 
     rtc_update_time();
 
-    #if TIME_KERNEL_DEBUG == 1
+#if TIME_KERNEL_DEBUG == 1
     kernel_serial_debug("Time manager RTC handler\n");
-    #endif
+#endif
 
     /* EOI */
     kernel_interrupt_set_irq_eoi(sys_rtc_timer.get_irq());
@@ -286,9 +286,9 @@ void time_aux_timer_handler(cpu_state_t* cpu_state, uintptr_t int_id,
     (void)int_id;
     (void)stack;
 
-    #if TIME_KERNEL_DEBUG == 1
+#if TIME_KERNEL_DEBUG == 1
     kernel_serial_debug("Time manager AUX handler\n");
-    #endif
+#endif
 
     /* EOI */
     kernel_interrupt_set_irq_eoi(sys_aux_timer.get_irq());

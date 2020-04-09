@@ -631,47 +631,6 @@ __inline__ static uint32_t cpu_inl(const uint16_t port)
 }
 
 /**
- * @brief Compare and swap word atomicaly.
- *
- * @details This function can be used by synchronization primitive to compare
- * and swap a word atomicaly. cpu_compare_and_swap implements the usual compare
- * and swap behavior.
- *
- * @return The value of the lock, either old val if the lock was not aquired or
- * newval if the lock was aquired.
- *
- * @param[in,out] p_val The pointer to the lock.
- * @param[in] oldval The old value to swap.
- * @param[in] newval The new value to be swapped.
- */
-__inline__ static uint32_t cpu_compare_and_swap(volatile uint32_t* p_val,
-                                                const int oldval,
-                                                const int newval)
-{
-    uint32_t prev;
-    __asm__ __volatile__ (
-            "lock cmpxchg %1, %2\n"
-            "setne %%al"
-                : "=a" (prev)
-                : "r" (newval), "m" (*p_val), "0" (oldval)
-                : "memory");
-    return prev;
-}
-
-/**
- * @brief Test and set atomic operation.
- *
- * @details This function can be used by synchronization primitive to test
- * and set a word atomicaly. s implements the usual test and set behavior.
- *
- * @param[in,out] lock The spinlock to apply the test on.
- */
-__inline__ static int cpu_test_and_set(volatile uint32_t* lock)
-{
-        return cpu_compare_and_swap(lock, 0, 1);
-}
-
-/**
  * @brief Reads the TSC value of the CPU.
  *
  * @details Reads the current value of the CPU's time-stamp counter and store

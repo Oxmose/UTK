@@ -30,9 +30,10 @@
 #include <ata_pio.h>              /* ATA PIO driver */
 #include <keyboard.h>             /* Keyboard driver */
 #include <vga_text.h>             /* VGA display driver */
-#include <core/panic.h>           /* Kernel panic */
 #include <lib/stddef.h>           /* Standard definitions */
 #include <lib/string.h>           /* String manipulation */
+#include <core/panic.h>           /* Kernel panic */
+#include <core/scheduler.h>       /* Kernel scheduler */
 #include <memory/kheap.h>         /* Kernel heap */
 #include <memory/paging.h>        /* Memory paging management */
 #include <memory/meminfo.h>       /* Memory information */
@@ -86,8 +87,9 @@
  */
 void kernel_kickstart(void)
 {
-    OS_RETURN_E err;
-    (void)err;
+    OS_RETURN_E   err;
+    colorscheme_t new_scheme;
+    colorscheme_t buffer;
 
 #if TEST_MODE_ENABLED
     boot_test();
@@ -160,6 +162,7 @@ void kernel_kickstart(void)
 #if TEST_MODE_ENABLED
     paging_test();
     bios_call_test();
+    kernel_queue_test();
 #endif
 
 #if ((DISPLAY_TYPE == DISPLAY_VESA || DISPLAY_TYPE == DISPLAY_VESA_BUF) || \
@@ -268,4 +271,46 @@ void kernel_kickstart(void)
     INIT_MSG("SMP initialized\n",
              "Could not initialize SMP [%u]\n",
              err, 1);
+
+    err = sched_init();
+    INIT_MSG("Scheduler initialized\n",
+             "Could not initialize scheduler [%u]\n",
+             err, 1);
+
+# if DISPLAY_TYPE == DISPLAY_VESA_BUF
+    /* Create the VESA double buffer thread */
+    err = sched_create_kernel_thread(NULL, 
+                                     KERNEL_HIGHEST_PRIORITY,
+                                     "vesa_buf", 
+                                     0x1000,
+                                     0, 
+                                     vesa_double_buffer_thread,
+                                     (void*)0);
+    INIT_MSG("VESA buffer initialized\n",
+             "Could not initialize VESA buffer [%u]\n",
+             err, 1);
+#endif
+
+    new_scheme.foreground = FG_CYAN;
+    new_scheme.background = BG_BLACK;
+    new_scheme.vga_color  = 1;
+
+        /* No need to test return value */
+    graphic_save_color_scheme(&buffer);
+
+    /* Set REG on BLACK color scheme */
+    graphic_set_color_scheme(new_scheme);
+
+    /* Print tag */
+    kernel_printf("\n ================================ UTK Started "
+                  "================================ \n\n");
+
+    /* Restore original screen color scheme */
+    graphic_set_color_scheme(buffer);
+
+    /* First schedule, we should never return from here */
+    sched_schedule();
+
+    INIT_MSG("",
+             "Kernel returned to kickstart\n", OS_ERR_UNAUTHORIZED_ACTION, 1);
 }

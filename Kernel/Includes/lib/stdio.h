@@ -63,37 +63,6 @@ int vprintf(const char *__format, __builtin_va_list __vl)
  * 
  * @param[out] __dest The buffer to print the string into.
  * @param[in] __format The format string to print.
- * @param[in] ... The arguments attached to the format string.
- * 
- * @return 0 in all cases.
- */
-int sprintf(char *__dest, const char *__format, ...) 
-            __attribute__((format (printf, 2, 3)));
-
-/**
- * @brief Prints a formated string into a buffer.
- * 
- * @details Prints a formated string into a buffer with the attached parameters 
- * to be included in the string.
- * 
- * @param[out] __dest The buffer to print the string into.
- * @param[in] __size The maximal size of the buffer.
- * @param[in] __format The format string to print.
- * @param[in] ... The arguments attached to the format string.
- * 
- * @return 0 in all cases.
- */
-int snprintf(char *__dest, unsigned int __size, const char *__format, ...) 
-             __attribute__((format (printf, 3, 4)));
-
-/**
- * @brief Prints a formated string into a buffer.
- * 
- * @details Prints a formated string into a buffer with the attached parameters 
- * to be included in the string.
- * 
- * @param[out] __dest The buffer to print the string into.
- * @param[in] __format The format string to print.
  * @param[in] __vl The arguments attached to the format string.
  * 
  * @return 0 in all cases.

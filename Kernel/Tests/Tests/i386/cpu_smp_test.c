@@ -20,7 +20,10 @@ void cpu_smp_test(void)
     else 
     {
         printf("[TESTMODE] CPU %u booted\n", cpu_id);
-        while(1);
+        while(1)
+        {
+            cpu_hlt();
+        }
     }
 
     /* Kill QEMU */

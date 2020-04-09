@@ -41,6 +41,23 @@
 #define VESA_TEXT_TEST 0
 #define ATA_PIO_TEST 0
 #define CPU_SMP_TEST 0
+#define SSE_TEST 0
+#define CRITICAL_TEST 0
+#define DIV_BY_ZERO_TEST 0
+#define KERNEL_QUEUE_TEST 0
+#define SCHEDULER_LOAD_TEST 0
+#define SCHEDULER_LOAD_MC_TEST 0
+#define SCHEDULER_PREEMT_TEST 0
+#define SCHEDULER_SLEEP_TEST 0
+#define SCHEDULER_SLEEP_MC_TEST 0
+#define MUTEX_TEST 0
+#define SEMAPHORE_TEST 0
+#define SEMAPHORE_MC_TEST 0
+#define MAILBOX_TEST 0
+#define USERQUEUE_TEST 0
+#define PAGING_ALLOC_TEST 0
+#define MUTEX_MC_TEST 0
+#define SPINLOCK_TEST 0
 
 /* Put tests declarations here */
 void serial_test(void);
@@ -68,5 +85,21 @@ void bios_call_test(void);
 void vesa_text_test(void);
 void ata_pio_test(void);
 void cpu_smp_test(void);
+void sse_test(void);
+void critical_test(void);
+void div_by_zero_test(void);
+void kernel_queue_test(void);
+void scheduler_load_test(void);
+void scheduler_load_mc_test(void);
+void scheduler_preemt_test(void);
+void scheduler_sleep_test(void);
+void scheduler_sleep_mc_test(void);
+void mutex_test(void);
+void mutex_mc_test(void);
+void semaphore_test(void);
+void semaphore_mc_test(void);
+void mailbox_test(void);
+void userqueue_test(void);
+void spinlock_test(void);
 
 #endif /* __TEST_BANK_H_ */

@@ -53,6 +53,13 @@ struct mem_area
 /** @brief Shortcut for struct mem_area type. */
 typedef struct mem_area mem_area_t;
 
+/** @brief Kernel free frame pool. */
+extern mem_area_t* kernel_free_frames;
+
+/** @brief Kernel free page pool. */
+extern mem_area_t* kernel_free_pages;
+
+
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/

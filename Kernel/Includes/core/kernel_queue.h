@@ -24,6 +24,7 @@
 
 #include <lib/stddef.h>    /* Standard definitons */
 #include <lib/stdint.h>    /* Generic int types */
+#include <sync/critical.h> /* Critical sections */
 
 /* UTK configuration file */
 #include <config.h>
@@ -70,6 +71,11 @@ struct kernel_queue
 
     /** @brief Current queue's size. */
     uint32_t size;
+
+#if MAX_CPU_COUNT > 1
+    /** @brief Critical section spinlock. */
+    spinlock_t lock;
+#endif
 };
 
 /**

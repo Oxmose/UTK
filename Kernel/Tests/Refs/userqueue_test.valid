@@ -1,0 +1,5 @@
+[TESTMODE]THREAD2 return
+[TESTMODE]THREAD1 return
+[TESTMODE]THREAD1 return
+[TESTMODE]THREAD3 return
+[TESTMODE] Queue test passed.
