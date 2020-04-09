@@ -134,10 +134,10 @@ static OS_RETURN_E vga_print_char(const uint32_t line, const uint32_t column,
  */
 static void vga_process_char(const char character)
 {
-    #if (KERNEL_DEBUG == 1) | (TEST_MODE_ENABLED == 1)
+#if (KERNEL_DEBUG == 1) | (TEST_MODE_ENABLED == 1)
     /* Write on serial */
     serial_write(COM1, character);
-    #endif
+#endif
 
     /* If character is a normal ASCII character */
     if(character > 31 && character < 127)
@@ -266,18 +266,18 @@ OS_RETURN_E vga_init(void)
 {
     OS_RETURN_E err; 
 
-    #if VGA_DEBUG
+#if VGA_DEBUG
     kernel_serial_debug("Initializing VGA text driver\n");
-    #endif 
+#endif 
 
     /* Init framebuffer */
     vga_framebuffer = (uint16_t*)VGA_TEXT_FRAMEBUFFER;
 
     err = OS_NO_ERR;
 
-    #if TEST_MODE_ENABLED
+#if TEST_MODE_ENABLED
     vga_test();
-    #endif
+#endif
 
     return err;
 }

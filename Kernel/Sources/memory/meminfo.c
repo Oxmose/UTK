@@ -104,10 +104,10 @@ extern uint64_t kheap_mem_used;
 
 OS_RETURN_E memory_map_init(void)
 {
-    #if MEMORY_KERNEL_DEBUG
+#if MEMORY_KERNEL_DEBUG
     kernel_serial_debug("Reading memory configuration from 0x%p\n", 
                         multiboot_data_ptr);
-    #endif 
+#endif 
     multiboot_memory_map_t* mmap;
     multiboot_memory_map_t* mmap_end;
     uint32_t i;

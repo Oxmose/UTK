@@ -24,6 +24,7 @@
 #include <lib/stdlib.h>       /* atoi */
 #include <lib/string.h>       /* memset */
 #include <io/kernel_output.h> /* kernel_success */
+#include <sync/critical.h>    /* Critical sections */
 
 /* UTK configuration file */
 #include <config.h>
@@ -63,6 +64,11 @@ static uint32_t mem_free;
 uint32_t kheap_mem_used;
 /** @brief Quantity of memory used to store meta data in the kernel's heap. */
 static uint32_t mem_meta;
+
+#if MAX_CPU_COUNT > 1
+/** @brief Critical section spinlock. */
+static spinlock_t lock = SPINLOCK_INIT_VALUE;
+#endif
 
 /*******************************************************************************
  * FUNCTIONS
@@ -325,13 +331,13 @@ OS_RETURN_E kheap_init(void)
 
     init = 1;
 
-    #if KHEAP_KERNEL_DEBUG == 1
+#if KHEAP_KERNEL_DEBUG == 1
     kernel_serial_debug("Kernel Heap Initialized at 0x%p\n", mem_start);
-    #endif 
+#endif 
 
-    #if TEST_MODE_ENABLED
+#if TEST_MODE_ENABLED
     kheap_test();
-    #endif
+#endif
 
     return OS_NO_ERR;
 }
@@ -343,11 +349,18 @@ void* kmalloc(size_t size)
     mem_chunk_t* chunk2;
     size_t       size2;
     size_t       len;
+    uint32_t     int_state;
 
     if(init == 0)
     {
         return NULL;
     }
+
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
 
     size = (size + ALIGN - 1) & (~(ALIGN - 1));
 
@@ -360,6 +373,13 @@ void* kmalloc(size_t size)
 
 	if (n >= NUM_SIZES)
     {
+
+#if MAX_CPU_COUNT > 1
+        EXIT_CRITICAL(int_state, &lock);
+#else
+        EXIT_CRITICAL(int_state);
+#endif
+
         return NULL;
     }
 
@@ -368,6 +388,13 @@ void* kmalloc(size_t size)
 		++n;
 		if (n >= NUM_SIZES)
         {
+
+#if MAX_CPU_COUNT > 1
+            EXIT_CRITICAL(int_state, &lock);
+#else
+            EXIT_CRITICAL(int_state);
+#endif
+
             return NULL;
         }
     }
@@ -398,27 +425,40 @@ void* kmalloc(size_t size)
     mem_free -= size2;
     kheap_mem_used += size2 - len - HEADER_SIZE;
 
-    #if KHEAP_KERNEL_DEBUG == 1
+#if KHEAP_KERNEL_DEBUG == 1
     kernel_serial_debug("Kheap allocated 0x%p -> %uB (%uB free, %uB used)\n",
                         chunk->data,
                         size2 - len - HEADER_SIZE,
                         mem_free, kheap_mem_used);
-    #endif
+#endif
+
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
 
     return chunk->data;
 }
 
 void kfree(void* ptr)
 {
-    uint32_t used;
+    uint32_t     used;
     mem_chunk_t* chunk;
     mem_chunk_t* next;
     mem_chunk_t* prev;
+    uint32_t     int_state;
 
     if(init == 0 || ptr == NULL)
     {
         return;
     }
+
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
 
     chunk = (mem_chunk_t*)((int8_t*)ptr - HEADER_SIZE);
     next = CONTAINER(mem_chunk_t, all, chunk->all.next);
@@ -452,8 +492,14 @@ void kfree(void* ptr)
 		push_free(chunk);
     }
 
-    #if KHEAP_KERNEL_DEBUG == 1
+#if KHEAP_KERNEL_DEBUG == 1
     kernel_serial_debug("Kheap freed 0x%p -> %uB\n", ptr, used);
-    #endif
+#endif
+
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
 
 }

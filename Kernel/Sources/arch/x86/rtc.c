@@ -24,6 +24,7 @@
 #include <lib/stdint.h>           /* Generic int types */
 #include <lib/stddef.h>           /* Standard definition */
 #include <time/time_management.h> /* Timer factory */
+#include <sync/critical.h>        /* Critical sections */
 
 /* UTK configuration file */
 #include <config.h>
@@ -63,6 +64,11 @@ kernel_timer_t rtc_driver = {
     .get_irq        = rtc_get_irq
 
 };
+
+#if MAX_CPU_COUNT > 1
+/** @brief Critical section spinlock. */
+static spinlock_t lock = SPINLOCK_INIT_VALUE;
+#endif
 
 /*******************************************************************************
  * FUNCTIONS
@@ -142,30 +148,51 @@ OS_RETURN_E rtc_init(void)
 
     rtc_update_time();
 
-    #if TEST_MODE_ENABLED
+#if TEST_MODE_ENABLED
     rtc_test();
-    #endif
+#endif
 
-    #if RTC_KERNEL_DEBUG == 1
+#if RTC_KERNEL_DEBUG == 1
     kernel_serial_debug("Initialized RTC\n");
-    #endif
+#endif
 
     return err;
 }
 
 OS_RETURN_E rtc_enable(void)
 {
+    uint32_t int_state;
+
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
+
     if(disabled_nesting > 0)
     {
         --disabled_nesting;
     }
     if(disabled_nesting == 0)
     {
-        #if RTC_KERNEL_DEBUG == 1
+#if RTC_KERNEL_DEBUG == 1
         kernel_serial_debug("Enable RTC\n");
-        #endif
+#endif
+
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
+
         return kernel_interrupt_set_irq_mask(RTC_IRQ_LINE, 1);
     }
+
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
 
     return OS_NO_ERR;
 }
@@ -173,16 +200,29 @@ OS_RETURN_E rtc_enable(void)
 OS_RETURN_E rtc_disable(void)
 {
     OS_RETURN_E err;
+    uint32_t    int_state;
+
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
 
     if(disabled_nesting < UINT32_MAX)
     {
         ++disabled_nesting;
     }
 
-    #if RTC_KERNEL_DEBUG == 1
+#if RTC_KERNEL_DEBUG == 1
     kernel_serial_debug("Disable RTC (%d)\n", disabled_nesting);
-    #endif
+#endif
     err = kernel_interrupt_set_irq_mask(RTC_IRQ_LINE, 0);
+
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
 
     return err;
 }
@@ -192,6 +232,7 @@ OS_RETURN_E rtc_set_frequency(const uint32_t frequency)
     OS_RETURN_E err;
     uint32_t    prev_rate;
     uint32_t    rate;
+    uint32_t    int_state;
 
     if(frequency < RTC_MIN_FREQ || frequency > RTC_MAX_FREQ)
     {
@@ -252,10 +293,23 @@ OS_RETURN_E rtc_set_frequency(const uint32_t frequency)
         rate = 3;
     }
 
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
+
     /* Disable RTC IRQ */
     err = rtc_disable();
     if(err != OS_NO_ERR)
     {
+
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
+
         return err;
     }
 
@@ -268,9 +322,15 @@ OS_RETURN_E rtc_set_frequency(const uint32_t frequency)
 
     rtc_frequency = (RTC_QUARTZ_FREQ >> (rate - 1));
 
-    #if RTC_KERNEL_DEBUG == 1
+#if RTC_KERNEL_DEBUG == 1
     kernel_serial_debug("New RTC rate set (%d: %dHz)\n", rate, rtc_frequency);
-    #endif
+#endif
+
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
 
     /* Enable RTC IRQ */
     return rtc_enable();
@@ -288,15 +348,29 @@ OS_RETURN_E rtc_set_handler(void(*handler)(
                                  ))
 {
     OS_RETURN_E err;
+    uint32_t    int_state;
 
     if(handler == NULL)
     {
         return OS_ERR_NULL_POINTER;
     }
 
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
+
     err = rtc_disable();
     if(err != OS_NO_ERR)
     {
+
+#if MAX_CPU_COUNT > 1
+        EXIT_CRITICAL(int_state, &lock);
+#else
+        EXIT_CRITICAL(int_state);
+#endif
+
         return err;
     }
 
@@ -304,6 +378,13 @@ OS_RETURN_E rtc_set_handler(void(*handler)(
     err = kernel_interrupt_remove_irq_handler(RTC_IRQ_LINE);
     if(err != OS_NO_ERR)
     {
+
+#if MAX_CPU_COUNT > 1
+        EXIT_CRITICAL(int_state, &lock);
+#else
+        EXIT_CRITICAL(int_state);
+#endif
+
         rtc_enable();
         return err;
     }
@@ -311,22 +392,34 @@ OS_RETURN_E rtc_set_handler(void(*handler)(
     err = kernel_interrupt_register_irq_handler(RTC_IRQ_LINE, handler);
     if(err != OS_NO_ERR)
     {
-        rtc_enable();
+
+#if MAX_CPU_COUNT > 1
+        EXIT_CRITICAL(int_state, &lock);
+#else
+        EXIT_CRITICAL(int_state);
+#endif
+
         return err;
     }
 
-    #if RTC_KERNEL_DEBUG == 1
-    kernel_serial_debug("New RTC handler set (0x%08x)\n", handler);
-    #endif
+#if RTC_KERNEL_DEBUG == 1
+    kernel_serial_debug("New RTC handler set (0x%p)\n", handler);
+#endif
+
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
 
     return rtc_enable();
 }
 
 OS_RETURN_E rtc_remove_handler(void)
 {
-    #if RTC_KERNEL_DEBUG == 1
+#if RTC_KERNEL_DEBUG == 1
     kernel_serial_debug("Default RTC handler set\n");
-    #endif
+#endif
     return rtc_set_handler(dummy_handler);
 }
 
@@ -435,9 +528,9 @@ void rtc_update_time(void)
     cpu_outb(CMOS_REG_C, CMOS_COMM_PORT);
     cpu_inb(CMOS_DATA_PORT);
 
-    #if RTC_KERNEL_DEBUG == 1
+#if RTC_KERNEL_DEBUG == 1
     kernel_serial_debug("Updated RTC\n");
-    #endif
+#endif
 }
 
 uint32_t rtc_get_irq(void)

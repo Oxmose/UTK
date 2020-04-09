@@ -22,13 +22,12 @@
 
 #include <lib/stdint.h>         /* Generic int types */
 #include <lib/stddef.h>         /* Standard definitions */
-#include <core/panic.h>              /* Kernel panic */
+#include <core/panic.h>         /* Kernel panic */
+#include <core/scheduler.h>     /* Kernel scheduler */
 #include <cpu_settings.h>       /* CPU settings */
 #include <interrupt_settings.h> /* CPU interrupts settings */
 #include <cpu.h>                /* CPU management */
 #include <io/kernel_output.h>   /* Kernel output methods */
-
-#include <placeholder.h>
 
 /* UTK configuration file */
 #include <config.h>
@@ -47,6 +46,11 @@
 
 /** @brief Stores the handlers for each exception, defined in exceptions.h */
 extern custom_handler_t kernel_interrupt_handlers[INT_ENTRY_COUNT];
+
+#if MAX_CPU_COUNT > 1
+/** @brief Critical section spinlock. */
+static spinlock_t lock = SPINLOCK_INIT_VALUE;
+#endif
 
 /*******************************************************************************
  * FUNCTIONS
@@ -84,9 +88,9 @@ OS_RETURN_E kernel_exception_init(void)
 {
     OS_RETURN_E err;
 
-    #if EXCEPTION_KERNEL_DEBUG == 1
+#if EXCEPTION_KERNEL_DEBUG == 1
     kernel_serial_debug("Initializing exception manager.\n");
-    #endif
+#endif
 
     err = kernel_exception_register_handler(DIV_BY_ZERO_LINE,
                                             div_by_zero_handler);
@@ -95,9 +99,9 @@ OS_RETURN_E kernel_exception_init(void)
         return err;
     }
 
-    #if TEST_MODE_ENABLED 
+#if TEST_MODE_ENABLED 
     exception_test();
-    #endif
+#endif
 
     return OS_NO_ERR;
 }
@@ -110,6 +114,8 @@ OS_RETURN_E kernel_exception_register_handler(const uint32_t exception_line,
                                              )
                                        )
 {
+    uint32_t int_state;
+
     if((int32_t)exception_line < MIN_EXCEPTION_LINE ||
        exception_line > MAX_EXCEPTION_LINE)
     {
@@ -121,41 +127,81 @@ OS_RETURN_E kernel_exception_register_handler(const uint32_t exception_line,
         return OS_ERR_NULL_POINTER;
     }
 
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
+
     if(kernel_interrupt_handlers[exception_line].handler != NULL)
     {
+
+#if MAX_CPU_COUNT > 1
+        EXIT_CRITICAL(int_state, &lock);
+#else
+        EXIT_CRITICAL(int_state);
+#endif
+
         return OS_ERR_INTERRUPT_ALREADY_REGISTERED;
     }
 
     kernel_interrupt_handlers[exception_line].handler = handler;
     kernel_interrupt_handlers[exception_line].enabled = 1;
 
-    #if EXCEPTION_KERNEL_DEBUG == 1
+#if EXCEPTION_KERNEL_DEBUG == 1
     kernel_serial_debug("Added exception %u handler at 0x%p\n",
                         exception_line, handler);
-    #endif
+#endif
+
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
 
     return OS_NO_ERR;
 }
 
 OS_RETURN_E kernel_exception_remove_handler(const uint32_t exception_line)
 {
+    uint32_t int_state;
+
     if((int32_t)exception_line < MIN_EXCEPTION_LINE ||
        exception_line > MAX_EXCEPTION_LINE)
     {
         return OR_ERR_UNAUTHORIZED_INTERRUPT_LINE;
     }
 
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
+
     if(kernel_interrupt_handlers[exception_line].handler == NULL)
     {
+
+#if MAX_CPU_COUNT > 1
+        EXIT_CRITICAL(int_state, &lock);
+#else
+        EXIT_CRITICAL(int_state);
+#endif
+
         return OS_ERR_INTERRUPT_NOT_REGISTERED;
     }
 
     kernel_interrupt_handlers[exception_line].handler = NULL;
     kernel_interrupt_handlers[exception_line].enabled = 0;
 
-    #if EXCEPTION_KERNEL_DEBUG == 1
+#if EXCEPTION_KERNEL_DEBUG == 1
     kernel_serial_debug("Removed exception %u handle\n", exception_line);
-    #endif
+#endif
+
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
 
     return OS_NO_ERR;
 }

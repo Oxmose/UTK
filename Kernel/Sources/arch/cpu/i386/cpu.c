@@ -29,8 +29,7 @@
 #include <interrupt/exceptions.h> /* Expection management */
 #include <cpu_structs.h>          /* CPU structures */
 #include <memory/paging.h>        /* Memory management */
-
-#include <placeholder.h>
+#include <core/scheduler.h>       /* Kernel scheduler */
 
 /* UTK configuration file */
 #include <config.h>
@@ -77,7 +76,7 @@ static volatile uint32_t init_seq_end;
 extern uint8_t init_ap_code;
 
 /** @brief Booted CPU count */
-uint32_t init_cpu_count;
+volatile uint32_t init_cpu_count;
 
 /*******************************************************************************
  * FUNCTIONS
@@ -85,7 +84,6 @@ uint32_t init_cpu_count;
 
 /** @brief Extern ASM function to relocate AP boot code. */
 extern void __cpu_smp_loader_init(void);
-
 
 /**
  * @brief Handles a sse use exception (coprocessor not available)
@@ -134,14 +132,13 @@ static void sse_use_exception_handler(cpu_state_t* cpu_state,
                                 0xFFFFFFF0) +
                                 16);
         __asm__ __volatile__("fxsave %0"::"m"(*fxregs_addr));
-        #if TEST_MODE_ENABLED
+#if TEST_MODE_ENABLED
         kernel_serial_debug("[TESTMODE] SSE Context switch SAVE\n");
-        #endif
+#endif
     }
 
     if(sse_save_region[cpu_id] != current_thread->thread_storage)
     {
-
         /* Restore the current SSE context */
         fxregs_addr = (uint8_t*)((((uintptr_t)current_thread->thread_storage) & 
                                 0xFFFFFFF0) +
@@ -151,9 +148,9 @@ static void sse_use_exception_handler(cpu_state_t* cpu_state,
         /* Update the save region */
         sse_save_region[cpu_id] = current_thread->thread_storage;
 
-        #if TEST_MODE_ENABLED
+#if TEST_MODE_ENABLED
         kernel_serial_debug("[TESTMODE] SSE Context switch RESTORE\n");
-        #endif
+#endif
     }
 }
 
@@ -181,9 +178,9 @@ int32_t cpu_cpuid_capable(void)
 
 OS_RETURN_E cpu_detect(const uint32_t print)
 {
-    #if CPU_DEBUG 
+#if CPU_DEBUG 
     kernel_serial_debug("Detecting cpu\n");
-    #endif
+#endif
     if(cpu_cpuid_capable() == 1)
     {
         /* eax, ebx, ecx, edx */
@@ -455,9 +452,9 @@ OS_RETURN_E cpu_detect(const uint32_t print)
         return OS_ERR_UNAUTHORIZED_ACTION;
     }
 
-    #if CPU_DEBUG 
+#if CPU_DEBUG 
     kernel_serial_debug("Detecting cpu end\n");
-    #endif
+#endif
 
     return OS_NO_ERR;
 }
@@ -1503,11 +1500,11 @@ OS_RETURN_E cpu_smp_init(void)
     /* Make sure all the AP are initialized, we should never block here */
     while(init_cpu_count < (uint32_t)cpu_count);
 
-    #if TEST_MODE_ENABLED
+#if TEST_MODE_ENABLED
     cpu_smp_test();
-    #endif
+#endif
 
-    return OS_NO_ERR;
+    return err;
 }
 
 uint32_t cpu_get_booted_cpu_count(void)
@@ -1537,21 +1534,20 @@ void cpu_ap_core_init(void)
                      err, cpu_id);
         kernel_panic(err);
     }
+    
+    kernel_info("CPU %d booted, idling...\n", cpu_id);
 
     /* Update booted cpu count */
     ++init_cpu_count;
 
-    kernel_info("CPU %d booted, idling...\n", cpu_id);
-
-    #if TEST_MODE_ENABLED
+#if TEST_MODE_ENABLED
     cpu_smp_test();
-    #endif
+#endif
 
     while(init_seq_end == 0); 
 
     /* Init Scheduler */
     err = sched_init_ap();
-
     kernel_error("End of kernel reached by AP Core %d [%d]\n", cpu_id, err);
     kernel_panic(err);
 

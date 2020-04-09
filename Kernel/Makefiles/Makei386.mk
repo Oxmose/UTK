@@ -13,7 +13,7 @@
 ######################### Modules selection
 ARCH_DEP = x86
 CPU_DEP  = i386
-MODULES  = . io lib memory interrupt core time
+MODULES  = io lib memory interrupt core time user comm sync .
 
 TESTS_DIR  = Tests/Tests
 TEST_ARCH_DIR = Tests/Tests/i386
@@ -57,12 +57,12 @@ OBJCOPY = objcopy
 QEMU = qemu-system-i386
 
 DEBUG_FLAGS = -O0 -g
-EXTRA_FLAGS = -O2
+EXTRA_FLAGS = -O2 -g
 
 CFLAGS = -m32 -std=c11 -nostdinc -fno-builtin -nostdlib -fno-stack-protector \
          -nostartfiles -nodefaultlibs -Wall -Wextra -Werror -c -fno-pie \
-		 -no-pie -MD -ffreestanding -pedantic
-
+		 -no-pie -MD -ffreestanding
+		 
 ifeq ($(DEBUG), TRUE)
 CFLAGS += $(DEBUG_FLAGS)
 else

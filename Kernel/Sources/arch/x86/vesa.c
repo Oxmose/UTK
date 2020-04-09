@@ -32,8 +32,7 @@
 #include <memory/memalloc.h>  /* Memory allocation */
 #include <memory/kheap.h>     /* Kernel heap */
 #include <arch_paging.h>      /* Architecture specific memory settings */
-#include <placeholder.h>
-//#include <core/scheduler.h>      /* Scheduler management */
+#include <core/scheduler.h>   /* Kernel scheduler */
 
 /* UTK configuration file */
 #include <config.h>
@@ -128,7 +127,7 @@ static void fast_memset(void* dst, const uint8_t value, uint32_t size)
 {
     uint8_t *q = dst;
 
-    #if defined(__i386__)
+#if defined(__i386__)
         size_t nl = size >> 2;
         __asm__ __volatile__ ("cld ; rep ; stosl ; movl %3,%0 ; rep ; stosb"
                 : "+c" (nl), "+D" (q)
@@ -139,11 +138,11 @@ static void fast_memset(void* dst, const uint8_t value, uint32_t size)
                 :"+c" (nq), "+D" (q)
                 : "a" ((unsigned char)value * 0x0101010101010101U),
                 "r" ((unsigned int) size & 7));
-    #else
+#else
         while (n--) {
             *q++ = c;
         }
-    #endif
+#endif
 }
 
 static void fast_memcpy(void* dst, const void* src, const uint32_t size)
@@ -221,10 +220,10 @@ static void vesa_process_char(const char character)
     uint32_t i;
     uint32_t j;
 
-    #if (KERNEL_DEBUG == 1) | (TEST_MODE_ENABLED == 1)
+#if (KERNEL_DEBUG == 1) | (TEST_MODE_ENABLED == 1)
     /* Write on serial */
     serial_write(COM1, character);
-    #endif
+#endif
 
     /* If character is a normal ASCII character */
     if(character > 31 && character < 127)
@@ -430,9 +429,9 @@ OS_RETURN_E vesa_init(void)
 
     OS_RETURN_E err;
 
-    #if VESA_KERNEL_DEBUG == 1
+#if VESA_KERNEL_DEBUG == 1
     kernel_serial_debug("VESA Initialization start\n");
-    #endif
+#endif
 
     /* Init data */
     mode_count     = 0;
@@ -542,9 +541,9 @@ OS_RETURN_E vesa_init(void)
         return OS_ERR_VESA_NOT_SUPPORTED;
     }
 
-    #if VESA_KERNEL_DEBUG == 1
+#if VESA_KERNEL_DEBUG == 1
     kernel_serial_debug("VESA Initialization end\n");
-    #endif
+#endif
 
     return OS_NO_ERR;
 }
@@ -602,12 +601,12 @@ OS_RETURN_E vesa_text_vga_to_vesa(void)
         }
         cursor = cursor->next;
     }
-    #ifdef VESA_KERNEL_DEBUG
+#if VESA_KERNEL_DEBUG
     kernel_serial_debug("Selected VESA mode %dx%d %dbits\n",
                                                   selected_mode.width,
                                                   selected_mode.height,
                                                   selected_mode.bpp);
-    #endif
+#endif
 
     err = vesa_set_vesa_mode(selected_mode);
     if(err != OS_NO_ERR)
@@ -657,9 +656,9 @@ OS_RETURN_E vesa_text_vga_to_vesa(void)
     /* Restore previous screen scheme */
     screen_scheme = old_colorscheme;
 
-    #if VESA_KERNEL_DEBUG == 1
+#if VESA_KERNEL_DEBUG == 1
     kernel_serial_debug("VESA VGA Text to VESA\n");
-    #endif
+#endif
 
     return OS_NO_ERR;
 }
@@ -881,9 +880,9 @@ OS_RETURN_E vesa_set_vesa_mode(const vesa_mode_info_t mode)
 #endif
     }
 
-    #if VESA_KERNEL_DEBUG == 1
+#if VESA_KERNEL_DEBUG == 1
     kernel_serial_debug("VESA Mode set %d (%d)\n", mode.mode_id, err);
-    #endif
+#endif
 
     return err;
 }

@@ -1,0 +1,93 @@
+/*******************************************************************************
+ * @file kheap.c
+ *
+ * @see kheap.h
+ *
+ * @author Alexy Torres Aurora Dugo
+ *
+ * @date 10/01/2018
+ *
+ * @version 1.0
+ *
+ * @brief Kernel's heap allocator.
+ *
+ * @details Kernel's heap allocator. Allow to dynamically allocate and dealocate
+ * memory on the kernel's heap.
+ *
+ * @warning This allocator is not suited to allocate memory for the process, you
+ * should only use it for the kernel.
+ *
+ * @copyright Alexy Torres Aurora Dugo
+ ******************************************************************************/
+
+#include <lib/stdint.h>       /* Generic int types */
+#include <lib/stdlib.h>       /* atoi */
+#include <lib/string.h>       /* memset */
+#include <io/kernel_output.h> /* kernel_success */
+#include <sync/critical.h>    /* Critical sections */
+
+/* UTK configuration file */
+#include <config.h>
+
+/* Tests header file */
+#if TEST_MODE_ENABLED
+#include <Tests/test_bank.h>
+#endif
+
+/* Header file */
+#include <memory/kheap.h>
+
+#if MAX_CPU_COUNT > 1
+/** @brief Critical section spinlock. */
+static spinlock_t lock = SPINLOCK_INIT_VALUE;
+#endif
+
+/* Heap position in memory */
+/** @brief Start address of the kernel's heap. */
+extern uint8_t _kernel_heap_start;
+/** @brief End address of the kernel's heap. */
+extern uint8_t _kernel_heap_end;
+
+/** @brief Quantity of used memory in the kernel's heap. */
+uint32_t kheap_mem_used;
+
+int8_t* free_state;
+
+OS_RETURN_E kheap_init(void)
+{
+    void* mem = &_kernel_heap_start;
+    int8_t* mem_start = (int8_t*)(((uintptr_t)mem + ALIGN - 1) & (~(ALIGN - 1)));
+
+    free_state = mem_start;
+
+    return OS_NO_ERR;
+}
+
+void* kmalloc(uint32_t size)
+{
+    int8_t* addr;
+    uint32_t int_state;
+
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
+
+    addr = free_state;
+    free_state += size;
+
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
+
+
+    return (void*)addr;
+}
+
+void kfree(void* ptr)
+{
+    (void)ptr;
+}

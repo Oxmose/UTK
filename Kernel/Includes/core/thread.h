@@ -20,8 +20,9 @@
 #define __CORE_THREAD_H_
 
 #include <lib/stdint.h>        /* Generic int types */
-#include <core/kernel_queue.h> /* kernel_queue_node_t kernel_queue_t */
-#include <cpu_structs.h>               /* CPU structures */
+#include <core/kernel_queue.h> /* Kernel queues */
+#include <cpu_structs.h>       /* CPU structures */
+#include <sync/critical.h>     /* Critical sections */
 
 /* UTK configuration file */
 #include <config.h>
@@ -29,6 +30,8 @@
 /*******************************************************************************
  * CONSTANTS
  ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * STRUCTURES
@@ -195,6 +198,11 @@ struct kernel_thread
 
     /** @brief Thread's CPU affinity. */
     uint32_t cpu_affinity;
+
+#if MAX_CPU_COUNT > 1
+    /** @brief Thread's concurency lock. */
+    spinlock_t lock;
+#endif
 };
 
 /**
@@ -211,4 +219,6 @@ typedef kernel_thread_t* thread_t;
  * FUNCTIONS
  ******************************************************************************/
 
-#endif /* #ifndef __I386_THREAD_H_ */
+/* None */
+
+#endif /* #ifndef __CORE_THREAD_H_ */

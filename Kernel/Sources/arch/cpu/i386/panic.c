@@ -25,7 +25,7 @@
 #include <lib/stdio.h>            /* Error string */
 #include <cpu.h>                  /* CPU management */
 #include <bios_call.h>            /* BIOS call */
-//#include <scheduler.h>            /* Scheduler  */
+#include <core/scheduler.h>       /* Kernel scheduler  */
 #include <lapic.h>                /* LAPIC driver */
 #include <acpi.h>                 /* ACPI driver */
 #include <vga_text.h>             /* VGA driver */
@@ -164,7 +164,7 @@ void panic(cpu_state_t* cpu_state, uint32_t int_id, stack_state_t* stack_state)
     }
 
 
-    kernel_printf("##############################    KERNEL PANIC    ##########"
+    kernel_printf("\n##############################    KERNEL PANIC    ##########"
                     "####################\n");
     kernel_printf("  ");
     switch(int_id)
@@ -266,20 +266,20 @@ void panic(cpu_state_t* cpu_state, uint32_t int_id, stack_state_t* stack_state)
     }
 
     kernel_printf("        INT ID: 0x%02X                 \n", int_id);
-    kernel_printf("  Instruction [EIP]: 0x%08X                   Error code: "
-                    "0x%08X       \n", stack_state->eip, error_code);
+    kernel_printf("  Instruction [EIP]: 0x%p                   Error code: "
+                    "0x%p       \n", stack_state->eip, error_code);
     kernel_printf("                                                            "
                     "                   \n");
     kernel_printf("---------------------------------- CPU STATE ---------------"
                     "--------------------\n");
-    kernel_printf("  EAX: 0x%08X  |  EBX: 0x%08X  |  ECX: 0x%08X  |  EDX: "
-                    "0x%08X  \n", cpu_state->eax, cpu_state->ebx,
+    kernel_printf("  EAX: 0x%p  |  EBX: 0x%p  |  ECX: 0x%p  |  EDX: "
+                    "0x%p  \n", cpu_state->eax, cpu_state->ebx,
                     cpu_state->ecx,  cpu_state->edx);
-    kernel_printf("  ESI: 0x%08X  |  EDI: 0x%08X  |  EBP: 0x%08X  |  ESP: "
-                    "0x%08X  \n", cpu_state->esi, cpu_state->edi,
+    kernel_printf("  ESI: 0x%p  |  EDI: 0x%p  |  EBP: 0x%p  |  ESP: "
+                    "0x%p  \n", cpu_state->esi, cpu_state->edi,
                     cpu_state->ebp, cpu_state->esp);
-    kernel_printf("  CR0: 0x%08X  |  CR2: 0x%08X  |  CR3: 0x%08X  |  CR4: "
-                    "0x%08X  \n\n", CR0, CR2, CR3, CR4);
+    kernel_printf("  CR0: 0x%p  |  CR2: 0x%p  |  CR3: 0x%p  |  CR4: "
+                    "0x%p  \n\n", CR0, CR2, CR3, CR4);
     kernel_printf("  CS: 0x%04X  |  DS: 0x%04X  |  SS: 0x%04X                  "
                     "                   \n", stack_state->cs & 0xFFFF,
                     cpu_state->ds & 0xFFFF, cpu_state->ss & 0xFFFF);
@@ -295,19 +295,13 @@ void panic(cpu_state_t* cpu_state, uint32_t int_id, stack_state_t* stack_state)
                   " AC: %d  |  VF: %d  |  VP: %d  |  " 
                   "ID: %d\n", of_f, nt_f, rf_f, vm_f, 
                   ac_f, vif_f, vip_f, id_f);
-    kernel_printf("  IO: %d  |  EFLAGS: 0x%08X\n\n", (iopl0_f | iopl1_f << 1), 
+    kernel_printf("  IO: %d  |  EFLAGS: 0x%p\n\n", (iopl0_f | iopl1_f << 1), 
                    stack_state->eflags);
     kernel_printf("------------------------------- ADDITIONAL INFO ------------"
                     "--------------------\n");
-    #if 0 /* TODO */
     kernel_printf("  Core ID: %u  |  Thread:  %u  |  Time of panic: "
                   "%02u:%02u:%02u\n", current_cpu_id, sched_get_tid(), hours, 
                   minutes, seconds);
-    #else 
-    kernel_printf("  Core ID: %u  |  Thread:  %u  |  Time of panic: "
-                  "%02u:%02u:%02u\n", current_cpu_id, 0, hours, 
-                  minutes, seconds);
-    #endif
     kernel_printf("  Error: ");
     perror(error_code);
     kernel_printf("\n");

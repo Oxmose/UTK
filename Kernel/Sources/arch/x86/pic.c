@@ -21,6 +21,7 @@
 #include <lib/stdint.h>       /* Generic int types */
 #include <lib/stddef.h>       /* Standard definitions */
 #include <io/kernel_output.h> /* Kernel output methods */
+#include <sync/critical.h>    /* Critical sections */
 
 /* UTK configuration file */
 #include <config.h>
@@ -45,15 +46,20 @@ interrupt_driver_t pic_driver = {
     .driver_get_irq_int_line = pic_get_irq_int_line
 };
 
+#if MAX_CPU_COUNT > 1
+/** @brief Critical section spinlock. */
+static spinlock_t lock = SPINLOCK_INIT_VALUE;
+#endif
+
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
 
 OS_RETURN_E pic_init(void)
 {
-    #if PIC_KERNEL_DEBUG == 1
+#if PIC_KERNEL_DEBUG == 1
     kernel_serial_debug("PIC Initialization start\n");
-    #endif
+#endif
 
     /* Initialize the master, remap IRQs */
     cpu_outb(PIC_ICW1_ICW4 | PIC_ICW1_INIT, PIC_MASTER_COMM_PORT);
@@ -75,13 +81,13 @@ OS_RETURN_E pic_init(void)
     cpu_outb(0xFF, PIC_MASTER_DATA_PORT);
     cpu_outb(0xFF, PIC_SLAVE_DATA_PORT);
 
-    #if PIC_KERNEL_DEBUG == 1
+#if PIC_KERNEL_DEBUG == 1
     kernel_serial_debug("PIC Initialization end\n");
-    #endif
+#endif
 
-    #if TEST_MODE_ENABLED
+#if TEST_MODE_ENABLED
     pic_test();
-    #endif
+#endif
 
     return OS_NO_ERR;
 }
@@ -89,15 +95,23 @@ OS_RETURN_E pic_init(void)
 OS_RETURN_E pic_set_irq_mask(const uint32_t irq_number, const uint32_t enabled)
 {
     uint8_t  init_mask;
+    uint32_t int_state;
 
-    #if PIC_KERNEL_DEBUG == 1
+#if PIC_KERNEL_DEBUG == 1
     kernel_serial_debug("PIC IRQ mask setting start\n");
-    #endif
+#endif
 
     if(irq_number > PIC_MAX_IRQ_LINE)
     {
         return OS_ERR_NO_SUCH_IRQ_LINE;
     }
+
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
+
 
     /* Manage master PIC */
     if(irq_number < 8)
@@ -164,21 +178,27 @@ OS_RETURN_E pic_set_irq_mask(const uint32_t irq_number, const uint32_t enabled)
         }
     }
 
-    #if PIC_KERNEL_DEBUG == 1
+#if PIC_KERNEL_DEBUG == 1
     kernel_serial_debug("PIC Mask M: 0x%02x S: 0x%02x\n",
                         cpu_inb(PIC_MASTER_DATA_PORT),
                          cpu_inb(PIC_SLAVE_DATA_PORT));
     kernel_serial_debug("PIC IRQ mask setting end\n");
-    #endif
+#endif
+
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
 
     return OS_NO_ERR;
 }
 
 OS_RETURN_E pic_set_irq_eoi(const uint32_t irq_number)
 {
-    #if PIC_KERNEL_DEBUG == 1
+#if PIC_KERNEL_DEBUG == 1
     kernel_serial_debug("PIC IRQ EOI start\n");
-    #endif
+#endif
 
     if(irq_number > PIC_MAX_IRQ_LINE)
     {
@@ -192,9 +212,9 @@ OS_RETURN_E pic_set_irq_eoi(const uint32_t irq_number)
     }
     cpu_outb(PIC_EOI, PIC_MASTER_COMM_PORT);
 
-    #if PIC_KERNEL_DEBUG == 1
+#if PIC_KERNEL_DEBUG == 1
     kernel_serial_debug("PIC IRQ EOI end\n");
-    #endif
+#endif
 
     return OS_NO_ERR;
 }
@@ -204,9 +224,9 @@ INTERRUPT_TYPE_E pic_handle_spurious_irq(const uint32_t int_number)
     uint8_t  isr_val;
     uint32_t irq_number = int_number - INT_PIC_IRQ_OFFSET;
 
-    #if PIC_KERNEL_DEBUG == 1
+#if PIC_KERNEL_DEBUG == 1
     kernel_serial_debug("PIC Psurious handling %d\n", irq_number);
-    #endif
+#endif
 
     /* Check if regular soft interrupt */
     if(irq_number > PIC_MAX_IRQ_LINE)
@@ -261,13 +281,27 @@ INTERRUPT_TYPE_E pic_handle_spurious_irq(const uint32_t int_number)
 
 OS_RETURN_E pic_disable(void)
 {
+    uint32_t int_state;
+
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
+
     /* Disable all IRQs */
     cpu_outb(0xFF, PIC_MASTER_DATA_PORT);
     cpu_outb(0xFF, PIC_SLAVE_DATA_PORT);
 
-    #if PIC_KERNEL_DEBUG == 1
+#if PIC_KERNEL_DEBUG == 1
     kernel_serial_debug("PIC disabled\n");
-    #endif
+#endif
+
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
 
     return OS_NO_ERR;
 }

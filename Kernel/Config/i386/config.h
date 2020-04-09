@@ -30,7 +30,7 @@
  * @warning When modifying this value, do not forget to modify it in the
  * loader.S file.
  */
-#define KERNEL_STACK_SIZE 0x2000
+#define KERNEL_STACK_SIZE 0x4000
 
 /**
  * @brief Kernel's high memory offset.
@@ -81,7 +81,7 @@
  ******************************************************************************/
 
 /** @brief Enables support for graphic drivers. */
-#define DISPLAY_TYPE       DISPLAY_VESA
+#define DISPLAY_TYPE       DISPLAY_VGA
 
 /** @brief Enables ATA drivers support. */
 #define ENABLE_ATA         1
@@ -120,7 +120,7 @@
 
 /** @brief Defines the kernel's main timer frequency. This will set the maximal
  * scheduling frequency. */
-#define KERNEL_MAIN_TIMER_FREQ 100
+#define KERNEL_MAIN_TIMER_FREQ 200
 /** @brief Defines the kernel's auxiliary timer frequency. */
 #define KERNEL_AUX_TIMER_FREQ  20
 /** @brief Defines the kernel's rtc timer frequency. */
@@ -133,9 +133,9 @@
 /** @brief Defines the maximal length of a thread's name. */
 #define THREAD_MAX_NAME_LENGTH   32
 /** @brief Defines the thread's maximal stack size in bytes. */
-#define THREAD_MAX_STACK_SIZE    0x00400000  /* 4 MB */
+#define THREAD_MAX_STACK_SIZE    0x400000  /* 4 MB */
 /** @brief Defines the thread's kernel stack size in bytes. */
-#define THREAD_KERNEL_STACK_SIZE 0x400 /* 1KB */
+#define THREAD_KERNEL_STACK_SIZE 0x4000 /* 16KB */
 
 /*******************************************************************************
  * Peripherals settings
@@ -163,16 +163,16 @@
 #define SERIAL_KERNEL_DEBUG 1
 
 /** @brief Enables CPU feature. */
-#define CPU_KERNEL_DEBUG 1
+#define CPU_KERNEL_DEBUG 0
 
 /** @brief Enables Interrupt debuging feature. */
-#define INTERRUPT_KERNEL_DEBUG 1
+#define INTERRUPT_KERNEL_DEBUG 0
 
 /** @brief Enables Exception debugging feature. */
-#define EXCEPTION_KERNEL_DEBUG 1
+#define EXCEPTION_KERNEL_DEBUG 0
 
 /** @brief Enables memory debuging feature. */
-#define MEMORY_KERNEL_DEBUG 1
+#define MEMORY_KERNEL_DEBUG 0
 
 /** @brief Enables PIT driver debuging feature. */
 #define PIT_KERNEL_DEBUG 0
@@ -190,7 +190,7 @@
 #define KHEAP_KERNEL_DEBUG 0
 
 /** @brief Enables kernel acpi debuging feature. */
-#define ACPI_KERNEL_DEBUG 1
+#define ACPI_KERNEL_DEBUG 0
 
 /** @brief Enables kernel io apic debuging feature. */
 #define IOAPIC_KERNEL_DEBUG 0
@@ -220,7 +220,7 @@
 #define USERQUEUE_KERNEL_DEBUG 0
 
 /** @brief Enables kernel paging debuging feature. */
-#define PAGING_KERNEL_DEBUG 1
+#define PAGING_KERNEL_DEBUG 0
 
 /** @brief Enables test mode features. */
 #define TEST_MODE_ENABLED 0

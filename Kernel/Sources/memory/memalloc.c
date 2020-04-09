@@ -23,6 +23,7 @@
 #include <memory/kheap.h>       /* Kernel heap */
 #include <arch_paging.h>        /* Paging information */
 #include <io/kernel_output.h>   /* Kernel output methods */
+#include <sync/critical.h>      /* Critical sections */
 
 /* UTK configuration file */
 #include <config.h>
@@ -40,10 +41,10 @@
  ******************************************************************************/
 
 /** @brief Kernel free frame pool. */
-static mem_area_t* kernel_free_frames;
+mem_area_t* kernel_free_frames;
 
 /** @brief Kernel free page pool. */
-static mem_area_t* kernel_free_pages;
+mem_area_t* kernel_free_pages;
 
 /** @brief Memory map structure's size. */
 extern uint32_t    memory_map_size;
@@ -56,6 +57,11 @@ extern uint8_t     _kernel_start_phys;
 
 /** @brief Kernel end address. */
 extern uint8_t     _kernel_end;
+
+#if MAX_CPU_COUNT > 1
+/** @brief Critical section spinlock. */
+static spinlock_t lock = SPINLOCK_INIT_VALUE;
+#endif
 
 /*******************************************************************************
  * FUNCTIONS
@@ -310,10 +316,10 @@ OS_RETURN_E memalloc_init(void)
                 return err;
             }
 
-            #if MEMORY_KERNEL_DEBUG == 1
+#if MEMORY_KERNEL_DEBUG == 1
             kernel_serial_debug("Added free frame area 0x%p -> 0x%p (%uMB)\n",
                                 start, memory_map_data[i].limit, (memory_map_data[i].limit - start) >> 20);
-            #endif
+#endif
         }
     }
 
@@ -355,15 +361,15 @@ OS_RETURN_E memalloc_init(void)
         {
             return err;
         }
-        #if MEMORY_KERNEL_DEBUG == 1
+#if MEMORY_KERNEL_DEBUG == 1
         kernel_serial_debug("Added free page area 0x%p -> 0x%p (%uMB)\n",
                             start, next_limit, (next_limit - start) >> 20);
-        #endif
+#endif
 
-        #if MEMORY_KERNEL_DEBUG == 1
+#if MEMORY_KERNEL_DEBUG == 1
         kernel_serial_debug("Next free page range: 0x%p\n",
                             start);
-        #endif
+#endif
 
         if(next_limit == ARCH_MAX_ADDRESS)
         {
@@ -375,23 +381,35 @@ OS_RETURN_E memalloc_init(void)
         }
     }
 
-    #if TEST_MODE_ENABLED
+#if TEST_MODE_ENABLED
     memalloc_test();
-    #endif
+#endif
 
     return OS_NO_ERR;
 }
 
 void* memalloc_alloc_kframes(const size_t frame_count, OS_RETURN_E* err)
 {
-    
-    void* address;
+    uint32_t int_state;
+    void*    address;
+
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
 
     address = get_block(&kernel_free_frames, frame_count, err);
 
-    #if MEMORY_KERNEL_DEBUG == 1
+#if MEMORY_KERNEL_DEBUG == 1
     kernel_serial_debug("Allocated %u frames, at 0x%p \n", frame_count, address);
-    #endif
+#endif
+
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
 
     return (void*)address;
 }
@@ -399,26 +417,52 @@ void* memalloc_alloc_kframes(const size_t frame_count, OS_RETURN_E* err)
 OS_RETURN_E memalloc_free_kframes(void* frame_addr, const size_t frame_count)
 {
     OS_RETURN_E err;
+    uint32_t    int_state;
+
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
 
     err = add_free((uintptr_t)frame_addr, frame_count * KERNEL_PAGE_SIZE,
                     &kernel_free_frames);
 
-    #if MEMORY_KERNEL_DEBUG == 1
+#if MEMORY_KERNEL_DEBUG == 1
     kernel_serial_debug("Deallocated %u frames, at 0x%p \n", frame_count, frame_addr);
-    #endif
+#endif
+
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
 
     return err;
 }
 
 void* memalloc_alloc_kpages(const size_t page_count, OS_RETURN_E* err)
 {
-    void* address;
+    void*    address;
+    uint32_t int_state;
+
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
 
     address = get_block(&kernel_free_pages, page_count, err);
 
-    #if MEMORY_KERNEL_DEBUG == 1
+#if MEMORY_KERNEL_DEBUG == 1
     kernel_serial_debug("Allocated %u pages, at 0x%p \n", page_count, address);
-    #endif
+#endif
+
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
 
     return (void*)address;
 }
@@ -426,18 +470,31 @@ void* memalloc_alloc_kpages(const size_t page_count, OS_RETURN_E* err)
 OS_RETURN_E memalloc_free_kpages(void* page_addr, const size_t page_count)
 {
     OS_RETURN_E err;
+    uint32_t    int_state;
 
     if((uintptr_t)page_addr < KERNEL_MEM_OFFSET + (uintptr_t)&_kernel_end)
     {
         return OS_ERR_UNAUTHORIZED_ACTION;
     }
 
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
+
     err = add_free((uintptr_t)page_addr, page_count * KERNEL_PAGE_SIZE,
                    &kernel_free_pages);
 
-    #if MEMORY_KERNEL_DEBUG == 1
+#if MEMORY_KERNEL_DEBUG == 1
     kernel_serial_debug("Deallocated %u pages, at 0x%p \n", page_count, page_addr);
-    #endif
+#endif
+
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
 
     return err;
 }

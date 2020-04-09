@@ -663,9 +663,9 @@ void cpu_setup_gdt(void)
 {
     uint32_t i;
 
-    #if CPU_KERNEL_DEBUG == 1
+#if CPU_KERNEL_DEBUG == 1
     kernel_serial_debug("[CPU] Setting CPU GDT\n");
-    #endif
+#endif
     /************************************
      * KERNEL GDT ENTRIES
      ***********************************/
@@ -774,18 +774,18 @@ void cpu_setup_gdt(void)
 
     kernel_success("GDT Initialized at 0x%p\n", cpu_gdt_ptr.base);
 
-    #if TEST_MODE_ENABLED
+#if TEST_MODE_ENABLED
     gdt_test();
-    #endif
+#endif
 }
 
 void cpu_setup_idt(void)
 {
     uint32_t i;
 
-    #if CPU_KERNEL_DEBUG == 1
+#if CPU_KERNEL_DEBUG == 1
     kernel_serial_debug("[CPU] Setting CPU IDT\n");
-    #endif
+#endif
 
     /* Blank the IDT */
     memset(cpu_idt, 0, sizeof(uint64_t) * IDT_ENTRY_COUNT);
@@ -809,17 +809,17 @@ void cpu_setup_idt(void)
 
     kernel_success("IDT Initialized at 0x%p\n", cpu_idt_ptr.base);
 
-    #if TEST_MODE_ENABLED
+#if TEST_MODE_ENABLED
     idt_test();
-    #endif
+#endif
 }
 
 void cpu_setup_tss(void)
 {
     int32_t i;
-    #if CPU_KERNEL_DEBUG == 1
+#if CPU_KERNEL_DEBUG == 1
     kernel_serial_debug("[CPU] Setting CPU TSS\n");
-    #endif
+#endif
 
     /* Blank the TSS */
     memset(cpu_tss, 0, sizeof(cpu_tss_entry_t) * MAX_CPU_COUNT);
@@ -845,7 +845,7 @@ void cpu_setup_tss(void)
 
     kernel_success("TSS Initialized at 0x%p\n", cpu_tss);
 
-    #if TEST_MODE_ENABLED
+#if TEST_MODE_ENABLED
     tss_test();
-    #endif
+#endif
 }

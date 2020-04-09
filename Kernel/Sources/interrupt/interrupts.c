@@ -25,8 +25,9 @@
 #include <cpu_structs.h>        /* CPU structures */
 #include <cpu.h>                /* CPU management */
 #include <interrupt_settings.h> /* CPU interrupts settings */
-#include <core/panic.h>              /* Kernel panic */
+#include <core/panic.h>         /* Kernel panic */
 #include <io/kernel_output.h>   /* Kernel output methods */
+#include <sync/critical.h>      /* Critical sections */
 
 /* UTK configuration file */
 #include <config.h>
@@ -53,6 +54,11 @@ static interrupt_driver_t interrupt_driver;
  * the kernel.
  */
 static uint32_t spurious_interrupt;
+
+#if MAX_CPU_COUNT > 1
+/** @brief Critical section spinlock. */
+static spinlock_t lock  = SPINLOCK_INIT_VALUE;
+#endif
 
 
 /*******************************************************************************
@@ -93,9 +99,9 @@ static int32_t init_driver_get_irq_int_line(const uint32_t irq_number)
  */
 static void spurious_handler(void)
 {
-     #if INTERRUPT_KERNEL_DEBUG == 1
+#if INTERRUPT_KERNEL_DEBUG == 1
     kernel_serial_debug("Spurious interrupt\n");
-    #endif
+#endif
 
     ++spurious_interrupt;
 
@@ -127,10 +133,10 @@ void kernel_interrupt_handler(cpu_state_t cpu_state,
        int_id >= MIN_INTERRUPT_LINE)
     {
 
-        #if INTERRUPT_KERNEL_DEBUG == 1
+#if INTERRUPT_KERNEL_DEBUG == 1
         kernel_serial_debug("Blocked interrupt %u\n",
                             int_id);
-        #endif
+#endif
 
         return;
     }
@@ -140,10 +146,10 @@ void kernel_interrupt_handler(cpu_state_t cpu_state,
         panic(&cpu_state, int_id, &stack_state);
     }
 
-    #if INTERRUPT_KERNEL_DEBUG == 1
+#if INTERRUPT_KERNEL_DEBUG == 1
         kernel_serial_debug("Interrupt %d\n",
                             int_id);
-        #endif
+#endif
 
     /* Check for spurious interrupt */
     if(interrupt_driver.driver_handle_spurious(int_id) ==
@@ -153,10 +159,10 @@ void kernel_interrupt_handler(cpu_state_t cpu_state,
         return;
     }
 
-    #if INTERRUPT_KERNEL_DEBUG == 1
+#if INTERRUPT_KERNEL_DEBUG == 1
     kernel_serial_debug("Non spurious %d\n",
                         int_id);
-    #endif
+#endif
 
     /* Select custom handlers */
     if(int_id < INT_ENTRY_COUNT &&
@@ -176,9 +182,9 @@ void kernel_interrupt_handler(cpu_state_t cpu_state,
 
 OS_RETURN_E kernel_interrupt_init(void)
 {
-    #if INTERRUPT_KERNEL_DEBUG == 1
+#if INTERRUPT_KERNEL_DEBUG == 1
     kernel_serial_debug("Initializing interrupt manager.\n");
-    #endif
+#endif
 
     /* Blank custom interrupt handlers */
     memset(kernel_interrupt_handlers, 0,
@@ -198,15 +204,17 @@ OS_RETURN_E kernel_interrupt_init(void)
     interrupt_driver.driver_set_irq_eoi      = init_driver_set_irq_eoi;
     interrupt_driver.driver_set_irq_mask     = init_driver_set_irq_mask;
 
-    #if TEST_MODE_ENABLED 
+#if TEST_MODE_ENABLED 
     interrupt_test();
-    #endif
+#endif
 
     return OS_NO_ERR;
 }
 
 OS_RETURN_E kernel_interrupt_set_driver(const interrupt_driver_t* driver)
 {
+    uint32_t int_state;
+
     if(driver == NULL ||
        driver->driver_set_irq_eoi == NULL ||
        driver->driver_set_irq_mask == NULL ||
@@ -216,11 +224,23 @@ OS_RETURN_E kernel_interrupt_set_driver(const interrupt_driver_t* driver)
         return OS_ERR_NULL_POINTER;
     }
 
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
+
     interrupt_driver = *driver;
 
-    #if INTERRUPT_KERNEL_DEBUG == 1
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
+
+#if INTERRUPT_KERNEL_DEBUG == 1
     kernel_serial_debug("Set new interrupt driver.\n");
-    #endif
+#endif
 
     return OS_NO_ERR;
 }
@@ -233,6 +253,7 @@ OS_RETURN_E kernel_interrupt_register_int_handler(const uint32_t interrupt_line,
                                              )
                                        )
 {
+    uint32_t int_state;
 
     if(interrupt_line < MIN_INTERRUPT_LINE ||
        interrupt_line > MAX_INTERRUPT_LINE)
@@ -245,41 +266,81 @@ OS_RETURN_E kernel_interrupt_register_int_handler(const uint32_t interrupt_line,
         return OS_ERR_NULL_POINTER;
     }
 
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
+
     if(kernel_interrupt_handlers[interrupt_line].handler != NULL)
     {
+
+#if MAX_CPU_COUNT > 1
+        EXIT_CRITICAL(int_state, &lock);
+#else
+        EXIT_CRITICAL(int_state);
+#endif
+
         return OS_ERR_INTERRUPT_ALREADY_REGISTERED;
     }
 
     kernel_interrupt_handlers[interrupt_line].handler = handler;
     kernel_interrupt_handlers[interrupt_line].enabled = 1;
 
-    #if INTERRUPT_KERNEL_DEBUG == 1
+#if INTERRUPT_KERNEL_DEBUG == 1
     kernel_serial_debug("Added INT %u handler at 0x%p\n",
                         interrupt_line, handler);
-    #endif
+#endif
+
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
 
     return OS_NO_ERR;
 }
 
 OS_RETURN_E kernel_interrupt_remove_int_handler(const uint32_t interrupt_line)
 {
+    uint32_t int_state;
+
     if(interrupt_line < MIN_INTERRUPT_LINE ||
        interrupt_line > MAX_INTERRUPT_LINE)
     {
         return OR_ERR_UNAUTHORIZED_INTERRUPT_LINE;
     }
 
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
+
     if(kernel_interrupt_handlers[interrupt_line].handler == NULL)
     {
+
+#if MAX_CPU_COUNT > 1
+        EXIT_CRITICAL(int_state, &lock);
+#else
+        EXIT_CRITICAL(int_state);
+#endif
+
         return OS_ERR_INTERRUPT_NOT_REGISTERED;
     }
 
     kernel_interrupt_handlers[interrupt_line].handler = NULL;
     kernel_interrupt_handlers[interrupt_line].enabled = 0;
 
-    #if INTERRUPT_KERNEL_DEBUG == 1
+#if INTERRUPT_KERNEL_DEBUG == 1
     kernel_serial_debug("Removed INT %u handle\n", interrupt_line);
-    #endif
+#endif
+
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
 
     return OS_NO_ERR;
 }
@@ -324,9 +385,9 @@ void kernel_interrupt_restore(const uint32_t prev_state)
 {
     if(prev_state != 0)
     {
-        #if INTERRUPT_KERNEL_DEBUG == 1
+#if INTERRUPT_KERNEL_DEBUG == 1
         kernel_serial_debug("--- Enabled HW INT ---\n");
-        #endif
+#endif
 
         cpu_set_interrupt();
     }
@@ -343,9 +404,9 @@ uint32_t kernel_interrupt_disable(void)
 
     cpu_clear_interrupt();
 
-    #if INTERRUPT_KERNEL_DEBUG == 1
+#if INTERRUPT_KERNEL_DEBUG == 1
     kernel_serial_debug("--- Disabled HW INT ---\n");
-    #endif
+#endif
 
     return old_state;
 }
@@ -359,17 +420,17 @@ uint32_t kernel_interrupt_get_state(void)
 OS_RETURN_E kernel_interrupt_set_irq_mask(const uint32_t irq_number,
                                           const uint32_t enabled)
 {
-    #if INTERRUPT_KERNEL_DEBUG == 1
+#if INTERRUPT_KERNEL_DEBUG == 1
     kernel_serial_debug("IRQ Mask change: %u %u\n", irq_number, enabled);
-    #endif
+#endif
     return interrupt_driver.driver_set_irq_mask(irq_number, enabled);
 }
 
 OS_RETURN_E kernel_interrupt_set_irq_eoi(const uint32_t irq_number)
 {
-    #if INTERRUPT_KERNEL_DEBUG == 1
+#if INTERRUPT_KERNEL_DEBUG == 1
     kernel_serial_debug("IRQ EOI: %u\n", irq_number);
-    #endif
+#endif
     return interrupt_driver.driver_set_irq_eoi(irq_number);
 }
 

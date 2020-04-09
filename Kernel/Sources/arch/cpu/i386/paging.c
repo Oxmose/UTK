@@ -29,6 +29,7 @@
 #include <interrupt_settings.h>   /* Interrupt settings */
 #include <core/panic.h>           /* Kernel panic */
 #include <io/kernel_output.h>     /* Kernel output methods */
+#include <sync/critical.h>        /* Critical sections */
 
 /* UTK configuration file */
 #include <config.h>
@@ -95,6 +96,12 @@ extern uint8_t _kernel_heap_start;
 
 /** @brief Kernel heap end (virtual). */
 extern uint8_t _kernel_heap_end;
+
+#if MAX_CPU_COUNT > 1
+/** @brief Critical section spinlock. */
+static spinlock_t lock = SPINLOCK_INIT_VALUE;
+#endif
+
 
 /*******************************************************************************
  * FUNCTIONS
@@ -167,12 +174,12 @@ static void map_kernel_section(const void* start_addr, size_t size,
         start_addr_align += KERNEL_PAGE_SIZE;
     }
 
-    #if PAGING_KERNEL_DEBUG == 1
+#if PAGING_KERNEL_DEBUG == 1
     start_addr_align = (uintptr_t)start_addr & PAGE_ALIGN_MASK;
     to_map = (uintptr_t)start_addr - start_addr_align + size;
     kernel_serial_debug("Mapped kernel section at 0x%p -> 0x%p\n", start_addr_align, 
                         start_addr_align + to_map);
-    #endif
+#endif
 }
 
  /**
@@ -246,6 +253,13 @@ uint32_t is_mapped(const uintptr_t start_addr, const size_t size)
     size_t    pgtable_entry;
     uint32_t* pgdir_rec_addr; 
     uint32_t* pgtable;
+    uint32_t  int_state;
+
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
 
      /* Align addresses */
     start_align = start_addr & PAGE_ALIGN_MASK;
@@ -287,6 +301,12 @@ uint32_t is_mapped(const uintptr_t start_addr, const size_t size)
         }
     }
 
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
+
     return found;
 }
 
@@ -327,6 +347,13 @@ static OS_RETURN_E kernel_mmap_internal(const void* virt_addr,
     uint32_t*   pgtable;
     OS_RETURN_E err;
     uint32_t    i;
+    uint32_t    int_state;
+
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
 
     /* Align addresses */
     virt_align = (uintptr_t)virt_addr & PAGE_ALIGN_MASK;
@@ -397,10 +424,10 @@ static OS_RETURN_E kernel_mmap_internal(const void* virt_addr,
             (hardware ? PAGE_FLAG_HARDWARE : 0) |
             PAGE_FLAG_PRESENT;
 
-        #if PAGING_KERNEL_DEBUG == 1
+#if PAGING_KERNEL_DEBUG == 1
         kernel_serial_debug("Mapped page at 0x%p -> 0x%p\n", virt_align, 
                             phys_align);
-        #endif
+#endif
 
         /* Update addresses and size */
         virt_align += KERNEL_PAGE_SIZE;
@@ -415,6 +442,12 @@ static OS_RETURN_E kernel_mmap_internal(const void* virt_addr,
         }
     }
 
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
+
     return err;
 }
 
@@ -424,9 +457,9 @@ OS_RETURN_E paging_init(void)
     uint32_t    i;
     OS_RETURN_E err;
 
-    #if PAGING_KERNEL_DEBUG == 1
+#if PAGING_KERNEL_DEBUG == 1
     kernel_serial_debug("Initializing paging\n");
-    #endif
+#endif
 
     /* Initialize kernel page directory */
     for(i = 0; i < KERNEL_PGDIR_SIZE; ++i)
@@ -509,9 +542,9 @@ OS_RETURN_E paging_enable(void)
                          "or $0x80010000, %%eax\n\t"
                          "mov %%eax, %%cr0" : : : "eax");
 
-    #if PAGING_KERNEL_DEBUG == 1
+#if PAGING_KERNEL_DEBUG == 1
     kernel_serial_debug("Paging enabled\n");
-    #endif
+#endif
 
     enabled = 1;
 
@@ -534,9 +567,9 @@ OS_RETURN_E paging_disable(void)
     __asm__ __volatile__("mov %%cr0, %%eax\n\t"
                          "and $0x7FF7FFFF, %%eax\n\t"
                          "mov %%eax, %%cr0" : : : "eax");
-    #if PAGING_KERNEL_DEBUG == 1
+#if PAGING_KERNEL_DEBUG == 1
     kernel_serial_debug("Paging disabled\n");
-    #endif
+#endif
 
     enabled = 0;
 
@@ -549,12 +582,12 @@ OS_RETURN_E kernel_mmap_hw(const void* virt_addr,
                            const uint8_t read_only,
                            const uint8_t exec)
 {
-    #if PAGING_KERNEL_DEBUG == 1
+#if PAGING_KERNEL_DEBUG == 1
     kernel_serial_debug("Request HW mappping at 0x%p -> 0x%p (%uB)\n", 
                         virt_addr, 
                         phys_addr,
                         mapping_size);
-    #endif
+#endif
     return kernel_mmap_internal(virt_addr, phys_addr, 
                                 mapping_size, read_only, exec, 0, 1);
 }
@@ -588,12 +621,12 @@ OS_RETURN_E kernel_mmap(const void* virt_addr,
         return err;
     }
 
-    #if PAGING_KERNEL_DEBUG == 1
+#if PAGING_KERNEL_DEBUG == 1
     kernel_serial_debug("Request regular mappping at 0x%p -> 0x%p (%uB)\n",
                         virt_addr, 
                         frames,
                         mapping_size);
-    #endif
+#endif
 
     err = kernel_mmap_internal(virt_addr, frames, 
                                mapping_size, read_only, exec, 1, 0);
@@ -617,12 +650,18 @@ OS_RETURN_E kernel_munmap(const void* virt_addr, const size_t mapping_size)
     size_t      to_unmap;
     uint32_t    i;
     uint32_t    acc;
-
-    #if PAGING_KERNEL_DEBUG == 1
+    uint32_t    int_state;
+#if PAGING_KERNEL_DEBUG == 1
     kernel_serial_debug("Request unmappping at 0x%p (%uB)\n",
                         virt_addr, 
                         mapping_size);
-    #endif
+#endif
+
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
 
     /* Compute physical memory size */
     end_map   = (uintptr_t)virt_addr + mapping_size;
@@ -693,6 +732,12 @@ OS_RETURN_E kernel_munmap(const void* virt_addr, const size_t mapping_size)
             to_unmap = 0;
         }
     }
+
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
 
     return OS_NO_ERR;
 }

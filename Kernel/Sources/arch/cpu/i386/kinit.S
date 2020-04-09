@@ -27,7 +27,7 @@ CHECKSUM    equ -(MAGIC + FLAGS)
 ; Kernel memory layout 
 KERNEL_MEM_OFFSET    equ 0xE0000000 ; WARNING This value should be updated to 
                                     ; fit other configuration files
-KERNEL_STACK_SIZE    equ 0x2000 ; WARNING This value should be updated to fit 
+KERNEL_STACK_SIZE    equ 0x4000 ; WARNING This value should be updated to fit 
                                 ; other configuration files
 KERNEL_START_PAGE_ID equ (KERNEL_MEM_OFFSET >> 22)
 __kinit_low          equ (__kinit - KERNEL_MEM_OFFSET)
@@ -47,6 +47,8 @@ CODE_LOCATION equ 0x4000
 ; EXTERN DATA
 ;-------------------------------------------------------------------------------
 extern cpu_stacks
+extern cpu_stack_size
+
 extern cpu_info
 extern init_cpu_count
 
@@ -57,9 +59,6 @@ extern _kernel_bss_end
 
 extern cpu_gdt_ptr
 extern cpu_idt_ptr
-
-extern cpu_stacks
-extern cpu_stack_size
 
 extern init_cpu_count
 

@@ -20,6 +20,7 @@
 #include <lib/stdint.h>    /* Generic int types */
 #include <memory/paging.h> /* Memory management */
 #include <core/panic.h>    /* Kernel panic */
+#include <sync/critical.h> /* Critical sections */
 
 /* UTK configuration file */
 #include <config.h>
@@ -34,6 +35,11 @@
 /** @brief BIOS call memory region */
 extern uint8_t bios_call_memory;
 
+#if MAX_CPU_COUNT > 1
+/** @brief Critical section spinlock. */
+static spinlock_t lock = SPINLOCK_INIT_VALUE;
+#endif
+
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
@@ -45,6 +51,7 @@ extern void __bios_call(uint8_t intnum, bios_int_regs_t* regs);
 OS_RETURN_E bios_call(uint32_t intnum, bios_int_regs_t* regs)
 {
 	OS_RETURN_E err;
+	uint32_t    int_state;
 
 	/* Map the RM core */
 	err = kernel_mmap_hw((void*)&bios_call_memory, (void*)&bios_call_memory, 
@@ -54,7 +61,19 @@ OS_RETURN_E bios_call(uint32_t intnum, bios_int_regs_t* regs)
 		return err;
 	}
 
+#if MAX_CPU_COUNT > 1
+    ENTER_CRITICAL(int_state, &lock);
+#else
+    ENTER_CRITICAL(int_state);
+#endif
+
 	__bios_call(intnum, regs);
+
+#if MAX_CPU_COUNT > 1
+    EXIT_CRITICAL(int_state, &lock);
+#else
+    EXIT_CRITICAL(int_state);
+#endif
 
 	/* Unmap RM core */
 	err = kernel_munmap((void*)&bios_call_memory, 0x1000);

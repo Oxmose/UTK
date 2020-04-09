@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file keyboard.c
  * 
  * @see keyboard.h
@@ -428,64 +428,25 @@ OS_RETURN_E keyboard_init(void)
 
 uint32_t keyboard_read(char* buffer, const uint32_t size)
 {
-    //OS_RETURN_E err;
     uint32_t    read = 0;
 
     if(buffer == NULL || size == 0)
     {
         return 0;
     }
-#if 0
-    err = mutex_pend(&kbd_mutex);
-    if(err != OS_NO_ERR)
-    {
-        kernel_error("Keyboard cannot release its mutex[%d]\n", err);
-        kernel_panic(err);
-    }
 
-    /* Set current buffer */
-    err = sem_init(&kbd_buf.sem, 0);
-    if(err != OS_NO_ERR)
-    {
-        kernel_error("Keyboard cannot create buffer semaphore[%d]\n", err);
-        kernel_panic(err);
-    }
-#endif
     kbd_buf.char_buf  = buffer;
     kbd_buf.read_size = size;
     kbd_buf.read      = 0;
     kbd_buf.type      = 1;
-#if 0
-    /* Wait for completion */
-    err = sem_pend(&kbd_buf.sem);
-    if(err != OS_NO_ERR)
-    {
-        kernel_error("Keyboard cannot pend buffer semaphore[%d]\n", err);
-        kernel_panic(err);
-    }
-#endif
+
     read = kbd_buf.read;
-#if 0
-    /* Release resources */
-    err = sem_destroy(&kbd_buf.sem);
-    if(err != OS_NO_ERR)
-    {
-        kernel_error("Keyboard cannot delete buffer semaphore[%d]\n", err);
-        kernel_panic(err);
-    }
-#endif
+
     kbd_buf.char_buf  = NULL;
     kbd_buf.read_size = 0;
     kbd_buf.read      = 0;
     kbd_buf.type      = 0;
-#if 0
-    err = mutex_post(&kbd_mutex);
-    if(err != OS_NO_ERR)
-    {
-        kernel_error("Keyboard cannot release its mutex[%d]\n", err);
-        kernel_panic(err);
-    }
-#endif
+
     return read;
 }
 
