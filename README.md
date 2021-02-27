@@ -1,6 +1,6 @@
 # UTK - Utility Kernel
 
-* UTK is a kernel created for training and educational purposes. It is designed to execute in kernel mode only. The higher-half kernel is located at 0xE0000000. 
+* UTK is a kernel created for training and educational purposes. It is designed to execute in kernel mode only. 
 
 * UTK has a configuration file allowing the kernel to be customized depending on the system it will run on.
 

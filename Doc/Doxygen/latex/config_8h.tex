@@ -1,0 +1,105 @@
+\hypertarget{config_8h}{}\section{Kernel/\+Config/arch/stm32\+\_\+f401re/config.h File Reference}
+\label{config_8h}\index{Kernel/\+Config/arch/stm32\+\_\+f401re/config.\+h@{Kernel/\+Config/arch/stm32\+\_\+f401re/config.\+h}}
+{\ttfamily \#include \char`\"{}serial.\+h\char`\"{}}\newline
+Include dependency graph for config.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=272pt]{config_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{config_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{config_8h_aadd28d9914163468773660f1142ca822}{C\+O\+N\+F\+I\+G\+\_\+\+U\+A\+R\+T\+\_\+\+S\+E\+T\+T\+I\+N\+GS}
+\item 
+\#define \hyperlink{config_8h_a023f94f341f2300adee0891b15b364b2}{E\+R\+R\+O\+R\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}~3
+\item 
+\#define \hyperlink{config_8h_ae4ead2e291cd4f0949966eff6513bd20}{W\+A\+R\+N\+I\+N\+G\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}~2
+\item 
+\#define \hyperlink{config_8h_a8fa6c5ec8254575a940cf0a632310a95}{I\+N\+F\+O\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}~1
+\item 
+\#define \hyperlink{config_8h_a76e4c926f6662c7217b7e28510d2fc99}{N\+O\+N\+E\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}~0
+\item 
+\#define \hyperlink{config_8h_a6c272d2b12ffba9bdd5a4d5dd608a0f8}{K\+E\+R\+N\+E\+L\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}~\hyperlink{config_8h_a76e4c926f6662c7217b7e28510d2fc99}{N\+O\+N\+E\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\mbox{\Hypertarget{config_8h_aadd28d9914163468773660f1142ca822}\label{config_8h_aadd28d9914163468773660f1142ca822}} 
+\index{config.\+h@{config.\+h}!C\+O\+N\+F\+I\+G\+\_\+\+U\+A\+R\+T\+\_\+\+S\+E\+T\+T\+I\+N\+GS@{C\+O\+N\+F\+I\+G\+\_\+\+U\+A\+R\+T\+\_\+\+S\+E\+T\+T\+I\+N\+GS}}
+\index{C\+O\+N\+F\+I\+G\+\_\+\+U\+A\+R\+T\+\_\+\+S\+E\+T\+T\+I\+N\+GS@{C\+O\+N\+F\+I\+G\+\_\+\+U\+A\+R\+T\+\_\+\+S\+E\+T\+T\+I\+N\+GS}!config.\+h@{config.\+h}}
+\subsubsection{\texorpdfstring{C\+O\+N\+F\+I\+G\+\_\+\+U\+A\+R\+T\+\_\+\+S\+E\+T\+T\+I\+N\+GS}{CONFIG\_UART\_SETTINGS}}
+{\footnotesize\ttfamily \#define C\+O\+N\+F\+I\+G\+\_\+\+U\+A\+R\+T\+\_\+\+S\+E\+T\+T\+I\+N\+GS}
+
+{\bfseries Value\+:}
+\begin{DoxyCode}
+\{                  \(\backslash\)
+    .baudrate    = 115200,                      \(\backslash\)
+    .word\_length = 8,                           \(\backslash\)
+    .stop\_bits   = \hyperlink{serial_8h_a2b63bfe663eaa7e96165898d0bad9ba1}{SERIAL\_STOP\_BITS\_1},          \(\backslash\)
+    .partity     = \hyperlink{serial_8h_ad3af92391cfd2670eb782a60c7f923a6}{SERIAL\_PARITY\_NONE},          \(\backslash\)
+    .ctrl\_flow   = \hyperlink{serial_8h_ab85f99523d332a127bd78d8fd075e9f4}{SERIAL\_CTRL\_FLOW\_NONE}        \(\backslash\)
+\}
+\end{DoxyCode}
+Kernel\textquotesingle{}s serial settings. 
+
+Definition at line 22 of file config.\+h.
+
+\mbox{\Hypertarget{config_8h_a023f94f341f2300adee0891b15b364b2}\label{config_8h_a023f94f341f2300adee0891b15b364b2}} 
+\index{config.\+h@{config.\+h}!E\+R\+R\+O\+R\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL@{E\+R\+R\+O\+R\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}}
+\index{E\+R\+R\+O\+R\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL@{E\+R\+R\+O\+R\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}!config.\+h@{config.\+h}}
+\subsubsection{\texorpdfstring{E\+R\+R\+O\+R\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}{ERROR\_LOG\_LEVEL}}
+{\footnotesize\ttfamily \#define E\+R\+R\+O\+R\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL~3}
+
+
+
+Definition at line 31 of file config.\+h.
+
+\mbox{\Hypertarget{config_8h_a8fa6c5ec8254575a940cf0a632310a95}\label{config_8h_a8fa6c5ec8254575a940cf0a632310a95}} 
+\index{config.\+h@{config.\+h}!I\+N\+F\+O\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL@{I\+N\+F\+O\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}}
+\index{I\+N\+F\+O\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL@{I\+N\+F\+O\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}!config.\+h@{config.\+h}}
+\subsubsection{\texorpdfstring{I\+N\+F\+O\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}{INFO\_LOG\_LEVEL}}
+{\footnotesize\ttfamily \#define I\+N\+F\+O\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL~1}
+
+
+
+Definition at line 33 of file config.\+h.
+
+\mbox{\Hypertarget{config_8h_a6c272d2b12ffba9bdd5a4d5dd608a0f8}\label{config_8h_a6c272d2b12ffba9bdd5a4d5dd608a0f8}} 
+\index{config.\+h@{config.\+h}!K\+E\+R\+N\+E\+L\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL@{K\+E\+R\+N\+E\+L\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}}
+\index{K\+E\+R\+N\+E\+L\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL@{K\+E\+R\+N\+E\+L\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}!config.\+h@{config.\+h}}
+\subsubsection{\texorpdfstring{K\+E\+R\+N\+E\+L\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}{KERNEL\_LOG\_LEVEL}}
+{\footnotesize\ttfamily \#define K\+E\+R\+N\+E\+L\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL~\hyperlink{config_8h_a76e4c926f6662c7217b7e28510d2fc99}{N\+O\+N\+E\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}}
+
+
+
+Definition at line 36 of file config.\+h.
+
+\mbox{\Hypertarget{config_8h_a76e4c926f6662c7217b7e28510d2fc99}\label{config_8h_a76e4c926f6662c7217b7e28510d2fc99}} 
+\index{config.\+h@{config.\+h}!N\+O\+N\+E\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL@{N\+O\+N\+E\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}}
+\index{N\+O\+N\+E\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL@{N\+O\+N\+E\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}!config.\+h@{config.\+h}}
+\subsubsection{\texorpdfstring{N\+O\+N\+E\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}{NONE\_LOG\_LEVEL}}
+{\footnotesize\ttfamily \#define N\+O\+N\+E\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL~0}
+
+
+
+Definition at line 34 of file config.\+h.
+
+\mbox{\Hypertarget{config_8h_ae4ead2e291cd4f0949966eff6513bd20}\label{config_8h_ae4ead2e291cd4f0949966eff6513bd20}} 
+\index{config.\+h@{config.\+h}!W\+A\+R\+N\+I\+N\+G\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL@{W\+A\+R\+N\+I\+N\+G\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}}
+\index{W\+A\+R\+N\+I\+N\+G\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL@{W\+A\+R\+N\+I\+N\+G\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}!config.\+h@{config.\+h}}
+\subsubsection{\texorpdfstring{W\+A\+R\+N\+I\+N\+G\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL}{WARNING\_LOG\_LEVEL}}
+{\footnotesize\ttfamily \#define W\+A\+R\+N\+I\+N\+G\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL~2}
+
+
+
+Definition at line 32 of file config.\+h.
+

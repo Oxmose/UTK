@@ -1,4 +1,0 @@
-[TESTMODE] (T1)  (T2)  (T3) 
-[TESTMODE] (T1)  (T2)  (T3) 
-[TESTMODE] (T1)  (T1 END)  (T2)  (T2 END)  (T3)  (T3 END)  (T4 END)  (T5 END) 
-[TESTMODE] Semaphore test passed

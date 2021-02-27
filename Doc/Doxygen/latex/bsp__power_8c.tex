@@ -1,0 +1,74 @@
+\hypertarget{bsp__power_8c}{}\section{Kernel/\+Sources/arch/board/stm32/f401re/src/bsp\+\_\+power.c File Reference}
+\label{bsp__power_8c}\index{Kernel/\+Sources/arch/board/stm32/f401re/src/bsp\+\_\+power.\+c@{Kernel/\+Sources/arch/board/stm32/f401re/src/bsp\+\_\+power.\+c}}
+{\ttfamily \#include \char`\"{}error\+\_\+types.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}bsp\+\_\+power.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}stdint.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}config.\+h\char`\"{}}\newline
+Include dependency graph for bsp\+\_\+power.\+c\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=337pt]{bsp__power_8c__incl}
+\end{center}
+\end{figure}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{error__types_8h_acf146bc98f60f47c79d782f7523e339c}{E\+R\+R\+O\+R\+\_\+\+C\+O\+D\+E\+\_\+E} \hyperlink{bsp__power_8c_abe4bd68d683c1ab3fbc83afb60b36ede}{bsp\+\_\+pwr\+\_\+set\+\_\+scaling} (const \hyperlink{bsp__power_8h_adbcdf5dee7695e72280aa56c141f5758}{P\+O\+W\+E\+R\+\_\+\+S\+C\+A\+L\+I\+N\+G\+\_\+E} pwr\+\_\+scaling)
+\begin{DoxyCompactList}\small\item\em Sets the power scaling. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{bsp__power_8c_abe4bd68d683c1ab3fbc83afb60b36ede}\label{bsp__power_8c_abe4bd68d683c1ab3fbc83afb60b36ede}} 
+\index{bsp\+\_\+power.\+c@{bsp\+\_\+power.\+c}!bsp\+\_\+pwr\+\_\+set\+\_\+scaling@{bsp\+\_\+pwr\+\_\+set\+\_\+scaling}}
+\index{bsp\+\_\+pwr\+\_\+set\+\_\+scaling@{bsp\+\_\+pwr\+\_\+set\+\_\+scaling}!bsp\+\_\+power.\+c@{bsp\+\_\+power.\+c}}
+\subsubsection{\texorpdfstring{bsp\+\_\+pwr\+\_\+set\+\_\+scaling()}{bsp\_pwr\_set\_scaling()}}
+{\footnotesize\ttfamily \hyperlink{error__types_8h_acf146bc98f60f47c79d782f7523e339c}{E\+R\+R\+O\+R\+\_\+\+C\+O\+D\+E\+\_\+E} bsp\+\_\+pwr\+\_\+set\+\_\+scaling (\begin{DoxyParamCaption}\item[{const \hyperlink{bsp__power_8h_adbcdf5dee7695e72280aa56c141f5758}{P\+O\+W\+E\+R\+\_\+\+S\+C\+A\+L\+I\+N\+G\+\_\+E}}]{pwr\+\_\+scaling }\end{DoxyParamCaption})}
+
+
+
+Sets the power scaling. 
+
+Sets the power scaling based on the values passed in paramter. The scaling conforms to the values defined by the reference manual. If the value does not conform, the function has no effect and returns an error code.
+
+
+\begin{DoxyParams}{Parameters}
+{\em pwr\+\_\+scaling} & The scaling factor configuration.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+N\+O\+\_\+\+E\+R\+R\+OR is returned in case of success. Otherwise an error code is returned. Please refer to the list of the standard error codes. 
+\end{DoxyReturn}
+
+
+Definition at line 33 of file bsp\+\_\+power.\+c.
+
+
+\begin{DoxyCode}
+34 \{
+35     \textcolor{comment}{/* Sets the power scaling value, we don't apply mask verification because }
+36 \textcolor{comment}{     * the POWER\_SCALING\_E enumeration should already contain the right values.}
+37 \textcolor{comment}{     */}
+38     *\hyperlink{bsp__power_8h_a30eb4f51898e3d42222ed18e4f392156}{PWR\_CR\_REGISTER} = (*\hyperlink{bsp__power_8h_a30eb4f51898e3d42222ed18e4f392156}{PWR\_CR\_REGISTER} & ~
+      \hyperlink{bsp__power_8h_a06db718126d979cbf61fc27991514e1a}{PWR\_CR\_VOS\_MASK}) | pwr\_scaling;
+39 
+40     \textcolor{comment}{/* Delay to ensure bit update */}
+41     \textcolor{keywordflow}{while}((*\hyperlink{bsp__power_8h_a30eb4f51898e3d42222ed18e4f392156}{PWR\_CR\_REGISTER} & \hyperlink{bsp__power_8h_a06db718126d979cbf61fc27991514e1a}{PWR\_CR\_VOS\_MASK}) != pwr\_scaling);
+42 
+43 \textcolor{preprocessor}{#if KERNEL\_LOG\_LEVEL >= INFO\_LOG\_LEVEL}
+44     KERNEL\_LOG\_INFO(\textcolor{stringliteral}{"Power scaling mode changed"}, 
+45                     pwr\_scaling, 
+46                     \textcolor{keyword}{sizeof}(pwr\_scaling), 
+47                     \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR});
+48 \textcolor{preprocessor}{#endif}
+49 
+50     \textcolor{keywordflow}{return} \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR};
+51 \}
+\end{DoxyCode}
+Here is the caller graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=329pt]{bsp__power_8c_abe4bd68d683c1ab3fbc83afb60b36ede_icgraph}
+\end{center}
+\end{figure}
