@@ -1,0 +1,1650 @@
+\hypertarget{bsp__clocks_8h}{}\section{Kernel/\+Sources/arch/board/stm32/f401re/includes/bsp\+\_\+clocks.h File Reference}
+\label{bsp__clocks_8h}\index{Kernel/\+Sources/arch/board/stm32/f401re/includes/bsp\+\_\+clocks.\+h@{Kernel/\+Sources/arch/board/stm32/f401re/includes/bsp\+\_\+clocks.\+h}}
+{\ttfamily \#include \char`\"{}error\+\_\+types.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}bsp\+\_\+usart.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}bsp\+\_\+gpio.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}stdint.\+h\char`\"{}}\newline
+Include dependency graph for bsp\+\_\+clocks.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=276pt]{bsp__clocks_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=330pt]{bsp__clocks_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{bsp__clocks_8h_a5d90893e6a5c6e0be4c7d78220a99e72}{R\+C\+C\+\_\+\+C\+R\+\_\+\+A\+D\+D\+R\+E\+SS}~0x40023800
+\begin{DoxyCompactList}\small\item\em R\+CC Control Register address. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a2fcf7c04f16b1dd27c577a9a14c5ff96}{R\+C\+C\+\_\+\+C\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}~((volatile \hyperlink{stdint_8h_a324c5d28c0d82f502a234ab99efac87a}{uint32\+\_\+t}$\ast$)\hyperlink{bsp__clocks_8h_a5d90893e6a5c6e0be4c7d78220a99e72}{R\+C\+C\+\_\+\+C\+R\+\_\+\+A\+D\+D\+R\+E\+SS})
+\item 
+\#define \hyperlink{bsp__clocks_8h_aefbe0661a046e5156a8d1efb28acc7c1}{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+A\+D\+D\+R\+E\+SS}~0x40023804
+\begin{DoxyCompactList}\small\item\em R\+CC P\+LL Configuration Register address. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_ad2d60b66a5292f1c04c7c3ebfe9df335}{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}~((volatile \hyperlink{stdint_8h_a324c5d28c0d82f502a234ab99efac87a}{uint32\+\_\+t}$\ast$)\hyperlink{bsp__clocks_8h_aefbe0661a046e5156a8d1efb28acc7c1}{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+A\+D\+D\+R\+E\+SS})
+\item 
+\#define \hyperlink{bsp__clocks_8h_a91cfae801ddf98df5893db0b9a9027dd}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+A\+D\+D\+R\+E\+SS}~0x40023808
+\begin{DoxyCompactList}\small\item\em R\+CC Configuration Register address. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_ac454715dd9c4f8ba957cc53f318c58ac}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}~((volatile \hyperlink{stdint_8h_a324c5d28c0d82f502a234ab99efac87a}{uint32\+\_\+t}$\ast$)\hyperlink{bsp__clocks_8h_a91cfae801ddf98df5893db0b9a9027dd}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+A\+D\+D\+R\+E\+SS})
+\item 
+\#define \hyperlink{bsp__clocks_8h_aeeed0a38fad05745c2280f5ae24af5c7}{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS}~0x40023830
+\begin{DoxyCompactList}\small\item\em R\+CC A\+H\+B1 peripheral clock enable register address. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a4c6aae1c96c5acee8a320c6b2a8aaee5}{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}~((volatile \hyperlink{stdint_8h_a324c5d28c0d82f502a234ab99efac87a}{uint32\+\_\+t}$\ast$)\hyperlink{bsp__clocks_8h_aeeed0a38fad05745c2280f5ae24af5c7}{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS})
+\item 
+\#define \hyperlink{bsp__clocks_8h_aceec3e2cc1ffd17a8637d7437e1401fa}{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS}~0x40023840
+\begin{DoxyCompactList}\small\item\em R\+CC A\+P\+B1 peripheral clock enable register address. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_aae3fa9b2133a67e3ca65db35f8ac9a4c}{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}~((volatile \hyperlink{stdint_8h_a324c5d28c0d82f502a234ab99efac87a}{uint32\+\_\+t}$\ast$)\hyperlink{bsp__clocks_8h_aceec3e2cc1ffd17a8637d7437e1401fa}{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS})
+\item 
+\#define \hyperlink{bsp__clocks_8h_a5dfd160b628ef272a6f6cf6b0476afab}{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS}~0x40023844
+\begin{DoxyCompactList}\small\item\em R\+CC A\+P\+B2 peripheral clock enable register address. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_aae721f66e88c2e4264580d95d5ffdd59}{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}~((volatile \hyperlink{stdint_8h_a324c5d28c0d82f502a234ab99efac87a}{uint32\+\_\+t}$\ast$)\hyperlink{bsp__clocks_8h_a5dfd160b628ef272a6f6cf6b0476afab}{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS})
+\item 
+\#define \hyperlink{bsp__clocks_8h_a7a9d56a8aa1fa0f519ecbdf0d19dd4da}{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+S\+Y\+S\+C\+F\+G\+EN}~0x00004000
+\begin{DoxyCompactList}\small\item\em A\+P\+B2\+E\+NR System configuration controller clock enable. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a6ff46fb3b30fc6792e4fd18fcb0941b5}{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+A\+EN}~0x00000001
+\begin{DoxyCompactList}\small\item\em A\+H\+B1\+E\+NR G\+P\+IO A enable. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_ad7f408f92e7fd49b0957b8cb4ff31ca5}{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+B\+EN}~0x00000002
+\begin{DoxyCompactList}\small\item\em A\+H\+B1\+E\+NR G\+P\+IO B enable. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_ae8a8b42e33aef2a7bc2d41ad9d231733}{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+C\+EN}~0x00000004
+\begin{DoxyCompactList}\small\item\em A\+H\+B1\+E\+NR G\+P\+IO C enable. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_aebd8146e91c76f14af8dfe78a1c2d916}{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+D\+EN}~0x00000008
+\begin{DoxyCompactList}\small\item\em A\+H\+B1\+E\+NR G\+P\+IO D enable. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a67a9094e0e464eaa8e25f854f90abfc6}{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+E\+EN}~0x00000010
+\begin{DoxyCompactList}\small\item\em A\+H\+B1\+E\+NR G\+P\+IO E enable. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_adb16afc550121895822ebb22108196b6}{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+H\+EN}~0x00000080
+\begin{DoxyCompactList}\small\item\em A\+H\+B1\+E\+NR G\+P\+IO H enable. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a5c19997ccd28464b80a7c3325da0ca60}{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+P\+W\+R\+EN}~0x10000000
+\begin{DoxyCompactList}\small\item\em A\+P\+B1\+E\+NR Power interface clock enable. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_ab840af4f735ec36419d61c7db3cfa00d}{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+U\+S\+A\+R\+T2\+EN}~0x00020000
+\begin{DoxyCompactList}\small\item\em A\+P\+B1\+E\+NR U\+S\+A\+R\+T2 clock enable. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a4666bb90842e8134b32e6a34a0f165f3}{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+U\+S\+A\+R\+T1\+EN}~0x00000010
+\begin{DoxyCompactList}\small\item\em A\+P\+B2\+E\+NR U\+S\+A\+R\+T1 clock enable. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a0569d91f3b18ae130b7a09e0100c4459}{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+U\+S\+A\+R\+T6\+EN}~0x00000020
+\begin{DoxyCompactList}\small\item\em A\+P\+B2\+E\+NR U\+S\+A\+R\+T6 clock enable. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a7354703f289244a71753debf3ae26e46}{R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+I2\+S\+R\+DY}~0x08000000
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+CR P\+L\+L\+I2S ready flag. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a3ccb8964b640530f1080f9ea549d8133}{R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+I2\+S\+ON}~0x04000000
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+CR P\+L\+L\+I2S enabled. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_afa12d7ac6a7f0f91d066aeb2c6071888}{R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+R\+DY}~0x02000000
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+CR P\+LL ready flag. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_ad0e73d5b0a4883e074d40029b49ee47e}{R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+ON}~0x01000000
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+CR P\+LL enabled. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a12241a92893b4023a40e85d3b371ac05}{R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+T\+R\+I\+M\+\_\+\+D\+EF}~0x00000080
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+CR H\+SI clock default trimming value. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_af4fcacf94a97f7d49a70e089b39cf474}{R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+ON}~0x00000001
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+CR H\+SI clock enabled. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a9dbac3f2bc04f04ebafe1e66ae3fcf0d}{R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+R\+DY}~0x00000002
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+CR H\+SI clock ready flag. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_acbac8bae4f0808b3c3a5185aa10081fb}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+H\+SI}~0x00000000
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR System clock switch to H\+SI value. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_afb563f217242d969f4355d0818fde705}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+H\+SE}~0x00000001
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR System clock switch to H\+SE value. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a87389cacb2eaf53730da13a2a33cd487}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+P\+LL}~0x00000002
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR System clock switch to P\+LL value. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a6764639cf221e1ebc0b5448dcaed590a}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+H\+SI}~0x00000000
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR System clock switch to H\+SI status value. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_ae09a0202f441c1a43e69c62331d50a08}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+H\+SE}~0x00000004
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR System clock switch to H\+SE status value. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a2c67e2279804a83ef24438267d9d4a6c}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+P\+LL}~0x00000008
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR System clock switch to P\+LL status value. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a1351ccf5f6a5d9a6b91c4f533688d8fb}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+P\+R\+E\+\_\+\+EN}~0x00000080
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR A\+HB prescaller enabled state. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a3fe59bf63a37a12304f37d7babec3eeb}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+R\+P\+E\+\_\+\+D\+I\+V1}~0x00000000
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR A\+HB prescaller value. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a7a4503de78658d3271cb5494adc96e41}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+EN}~0x00001000
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR A\+PB LS prescaller enabled state. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_af832ad6844c907d9bb37c1536defcb0d}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+D\+I\+V2}~0x00001000
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR A\+PB LS prescaller value. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a1a384b58d9f246cb60ed0d0bfa92cbf4}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+EN}~0x00008000
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR A\+PB HS prescaller enabled state. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a247aebf1999a38ea07785558d277bb1a}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+D\+I\+V1}~0x00000000
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR A\+PB HS prescaller value. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_afaac3bc429eaa475ca5e431a020d4c67}{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+M\+\_\+\+M\+A\+SK}~0x0000003F
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+GR P\+L\+LM bit mask. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a90997335764397eb4be02c23676cda4a}{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+N\+\_\+\+M\+A\+SK}~0x00007\+F\+C0
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+GR P\+L\+LN bit mask. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a40a7c5938dfdd0ab63dcf3b203da7dd4}{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+P\+\_\+\+M\+A\+SK}~0x00030000
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+GR P\+L\+LP bit mask. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a6c5c6a2e8d760ad7da85ae2c8076ee31}{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+S\+R\+C\+\_\+\+M\+A\+SK}~0x00400000
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+GR P\+L\+L\+S\+RC bit mask. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_ad4784939ce13e81f2cc64dda2b5d8770}{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+Q\+\_\+\+M\+A\+SK}~0x0\+F000000
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+GR P\+L\+LQ bit mask. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a7e5e28699fe923870e15fef3651ff3ef}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+M\+A\+SK}~0x00000003
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR SW bit mask. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a451045d952eb1caaa0090c9e8dc75082}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+M\+A\+SK}~0x0000000C
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR S\+WS bit mask. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a7b024c33f9bd185d923b55af2360fec5}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+R\+P\+E\+\_\+\+M\+A\+SK}~0x000000\+F0
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR H\+R\+PE bit mask. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a2ff38fa14905e578752b706e5c29b146}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+P\+R\+E\+\_\+\+V\+A\+L\+\_\+\+M\+A\+SK}~0x00000070
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR H\+R\+PE value bit mask. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a1220a63e00de9ff4a2a45474ead3662d}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+M\+A\+SK}~0x00001\+C00
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR P\+P\+R\+E1 bit mask. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_aebda6f102f65bc354b95232527021aba}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+V\+A\+L\+\_\+\+M\+A\+SK}~0x00000\+C00
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR P\+P\+R\+E1 value bit mask. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a41aef118b0611444caa87df8ea302dc2}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+M\+A\+SK}~0x0000\+E000
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR P\+P\+R\+E2 bit mask. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_adb27fe14c6c6c2cb20f13aaf86f0900a}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+V\+A\+L\+\_\+\+M\+A\+SK}~0x00006000
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR P\+P\+R\+E2 value bit mask. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a73f9913edb8b30eb2b8aa1b5d29b297e}{R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+T\+R\+I\+M\+\_\+\+M\+A\+SK}~0x000000\+F8
+\begin{DoxyCompactList}\small\item\em H\+SI clock trimming field mask. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_add5fc49687031bdd44fca9c909f74fe0}{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+M\+\_\+\+O\+F\+F\+S\+ET}~0
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+GR P\+L\+LM bit field offset. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_adc0f70732fb3d933c96d741f27baec35}{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+N\+\_\+\+O\+F\+F\+S\+ET}~6
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+GR P\+L\+LN bit field offset. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a9a6c6234e6c59e7638d1a8edd237f591}{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+P\+\_\+\+O\+F\+F\+S\+ET}~16
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+GR P\+L\+LP bit field offset. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a001728588571f89b2b52e6a903e66395}{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+S\+R\+C\+\_\+\+O\+F\+F\+S\+ET}~22
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+GR P\+L\+L\+S\+RC bit field offset. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_aa47b1576488cea5e741f58cce74337c9}{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+Q\+\_\+\+O\+F\+F\+S\+ET}~24
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+GR P\+L\+LQ bit field offset. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_adca5b474c16bb5c9b4bbedfabeba8e25}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+R\+P\+E\+\_\+\+O\+F\+F\+S\+ET}~4
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR H\+P\+RE bit field offset. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a1f605f808c9ab7530142dd8808e83a22}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+O\+F\+F\+S\+ET}~10
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR P\+P\+R\+E1 bit field offset. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a906e390883db586903c4b1144a182e47}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+O\+F\+F\+S\+ET}~13
+\begin{DoxyCompactList}\small\item\em R\+C\+C\+\_\+\+C\+F\+GR P\+P\+R\+E2 bit field offset. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_adc4eb2ce50286dc96d4976b9689be1d7}{R\+C\+C\+\_\+\+P\+L\+L\+M\+\_\+\+V\+A\+L\+UE}~16
+\begin{DoxyCompactList}\small\item\em Division factor for input clock. Divide by 16 the H\+SI clock. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a11fa93ae89931a632e06eb0694ff62b7}{R\+C\+C\+\_\+\+P\+L\+L\+N\+\_\+\+V\+A\+L\+UE}~336
+\begin{DoxyCompactList}\small\item\em Multiply factor for system clock. Multiply by 336 the V\+CO clock. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a9ad812030f6e208e79df8e9bddb96c19}{R\+C\+C\+\_\+\+P\+L\+L\+P\+\_\+\+V\+A\+L\+UE}~1
+\begin{DoxyCompactList}\small\item\em Division factor for system clock. Divide by 4 the V\+CO clock. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a0babc931753727d1ee6b56d41a51f598}{R\+C\+C\+\_\+\+P\+L\+L\+Q\+\_\+\+V\+A\+L\+UE}~8
+\begin{DoxyCompactList}\small\item\em Division factor for U\+SB O\+TG FS clock. Divide by 8 the V\+CO clock. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_ae90c3d400891ac3355363979581bd924}{R\+C\+C\+\_\+\+P\+L\+L\+S\+R\+C\+\_\+\+V\+A\+L\+UE}~0
+\begin{DoxyCompactList}\small\item\em P\+LL source clock set as H\+SI. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_ae89e6b2d1e86b7fb4831cb013ece2c52}{R\+C\+C\+\_\+\+H\+S\+I\+\_\+\+B\+A\+S\+E\+\_\+\+F\+R\+EQ}~16000000
+\begin{DoxyCompactList}\small\item\em H\+SI clock frequency. \end{DoxyCompactList}\item 
+\#define \hyperlink{bsp__clocks_8h_a19d723f47200a1da259e9c147f2de258}{R\+C\+C\+\_\+\+H\+S\+E\+\_\+\+B\+A\+S\+E\+\_\+\+F\+R\+EQ}~0
+\begin{DoxyCompactList}\small\item\em H\+SE clock frequency (does not exists on S\+T\+M\+F401\+RE) \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef enum \hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70}{C\+L\+O\+C\+K\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+ER} \hyperlink{bsp__clocks_8h_ac9d4d589a659370f313ef156f6eff0e8}{C\+L\+O\+C\+K\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+E\+R\+\_\+T}
+\begin{DoxyCompactList}\small\item\em Short hand for enum C\+L\+O\+C\+K\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+ER. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70}{C\+L\+O\+C\+K\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+ER} \{ \newline
+\hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a44aa8d3c1c8f980b372190786a4853f9}{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+S\+Y\+S\+C\+LK}, 
+\hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a58357d0569548d6c2ba44f27e0aa6ba6}{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+H\+C\+LK}, 
+\hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a265c9dec4478eb66904a2dbc6954e598}{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+F\+C\+LK}, 
+\hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a0493d0bbd7edf1aebadb342c5c38f709}{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+P\+C\+L\+K1}, 
+\newline
+\hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70aad62d8c78d2b4617724a82ec190a33ee}{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+P\+C\+L\+K2}, 
+\hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70aad46d3b8852f9a4d711c15164bf1c0d3}{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+A\+P\+B1\+\_\+\+T\+I\+M\+ER}, 
+\hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a30cca3be6a7bad72d2c02e9b58ff4d50}{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+A\+P\+B2\+\_\+\+T\+I\+M\+ER}
+ \}\begin{DoxyCompactList}\small\item\em Clock identifer enumeration. Stores all accessible B\+SP clocks. \end{DoxyCompactList}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{error__types_8h_acf146bc98f60f47c79d782f7523e339c}{E\+R\+R\+O\+R\+\_\+\+C\+O\+D\+E\+\_\+E} \hyperlink{bsp__clocks_8h_aaf01af602e17579af5e6af009ae7a557}{bsp\+\_\+clk\+\_\+usart\+\_\+enable} (const \hyperlink{bsp__usart_8h_a594f9d90a9a3875660da4512fb208cf9}{U\+S\+A\+R\+T\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+E\+R\+\_\+E} usart\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Enables the U\+S\+A\+RT clocks. \end{DoxyCompactList}\item 
+\hyperlink{error__types_8h_acf146bc98f60f47c79d782f7523e339c}{E\+R\+R\+O\+R\+\_\+\+C\+O\+D\+E\+\_\+E} \hyperlink{bsp__clocks_8h_a500b2e77b70c93b3f2b4a94cc9bcf79d}{bsp\+\_\+clk\+\_\+gpio\+\_\+enable} (const \hyperlink{bsp__gpio_8h_ab086506332275a2a873dfce02ed5a3b8}{G\+P\+I\+O\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+E\+R\+\_\+E} gpio\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Enables the G\+P\+IO clocks. \end{DoxyCompactList}\item 
+\hyperlink{error__types_8h_acf146bc98f60f47c79d782f7523e339c}{E\+R\+R\+O\+R\+\_\+\+C\+O\+D\+E\+\_\+E} \hyperlink{bsp__clocks_8h_a286d003315af35aa9dd72b86ba6d8420}{bsp\+\_\+clk\+\_\+sys\+\_\+init} (void)
+\begin{DoxyCompactList}\small\item\em Initializes system clocks. \end{DoxyCompactList}\item 
+\hyperlink{stdint_8h_a324c5d28c0d82f502a234ab99efac87a}{uint32\+\_\+t} \hyperlink{bsp__clocks_8h_aeeded4b587684fa3383b3d42ee29af1e}{bsp\+\_\+clocks\+\_\+get\+\_\+freq} (const \hyperlink{bsp__clocks_8h_ac9d4d589a659370f313ef156f6eff0e8}{C\+L\+O\+C\+K\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+E\+R\+\_\+T} clk\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Get the frequencies in M\+Hz of the clocks which identifer corresponds to the identifier given as parameter. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\mbox{\Hypertarget{bsp__clocks_8h_aeeed0a38fad05745c2280f5ae24af5c7}\label{bsp__clocks_8h_aeeed0a38fad05745c2280f5ae24af5c7}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS@{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS}}
+\index{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS@{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS}{RCC\_AHB1ENR\_ADDRESS}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS~0x40023830}
+
+
+
+R\+CC A\+H\+B1 peripheral clock enable register address. 
+
+
+
+Definition at line 38 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a6ff46fb3b30fc6792e4fd18fcb0941b5}\label{bsp__clocks_8h_a6ff46fb3b30fc6792e4fd18fcb0941b5}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+A\+EN@{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+A\+EN}}
+\index{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+A\+EN@{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+A\+EN}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+A\+EN}{RCC\_AHB1ENR\_GPIOAEN}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+A\+EN~0x00000001}
+
+
+
+A\+H\+B1\+E\+NR G\+P\+IO A enable. 
+
+
+
+Definition at line 50 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_ad7f408f92e7fd49b0957b8cb4ff31ca5}\label{bsp__clocks_8h_ad7f408f92e7fd49b0957b8cb4ff31ca5}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+B\+EN@{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+B\+EN}}
+\index{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+B\+EN@{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+B\+EN}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+B\+EN}{RCC\_AHB1ENR\_GPIOBEN}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+B\+EN~0x00000002}
+
+
+
+A\+H\+B1\+E\+NR G\+P\+IO B enable. 
+
+
+
+Definition at line 52 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_ae8a8b42e33aef2a7bc2d41ad9d231733}\label{bsp__clocks_8h_ae8a8b42e33aef2a7bc2d41ad9d231733}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+C\+EN@{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+C\+EN}}
+\index{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+C\+EN@{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+C\+EN}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+C\+EN}{RCC\_AHB1ENR\_GPIOCEN}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+C\+EN~0x00000004}
+
+
+
+A\+H\+B1\+E\+NR G\+P\+IO C enable. 
+
+
+
+Definition at line 54 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_aebd8146e91c76f14af8dfe78a1c2d916}\label{bsp__clocks_8h_aebd8146e91c76f14af8dfe78a1c2d916}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+D\+EN@{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+D\+EN}}
+\index{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+D\+EN@{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+D\+EN}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+D\+EN}{RCC\_AHB1ENR\_GPIODEN}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+D\+EN~0x00000008}
+
+
+
+A\+H\+B1\+E\+NR G\+P\+IO D enable. 
+
+
+
+Definition at line 56 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a67a9094e0e464eaa8e25f854f90abfc6}\label{bsp__clocks_8h_a67a9094e0e464eaa8e25f854f90abfc6}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+E\+EN@{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+E\+EN}}
+\index{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+E\+EN@{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+E\+EN}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+E\+EN}{RCC\_AHB1ENR\_GPIOEEN}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+E\+EN~0x00000010}
+
+
+
+A\+H\+B1\+E\+NR G\+P\+IO E enable. 
+
+
+
+Definition at line 58 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_adb16afc550121895822ebb22108196b6}\label{bsp__clocks_8h_adb16afc550121895822ebb22108196b6}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+H\+EN@{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+H\+EN}}
+\index{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+H\+EN@{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+H\+EN}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+H\+EN}{RCC\_AHB1ENR\_GPIOHEN}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+G\+P\+I\+O\+H\+EN~0x00000080}
+
+
+
+A\+H\+B1\+E\+NR G\+P\+IO H enable. 
+
+
+
+Definition at line 60 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a4c6aae1c96c5acee8a320c6b2a8aaee5}\label{bsp__clocks_8h_a4c6aae1c96c5acee8a320c6b2a8aaee5}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER@{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}}
+\index{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER@{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}{RCC\_AHB1ENR\_REGISTER}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER~((volatile \hyperlink{stdint_8h_a324c5d28c0d82f502a234ab99efac87a}{uint32\+\_\+t}$\ast$)\hyperlink{bsp__clocks_8h_aeeed0a38fad05745c2280f5ae24af5c7}{R\+C\+C\+\_\+\+A\+H\+B1\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS})}
+
+
+
+Definition at line 39 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_aceec3e2cc1ffd17a8637d7437e1401fa}\label{bsp__clocks_8h_aceec3e2cc1ffd17a8637d7437e1401fa}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS@{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS}}
+\index{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS@{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS}{RCC\_APB1ENR\_ADDRESS}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS~0x40023840}
+
+
+
+R\+CC A\+P\+B1 peripheral clock enable register address. 
+
+
+
+Definition at line 41 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a5c19997ccd28464b80a7c3325da0ca60}\label{bsp__clocks_8h_a5c19997ccd28464b80a7c3325da0ca60}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+P\+W\+R\+EN@{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+P\+W\+R\+EN}}
+\index{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+P\+W\+R\+EN@{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+P\+W\+R\+EN}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+P\+W\+R\+EN}{RCC\_APB1ENR\_PWREN}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+P\+W\+R\+EN~0x10000000}
+
+
+
+A\+P\+B1\+E\+NR Power interface clock enable. 
+
+
+
+Definition at line 62 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_aae3fa9b2133a67e3ca65db35f8ac9a4c}\label{bsp__clocks_8h_aae3fa9b2133a67e3ca65db35f8ac9a4c}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER@{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}}
+\index{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER@{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}{RCC\_APB1ENR\_REGISTER}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER~((volatile \hyperlink{stdint_8h_a324c5d28c0d82f502a234ab99efac87a}{uint32\+\_\+t}$\ast$)\hyperlink{bsp__clocks_8h_aceec3e2cc1ffd17a8637d7437e1401fa}{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS})}
+
+
+
+Definition at line 42 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_ab840af4f735ec36419d61c7db3cfa00d}\label{bsp__clocks_8h_ab840af4f735ec36419d61c7db3cfa00d}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+U\+S\+A\+R\+T2\+EN@{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+U\+S\+A\+R\+T2\+EN}}
+\index{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+U\+S\+A\+R\+T2\+EN@{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+U\+S\+A\+R\+T2\+EN}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+U\+S\+A\+R\+T2\+EN}{RCC\_APB1ENR\_USART2EN}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+A\+P\+B1\+E\+N\+R\+\_\+\+U\+S\+A\+R\+T2\+EN~0x00020000}
+
+
+
+A\+P\+B1\+E\+NR U\+S\+A\+R\+T2 clock enable. 
+
+
+
+Definition at line 64 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a5dfd160b628ef272a6f6cf6b0476afab}\label{bsp__clocks_8h_a5dfd160b628ef272a6f6cf6b0476afab}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS@{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS}}
+\index{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS@{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS}{RCC\_APB2ENR\_ADDRESS}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS~0x40023844}
+
+
+
+R\+CC A\+P\+B2 peripheral clock enable register address. 
+
+
+
+Definition at line 44 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_aae721f66e88c2e4264580d95d5ffdd59}\label{bsp__clocks_8h_aae721f66e88c2e4264580d95d5ffdd59}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER@{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}}
+\index{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER@{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}{RCC\_APB2ENR\_REGISTER}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER~((volatile \hyperlink{stdint_8h_a324c5d28c0d82f502a234ab99efac87a}{uint32\+\_\+t}$\ast$)\hyperlink{bsp__clocks_8h_a5dfd160b628ef272a6f6cf6b0476afab}{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+A\+D\+D\+R\+E\+SS})}
+
+
+
+Definition at line 45 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a7a9d56a8aa1fa0f519ecbdf0d19dd4da}\label{bsp__clocks_8h_a7a9d56a8aa1fa0f519ecbdf0d19dd4da}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+S\+Y\+S\+C\+F\+G\+EN@{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+S\+Y\+S\+C\+F\+G\+EN}}
+\index{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+S\+Y\+S\+C\+F\+G\+EN@{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+S\+Y\+S\+C\+F\+G\+EN}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+S\+Y\+S\+C\+F\+G\+EN}{RCC\_APB2ENR\_SYSCFGEN}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+S\+Y\+S\+C\+F\+G\+EN~0x00004000}
+
+
+
+A\+P\+B2\+E\+NR System configuration controller clock enable. 
+
+
+
+Definition at line 48 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a4666bb90842e8134b32e6a34a0f165f3}\label{bsp__clocks_8h_a4666bb90842e8134b32e6a34a0f165f3}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+U\+S\+A\+R\+T1\+EN@{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+U\+S\+A\+R\+T1\+EN}}
+\index{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+U\+S\+A\+R\+T1\+EN@{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+U\+S\+A\+R\+T1\+EN}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+U\+S\+A\+R\+T1\+EN}{RCC\_APB2ENR\_USART1EN}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+U\+S\+A\+R\+T1\+EN~0x00000010}
+
+
+
+A\+P\+B2\+E\+NR U\+S\+A\+R\+T1 clock enable. 
+
+
+
+Definition at line 66 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a0569d91f3b18ae130b7a09e0100c4459}\label{bsp__clocks_8h_a0569d91f3b18ae130b7a09e0100c4459}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+U\+S\+A\+R\+T6\+EN@{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+U\+S\+A\+R\+T6\+EN}}
+\index{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+U\+S\+A\+R\+T6\+EN@{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+U\+S\+A\+R\+T6\+EN}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+U\+S\+A\+R\+T6\+EN}{RCC\_APB2ENR\_USART6EN}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+A\+P\+B2\+E\+N\+R\+\_\+\+U\+S\+A\+R\+T6\+EN~0x00000020}
+
+
+
+A\+P\+B2\+E\+NR U\+S\+A\+R\+T6 clock enable. 
+
+
+
+Definition at line 68 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a91cfae801ddf98df5893db0b9a9027dd}\label{bsp__clocks_8h_a91cfae801ddf98df5893db0b9a9027dd}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+A\+D\+D\+R\+E\+SS@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+A\+D\+D\+R\+E\+SS}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+A\+D\+D\+R\+E\+SS@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+A\+D\+D\+R\+E\+SS}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+A\+D\+D\+R\+E\+SS}{RCC\_CFGR\_ADDRESS}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+A\+D\+D\+R\+E\+SS~0x40023808}
+
+
+
+R\+CC Configuration Register address. 
+
+
+
+Definition at line 35 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a1351ccf5f6a5d9a6b91c4f533688d8fb}\label{bsp__clocks_8h_a1351ccf5f6a5d9a6b91c4f533688d8fb}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+P\+R\+E\+\_\+\+EN@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+P\+R\+E\+\_\+\+EN}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+P\+R\+E\+\_\+\+EN@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+P\+R\+E\+\_\+\+EN}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+P\+R\+E\+\_\+\+EN}{RCC\_CFGR\_HPRE\_EN}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+P\+R\+E\+\_\+\+EN~0x00000080}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR A\+HB prescaller enabled state. 
+
+
+
+Definition at line 98 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a2ff38fa14905e578752b706e5c29b146}\label{bsp__clocks_8h_a2ff38fa14905e578752b706e5c29b146}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+P\+R\+E\+\_\+\+V\+A\+L\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+P\+R\+E\+\_\+\+V\+A\+L\+\_\+\+M\+A\+SK}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+P\+R\+E\+\_\+\+V\+A\+L\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+P\+R\+E\+\_\+\+V\+A\+L\+\_\+\+M\+A\+SK}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+P\+R\+E\+\_\+\+V\+A\+L\+\_\+\+M\+A\+SK}{RCC\_CFGR\_HPRE\_VAL\_MASK}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+P\+R\+E\+\_\+\+V\+A\+L\+\_\+\+M\+A\+SK~0x00000070}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR H\+R\+PE value bit mask. 
+
+
+
+Definition at line 128 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a3fe59bf63a37a12304f37d7babec3eeb}\label{bsp__clocks_8h_a3fe59bf63a37a12304f37d7babec3eeb}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+R\+P\+E\+\_\+\+D\+I\+V1@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+R\+P\+E\+\_\+\+D\+I\+V1}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+R\+P\+E\+\_\+\+D\+I\+V1@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+R\+P\+E\+\_\+\+D\+I\+V1}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+R\+P\+E\+\_\+\+D\+I\+V1}{RCC\_CFGR\_HRPE\_DIV1}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+R\+P\+E\+\_\+\+D\+I\+V1~0x00000000}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR A\+HB prescaller value. 
+
+
+
+Definition at line 100 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a7b024c33f9bd185d923b55af2360fec5}\label{bsp__clocks_8h_a7b024c33f9bd185d923b55af2360fec5}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+R\+P\+E\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+R\+P\+E\+\_\+\+M\+A\+SK}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+R\+P\+E\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+R\+P\+E\+\_\+\+M\+A\+SK}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+R\+P\+E\+\_\+\+M\+A\+SK}{RCC\_CFGR\_HRPE\_MASK}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+R\+P\+E\+\_\+\+M\+A\+SK~0x000000\+F0}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR H\+R\+PE bit mask. 
+
+
+
+Definition at line 126 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_adca5b474c16bb5c9b4bbedfabeba8e25}\label{bsp__clocks_8h_adca5b474c16bb5c9b4bbedfabeba8e25}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+R\+P\+E\+\_\+\+O\+F\+F\+S\+ET@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+R\+P\+E\+\_\+\+O\+F\+F\+S\+ET}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+R\+P\+E\+\_\+\+O\+F\+F\+S\+ET@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+R\+P\+E\+\_\+\+O\+F\+F\+S\+ET}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+R\+P\+E\+\_\+\+O\+F\+F\+S\+ET}{RCC\_CFGR\_HRPE\_OFFSET}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+H\+R\+P\+E\+\_\+\+O\+F\+F\+S\+ET~4}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR H\+P\+RE bit field offset. 
+
+
+
+Definition at line 153 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_af832ad6844c907d9bb37c1536defcb0d}\label{bsp__clocks_8h_af832ad6844c907d9bb37c1536defcb0d}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+D\+I\+V2@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+D\+I\+V2}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+D\+I\+V2@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+D\+I\+V2}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+D\+I\+V2}{RCC\_CFGR\_PPRE1\_DIV2}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+D\+I\+V2~0x00001000}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR A\+PB LS prescaller value. 
+
+
+
+Definition at line 104 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a7a4503de78658d3271cb5494adc96e41}\label{bsp__clocks_8h_a7a4503de78658d3271cb5494adc96e41}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+EN@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+EN}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+EN@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+EN}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+EN}{RCC\_CFGR\_PPRE1\_EN}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+EN~0x00001000}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR A\+PB LS prescaller enabled state. 
+
+
+
+Definition at line 102 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a1220a63e00de9ff4a2a45474ead3662d}\label{bsp__clocks_8h_a1220a63e00de9ff4a2a45474ead3662d}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+M\+A\+SK}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+M\+A\+SK}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+M\+A\+SK}{RCC\_CFGR\_PPRE1\_MASK}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+M\+A\+SK~0x00001\+C00}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR P\+P\+R\+E1 bit mask. 
+
+
+
+Definition at line 130 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a1f605f808c9ab7530142dd8808e83a22}\label{bsp__clocks_8h_a1f605f808c9ab7530142dd8808e83a22}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+O\+F\+F\+S\+ET@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+O\+F\+F\+S\+ET}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+O\+F\+F\+S\+ET@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+O\+F\+F\+S\+ET}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+O\+F\+F\+S\+ET}{RCC\_CFGR\_PPRE1\_OFFSET}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+O\+F\+F\+S\+ET~10}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR P\+P\+R\+E1 bit field offset. 
+
+
+
+Definition at line 155 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_aebda6f102f65bc354b95232527021aba}\label{bsp__clocks_8h_aebda6f102f65bc354b95232527021aba}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+V\+A\+L\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+V\+A\+L\+\_\+\+M\+A\+SK}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+V\+A\+L\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+V\+A\+L\+\_\+\+M\+A\+SK}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+V\+A\+L\+\_\+\+M\+A\+SK}{RCC\_CFGR\_PPRE1\_VAL\_MASK}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E1\+\_\+\+V\+A\+L\+\_\+\+M\+A\+SK~0x00000\+C00}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR P\+P\+R\+E1 value bit mask. 
+
+
+
+Definition at line 132 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a247aebf1999a38ea07785558d277bb1a}\label{bsp__clocks_8h_a247aebf1999a38ea07785558d277bb1a}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+D\+I\+V1@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+D\+I\+V1}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+D\+I\+V1@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+D\+I\+V1}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+D\+I\+V1}{RCC\_CFGR\_PPRE2\_DIV1}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+D\+I\+V1~0x00000000}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR A\+PB HS prescaller value. 
+
+
+
+Definition at line 108 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a1a384b58d9f246cb60ed0d0bfa92cbf4}\label{bsp__clocks_8h_a1a384b58d9f246cb60ed0d0bfa92cbf4}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+EN@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+EN}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+EN@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+EN}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+EN}{RCC\_CFGR\_PPRE2\_EN}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+EN~0x00008000}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR A\+PB HS prescaller enabled state. 
+
+
+
+Definition at line 106 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a41aef118b0611444caa87df8ea302dc2}\label{bsp__clocks_8h_a41aef118b0611444caa87df8ea302dc2}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+M\+A\+SK}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+M\+A\+SK}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+M\+A\+SK}{RCC\_CFGR\_PPRE2\_MASK}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+M\+A\+SK~0x0000\+E000}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR P\+P\+R\+E2 bit mask. 
+
+
+
+Definition at line 134 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a906e390883db586903c4b1144a182e47}\label{bsp__clocks_8h_a906e390883db586903c4b1144a182e47}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+O\+F\+F\+S\+ET@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+O\+F\+F\+S\+ET}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+O\+F\+F\+S\+ET@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+O\+F\+F\+S\+ET}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+O\+F\+F\+S\+ET}{RCC\_CFGR\_PPRE2\_OFFSET}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+O\+F\+F\+S\+ET~13}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR P\+P\+R\+E2 bit field offset. 
+
+
+
+Definition at line 157 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_adb27fe14c6c6c2cb20f13aaf86f0900a}\label{bsp__clocks_8h_adb27fe14c6c6c2cb20f13aaf86f0900a}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+V\+A\+L\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+V\+A\+L\+\_\+\+M\+A\+SK}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+V\+A\+L\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+V\+A\+L\+\_\+\+M\+A\+SK}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+V\+A\+L\+\_\+\+M\+A\+SK}{RCC\_CFGR\_PPRE2\_VAL\_MASK}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+P\+P\+R\+E2\+\_\+\+V\+A\+L\+\_\+\+M\+A\+SK~0x00006000}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR P\+P\+R\+E2 value bit mask. 
+
+
+
+Definition at line 136 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_ac454715dd9c4f8ba957cc53f318c58ac}\label{bsp__clocks_8h_ac454715dd9c4f8ba957cc53f318c58ac}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}{RCC\_CFGR\_REGISTER}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER~((volatile \hyperlink{stdint_8h_a324c5d28c0d82f502a234ab99efac87a}{uint32\+\_\+t}$\ast$)\hyperlink{bsp__clocks_8h_a91cfae801ddf98df5893db0b9a9027dd}{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+A\+D\+D\+R\+E\+SS})}
+
+
+
+Definition at line 36 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_afb563f217242d969f4355d0818fde705}\label{bsp__clocks_8h_afb563f217242d969f4355d0818fde705}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+H\+SE@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+H\+SE}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+H\+SE@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+H\+SE}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+H\+SE}{RCC\_CFGR\_SW\_HSE}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+H\+SE~0x00000001}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR System clock switch to H\+SE value. 
+
+
+
+Definition at line 88 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_acbac8bae4f0808b3c3a5185aa10081fb}\label{bsp__clocks_8h_acbac8bae4f0808b3c3a5185aa10081fb}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+H\+SI@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+H\+SI}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+H\+SI@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+H\+SI}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+H\+SI}{RCC\_CFGR\_SW\_HSI}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+H\+SI~0x00000000}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR System clock switch to H\+SI value. 
+
+
+
+Definition at line 86 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a7e5e28699fe923870e15fef3651ff3ef}\label{bsp__clocks_8h_a7e5e28699fe923870e15fef3651ff3ef}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+M\+A\+SK}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+M\+A\+SK}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+M\+A\+SK}{RCC\_CFGR\_SW\_MASK}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+M\+A\+SK~0x00000003}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR SW bit mask. 
+
+
+
+Definition at line 122 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a87389cacb2eaf53730da13a2a33cd487}\label{bsp__clocks_8h_a87389cacb2eaf53730da13a2a33cd487}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+P\+LL@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+P\+LL}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+P\+LL@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+P\+LL}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+P\+LL}{RCC\_CFGR\_SW\_PLL}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+\_\+\+P\+LL~0x00000002}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR System clock switch to P\+LL value. 
+
+
+
+Definition at line 90 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_ae09a0202f441c1a43e69c62331d50a08}\label{bsp__clocks_8h_ae09a0202f441c1a43e69c62331d50a08}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+H\+SE@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+H\+SE}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+H\+SE@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+H\+SE}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+H\+SE}{RCC\_CFGR\_SWS\_HSE}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+H\+SE~0x00000004}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR System clock switch to H\+SE status value. 
+
+
+
+Definition at line 94 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a6764639cf221e1ebc0b5448dcaed590a}\label{bsp__clocks_8h_a6764639cf221e1ebc0b5448dcaed590a}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+H\+SI@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+H\+SI}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+H\+SI@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+H\+SI}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+H\+SI}{RCC\_CFGR\_SWS\_HSI}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+H\+SI~0x00000000}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR System clock switch to H\+SI status value. 
+
+
+
+Definition at line 92 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a451045d952eb1caaa0090c9e8dc75082}\label{bsp__clocks_8h_a451045d952eb1caaa0090c9e8dc75082}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+M\+A\+SK}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+M\+A\+SK}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+M\+A\+SK}{RCC\_CFGR\_SWS\_MASK}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+M\+A\+SK~0x0000000C}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR S\+WS bit mask. 
+
+
+
+Definition at line 124 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a2c67e2279804a83ef24438267d9d4a6c}\label{bsp__clocks_8h_a2c67e2279804a83ef24438267d9d4a6c}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+P\+LL@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+P\+LL}}
+\index{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+P\+LL@{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+P\+LL}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+P\+LL}{RCC\_CFGR\_SWS\_PLL}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+F\+G\+R\+\_\+\+S\+W\+S\+\_\+\+P\+LL~0x00000008}
+
+
+
+R\+C\+C\+\_\+\+C\+F\+GR System clock switch to P\+LL status value. 
+
+
+
+Definition at line 96 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a5d90893e6a5c6e0be4c7d78220a99e72}\label{bsp__clocks_8h_a5d90893e6a5c6e0be4c7d78220a99e72}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+R\+\_\+\+A\+D\+D\+R\+E\+SS@{R\+C\+C\+\_\+\+C\+R\+\_\+\+A\+D\+D\+R\+E\+SS}}
+\index{R\+C\+C\+\_\+\+C\+R\+\_\+\+A\+D\+D\+R\+E\+SS@{R\+C\+C\+\_\+\+C\+R\+\_\+\+A\+D\+D\+R\+E\+SS}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+R\+\_\+\+A\+D\+D\+R\+E\+SS}{RCC\_CR\_ADDRESS}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+R\+\_\+\+A\+D\+D\+R\+E\+SS~0x40023800}
+
+
+
+R\+CC Control Register address. 
+
+
+
+Definition at line 29 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_af4fcacf94a97f7d49a70e089b39cf474}\label{bsp__clocks_8h_af4fcacf94a97f7d49a70e089b39cf474}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+ON@{R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+ON}}
+\index{R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+ON@{R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+ON}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+ON}{RCC\_CR\_HSION}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+ON~0x00000001}
+
+
+
+R\+C\+C\+\_\+\+CR H\+SI clock enabled. 
+
+
+
+Definition at line 81 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a9dbac3f2bc04f04ebafe1e66ae3fcf0d}\label{bsp__clocks_8h_a9dbac3f2bc04f04ebafe1e66ae3fcf0d}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+R\+DY@{R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+R\+DY}}
+\index{R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+R\+DY@{R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+R\+DY}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+R\+DY}{RCC\_CR\_HSIRDY}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+R\+DY~0x00000002}
+
+
+
+R\+C\+C\+\_\+\+CR H\+SI clock ready flag. 
+
+
+
+Definition at line 83 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a12241a92893b4023a40e85d3b371ac05}\label{bsp__clocks_8h_a12241a92893b4023a40e85d3b371ac05}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+T\+R\+I\+M\+\_\+\+D\+EF@{R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+T\+R\+I\+M\+\_\+\+D\+EF}}
+\index{R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+T\+R\+I\+M\+\_\+\+D\+EF@{R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+T\+R\+I\+M\+\_\+\+D\+EF}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+T\+R\+I\+M\+\_\+\+D\+EF}{RCC\_CR\_HSITRIM\_DEF}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+T\+R\+I\+M\+\_\+\+D\+EF~0x00000080}
+
+
+
+R\+C\+C\+\_\+\+CR H\+SI clock default trimming value. 
+
+
+
+Definition at line 79 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a73f9913edb8b30eb2b8aa1b5d29b297e}\label{bsp__clocks_8h_a73f9913edb8b30eb2b8aa1b5d29b297e}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+T\+R\+I\+M\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+T\+R\+I\+M\+\_\+\+M\+A\+SK}}
+\index{R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+T\+R\+I\+M\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+T\+R\+I\+M\+\_\+\+M\+A\+SK}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+T\+R\+I\+M\+\_\+\+M\+A\+SK}{RCC\_CR\_HSITRIM\_MASK}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+R\+\_\+\+H\+S\+I\+T\+R\+I\+M\+\_\+\+M\+A\+SK~0x000000\+F8}
+
+
+
+H\+SI clock trimming field mask. 
+
+
+
+Definition at line 139 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a3ccb8964b640530f1080f9ea549d8133}\label{bsp__clocks_8h_a3ccb8964b640530f1080f9ea549d8133}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+I2\+S\+ON@{R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+I2\+S\+ON}}
+\index{R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+I2\+S\+ON@{R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+I2\+S\+ON}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+I2\+S\+ON}{RCC\_CR\_PLLI2SON}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+I2\+S\+ON~0x04000000}
+
+
+
+R\+C\+C\+\_\+\+CR P\+L\+L\+I2S enabled. 
+
+
+
+Definition at line 73 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a7354703f289244a71753debf3ae26e46}\label{bsp__clocks_8h_a7354703f289244a71753debf3ae26e46}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+I2\+S\+R\+DY@{R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+I2\+S\+R\+DY}}
+\index{R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+I2\+S\+R\+DY@{R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+I2\+S\+R\+DY}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+I2\+S\+R\+DY}{RCC\_CR\_PLLI2SRDY}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+I2\+S\+R\+DY~0x08000000}
+
+
+
+R\+C\+C\+\_\+\+CR P\+L\+L\+I2S ready flag. 
+
+
+
+Definition at line 71 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_ad0e73d5b0a4883e074d40029b49ee47e}\label{bsp__clocks_8h_ad0e73d5b0a4883e074d40029b49ee47e}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+ON@{R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+ON}}
+\index{R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+ON@{R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+ON}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+ON}{RCC\_CR\_PLLON}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+ON~0x01000000}
+
+
+
+R\+C\+C\+\_\+\+CR P\+LL enabled. 
+
+
+
+Definition at line 77 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_afa12d7ac6a7f0f91d066aeb2c6071888}\label{bsp__clocks_8h_afa12d7ac6a7f0f91d066aeb2c6071888}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+R\+DY@{R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+R\+DY}}
+\index{R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+R\+DY@{R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+R\+DY}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+R\+DY}{RCC\_CR\_PLLRDY}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+R\+\_\+\+P\+L\+L\+R\+DY~0x02000000}
+
+
+
+R\+C\+C\+\_\+\+CR P\+LL ready flag. 
+
+
+
+Definition at line 75 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a2fcf7c04f16b1dd27c577a9a14c5ff96}\label{bsp__clocks_8h_a2fcf7c04f16b1dd27c577a9a14c5ff96}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+C\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER@{R\+C\+C\+\_\+\+C\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}}
+\index{R\+C\+C\+\_\+\+C\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER@{R\+C\+C\+\_\+\+C\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+C\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}{RCC\_CR\_REGISTER}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+C\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER~((volatile \hyperlink{stdint_8h_a324c5d28c0d82f502a234ab99efac87a}{uint32\+\_\+t}$\ast$)\hyperlink{bsp__clocks_8h_a5d90893e6a5c6e0be4c7d78220a99e72}{R\+C\+C\+\_\+\+C\+R\+\_\+\+A\+D\+D\+R\+E\+SS})}
+
+
+
+Definition at line 30 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a19d723f47200a1da259e9c147f2de258}\label{bsp__clocks_8h_a19d723f47200a1da259e9c147f2de258}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+H\+S\+E\+\_\+\+B\+A\+S\+E\+\_\+\+F\+R\+EQ@{R\+C\+C\+\_\+\+H\+S\+E\+\_\+\+B\+A\+S\+E\+\_\+\+F\+R\+EQ}}
+\index{R\+C\+C\+\_\+\+H\+S\+E\+\_\+\+B\+A\+S\+E\+\_\+\+F\+R\+EQ@{R\+C\+C\+\_\+\+H\+S\+E\+\_\+\+B\+A\+S\+E\+\_\+\+F\+R\+EQ}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+H\+S\+E\+\_\+\+B\+A\+S\+E\+\_\+\+F\+R\+EQ}{RCC\_HSE\_BASE\_FREQ}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+H\+S\+E\+\_\+\+B\+A\+S\+E\+\_\+\+F\+R\+EQ~0}
+
+
+
+H\+SE clock frequency (does not exists on S\+T\+M\+F401\+RE) 
+
+
+
+Definition at line 181 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_ae89e6b2d1e86b7fb4831cb013ece2c52}\label{bsp__clocks_8h_ae89e6b2d1e86b7fb4831cb013ece2c52}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+H\+S\+I\+\_\+\+B\+A\+S\+E\+\_\+\+F\+R\+EQ@{R\+C\+C\+\_\+\+H\+S\+I\+\_\+\+B\+A\+S\+E\+\_\+\+F\+R\+EQ}}
+\index{R\+C\+C\+\_\+\+H\+S\+I\+\_\+\+B\+A\+S\+E\+\_\+\+F\+R\+EQ@{R\+C\+C\+\_\+\+H\+S\+I\+\_\+\+B\+A\+S\+E\+\_\+\+F\+R\+EQ}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+H\+S\+I\+\_\+\+B\+A\+S\+E\+\_\+\+F\+R\+EQ}{RCC\_HSI\_BASE\_FREQ}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+H\+S\+I\+\_\+\+B\+A\+S\+E\+\_\+\+F\+R\+EQ~16000000}
+
+
+
+H\+SI clock frequency. 
+
+
+
+Definition at line 179 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_aefbe0661a046e5156a8d1efb28acc7c1}\label{bsp__clocks_8h_aefbe0661a046e5156a8d1efb28acc7c1}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+A\+D\+D\+R\+E\+SS@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+A\+D\+D\+R\+E\+SS}}
+\index{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+A\+D\+D\+R\+E\+SS@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+A\+D\+D\+R\+E\+SS}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+A\+D\+D\+R\+E\+SS}{RCC\_PLLCFGR\_ADDRESS}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+A\+D\+D\+R\+E\+SS~0x40023804}
+
+
+
+R\+CC P\+LL Configuration Register address. 
+
+
+
+Definition at line 32 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_afaac3bc429eaa475ca5e431a020d4c67}\label{bsp__clocks_8h_afaac3bc429eaa475ca5e431a020d4c67}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+M\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+M\+\_\+\+M\+A\+SK}}
+\index{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+M\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+M\+\_\+\+M\+A\+SK}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+M\+\_\+\+M\+A\+SK}{RCC\_PLLCFGR\_PLLM\_MASK}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+M\+\_\+\+M\+A\+SK~0x0000003F}
+
+
+
+R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+GR P\+L\+LM bit mask. 
+
+
+
+Definition at line 111 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_add5fc49687031bdd44fca9c909f74fe0}\label{bsp__clocks_8h_add5fc49687031bdd44fca9c909f74fe0}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+M\+\_\+\+O\+F\+F\+S\+ET@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+M\+\_\+\+O\+F\+F\+S\+ET}}
+\index{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+M\+\_\+\+O\+F\+F\+S\+ET@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+M\+\_\+\+O\+F\+F\+S\+ET}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+M\+\_\+\+O\+F\+F\+S\+ET}{RCC\_PLLCFGR\_PLLM\_OFFSET}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+M\+\_\+\+O\+F\+F\+S\+ET~0}
+
+
+
+R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+GR P\+L\+LM bit field offset. 
+
+
+
+Definition at line 142 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a90997335764397eb4be02c23676cda4a}\label{bsp__clocks_8h_a90997335764397eb4be02c23676cda4a}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+N\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+N\+\_\+\+M\+A\+SK}}
+\index{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+N\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+N\+\_\+\+M\+A\+SK}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+N\+\_\+\+M\+A\+SK}{RCC\_PLLCFGR\_PLLN\_MASK}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+N\+\_\+\+M\+A\+SK~0x00007\+F\+C0}
+
+
+
+R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+GR P\+L\+LN bit mask. 
+
+
+
+Definition at line 113 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_adc0f70732fb3d933c96d741f27baec35}\label{bsp__clocks_8h_adc0f70732fb3d933c96d741f27baec35}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+N\+\_\+\+O\+F\+F\+S\+ET@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+N\+\_\+\+O\+F\+F\+S\+ET}}
+\index{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+N\+\_\+\+O\+F\+F\+S\+ET@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+N\+\_\+\+O\+F\+F\+S\+ET}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+N\+\_\+\+O\+F\+F\+S\+ET}{RCC\_PLLCFGR\_PLLN\_OFFSET}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+N\+\_\+\+O\+F\+F\+S\+ET~6}
+
+
+
+R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+GR P\+L\+LN bit field offset. 
+
+
+
+Definition at line 144 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a40a7c5938dfdd0ab63dcf3b203da7dd4}\label{bsp__clocks_8h_a40a7c5938dfdd0ab63dcf3b203da7dd4}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+P\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+P\+\_\+\+M\+A\+SK}}
+\index{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+P\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+P\+\_\+\+M\+A\+SK}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+P\+\_\+\+M\+A\+SK}{RCC\_PLLCFGR\_PLLP\_MASK}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+P\+\_\+\+M\+A\+SK~0x00030000}
+
+
+
+R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+GR P\+L\+LP bit mask. 
+
+
+
+Definition at line 115 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a9a6c6234e6c59e7638d1a8edd237f591}\label{bsp__clocks_8h_a9a6c6234e6c59e7638d1a8edd237f591}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+P\+\_\+\+O\+F\+F\+S\+ET@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+P\+\_\+\+O\+F\+F\+S\+ET}}
+\index{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+P\+\_\+\+O\+F\+F\+S\+ET@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+P\+\_\+\+O\+F\+F\+S\+ET}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+P\+\_\+\+O\+F\+F\+S\+ET}{RCC\_PLLCFGR\_PLLP\_OFFSET}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+P\+\_\+\+O\+F\+F\+S\+ET~16}
+
+
+
+R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+GR P\+L\+LP bit field offset. 
+
+
+
+Definition at line 146 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_ad4784939ce13e81f2cc64dda2b5d8770}\label{bsp__clocks_8h_ad4784939ce13e81f2cc64dda2b5d8770}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+Q\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+Q\+\_\+\+M\+A\+SK}}
+\index{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+Q\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+Q\+\_\+\+M\+A\+SK}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+Q\+\_\+\+M\+A\+SK}{RCC\_PLLCFGR\_PLLQ\_MASK}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+Q\+\_\+\+M\+A\+SK~0x0\+F000000}
+
+
+
+R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+GR P\+L\+LQ bit mask. 
+
+
+
+Definition at line 119 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_aa47b1576488cea5e741f58cce74337c9}\label{bsp__clocks_8h_aa47b1576488cea5e741f58cce74337c9}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+Q\+\_\+\+O\+F\+F\+S\+ET@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+Q\+\_\+\+O\+F\+F\+S\+ET}}
+\index{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+Q\+\_\+\+O\+F\+F\+S\+ET@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+Q\+\_\+\+O\+F\+F\+S\+ET}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+Q\+\_\+\+O\+F\+F\+S\+ET}{RCC\_PLLCFGR\_PLLQ\_OFFSET}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+Q\+\_\+\+O\+F\+F\+S\+ET~24}
+
+
+
+R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+GR P\+L\+LQ bit field offset. 
+
+
+
+Definition at line 150 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a6c5c6a2e8d760ad7da85ae2c8076ee31}\label{bsp__clocks_8h_a6c5c6a2e8d760ad7da85ae2c8076ee31}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+S\+R\+C\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+S\+R\+C\+\_\+\+M\+A\+SK}}
+\index{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+S\+R\+C\+\_\+\+M\+A\+SK@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+S\+R\+C\+\_\+\+M\+A\+SK}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+S\+R\+C\+\_\+\+M\+A\+SK}{RCC\_PLLCFGR\_PLLSRC\_MASK}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+S\+R\+C\+\_\+\+M\+A\+SK~0x00400000}
+
+
+
+R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+GR P\+L\+L\+S\+RC bit mask. 
+
+
+
+Definition at line 117 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a001728588571f89b2b52e6a903e66395}\label{bsp__clocks_8h_a001728588571f89b2b52e6a903e66395}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+S\+R\+C\+\_\+\+O\+F\+F\+S\+ET@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+S\+R\+C\+\_\+\+O\+F\+F\+S\+ET}}
+\index{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+S\+R\+C\+\_\+\+O\+F\+F\+S\+ET@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+S\+R\+C\+\_\+\+O\+F\+F\+S\+ET}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+S\+R\+C\+\_\+\+O\+F\+F\+S\+ET}{RCC\_PLLCFGR\_PLLSRC\_OFFSET}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+P\+L\+L\+S\+R\+C\+\_\+\+O\+F\+F\+S\+ET~22}
+
+
+
+R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+GR P\+L\+L\+S\+RC bit field offset. 
+
+
+
+Definition at line 148 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_ad2d60b66a5292f1c04c7c3ebfe9df335}\label{bsp__clocks_8h_ad2d60b66a5292f1c04c7c3ebfe9df335}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}}
+\index{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER@{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER}{RCC\_PLLCFGR\_REGISTER}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+R\+E\+G\+I\+S\+T\+ER~((volatile \hyperlink{stdint_8h_a324c5d28c0d82f502a234ab99efac87a}{uint32\+\_\+t}$\ast$)\hyperlink{bsp__clocks_8h_aefbe0661a046e5156a8d1efb28acc7c1}{R\+C\+C\+\_\+\+P\+L\+L\+C\+F\+G\+R\+\_\+\+A\+D\+D\+R\+E\+SS})}
+
+
+
+Definition at line 33 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_adc4eb2ce50286dc96d4976b9689be1d7}\label{bsp__clocks_8h_adc4eb2ce50286dc96d4976b9689be1d7}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+P\+L\+L\+M\+\_\+\+V\+A\+L\+UE@{R\+C\+C\+\_\+\+P\+L\+L\+M\+\_\+\+V\+A\+L\+UE}}
+\index{R\+C\+C\+\_\+\+P\+L\+L\+M\+\_\+\+V\+A\+L\+UE@{R\+C\+C\+\_\+\+P\+L\+L\+M\+\_\+\+V\+A\+L\+UE}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+P\+L\+L\+M\+\_\+\+V\+A\+L\+UE}{RCC\_PLLM\_VALUE}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+P\+L\+L\+M\+\_\+\+V\+A\+L\+UE~16}
+
+
+
+Division factor for input clock. Divide by 16 the H\+SI clock. 
+
+
+
+Definition at line 164 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a11fa93ae89931a632e06eb0694ff62b7}\label{bsp__clocks_8h_a11fa93ae89931a632e06eb0694ff62b7}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+P\+L\+L\+N\+\_\+\+V\+A\+L\+UE@{R\+C\+C\+\_\+\+P\+L\+L\+N\+\_\+\+V\+A\+L\+UE}}
+\index{R\+C\+C\+\_\+\+P\+L\+L\+N\+\_\+\+V\+A\+L\+UE@{R\+C\+C\+\_\+\+P\+L\+L\+N\+\_\+\+V\+A\+L\+UE}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+P\+L\+L\+N\+\_\+\+V\+A\+L\+UE}{RCC\_PLLN\_VALUE}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+P\+L\+L\+N\+\_\+\+V\+A\+L\+UE~336}
+
+
+
+Multiply factor for system clock. Multiply by 336 the V\+CO clock. 
+
+
+
+Definition at line 166 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a9ad812030f6e208e79df8e9bddb96c19}\label{bsp__clocks_8h_a9ad812030f6e208e79df8e9bddb96c19}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+P\+L\+L\+P\+\_\+\+V\+A\+L\+UE@{R\+C\+C\+\_\+\+P\+L\+L\+P\+\_\+\+V\+A\+L\+UE}}
+\index{R\+C\+C\+\_\+\+P\+L\+L\+P\+\_\+\+V\+A\+L\+UE@{R\+C\+C\+\_\+\+P\+L\+L\+P\+\_\+\+V\+A\+L\+UE}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+P\+L\+L\+P\+\_\+\+V\+A\+L\+UE}{RCC\_PLLP\_VALUE}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+P\+L\+L\+P\+\_\+\+V\+A\+L\+UE~1}
+
+
+
+Division factor for system clock. Divide by 4 the V\+CO clock. 
+
+
+
+Definition at line 168 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_a0babc931753727d1ee6b56d41a51f598}\label{bsp__clocks_8h_a0babc931753727d1ee6b56d41a51f598}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+P\+L\+L\+Q\+\_\+\+V\+A\+L\+UE@{R\+C\+C\+\_\+\+P\+L\+L\+Q\+\_\+\+V\+A\+L\+UE}}
+\index{R\+C\+C\+\_\+\+P\+L\+L\+Q\+\_\+\+V\+A\+L\+UE@{R\+C\+C\+\_\+\+P\+L\+L\+Q\+\_\+\+V\+A\+L\+UE}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+P\+L\+L\+Q\+\_\+\+V\+A\+L\+UE}{RCC\_PLLQ\_VALUE}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+P\+L\+L\+Q\+\_\+\+V\+A\+L\+UE~8}
+
+
+
+Division factor for U\+SB O\+TG FS clock. Divide by 8 the V\+CO clock. 
+
+
+
+Definition at line 170 of file bsp\+\_\+clocks.\+h.
+
+\mbox{\Hypertarget{bsp__clocks_8h_ae90c3d400891ac3355363979581bd924}\label{bsp__clocks_8h_ae90c3d400891ac3355363979581bd924}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!R\+C\+C\+\_\+\+P\+L\+L\+S\+R\+C\+\_\+\+V\+A\+L\+UE@{R\+C\+C\+\_\+\+P\+L\+L\+S\+R\+C\+\_\+\+V\+A\+L\+UE}}
+\index{R\+C\+C\+\_\+\+P\+L\+L\+S\+R\+C\+\_\+\+V\+A\+L\+UE@{R\+C\+C\+\_\+\+P\+L\+L\+S\+R\+C\+\_\+\+V\+A\+L\+UE}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{R\+C\+C\+\_\+\+P\+L\+L\+S\+R\+C\+\_\+\+V\+A\+L\+UE}{RCC\_PLLSRC\_VALUE}}
+{\footnotesize\ttfamily \#define R\+C\+C\+\_\+\+P\+L\+L\+S\+R\+C\+\_\+\+V\+A\+L\+UE~0}
+
+
+
+P\+LL source clock set as H\+SI. 
+
+
+
+Definition at line 172 of file bsp\+\_\+clocks.\+h.
+
+
+
+\subsection{Typedef Documentation}
+\mbox{\Hypertarget{bsp__clocks_8h_ac9d4d589a659370f313ef156f6eff0e8}\label{bsp__clocks_8h_ac9d4d589a659370f313ef156f6eff0e8}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!C\+L\+O\+C\+K\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+E\+R\+\_\+T@{C\+L\+O\+C\+K\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+E\+R\+\_\+T}}
+\index{C\+L\+O\+C\+K\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+E\+R\+\_\+T@{C\+L\+O\+C\+K\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+E\+R\+\_\+T}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{C\+L\+O\+C\+K\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+E\+R\+\_\+T}{CLOCK\_IDENTIFIER\_T}}
+{\footnotesize\ttfamily typedef enum \hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70}{C\+L\+O\+C\+K\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+ER} \hyperlink{bsp__clocks_8h_ac9d4d589a659370f313ef156f6eff0e8}{C\+L\+O\+C\+K\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+E\+R\+\_\+T}}
+
+
+
+Short hand for enum C\+L\+O\+C\+K\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+ER. 
+
+
+
+Definition at line 207 of file bsp\+\_\+clocks.\+h.
+
+
+
+\subsection{Enumeration Type Documentation}
+\mbox{\Hypertarget{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70}\label{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!C\+L\+O\+C\+K\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+ER@{C\+L\+O\+C\+K\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+ER}}
+\index{C\+L\+O\+C\+K\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+ER@{C\+L\+O\+C\+K\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+ER}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{C\+L\+O\+C\+K\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+ER}{CLOCK\_IDENTIFIER}}
+{\footnotesize\ttfamily enum \hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70}{C\+L\+O\+C\+K\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+ER}}
+
+
+
+Clock identifer enumeration. Stores all accessible B\+SP clocks. 
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+S\+Y\+S\+C\+LK@{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+S\+Y\+S\+C\+LK}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+S\+Y\+S\+C\+LK@{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+S\+Y\+S\+C\+LK}}}\mbox{\Hypertarget{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a44aa8d3c1c8f980b372190786a4853f9}\label{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a44aa8d3c1c8f980b372190786a4853f9}} 
+B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+S\+Y\+S\+C\+LK&System\textquotesingle{}s clock identifier. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+H\+C\+LK@{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+H\+C\+LK}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+H\+C\+LK@{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+H\+C\+LK}}}\mbox{\Hypertarget{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a58357d0569548d6c2ba44f27e0aa6ba6}\label{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a58357d0569548d6c2ba44f27e0aa6ba6}} 
+B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+H\+C\+LK&H\+C\+LK, used by A\+HB bus, core, etc. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+F\+C\+LK@{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+F\+C\+LK}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+F\+C\+LK@{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+F\+C\+LK}}}\mbox{\Hypertarget{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a265c9dec4478eb66904a2dbc6954e598}\label{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a265c9dec4478eb66904a2dbc6954e598}} 
+B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+F\+C\+LK&F\+C\+LK sued by the cortex core. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+P\+C\+L\+K1@{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+P\+C\+L\+K1}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+P\+C\+L\+K1@{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+P\+C\+L\+K1}}}\mbox{\Hypertarget{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a0493d0bbd7edf1aebadb342c5c38f709}\label{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a0493d0bbd7edf1aebadb342c5c38f709}} 
+B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+P\+C\+L\+K1&P\+C\+L\+K1 used as A\+P\+B1 peripheral clocks. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+P\+C\+L\+K2@{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+P\+C\+L\+K2}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+P\+C\+L\+K2@{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+P\+C\+L\+K2}}}\mbox{\Hypertarget{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70aad62d8c78d2b4617724a82ec190a33ee}\label{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70aad62d8c78d2b4617724a82ec190a33ee}} 
+B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+P\+C\+L\+K2&P\+C\+L\+K2 used as A\+P\+B2 peripheral clocks. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+A\+P\+B1\+\_\+\+T\+I\+M\+ER@{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+A\+P\+B1\+\_\+\+T\+I\+M\+ER}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+A\+P\+B1\+\_\+\+T\+I\+M\+ER@{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+A\+P\+B1\+\_\+\+T\+I\+M\+ER}}}\mbox{\Hypertarget{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70aad46d3b8852f9a4d711c15164bf1c0d3}\label{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70aad46d3b8852f9a4d711c15164bf1c0d3}} 
+B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+A\+P\+B1\+\_\+\+T\+I\+M\+ER&P\+C\+L\+K1 used as A\+P\+B1 timers clocks. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+A\+P\+B2\+\_\+\+T\+I\+M\+ER@{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+A\+P\+B2\+\_\+\+T\+I\+M\+ER}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+A\+P\+B2\+\_\+\+T\+I\+M\+ER@{B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+A\+P\+B2\+\_\+\+T\+I\+M\+ER}}}\mbox{\Hypertarget{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a30cca3be6a7bad72d2c02e9b58ff4d50}\label{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a30cca3be6a7bad72d2c02e9b58ff4d50}} 
+B\+S\+P\+\_\+\+C\+L\+O\+C\+K\+\_\+\+I\+D\+\_\+\+A\+P\+B2\+\_\+\+T\+I\+M\+ER&P\+C\+L\+K1 used as A\+P\+B2 timers clocks. \\
+\hline
+
+\end{DoxyEnumFields}
+
+
+Definition at line 188 of file bsp\+\_\+clocks.\+h.
+
+
+\begin{DoxyCode}
+189 \{
+191     \hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a44aa8d3c1c8f980b372190786a4853f9}{BSP\_CLOCK\_ID\_SYSCLK},
+193     \hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a58357d0569548d6c2ba44f27e0aa6ba6}{BSP\_CLOCK\_ID\_HCLK},
+195     \hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a265c9dec4478eb66904a2dbc6954e598}{BSP\_CLOCK\_ID\_FCLK},      
+197     \hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a0493d0bbd7edf1aebadb342c5c38f709}{BSP\_CLOCK\_ID\_PCLK1},
+199     \hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70aad62d8c78d2b4617724a82ec190a33ee}{BSP\_CLOCK\_ID\_PCLK2},
+201     \hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70aad46d3b8852f9a4d711c15164bf1c0d3}{BSP\_CLOCK\_ID\_APB1\_TIMER},
+203     \hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a30cca3be6a7bad72d2c02e9b58ff4d50}{BSP\_CLOCK\_ID\_APB2\_TIMER},
+204 \};
+\end{DoxyCode}
+
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{bsp__clocks_8h_a500b2e77b70c93b3f2b4a94cc9bcf79d}\label{bsp__clocks_8h_a500b2e77b70c93b3f2b4a94cc9bcf79d}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!bsp\+\_\+clk\+\_\+gpio\+\_\+enable@{bsp\+\_\+clk\+\_\+gpio\+\_\+enable}}
+\index{bsp\+\_\+clk\+\_\+gpio\+\_\+enable@{bsp\+\_\+clk\+\_\+gpio\+\_\+enable}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{bsp\+\_\+clk\+\_\+gpio\+\_\+enable()}{bsp\_clk\_gpio\_enable()}}
+{\footnotesize\ttfamily \hyperlink{error__types_8h_acf146bc98f60f47c79d782f7523e339c}{E\+R\+R\+O\+R\+\_\+\+C\+O\+D\+E\+\_\+E} bsp\+\_\+clk\+\_\+gpio\+\_\+enable (\begin{DoxyParamCaption}\item[{const \hyperlink{bsp__gpio_8h_ab086506332275a2a873dfce02ed5a3b8}{G\+P\+I\+O\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+E\+R\+\_\+E}}]{gpio\+\_\+id }\end{DoxyParamCaption})}
+
+
+
+Enables the G\+P\+IO clocks. 
+
+Enables the G\+P\+IO clocks. This function will enable the peripheral clock used by the G\+P\+IO corresponding to the identifier given as parameter. If the identifier is unknown, the function has no effect.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em gpio\+\_\+id} & The G\+P\+IO identifier for which the clock should be enabled.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+N\+O\+\_\+\+E\+R\+R\+OR is returned in case of success. Otherwise an error code is returned. Please refer to the list of the standard error codes. 
+\end{DoxyReturn}
+
+
+Definition at line 145 of file bsp\+\_\+clocks.\+c.
+
+
+\begin{DoxyCode}
+146 \{
+147     \hyperlink{stdint_8h_a324c5d28c0d82f502a234ab99efac87a}{uint32\_t} reg\_val;
+148 
+149     \textcolor{keywordflow}{switch}(gpio\_id)
+150     \{
+151         \textcolor{keywordflow}{case} \hyperlink{bsp__gpio_8h_a69f521b579d2c761dd65949f2bae88f3a4cb73b98ec508807d984052a1598950a}{GPIO\_ID\_A}:
+152             reg\_val = \hyperlink{bsp__clocks_8h_a6ff46fb3b30fc6792e4fd18fcb0941b5}{RCC\_AHB1ENR\_GPIOAEN};
+153             \textcolor{keywordflow}{break};
+154         \textcolor{keywordflow}{case} \hyperlink{bsp__gpio_8h_a69f521b579d2c761dd65949f2bae88f3a9fc59b324d277c00de32d87f8072b56a}{GPIO\_ID\_B}:
+155             reg\_val = \hyperlink{bsp__clocks_8h_ad7f408f92e7fd49b0957b8cb4ff31ca5}{RCC\_AHB1ENR\_GPIOBEN};
+156             \textcolor{keywordflow}{break};
+157         \textcolor{keywordflow}{case} \hyperlink{bsp__gpio_8h_a69f521b579d2c761dd65949f2bae88f3afae76fa0a334173cbea6472ae010d0a9}{GPIO\_ID\_C}:
+158             reg\_val = \hyperlink{bsp__clocks_8h_ae8a8b42e33aef2a7bc2d41ad9d231733}{RCC\_AHB1ENR\_GPIOCEN};
+159             \textcolor{keywordflow}{break};
+160         \textcolor{keywordflow}{case} \hyperlink{bsp__gpio_8h_a69f521b579d2c761dd65949f2bae88f3ad6df84175b0fc74ef3c655082b648918}{GPIO\_ID\_D}:
+161             reg\_val = \hyperlink{bsp__clocks_8h_aebd8146e91c76f14af8dfe78a1c2d916}{RCC\_AHB1ENR\_GPIODEN};
+162             \textcolor{keywordflow}{break};
+163         \textcolor{keywordflow}{case} \hyperlink{bsp__gpio_8h_a69f521b579d2c761dd65949f2bae88f3a496fabc0d5663f4956df5e9a4d275ed4}{GPIO\_ID\_E}:
+164             reg\_val = \hyperlink{bsp__clocks_8h_a67a9094e0e464eaa8e25f854f90abfc6}{RCC\_AHB1ENR\_GPIOEEN};
+165             \textcolor{keywordflow}{break};
+166         \textcolor{keywordflow}{case} \hyperlink{bsp__gpio_8h_a69f521b579d2c761dd65949f2bae88f3aa25ae326f6c8e013c190052d0a3c7d29}{GPIO\_ID\_H}:
+167             reg\_val = \hyperlink{bsp__clocks_8h_adb16afc550121895822ebb22108196b6}{RCC\_AHB1ENR\_GPIOHEN};
+168             \textcolor{keywordflow}{break};
+169         \textcolor{keywordflow}{default}:
+170             reg\_val = 0;
+171     \}
+172 
+173     \textcolor{keywordflow}{if}(reg\_val == 0)
+174     \{
+175 \textcolor{preprocessor}{#if KERNEL\_LOG\_LEVEL == ERROR\_LOG\_LEVEL}
+176         \hyperlink{logger_8h_a580bb63c1418b2fc8456f9b6c5b6d39d}{KERNEL\_LOG\_ERROR}(\textcolor{stringliteral}{"Wrong GPIO identifer"}, 
+177                          gpio\_id, 
+178                          \textcolor{keyword}{sizeof}(gpio\_id), 
+179                          \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabbe6797281350f36c23d07d6f2d7f6e2}{ERROR\_INVALID\_PARAM});
+180 \textcolor{preprocessor}{#endif}
+181         \textcolor{keywordflow}{return} \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabbe6797281350f36c23d07d6f2d7f6e2}{ERROR\_INVALID\_PARAM};
+182     \}
+183 
+184     *\hyperlink{bsp__clocks_8h_a4c6aae1c96c5acee8a320c6b2a8aaee5}{RCC\_AHB1ENR\_REGISTER} = *\hyperlink{bsp__clocks_8h_a4c6aae1c96c5acee8a320c6b2a8aaee5}{RCC\_AHB1ENR\_REGISTER} | reg\_val;
+185     \textcolor{keywordflow}{while}((*\hyperlink{bsp__clocks_8h_a4c6aae1c96c5acee8a320c6b2a8aaee5}{RCC\_AHB1ENR\_REGISTER} & reg\_val) == 0);
+186 
+187 \textcolor{preprocessor}{#if KERNEL\_LOG\_LEVEL >= INFO\_LOG\_LEVEL}
+188         KERNEL\_LOG\_INFO(\textcolor{stringliteral}{"GPIO clock enabled"}, 
+189                         gpio\_id, 
+190                         \textcolor{keyword}{sizeof}(gpio\_id), 
+191                         \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR});
+192 \textcolor{preprocessor}{#endif}
+193 
+194     \textcolor{keywordflow}{return} \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR};
+195 \}
+\end{DoxyCode}
+Here is the call graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{bsp__clocks_8h_a500b2e77b70c93b3f2b4a94cc9bcf79d_cgraph}
+\end{center}
+\end{figure}
+Here is the caller graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{bsp__clocks_8h_a500b2e77b70c93b3f2b4a94cc9bcf79d_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{bsp__clocks_8h_a286d003315af35aa9dd72b86ba6d8420}\label{bsp__clocks_8h_a286d003315af35aa9dd72b86ba6d8420}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!bsp\+\_\+clk\+\_\+sys\+\_\+init@{bsp\+\_\+clk\+\_\+sys\+\_\+init}}
+\index{bsp\+\_\+clk\+\_\+sys\+\_\+init@{bsp\+\_\+clk\+\_\+sys\+\_\+init}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{bsp\+\_\+clk\+\_\+sys\+\_\+init()}{bsp\_clk\_sys\_init()}}
+{\footnotesize\ttfamily \hyperlink{error__types_8h_acf146bc98f60f47c79d782f7523e339c}{E\+R\+R\+O\+R\+\_\+\+C\+O\+D\+E\+\_\+E} bsp\+\_\+clk\+\_\+sys\+\_\+init (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Initializes system clocks. 
+
+Initializes system clocks. The C\+PU, A\+HB and A\+PB clocks are initialized. The function also sets the regulator output voltage needed by the clocks.
+
+\begin{DoxyReturn}{Returns}
+N\+O\+\_\+\+E\+R\+R\+OR is returned in case of success. Otherwise an error code is returned. Please refer to the list of the standard error codes. 
+\end{DoxyReturn}
+
+
+Definition at line 242 of file bsp\+\_\+clocks.\+c.
+
+
+\begin{DoxyCode}
+243 \{
+244     \hyperlink{error__types_8h_acf146bc98f60f47c79d782f7523e339c}{ERROR\_CODE\_E} error;
+245 
+246     \textcolor{comment}{/* Check init state */}
+247     \textcolor{keywordflow}{if}(\hyperlink{bsp__clocks_8c_a7e7b4728df96b76f3a8042b7fb46aa8c}{bsp\_clk\_init} != 0)
+248     \{
+249 \textcolor{preprocessor}{#if KERNEL\_LOG\_LEVEL == ERROR\_LOG\_LEVEL}
+250         \hyperlink{logger_8h_a580bb63c1418b2fc8456f9b6c5b6d39d}{KERNEL\_LOG\_ERROR}(\textcolor{stringliteral}{"System clock is already initialized"}, 
+251                          \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28ca9af911a6ba1c32ce22213d689cb59f86}{ERROR\_ALREADY\_INIT}, 
+252                          \textcolor{keyword}{sizeof}(\hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28ca9af911a6ba1c32ce22213d689cb59f86}{ERROR\_ALREADY\_INIT}), 
+253                          \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28ca9af911a6ba1c32ce22213d689cb59f86}{ERROR\_ALREADY\_INIT});
+254 \textcolor{preprocessor}{#endif}
+255         \textcolor{keywordflow}{return} \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28ca9af911a6ba1c32ce22213d689cb59f86}{ERROR\_ALREADY\_INIT};
+256     \}
+257 
+258     \textcolor{comment}{/* Enable the power interface clock and system clock controller */}
+259     *\hyperlink{bsp__clocks_8h_aae3fa9b2133a67e3ca65db35f8ac9a4c}{RCC\_APB1ENR\_REGISTER} = *\hyperlink{bsp__clocks_8h_aae3fa9b2133a67e3ca65db35f8ac9a4c}{RCC\_APB1ENR\_REGISTER} | 
+      \hyperlink{bsp__clocks_8h_a5c19997ccd28464b80a7c3325da0ca60}{RCC\_APB1ENR\_PWREN};
+260     \textcolor{keywordflow}{while}((*\hyperlink{bsp__clocks_8h_aae3fa9b2133a67e3ca65db35f8ac9a4c}{RCC\_APB1ENR\_REGISTER} & \hyperlink{bsp__clocks_8h_a5c19997ccd28464b80a7c3325da0ca60}{RCC\_APB1ENR\_PWREN}) == 0);
+261     *\hyperlink{bsp__clocks_8h_aae721f66e88c2e4264580d95d5ffdd59}{RCC\_APB2ENR\_REGISTER} = *\hyperlink{bsp__clocks_8h_aae721f66e88c2e4264580d95d5ffdd59}{RCC\_APB2ENR\_REGISTER} | 
+      \hyperlink{bsp__clocks_8h_a7a9d56a8aa1fa0f519ecbdf0d19dd4da}{RCC\_APB2ENR\_SYSCFGEN};
+262     \textcolor{keywordflow}{while}((*\hyperlink{bsp__clocks_8h_aae721f66e88c2e4264580d95d5ffdd59}{RCC\_APB2ENR\_REGISTER} & \hyperlink{bsp__clocks_8h_a7a9d56a8aa1fa0f519ecbdf0d19dd4da}{RCC\_APB2ENR\_SYSCFGEN}) == 0);
+263 
+264     \textcolor{comment}{/* Update voltage scaling */}
+265     error = \hyperlink{bsp__power_8h_abe4bd68d683c1ab3fbc83afb60b36ede}{bsp\_pwr\_set\_scaling}(\hyperlink{bsp__power_8h_aeab31582495468040935b45b76f06553a8ddc2bb242e2a77509aad0d808c22339}{POWER\_SCALING\_MODE\_2});
+266     \textcolor{keywordflow}{if}(error != \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR})
+267     \{
+268         \textcolor{keywordflow}{return} error;
+269     \}
+270     
+271     \textcolor{comment}{/* Set flash latency */}
+272     error = \hyperlink{bsp__flash_8h_a51f3c79743adab8e26ca7a5c6b33c55b}{bsp\_flash\_set\_latency}(\hyperlink{bsp__flash_8h_ad230debff3c818a6f9ced62364bc86c0ad84e36d61f83d1f0104cb3384726476c}{FLASH\_LATENCY\_WS\_2});
+273     \textcolor{keywordflow}{if}(error != \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR})
+274     \{
+275         \textcolor{keywordflow}{return} error;
+276     \}
+277 
+278     \textcolor{comment}{/* Init systems clocks */}
+279     \hyperlink{bsp__clocks_8c_a0ce28d57a364aa3702778c54bb4d3c05}{bsp\_clk\_base\_sys\_init}();
+280     \hyperlink{bsp__clocks_8c_a1b855e007d20366749d59e4eda97222f}{bsp\_clk\_pll\_init}();
+281     \hyperlink{bsp__clocks_8c_a69dea9163b1220130c719ac0b3b9327f}{bsp\_clk\_switch\_to\_pll}();
+282 
+283     \textcolor{comment}{/* Init GPIO and USART clocks */}
+284     error = \hyperlink{bsp__clocks_8c_a500b2e77b70c93b3f2b4a94cc9bcf79d}{bsp\_clk\_gpio\_enable}(\hyperlink{bsp__gpio_8h_a69f521b579d2c761dd65949f2bae88f3a4cb73b98ec508807d984052a1598950a}{GPIO\_ID\_A});
+285     \textcolor{keywordflow}{if}(error != \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR})
+286     \{
+287         \textcolor{keywordflow}{return} error;
+288     \}
+289     error = \hyperlink{bsp__clocks_8c_aaf01af602e17579af5e6af009ae7a557}{bsp\_clk\_usart\_enable}(\hyperlink{bsp__usart_8h_a58f9be3820e29e0fbf00e2466c3ee768abb138542d801249fd01ec62c34f52cff}{USART\_ID\_2});
+290     \textcolor{keywordflow}{if}(error != \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR})
+291     \{
+292         \textcolor{keywordflow}{return} error;
+293     \}
+294 
+295 \textcolor{preprocessor}{#if KERNEL\_LOG\_LEVEL >= INFO\_LOG\_LEVEL}
+296     KERNEL\_LOG\_INFO(\textcolor{stringliteral}{"System clock initialized"}, 
+297                     \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR}, 
+298                     \textcolor{keyword}{sizeof}(\hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR}), 
+299                     \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR});
+300 \textcolor{preprocessor}{#endif}
+301 
+302     \textcolor{comment}{/* Update init state */}
+303     \hyperlink{bsp__clocks_8c_a7e7b4728df96b76f3a8042b7fb46aa8c}{bsp\_clk\_init} = 1;
+304     \textcolor{keywordflow}{return} \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR};
+305 \}
+\end{DoxyCode}
+Here is the call graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{bsp__clocks_8h_a286d003315af35aa9dd72b86ba6d8420_cgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{bsp__clocks_8h_aaf01af602e17579af5e6af009ae7a557}\label{bsp__clocks_8h_aaf01af602e17579af5e6af009ae7a557}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!bsp\+\_\+clk\+\_\+usart\+\_\+enable@{bsp\+\_\+clk\+\_\+usart\+\_\+enable}}
+\index{bsp\+\_\+clk\+\_\+usart\+\_\+enable@{bsp\+\_\+clk\+\_\+usart\+\_\+enable}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{bsp\+\_\+clk\+\_\+usart\+\_\+enable()}{bsp\_clk\_usart\_enable()}}
+{\footnotesize\ttfamily \hyperlink{error__types_8h_acf146bc98f60f47c79d782f7523e339c}{E\+R\+R\+O\+R\+\_\+\+C\+O\+D\+E\+\_\+E} bsp\+\_\+clk\+\_\+usart\+\_\+enable (\begin{DoxyParamCaption}\item[{const \hyperlink{bsp__usart_8h_a594f9d90a9a3875660da4512fb208cf9}{U\+S\+A\+R\+T\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+E\+R\+\_\+E}}]{usart\+\_\+id }\end{DoxyParamCaption})}
+
+
+
+Enables the U\+S\+A\+RT clocks. 
+
+Enables the U\+S\+A\+RT clocks. This function will enable the peripheral clock used by the U\+S\+A\+RT corresponding to the identifier given as parameter. If the identifier is unknown, the function has no effect.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em usart\+\_\+id} & The U\+S\+A\+RT identifier for which the clock should be enabled.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+N\+O\+\_\+\+E\+R\+R\+OR is returned in case of success. Otherwise an error code is returned. Please refer to the list of the standard error codes. 
+\end{DoxyReturn}
+
+
+Definition at line 197 of file bsp\+\_\+clocks.\+c.
+
+
+\begin{DoxyCode}
+198 \{
+199     \hyperlink{error__types_8h_acf146bc98f60f47c79d782f7523e339c}{ERROR\_CODE\_E} error;
+200 
+201     error = \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR};
+202 
+203     \textcolor{comment}{/* Select the USART interface */}
+204     \textcolor{keywordflow}{switch}(usart\_id)
+205     \{
+206         \textcolor{keywordflow}{case} \hyperlink{bsp__usart_8h_a58f9be3820e29e0fbf00e2466c3ee768a512d550c862eac9ad45d923508bb0f7d}{USART\_ID\_1}:
+207             *\hyperlink{bsp__clocks_8h_aae721f66e88c2e4264580d95d5ffdd59}{RCC\_APB2ENR\_REGISTER} = *\hyperlink{bsp__clocks_8h_aae721f66e88c2e4264580d95d5ffdd59}{RCC\_APB2ENR\_REGISTER} | 
+208                                      \hyperlink{bsp__clocks_8h_a4666bb90842e8134b32e6a34a0f165f3}{RCC\_APB2ENR\_USART1EN};
+209             \textcolor{keywordflow}{while}((*\hyperlink{bsp__clocks_8h_aae721f66e88c2e4264580d95d5ffdd59}{RCC\_APB2ENR\_REGISTER} & 
+      \hyperlink{bsp__clocks_8h_a4666bb90842e8134b32e6a34a0f165f3}{RCC\_APB2ENR\_USART1EN}) == 0);
+210             \textcolor{keywordflow}{break};
+211         \textcolor{keywordflow}{case} \hyperlink{bsp__usart_8h_a58f9be3820e29e0fbf00e2466c3ee768abb138542d801249fd01ec62c34f52cff}{USART\_ID\_2}:
+212             *\hyperlink{bsp__clocks_8h_aae3fa9b2133a67e3ca65db35f8ac9a4c}{RCC\_APB1ENR\_REGISTER} = *\hyperlink{bsp__clocks_8h_aae3fa9b2133a67e3ca65db35f8ac9a4c}{RCC\_APB1ENR\_REGISTER} | 
+213                                      \hyperlink{bsp__clocks_8h_ab840af4f735ec36419d61c7db3cfa00d}{RCC\_APB1ENR\_USART2EN};
+214             \textcolor{keywordflow}{while}((*\hyperlink{bsp__clocks_8h_aae3fa9b2133a67e3ca65db35f8ac9a4c}{RCC\_APB1ENR\_REGISTER} & 
+      \hyperlink{bsp__clocks_8h_ab840af4f735ec36419d61c7db3cfa00d}{RCC\_APB1ENR\_USART2EN}) == 0);
+215             \textcolor{keywordflow}{break};
+216         \textcolor{keywordflow}{case} \hyperlink{bsp__usart_8h_a58f9be3820e29e0fbf00e2466c3ee768afd45e5de3678cbcada70f46bde327479}{USART\_ID\_6}:
+217             *\hyperlink{bsp__clocks_8h_aae721f66e88c2e4264580d95d5ffdd59}{RCC\_APB2ENR\_REGISTER} = *\hyperlink{bsp__clocks_8h_aae721f66e88c2e4264580d95d5ffdd59}{RCC\_APB2ENR\_REGISTER} | 
+218                                      \hyperlink{bsp__clocks_8h_a0569d91f3b18ae130b7a09e0100c4459}{RCC\_APB2ENR\_USART6EN};
+219             \textcolor{keywordflow}{while}((*\hyperlink{bsp__clocks_8h_aae721f66e88c2e4264580d95d5ffdd59}{RCC\_APB2ENR\_REGISTER} & 
+      \hyperlink{bsp__clocks_8h_a0569d91f3b18ae130b7a09e0100c4459}{RCC\_APB2ENR\_USART6EN}) == 0);
+220             \textcolor{keywordflow}{break};
+221 
+222         \textcolor{keywordflow}{default}:
+223 \textcolor{preprocessor}{#if KERNEL\_LOG\_LEVEL == ERROR\_LOG\_LEVEL}
+224             \hyperlink{logger_8h_a580bb63c1418b2fc8456f9b6c5b6d39d}{KERNEL\_LOG\_ERROR}(\textcolor{stringliteral}{"Wrong USART identifer"}, 
+225                             usart\_id, 
+226                             \textcolor{keyword}{sizeof}(usart\_id), 
+227                             \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabbe6797281350f36c23d07d6f2d7f6e2}{ERROR\_INVALID\_PARAM});
+228 \textcolor{preprocessor}{#endif}
+229             error = \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabbe6797281350f36c23d07d6f2d7f6e2}{ERROR\_INVALID\_PARAM};
+230     \}
+231 
+232 \textcolor{preprocessor}{#if KERNEL\_LOG\_LEVEL >= INFO\_LOG\_LEVEL}
+233     KERNEL\_LOG\_INFO(\textcolor{stringliteral}{"USART clock enabled"}, 
+234                     usart\_id, 
+235                     \textcolor{keyword}{sizeof}(usart\_id), 
+236                     \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR});
+237 \textcolor{preprocessor}{#endif}
+238 
+239     \textcolor{keywordflow}{return} error;
+240 \}
+\end{DoxyCode}
+Here is the call graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{bsp__clocks_8h_aaf01af602e17579af5e6af009ae7a557_cgraph}
+\end{center}
+\end{figure}
+Here is the caller graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{bsp__clocks_8h_aaf01af602e17579af5e6af009ae7a557_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{bsp__clocks_8h_aeeded4b587684fa3383b3d42ee29af1e}\label{bsp__clocks_8h_aeeded4b587684fa3383b3d42ee29af1e}} 
+\index{bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}!bsp\+\_\+clocks\+\_\+get\+\_\+freq@{bsp\+\_\+clocks\+\_\+get\+\_\+freq}}
+\index{bsp\+\_\+clocks\+\_\+get\+\_\+freq@{bsp\+\_\+clocks\+\_\+get\+\_\+freq}!bsp\+\_\+clocks.\+h@{bsp\+\_\+clocks.\+h}}
+\subsubsection{\texorpdfstring{bsp\+\_\+clocks\+\_\+get\+\_\+freq()}{bsp\_clocks\_get\_freq()}}
+{\footnotesize\ttfamily \hyperlink{stdint_8h_a324c5d28c0d82f502a234ab99efac87a}{uint32\+\_\+t} bsp\+\_\+clocks\+\_\+get\+\_\+freq (\begin{DoxyParamCaption}\item[{const \hyperlink{bsp__clocks_8h_ac9d4d589a659370f313ef156f6eff0e8}{C\+L\+O\+C\+K\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+E\+R\+\_\+T}}]{clk\+\_\+id }\end{DoxyParamCaption})}
+
+
+
+Get the frequencies in M\+Hz of the clocks which identifer corresponds to the identifier given as parameter. 
+
+Get the frequencies of the clocks which identifer corresponds to the identifier given as parameter. The P\+LL parameters and other clocks register are read to return the correct frequency for a given clock.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em clk\+\_\+id} & The identifier of the clock.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The frequency in M\+Hz of the clock is returned. 
+\end{DoxyReturn}
+
+
+Definition at line 307 of file bsp\+\_\+clocks.\+c.
+
+
+\begin{DoxyCode}
+308 \{
+309     \hyperlink{stdint_8h_a324c5d28c0d82f502a234ab99efac87a}{uint32\_t} sysclk;
+310     \hyperlink{stdint_8h_a324c5d28c0d82f502a234ab99efac87a}{uint32\_t} factor;
+311 
+312     \textcolor{comment}{/* Get Source clock */}
+313     \textcolor{keywordflow}{if}((*\hyperlink{bsp__clocks_8h_ac454715dd9c4f8ba957cc53f318c58ac}{RCC\_CFGR\_REGISTER} & \hyperlink{bsp__clocks_8h_a451045d952eb1caaa0090c9e8dc75082}{RCC\_CFGR\_SWS\_MASK}) == 
+      \hyperlink{bsp__clocks_8h_a2c67e2279804a83ef24438267d9d4a6c}{RCC\_CFGR\_SWS\_PLL})
+314     \{
+315         sysclk = \hyperlink{bsp__clocks_8c_ac154ab5d2a56dd8e09e0545e9775112e}{bsp\_clock\_get\_pll\_freq}();
+316     \}
+317     \textcolor{keywordflow}{else} \textcolor{keywordflow}{if}((*\hyperlink{bsp__clocks_8h_ac454715dd9c4f8ba957cc53f318c58ac}{RCC\_CFGR\_REGISTER} & RCC\_CFGR\_SWS\_MASK) == 
+      \hyperlink{bsp__clocks_8h_a6764639cf221e1ebc0b5448dcaed590a}{RCC\_CFGR\_SWS\_HSI})
+318     \{
+319         sysclk = \hyperlink{bsp__clocks_8h_ae89e6b2d1e86b7fb4831cb013ece2c52}{RCC\_HSI\_BASE\_FREQ};
+320     \}
+321     \textcolor{keywordflow}{else} \textcolor{keywordflow}{if}((*\hyperlink{bsp__clocks_8h_ac454715dd9c4f8ba957cc53f318c58ac}{RCC\_CFGR\_REGISTER} & RCC\_CFGR\_SWS\_MASK) == 
+      \hyperlink{bsp__clocks_8h_ae09a0202f441c1a43e69c62331d50a08}{RCC\_CFGR\_SWS\_HSE})
+322     \{
+323         sysclk = \hyperlink{bsp__clocks_8h_a19d723f47200a1da259e9c147f2de258}{RCC\_HSE\_BASE\_FREQ};
+324     \}
+325     \textcolor{keywordflow}{else} 
+326     \{
+327         \textcolor{comment}{/* We were  not able to detect the input clock */}
+328         \textcolor{keywordflow}{return} 0;
+329     \}
+330 
+331     \textcolor{comment}{/* Divide by AHB prescaler */}
+332     \textcolor{keywordflow}{if}((*\hyperlink{bsp__clocks_8h_ac454715dd9c4f8ba957cc53f318c58ac}{RCC\_CFGR\_REGISTER} & \hyperlink{bsp__clocks_8h_a1351ccf5f6a5d9a6b91c4f533688d8fb}{RCC\_CFGR\_HPRE\_EN}) != 0)
+333     \{
+334         factor = (*\hyperlink{bsp__clocks_8h_ac454715dd9c4f8ba957cc53f318c58ac}{RCC\_CFGR\_REGISTER} & \hyperlink{bsp__clocks_8h_a2ff38fa14905e578752b706e5c29b146}{RCC\_CFGR\_HPRE\_VAL\_MASK}) >> 
+335                   \hyperlink{bsp__clocks_8h_adca5b474c16bb5c9b4bbedfabeba8e25}{RCC\_CFGR\_HRPE\_OFFSET};
+336         sysclk /= (\hyperlink{stdint_8h_a324c5d28c0d82f502a234ab99efac87a}{uint32\_t})\hyperlink{bsp__clocks_8c_abed7da9c2bfa6c8191c3bf928e64041f}{bsp\_hpre\_factor\_lookup}[factor];
+337     \}
+338 
+339     \textcolor{keywordflow}{if}(clk\_id == \hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a58357d0569548d6c2ba44f27e0aa6ba6}{BSP\_CLOCK\_ID\_HCLK} || clk\_id == 
+      \hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a265c9dec4478eb66904a2dbc6954e598}{BSP\_CLOCK\_ID\_FCLK})
+340     \{
+341         \textcolor{keywordflow}{return} sysclk;
+342     \}
+343     \textcolor{keywordflow}{else} \textcolor{keywordflow}{if}(clk\_id == \hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a0493d0bbd7edf1aebadb342c5c38f709}{BSP\_CLOCK\_ID\_PCLK1} || clk\_id == 
+      \hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70aad46d3b8852f9a4d711c15164bf1c0d3}{BSP\_CLOCK\_ID\_APB1\_TIMER})
+344     \{
+345         \textcolor{comment}{/* Get the APB1 prescaler */}
+346         \textcolor{keywordflow}{if}((*\hyperlink{bsp__clocks_8h_ac454715dd9c4f8ba957cc53f318c58ac}{RCC\_CFGR\_REGISTER} & \hyperlink{bsp__clocks_8h_a7a4503de78658d3271cb5494adc96e41}{RCC\_CFGR\_PPRE1\_EN}) != 0)
+347         \{
+348             factor = (*\hyperlink{bsp__clocks_8h_ac454715dd9c4f8ba957cc53f318c58ac}{RCC\_CFGR\_REGISTER} & 
+      \hyperlink{bsp__clocks_8h_aebda6f102f65bc354b95232527021aba}{RCC\_CFGR\_PPRE1\_VAL\_MASK}) >> 
+349                       \hyperlink{bsp__clocks_8h_a1f605f808c9ab7530142dd8808e83a22}{RCC\_CFGR\_PPRE1\_OFFSET};
+350 
+351             sysclk /= (\hyperlink{stdint_8h_a324c5d28c0d82f502a234ab99efac87a}{uint32\_t})\hyperlink{bsp__clocks_8c_a1ef2cd1399c95dbe65a524595da1fc5c}{bsp\_ppre\_factor\_lookup}[factor];
+352 
+353             \textcolor{keywordflow}{if}(clk\_id == \hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70aad46d3b8852f9a4d711c15164bf1c0d3}{BSP\_CLOCK\_ID\_APB1\_TIMER})
+354             \{
+355                 sysclk *= 2;
+356             \}
+357         \}
+358     \}
+359     \textcolor{keywordflow}{else} \textcolor{keywordflow}{if}(clk\_id == \hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70aad62d8c78d2b4617724a82ec190a33ee}{BSP\_CLOCK\_ID\_PCLK2} || clk\_id == 
+      \hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a30cca3be6a7bad72d2c02e9b58ff4d50}{BSP\_CLOCK\_ID\_APB2\_TIMER})
+360     \{
+361         \textcolor{comment}{/* Get the APB2 prescaler */}
+362         \textcolor{keywordflow}{if}((*\hyperlink{bsp__clocks_8h_ac454715dd9c4f8ba957cc53f318c58ac}{RCC\_CFGR\_REGISTER} & \hyperlink{bsp__clocks_8h_a1a384b58d9f246cb60ed0d0bfa92cbf4}{RCC\_CFGR\_PPRE2\_EN}) != 0)
+363         \{
+364             factor = (*\hyperlink{bsp__clocks_8h_ac454715dd9c4f8ba957cc53f318c58ac}{RCC\_CFGR\_REGISTER} & 
+      \hyperlink{bsp__clocks_8h_adb27fe14c6c6c2cb20f13aaf86f0900a}{RCC\_CFGR\_PPRE2\_VAL\_MASK}) >> 
+365                       \hyperlink{bsp__clocks_8h_a906e390883db586903c4b1144a182e47}{RCC\_CFGR\_PPRE2\_OFFSET};
+366             sysclk /= \hyperlink{bsp__clocks_8c_a1ef2cd1399c95dbe65a524595da1fc5c}{bsp\_ppre\_factor\_lookup}[factor];
+367 
+368             \textcolor{keywordflow}{if}(clk\_id == \hyperlink{bsp__clocks_8h_ad0e92b49c1a7205e3460ca1e54fa9d70a30cca3be6a7bad72d2c02e9b58ff4d50}{BSP\_CLOCK\_ID\_APB2\_TIMER})
+369             \{
+370                 sysclk *= 2;
+371             \}
+372         \}
+373     \}
+374     \textcolor{keywordflow}{else} 
+375     \{
+376         sysclk = 0;
+377     \}
+378 
+379 \textcolor{preprocessor}{#if KERNEL\_LOG\_LEVEL >= INFO\_LOG\_LEVEL}
+380     KERNEL\_LOG\_INFO(\textcolor{stringliteral}{"System clock frequency requested"}, 
+381                     (\textcolor{keywordtype}{void}*)(\hyperlink{stdint_8h_a324c5d28c0d82f502a234ab99efac87a}{uint32\_t})sysclk, 
+382                     \textcolor{keyword}{sizeof}(sysclk), 
+383                     \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR});
+384 \textcolor{preprocessor}{#endif}
+385 
+386     \textcolor{keywordflow}{return} sysclk;
+387 \}
+\end{DoxyCode}
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{bsp__clocks_8h_aeeded4b587684fa3383b3d42ee29af1e_cgraph}
+\end{center}
+\end{figure}
+Here is the caller graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{bsp__clocks_8h_aeeded4b587684fa3383b3d42ee29af1e_icgraph}
+\end{center}
+\end{figure}

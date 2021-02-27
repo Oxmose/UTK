@@ -1,0 +1,59 @@
+\hypertarget{panic_8c}{}\section{Kernel/\+Sources/arch/cpu/arm/cortex\+\_\+m4/src/panic.c File Reference}
+\label{panic_8c}\index{Kernel/\+Sources/arch/cpu/arm/cortex\+\_\+m4/src/panic.\+c@{Kernel/\+Sources/arch/cpu/arm/cortex\+\_\+m4/src/panic.\+c}}
+{\ttfamily \#include \char`\"{}error\+\_\+types.\+h\char`\"{}}\newline
+Include dependency graph for panic.\+c\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=211pt]{panic_8c__incl}
+\end{center}
+\end{figure}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{panic_8c_aa5ac2c6ab3501946e72d97373cba55f6}{kernel\+\_\+panic} (const \hyperlink{error__types_8h_acf146bc98f60f47c79d782f7523e339c}{E\+R\+R\+O\+R\+\_\+\+C\+O\+D\+E\+\_\+E} reason)
+\begin{DoxyCompactList}\small\item\em Kernel panic endpoint. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{panic_8c_aa5ac2c6ab3501946e72d97373cba55f6}\label{panic_8c_aa5ac2c6ab3501946e72d97373cba55f6}} 
+\index{panic.\+c@{panic.\+c}!kernel\+\_\+panic@{kernel\+\_\+panic}}
+\index{kernel\+\_\+panic@{kernel\+\_\+panic}!panic.\+c@{panic.\+c}}
+\subsubsection{\texorpdfstring{kernel\+\_\+panic()}{kernel\_panic()}}
+{\footnotesize\ttfamily void kernel\+\_\+panic (\begin{DoxyParamCaption}\item[{const \hyperlink{error__types_8h_acf146bc98f60f47c79d782f7523e339c}{E\+R\+R\+O\+R\+\_\+\+C\+O\+D\+E\+\_\+E}}]{reason }\end{DoxyParamCaption})}
+
+
+
+Kernel panic endpoint. 
+
+Kernel panic endpoint. This function is dedicated to handle a kernel panic. It outpus the current system\textquotesingle{}s state before putting it in halted mode.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em reason} & The reason of the kernel panic.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyWarning}{Warning}
+This function should never return. 
+\end{DoxyWarning}
+
+
+Definition at line 27 of file panic.\+c.
+
+
+\begin{DoxyCode}
+28 \{
+29 
+30     (void) reason;
+31     
+32     \textcolor{comment}{/* We halt here, the error cannot be recovered */}
+33     \textcolor{keywordflow}{while}(1);
+34 \}
+\end{DoxyCode}
+Here is the caller graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=290pt]{panic_8c_aa5ac2c6ab3501946e72d97373cba55f6_icgraph}
+\end{center}
+\end{figure}

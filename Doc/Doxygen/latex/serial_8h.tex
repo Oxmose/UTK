@@ -1,0 +1,441 @@
+\hypertarget{serial_8h}{}\section{Kernel/\+Sources/arch/board/includes/serial.h File Reference}
+\label{serial_8h}\index{Kernel/\+Sources/arch/board/includes/serial.\+h@{Kernel/\+Sources/arch/board/includes/serial.\+h}}
+{\ttfamily \#include \char`\"{}stdint.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}stddef.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}error\+\_\+types.\+h\char`\"{}}\newline
+Include dependency graph for serial.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=273pt]{serial_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{serial_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{struct_s_e_r_i_a_l___s_e_t_t_i_n_g_s}{S\+E\+R\+I\+A\+L\+\_\+\+S\+E\+T\+T\+I\+N\+GS}
+\begin{DoxyCompactList}\small\item\em Serial settings structure that contains the parameters used to configure the serial line. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{serial_8h_ad3af92391cfd2670eb782a60c7f923a6}{S\+E\+R\+I\+A\+L\+\_\+\+P\+A\+R\+I\+T\+Y\+\_\+\+N\+O\+NE}~0
+\begin{DoxyCompactList}\small\item\em Serial parity setting\+: no parity. \end{DoxyCompactList}\item 
+\#define \hyperlink{serial_8h_aa1baeda93fe64b888113824d02471d0f}{S\+E\+R\+I\+A\+L\+\_\+\+P\+A\+R\+I\+T\+Y\+\_\+\+O\+DD}~1
+\begin{DoxyCompactList}\small\item\em Serial parity setting\+: odd parity. \end{DoxyCompactList}\item 
+\#define \hyperlink{serial_8h_ab1469484b1ad5e39561c21b5a590eaf6}{S\+E\+R\+I\+A\+L\+\_\+\+P\+A\+R\+I\+T\+Y\+\_\+\+E\+V\+EN}~2
+\begin{DoxyCompactList}\small\item\em Serial parity setting\+: even parity. \end{DoxyCompactList}\item 
+\#define \hyperlink{serial_8h_a53a4c884223db0ce40e97ed0cc5e6d19}{S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+05}~0
+\begin{DoxyCompactList}\small\item\em Serial stop bits number\+: 0.\+5 bits. \end{DoxyCompactList}\item 
+\#define \hyperlink{serial_8h_a2b63bfe663eaa7e96165898d0bad9ba1}{S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+1}~1
+\begin{DoxyCompactList}\small\item\em Serial stop bits number\+: 1 bits. \end{DoxyCompactList}\item 
+\#define \hyperlink{serial_8h_adfe27b7a5b350830ec68973c5aa7de7a}{S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+15}~2
+\begin{DoxyCompactList}\small\item\em Serial stop bits number\+: 1.\+5 bits. \end{DoxyCompactList}\item 
+\#define \hyperlink{serial_8h_ad91c5a26785732ceabc6feddf28a2695}{S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+2}~3
+\begin{DoxyCompactList}\small\item\em Serial stop bits number\+: 2 bits. \end{DoxyCompactList}\item 
+\#define \hyperlink{serial_8h_ab85f99523d332a127bd78d8fd075e9f4}{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+N\+O\+NE}~0
+\begin{DoxyCompactList}\small\item\em Serial flow control method\+: no control. \end{DoxyCompactList}\item 
+\#define \hyperlink{serial_8h_a547310a9a903fa2fe282cb02236a6278}{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+X\+O\+N\+X\+O\+FF}~1
+\begin{DoxyCompactList}\small\item\em Serial flow control method\+: X\+O\+N/\+X\+O\+FF control. \end{DoxyCompactList}\item 
+\#define \hyperlink{serial_8h_a0d44b3d3d3e5bb25dc7b976dc2acd4d6}{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+C\+TS}~2
+\begin{DoxyCompactList}\small\item\em Serial flow control method\+: hardware C\+TS control. \end{DoxyCompactList}\item 
+\#define \hyperlink{serial_8h_a2335857b5c95b76430e052c05f6e71b5}{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+R\+TS}~3
+\begin{DoxyCompactList}\small\item\em Serial flow control method\+: hardware R\+TS control. \end{DoxyCompactList}\item 
+\#define \hyperlink{serial_8h_a5eadb2a7b63f2b5483b5c4aed197d99a}{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+C\+T\+S\+\_\+\+R\+TS}~4
+\begin{DoxyCompactList}\small\item\em Serial flow control method\+: hardware C\+T\+Sand R\+TS control. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \hyperlink{struct_s_e_r_i_a_l___s_e_t_t_i_n_g_s}{S\+E\+R\+I\+A\+L\+\_\+\+S\+E\+T\+T\+I\+N\+GS} \hyperlink{serial_8h_acf007a933480ae3b580e6bccdc4b7c40}{S\+E\+R\+I\+A\+L\+\_\+\+S\+E\+T\+T\+I\+N\+G\+S\+\_\+T}
+\begin{DoxyCompactList}\small\item\em Sharthand for struct \hyperlink{struct_s_e_r_i_a_l___s_e_t_t_i_n_g_s}{S\+E\+R\+I\+A\+L\+\_\+\+S\+E\+T\+T\+I\+N\+GS}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{error__types_8h_acf146bc98f60f47c79d782f7523e339c}{E\+R\+R\+O\+R\+\_\+\+C\+O\+D\+E\+\_\+E} \hyperlink{serial_8h_ac8063a6773891c77be25ad972f915f35}{serial\+\_\+init} (const \hyperlink{serial_8h_acf007a933480ae3b580e6bccdc4b7c40}{S\+E\+R\+I\+A\+L\+\_\+\+S\+E\+T\+T\+I\+N\+G\+S\+\_\+T} $\ast$settings)
+\begin{DoxyCompactList}\small\item\em Initializes the serial line. \end{DoxyCompactList}\item 
+\hyperlink{error__types_8h_acf146bc98f60f47c79d782f7523e339c}{E\+R\+R\+O\+R\+\_\+\+C\+O\+D\+E\+\_\+E} \hyperlink{serial_8h_a28c404f87f73ce3d02c889d4792d6a19}{serial\+\_\+write} (const char $\ast$str, const \hyperlink{stddef_8h_aa9d55e2f20e580b7445617d0d12fff6e}{size\+\_\+t} length)
+\begin{DoxyCompactList}\small\item\em Writes a string of characters to the serial line. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\mbox{\Hypertarget{serial_8h_a0d44b3d3d3e5bb25dc7b976dc2acd4d6}\label{serial_8h_a0d44b3d3d3e5bb25dc7b976dc2acd4d6}} 
+\index{serial.\+h@{serial.\+h}!S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+C\+TS@{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+C\+TS}}
+\index{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+C\+TS@{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+C\+TS}!serial.\+h@{serial.\+h}}
+\subsubsection{\texorpdfstring{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+C\+TS}{SERIAL\_CTRL\_FLOW\_CTS}}
+{\footnotesize\ttfamily \#define S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+C\+TS~2}
+
+
+
+Serial flow control method\+: hardware C\+TS control. 
+
+
+
+Definition at line 48 of file serial.\+h.
+
+\mbox{\Hypertarget{serial_8h_a5eadb2a7b63f2b5483b5c4aed197d99a}\label{serial_8h_a5eadb2a7b63f2b5483b5c4aed197d99a}} 
+\index{serial.\+h@{serial.\+h}!S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+C\+T\+S\+\_\+\+R\+TS@{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+C\+T\+S\+\_\+\+R\+TS}}
+\index{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+C\+T\+S\+\_\+\+R\+TS@{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+C\+T\+S\+\_\+\+R\+TS}!serial.\+h@{serial.\+h}}
+\subsubsection{\texorpdfstring{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+C\+T\+S\+\_\+\+R\+TS}{SERIAL\_CTRL\_FLOW\_CTS\_RTS}}
+{\footnotesize\ttfamily \#define S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+C\+T\+S\+\_\+\+R\+TS~4}
+
+
+
+Serial flow control method\+: hardware C\+T\+Sand R\+TS control. 
+
+
+
+Definition at line 52 of file serial.\+h.
+
+\mbox{\Hypertarget{serial_8h_ab85f99523d332a127bd78d8fd075e9f4}\label{serial_8h_ab85f99523d332a127bd78d8fd075e9f4}} 
+\index{serial.\+h@{serial.\+h}!S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+N\+O\+NE@{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+N\+O\+NE}}
+\index{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+N\+O\+NE@{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+N\+O\+NE}!serial.\+h@{serial.\+h}}
+\subsubsection{\texorpdfstring{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+N\+O\+NE}{SERIAL\_CTRL\_FLOW\_NONE}}
+{\footnotesize\ttfamily \#define S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+N\+O\+NE~0}
+
+
+
+Serial flow control method\+: no control. 
+
+
+
+Definition at line 44 of file serial.\+h.
+
+\mbox{\Hypertarget{serial_8h_a2335857b5c95b76430e052c05f6e71b5}\label{serial_8h_a2335857b5c95b76430e052c05f6e71b5}} 
+\index{serial.\+h@{serial.\+h}!S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+R\+TS@{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+R\+TS}}
+\index{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+R\+TS@{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+R\+TS}!serial.\+h@{serial.\+h}}
+\subsubsection{\texorpdfstring{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+R\+TS}{SERIAL\_CTRL\_FLOW\_RTS}}
+{\footnotesize\ttfamily \#define S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+R\+TS~3}
+
+
+
+Serial flow control method\+: hardware R\+TS control. 
+
+
+
+Definition at line 50 of file serial.\+h.
+
+\mbox{\Hypertarget{serial_8h_a547310a9a903fa2fe282cb02236a6278}\label{serial_8h_a547310a9a903fa2fe282cb02236a6278}} 
+\index{serial.\+h@{serial.\+h}!S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+X\+O\+N\+X\+O\+FF@{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+X\+O\+N\+X\+O\+FF}}
+\index{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+X\+O\+N\+X\+O\+FF@{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+X\+O\+N\+X\+O\+FF}!serial.\+h@{serial.\+h}}
+\subsubsection{\texorpdfstring{S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+X\+O\+N\+X\+O\+FF}{SERIAL\_CTRL\_FLOW\_XONXOFF}}
+{\footnotesize\ttfamily \#define S\+E\+R\+I\+A\+L\+\_\+\+C\+T\+R\+L\+\_\+\+F\+L\+O\+W\+\_\+\+X\+O\+N\+X\+O\+FF~1}
+
+
+
+Serial flow control method\+: X\+O\+N/\+X\+O\+FF control. 
+
+
+
+Definition at line 46 of file serial.\+h.
+
+\mbox{\Hypertarget{serial_8h_ab1469484b1ad5e39561c21b5a590eaf6}\label{serial_8h_ab1469484b1ad5e39561c21b5a590eaf6}} 
+\index{serial.\+h@{serial.\+h}!S\+E\+R\+I\+A\+L\+\_\+\+P\+A\+R\+I\+T\+Y\+\_\+\+E\+V\+EN@{S\+E\+R\+I\+A\+L\+\_\+\+P\+A\+R\+I\+T\+Y\+\_\+\+E\+V\+EN}}
+\index{S\+E\+R\+I\+A\+L\+\_\+\+P\+A\+R\+I\+T\+Y\+\_\+\+E\+V\+EN@{S\+E\+R\+I\+A\+L\+\_\+\+P\+A\+R\+I\+T\+Y\+\_\+\+E\+V\+EN}!serial.\+h@{serial.\+h}}
+\subsubsection{\texorpdfstring{S\+E\+R\+I\+A\+L\+\_\+\+P\+A\+R\+I\+T\+Y\+\_\+\+E\+V\+EN}{SERIAL\_PARITY\_EVEN}}
+{\footnotesize\ttfamily \#define S\+E\+R\+I\+A\+L\+\_\+\+P\+A\+R\+I\+T\+Y\+\_\+\+E\+V\+EN~2}
+
+
+
+Serial parity setting\+: even parity. 
+
+
+
+Definition at line 32 of file serial.\+h.
+
+\mbox{\Hypertarget{serial_8h_ad3af92391cfd2670eb782a60c7f923a6}\label{serial_8h_ad3af92391cfd2670eb782a60c7f923a6}} 
+\index{serial.\+h@{serial.\+h}!S\+E\+R\+I\+A\+L\+\_\+\+P\+A\+R\+I\+T\+Y\+\_\+\+N\+O\+NE@{S\+E\+R\+I\+A\+L\+\_\+\+P\+A\+R\+I\+T\+Y\+\_\+\+N\+O\+NE}}
+\index{S\+E\+R\+I\+A\+L\+\_\+\+P\+A\+R\+I\+T\+Y\+\_\+\+N\+O\+NE@{S\+E\+R\+I\+A\+L\+\_\+\+P\+A\+R\+I\+T\+Y\+\_\+\+N\+O\+NE}!serial.\+h@{serial.\+h}}
+\subsubsection{\texorpdfstring{S\+E\+R\+I\+A\+L\+\_\+\+P\+A\+R\+I\+T\+Y\+\_\+\+N\+O\+NE}{SERIAL\_PARITY\_NONE}}
+{\footnotesize\ttfamily \#define S\+E\+R\+I\+A\+L\+\_\+\+P\+A\+R\+I\+T\+Y\+\_\+\+N\+O\+NE~0}
+
+
+
+Serial parity setting\+: no parity. 
+
+
+
+Definition at line 28 of file serial.\+h.
+
+\mbox{\Hypertarget{serial_8h_aa1baeda93fe64b888113824d02471d0f}\label{serial_8h_aa1baeda93fe64b888113824d02471d0f}} 
+\index{serial.\+h@{serial.\+h}!S\+E\+R\+I\+A\+L\+\_\+\+P\+A\+R\+I\+T\+Y\+\_\+\+O\+DD@{S\+E\+R\+I\+A\+L\+\_\+\+P\+A\+R\+I\+T\+Y\+\_\+\+O\+DD}}
+\index{S\+E\+R\+I\+A\+L\+\_\+\+P\+A\+R\+I\+T\+Y\+\_\+\+O\+DD@{S\+E\+R\+I\+A\+L\+\_\+\+P\+A\+R\+I\+T\+Y\+\_\+\+O\+DD}!serial.\+h@{serial.\+h}}
+\subsubsection{\texorpdfstring{S\+E\+R\+I\+A\+L\+\_\+\+P\+A\+R\+I\+T\+Y\+\_\+\+O\+DD}{SERIAL\_PARITY\_ODD}}
+{\footnotesize\ttfamily \#define S\+E\+R\+I\+A\+L\+\_\+\+P\+A\+R\+I\+T\+Y\+\_\+\+O\+DD~1}
+
+
+
+Serial parity setting\+: odd parity. 
+
+
+
+Definition at line 30 of file serial.\+h.
+
+\mbox{\Hypertarget{serial_8h_a53a4c884223db0ce40e97ed0cc5e6d19}\label{serial_8h_a53a4c884223db0ce40e97ed0cc5e6d19}} 
+\index{serial.\+h@{serial.\+h}!S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+05@{S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+05}}
+\index{S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+05@{S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+05}!serial.\+h@{serial.\+h}}
+\subsubsection{\texorpdfstring{S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+05}{SERIAL\_STOP\_BITS\_05}}
+{\footnotesize\ttfamily \#define S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+05~0}
+
+
+
+Serial stop bits number\+: 0.\+5 bits. 
+
+
+
+Definition at line 35 of file serial.\+h.
+
+\mbox{\Hypertarget{serial_8h_a2b63bfe663eaa7e96165898d0bad9ba1}\label{serial_8h_a2b63bfe663eaa7e96165898d0bad9ba1}} 
+\index{serial.\+h@{serial.\+h}!S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+1@{S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+1}}
+\index{S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+1@{S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+1}!serial.\+h@{serial.\+h}}
+\subsubsection{\texorpdfstring{S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+1}{SERIAL\_STOP\_BITS\_1}}
+{\footnotesize\ttfamily \#define S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+1~1}
+
+
+
+Serial stop bits number\+: 1 bits. 
+
+
+
+Definition at line 37 of file serial.\+h.
+
+\mbox{\Hypertarget{serial_8h_adfe27b7a5b350830ec68973c5aa7de7a}\label{serial_8h_adfe27b7a5b350830ec68973c5aa7de7a}} 
+\index{serial.\+h@{serial.\+h}!S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+15@{S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+15}}
+\index{S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+15@{S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+15}!serial.\+h@{serial.\+h}}
+\subsubsection{\texorpdfstring{S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+15}{SERIAL\_STOP\_BITS\_15}}
+{\footnotesize\ttfamily \#define S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+15~2}
+
+
+
+Serial stop bits number\+: 1.\+5 bits. 
+
+
+
+Definition at line 39 of file serial.\+h.
+
+\mbox{\Hypertarget{serial_8h_ad91c5a26785732ceabc6feddf28a2695}\label{serial_8h_ad91c5a26785732ceabc6feddf28a2695}} 
+\index{serial.\+h@{serial.\+h}!S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+2@{S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+2}}
+\index{S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+2@{S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+2}!serial.\+h@{serial.\+h}}
+\subsubsection{\texorpdfstring{S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+2}{SERIAL\_STOP\_BITS\_2}}
+{\footnotesize\ttfamily \#define S\+E\+R\+I\+A\+L\+\_\+\+S\+T\+O\+P\+\_\+\+B\+I\+T\+S\+\_\+2~3}
+
+
+
+Serial stop bits number\+: 2 bits. 
+
+
+
+Definition at line 41 of file serial.\+h.
+
+
+
+\subsection{Typedef Documentation}
+\mbox{\Hypertarget{serial_8h_acf007a933480ae3b580e6bccdc4b7c40}\label{serial_8h_acf007a933480ae3b580e6bccdc4b7c40}} 
+\index{serial.\+h@{serial.\+h}!S\+E\+R\+I\+A\+L\+\_\+\+S\+E\+T\+T\+I\+N\+G\+S\+\_\+T@{S\+E\+R\+I\+A\+L\+\_\+\+S\+E\+T\+T\+I\+N\+G\+S\+\_\+T}}
+\index{S\+E\+R\+I\+A\+L\+\_\+\+S\+E\+T\+T\+I\+N\+G\+S\+\_\+T@{S\+E\+R\+I\+A\+L\+\_\+\+S\+E\+T\+T\+I\+N\+G\+S\+\_\+T}!serial.\+h@{serial.\+h}}
+\subsubsection{\texorpdfstring{S\+E\+R\+I\+A\+L\+\_\+\+S\+E\+T\+T\+I\+N\+G\+S\+\_\+T}{SERIAL\_SETTINGS\_T}}
+{\footnotesize\ttfamily typedef struct \hyperlink{struct_s_e_r_i_a_l___s_e_t_t_i_n_g_s}{S\+E\+R\+I\+A\+L\+\_\+\+S\+E\+T\+T\+I\+N\+GS} \hyperlink{serial_8h_acf007a933480ae3b580e6bccdc4b7c40}{S\+E\+R\+I\+A\+L\+\_\+\+S\+E\+T\+T\+I\+N\+G\+S\+\_\+T}}
+
+
+
+Sharthand for struct \hyperlink{struct_s_e_r_i_a_l___s_e_t_t_i_n_g_s}{S\+E\+R\+I\+A\+L\+\_\+\+S\+E\+T\+T\+I\+N\+GS}. 
+
+
+
+Definition at line 76 of file serial.\+h.
+
+
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{serial_8h_ac8063a6773891c77be25ad972f915f35}\label{serial_8h_ac8063a6773891c77be25ad972f915f35}} 
+\index{serial.\+h@{serial.\+h}!serial\+\_\+init@{serial\+\_\+init}}
+\index{serial\+\_\+init@{serial\+\_\+init}!serial.\+h@{serial.\+h}}
+\subsubsection{\texorpdfstring{serial\+\_\+init()}{serial\_init()}}
+{\footnotesize\ttfamily \hyperlink{error__types_8h_acf146bc98f60f47c79d782f7523e339c}{E\+R\+R\+O\+R\+\_\+\+C\+O\+D\+E\+\_\+E} serial\+\_\+init (\begin{DoxyParamCaption}\item[{const \hyperlink{serial_8h_acf007a933480ae3b580e6bccdc4b7c40}{S\+E\+R\+I\+A\+L\+\_\+\+S\+E\+T\+T\+I\+N\+G\+S\+\_\+T} $\ast$}]{settings }\end{DoxyParamCaption})}
+
+
+
+Initializes the serial line. 
+
+Initializes the system\textquotesingle{}s serial line. The settings structure is used to set the line\textquotesingle{}s parameter according to th user\textquotesingle{}s choice.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em settings} & The settings structure used to initialize the serial line.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+N\+O\+\_\+\+E\+R\+R\+OR is returned in case of success. Otherwise an error code is returned. Please refer to the list of the standard error codes. 
+\end{DoxyReturn}
+This function uses U\+S\+A\+R\+T2 as main U\+A\+RT output.
+
+Definition at line 406 of file bsp\+\_\+usart.\+c.
+
+
+\begin{DoxyCode}
+407 \{
+411 
+412     \hyperlink{struct_g_p_i_o___s_e_t_t_i_n_g_s}{GPIO\_SETTINGS\_T} gpio\_settings;
+413     \hyperlink{error__types_8h_acf146bc98f60f47c79d782f7523e339c}{ERROR\_CODE\_E}    error;
+414 
+415     \textcolor{keywordflow}{if}(\hyperlink{bsp__usart_8c_ad317e99f056e9ce535815fcdd1697c93}{usart\_init\_state} != 0)
+416     \{
+417 \textcolor{preprocessor}{#if KERNEL\_LOG\_LEVEL == ERROR\_LOG\_LEVEL}
+418         \hyperlink{logger_8h_a580bb63c1418b2fc8456f9b6c5b6d39d}{KERNEL\_LOG\_ERROR}(\textcolor{stringliteral}{"Serial already initialized"}, 
+419                          \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28ca9af911a6ba1c32ce22213d689cb59f86}{ERROR\_ALREADY\_INIT}, 
+420                          \textcolor{keyword}{sizeof}(\hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28ca9af911a6ba1c32ce22213d689cb59f86}{ERROR\_ALREADY\_INIT}), 
+421                          \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28ca9af911a6ba1c32ce22213d689cb59f86}{ERROR\_ALREADY\_INIT});
+422 \textcolor{preprocessor}{#endif        }
+423         \textcolor{keywordflow}{return} \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28ca9af911a6ba1c32ce22213d689cb59f86}{ERROR\_ALREADY\_INIT};
+424     \}
+425 
+426     \textcolor{comment}{/* Check parameters */}
+427     \textcolor{keywordflow}{if}(settings == \hyperlink{stddef_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL})
+428     \{
+429 \textcolor{preprocessor}{#if KERNEL\_LOG\_LEVEL == ERROR\_LOG\_LEVEL}
+430         \hyperlink{logger_8h_a580bb63c1418b2fc8456f9b6c5b6d39d}{KERNEL\_LOG\_ERROR}(\textcolor{stringliteral}{"Serial settings structure is NULL"}, 
+431                          \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28ca3d37cbe00af5e55b2ab0cfac2a5b4b0e}{ERROR\_NULL\_POINTER}, 
+432                          \textcolor{keyword}{sizeof}(\hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28ca3d37cbe00af5e55b2ab0cfac2a5b4b0e}{ERROR\_NULL\_POINTER}), 
+433                          \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28ca3d37cbe00af5e55b2ab0cfac2a5b4b0e}{ERROR\_NULL\_POINTER});
+434 \textcolor{preprocessor}{#endif}
+435         \textcolor{keywordflow}{return} \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28ca3d37cbe00af5e55b2ab0cfac2a5b4b0e}{ERROR\_NULL\_POINTER};
+436     \}
+437     \hyperlink{bsp__usart_8c_a8aa979774d50a01cae417a899595055c}{CHECK\_BAUDRATE}(settings->\hyperlink{struct_s_e_r_i_a_l___s_e_t_t_i_n_g_s_ac4f06ea26ed6bd7ae83b92d64ac10b78}{baudrate});
+438     \hyperlink{bsp__usart_8c_a51885194f22c4bd5f94ab0bb253dd079}{CHECK\_WDLENGTH}(settings->\hyperlink{struct_s_e_r_i_a_l___s_e_t_t_i_n_g_s_ae9ff0fba282a81e6b05a1082ab54e14d}{word\_length});
+439     \hyperlink{bsp__usart_8c_ace359bfb3e864f995667f829a5520105}{CHECK\_STOPBITS}(settings->\hyperlink{struct_s_e_r_i_a_l___s_e_t_t_i_n_g_s_ae847d8b7e1095e0ae8d6eb1e4a281585}{stop\_bits});
+440     \hyperlink{bsp__usart_8c_a2c164787cf0d531b3c026aa2b9193a2b}{CHECK\_PARITYVA}(settings->\hyperlink{struct_s_e_r_i_a_l___s_e_t_t_i_n_g_s_a57fc780fe7a58343cb0513fd873e95fb}{partity});
+441     \hyperlink{bsp__usart_8c_a47ca255399a13357557641c6af83af64}{CHECK\_CTRLFLOW}(settings->\hyperlink{struct_s_e_r_i_a_l___s_e_t_t_i_n_g_s_a6f2a9d6a71d9ca705cf561f08e4e222c}{ctrl\_flow});
+442 
+443     \textcolor{comment}{/* Init GPIO and USART clock */}
+444     error = \hyperlink{bsp__clocks_8h_a500b2e77b70c93b3f2b4a94cc9bcf79d}{bsp\_clk\_gpio\_enable}(\hyperlink{bsp__gpio_8h_a69f521b579d2c761dd65949f2bae88f3a4cb73b98ec508807d984052a1598950a}{GPIO\_ID\_A});
+445     \textcolor{keywordflow}{if}(error != \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR})
+446     \{
+447         \textcolor{keywordflow}{return} error;
+448     \}
+449     error = \hyperlink{bsp__clocks_8h_aaf01af602e17579af5e6af009ae7a557}{bsp\_clk\_usart\_enable}(\hyperlink{bsp__usart_8h_a58f9be3820e29e0fbf00e2466c3ee768abb138542d801249fd01ec62c34f52cff}{USART\_ID\_2});
+450     \textcolor{keywordflow}{if}(error != \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR})
+451     \{
+452         \textcolor{keywordflow}{return} error;
+453     \}
+454 
+455     \textcolor{comment}{/* Initialize the USART2 GPIO A */}
+456     gpio\_settings.\hyperlink{struct_g_p_i_o___s_e_t_t_i_n_g_s_aad1e743ccf6e6bc276e61f9ba35bdfd0}{io\_pin}      = \hyperlink{bsp__gpio_8h_a6eee38b797a7268f04357dfa2759efd2}{GPIO\_PIN\_2} | 
+457                                 \hyperlink{bsp__gpio_8h_adcaf899c018a0dde572b5af783565c62}{GPIO\_PIN\_3};
+458     gpio\_settings.\hyperlink{struct_g_p_i_o___s_e_t_t_i_n_g_s_aca4ea33051d3d932467e31db14e636aa}{io\_modetype} = \hyperlink{bsp__gpio_8h_ae0c591139910f3313c998fdcf74a2b77}{GPIO\_MODE\_ALTFUN}   | 
+459                                 \hyperlink{bsp__gpio_8h_af9c9aabc72e4bda42794979584908a8c}{GPIO\_TYPE\_PUSHPULL} | 
+460                                 \hyperlink{bsp__gpio_8h_ad53ebddfcc3973120b1c0271423f131e}{GPIO\_PUPD\_NONE};
+461     gpio\_settings.\hyperlink{struct_g_p_i_o___s_e_t_t_i_n_g_s_a4555d90ee383bdb9bf2fc3b049f32fd1}{io\_altfunc}  = \hyperlink{bsp__gpio_8h_a6af3869309b2bfedca84f57a7772ee4d}{GPIO\_ALFUNC\_7};
+462     gpio\_settings.\hyperlink{struct_g_p_i_o___s_e_t_t_i_n_g_s_aee8d1e0b4f18b0a599ebcbc2e0c8b60f}{io\_speed}    = \hyperlink{bsp__gpio_8h_ae11603e44b5bb26398c583a2410cafd5}{GPIO\_SPEED\_VERY\_HIGH};
+463 
+464     error = \hyperlink{bsp__gpio_8h_ac05d93f29cf8cdcd3809298fe5df2f87}{bsp\_gpio\_init}(\hyperlink{bsp__gpio_8h_a69f521b579d2c761dd65949f2bae88f3a4cb73b98ec508807d984052a1598950a}{GPIO\_ID\_A}, &gpio\_settings);
+465     \textcolor{keywordflow}{if}(error != \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR})
+466     \{
+467         \textcolor{keywordflow}{return} error;
+468     \}
+469 
+470     \textcolor{comment}{/* Make sure USART2 is disabled */}
+471     \hyperlink{bsp__usart_8c_a81aa58ca3b3ff2a16c5666f1601dedc7}{bsp\_usart\_disable}(\hyperlink{bsp__usart_8h_a58f9be3820e29e0fbf00e2466c3ee768abb138542d801249fd01ec62c34f52cff}{USART\_ID\_2});
+472 
+473     \textcolor{comment}{/* Set USART2 settings */}
+474     \hyperlink{bsp__usart_8c_a39d14fff7f007d639de7a6db12fd8acf}{bsp\_uart\_init}(\hyperlink{bsp__usart_8h_a58f9be3820e29e0fbf00e2466c3ee768abb138542d801249fd01ec62c34f52cff}{USART\_ID\_2}, settings);
+475 
+476     \textcolor{comment}{/* Enable USART2 */}
+477     \hyperlink{bsp__usart_8c_ae71596fd1683989728deee59105b9b06}{bsp\_usart\_enable}(\hyperlink{bsp__usart_8h_a58f9be3820e29e0fbf00e2466c3ee768abb138542d801249fd01ec62c34f52cff}{USART\_ID\_2});
+478 
+479 \textcolor{preprocessor}{#if KERNEL\_LOG\_LEVEL >= INFO\_LOG\_LEVEL}
+480     KERNEL\_LOG\_INFO(\textcolor{stringliteral}{"USART initialized"}, 
+481                      \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR}, 
+482                      \textcolor{keyword}{sizeof}(\hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR}), 
+483                      \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR});
+484 \textcolor{preprocessor}{#endif }
+485     \hyperlink{bsp__usart_8c_ad317e99f056e9ce535815fcdd1697c93}{usart\_init\_state} = 1;
+486     \textcolor{keywordflow}{return} \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR};
+487 \}
+\end{DoxyCode}
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{serial_8h_ac8063a6773891c77be25ad972f915f35_cgraph}
+\end{center}
+\end{figure}
+Here is the caller graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=276pt]{serial_8h_ac8063a6773891c77be25ad972f915f35_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{serial_8h_a28c404f87f73ce3d02c889d4792d6a19}\label{serial_8h_a28c404f87f73ce3d02c889d4792d6a19}} 
+\index{serial.\+h@{serial.\+h}!serial\+\_\+write@{serial\+\_\+write}}
+\index{serial\+\_\+write@{serial\+\_\+write}!serial.\+h@{serial.\+h}}
+\subsubsection{\texorpdfstring{serial\+\_\+write()}{serial\_write()}}
+{\footnotesize\ttfamily \hyperlink{error__types_8h_acf146bc98f60f47c79d782f7523e339c}{E\+R\+R\+O\+R\+\_\+\+C\+O\+D\+E\+\_\+E} serial\+\_\+write (\begin{DoxyParamCaption}\item[{const char $\ast$}]{str,  }\item[{const \hyperlink{stddef_8h_aa9d55e2f20e580b7445617d0d12fff6e}{size\+\_\+t}}]{length }\end{DoxyParamCaption})}
+
+
+
+Writes a string of characters to the serial line. 
+
+Writes a string of characters to the serial line. The line should have been initialized. If the serial line is not ready, this function has no effect.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em str} & The string to send to the serial line. \\
+\hline
+\mbox{\tt in}  & {\em length} & The length of the string to send to the serial line.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+N\+O\+\_\+\+E\+R\+R\+OR is returned in case of success. Otherwise an error code is returned. Please refer to the list of the standard error codes. 
+\end{DoxyReturn}
+
+
+Definition at line 489 of file bsp\+\_\+usart.\+c.
+
+
+\begin{DoxyCode}
+490 \{
+491     \textcolor{keywordtype}{size\_t} i;
+492 
+493     \textcolor{keywordflow}{if}(\hyperlink{bsp__usart_8c_ad317e99f056e9ce535815fcdd1697c93}{usart\_init\_state} == 0)
+494     \{
+495 \textcolor{preprocessor}{#if KERNEL\_LOG\_LEVEL == ERROR\_LOG\_LEVEL}
+496         \hyperlink{logger_8h_a580bb63c1418b2fc8456f9b6c5b6d39d}{KERNEL\_LOG\_ERROR}(\textcolor{stringliteral}{"Serial needs to be initialized"}, 
+497                          \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28ca10cd4fcc87eb6469778e1c547cf94877}{ERROR\_NEED\_INIT}, 
+498                          \textcolor{keyword}{sizeof}(\hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28ca10cd4fcc87eb6469778e1c547cf94877}{ERROR\_NEED\_INIT}), 
+499                          \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28ca10cd4fcc87eb6469778e1c547cf94877}{ERROR\_NEED\_INIT});
+500 \textcolor{preprocessor}{#endif        }
+501         \textcolor{keywordflow}{return} \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28ca9af911a6ba1c32ce22213d689cb59f86}{ERROR\_ALREADY\_INIT};
+502     \}
+503 
+504     \textcolor{keywordflow}{for}(i = 0; i < length; ++i)
+505     \{
+506         \textcolor{comment}{/* Wait for serial line to be ready to transmit */}
+507         \textcolor{keywordflow}{while}((*\hyperlink{bsp__usart_8h_aa902cd686824df937532dbdb8a9c9dac}{USART2\_SR\_REGISTER} & \hyperlink{bsp__usart_8h_a65e9cddf0890113d405342f1d8b5b980}{USART\_SR\_TXE}) == 0);
+508 
+509         *\hyperlink{bsp__usart_8h_a8e09469004e7199b63ac9df19afd41a5}{USART2\_DR\_REGISTER} = *str++;
+510     \}
+511 
+512     \textcolor{keywordflow}{return} \hyperlink{error__types_8h_a4db9ee29f2ff83c71567c12f6bfbf28cabf350750d0d4fabd8954c0f1e9bbae94}{NO\_ERROR};
+513 \}
+\end{DoxyCode}
+Here is the call graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=309pt]{serial_8h_a28c404f87f73ce3d02c889d4792d6a19_cgraph}
+\end{center}
+\end{figure}
+Here is the caller graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=285pt]{serial_8h_a28c404f87f73ce3d02c889d4792d6a19_icgraph}
+\end{center}
+\end{figure}
