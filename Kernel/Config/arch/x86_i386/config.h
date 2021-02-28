@@ -34,8 +34,8 @@
 
 /* Kernel log level */
 #define DEBUG_LOG_LEVEL   3
-#define ERROR_LOG_LEVEL   2
-#define INFO_LOG_LEVEL    1
+#define INFO_LOG_LEVEL    2
+#define ERROR_LOG_LEVEL   1
 #define NONE_LOG_LEVEL    0
 
 #define KERNEL_LOG_LEVEL DEBUG_LOG_LEVEL

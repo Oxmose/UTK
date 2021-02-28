@@ -393,7 +393,6 @@ typedef struct cpu_info cpu_info_t;
  */
 OS_RETURN_E cpu_get_info(cpu_info_t* info);
 
-
 /**
  * @brief Return the SSE state.
  *
@@ -402,32 +401,6 @@ OS_RETURN_E cpu_get_info(cpu_info_t* info);
  * @return The function return 0 if SSE is not enabled, 1 otherwise.
  */
 uint8_t cpu_is_sse_enabled(void);
-
-/**
- * @brief Returns 1 if the CPUID intruction is available on the CPU. 0 is
- * returned otherwise.
- *
- * @return 1 if the CPUID instruction is available, 0 otherwise.
- */
-int32_t cpu_cpuid_capable(void);
-
-/**
- * @brief Detects CPU features and save then in the system's cpu_info_t
- * structure. Print the data.
- *
- * @details The function requests the CPUID data to the running CPU. The data
- * are then saved in an internatl kernel's structure. The function will also
- * print the gathered data if the parameter print is not set to 0.
- *
- * @param[in] print If not set to 0, the function will print a message with
- * the collected data.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - OS_ERR_UNAUTHORIZED_ACTION is returned if the kernel could not detect the
- * CPU.
- */
-OS_RETURN_E cpu_detect(const uint32_t print);
 
 /**
  * @brief Enables the SSE features of the CPU.
@@ -457,10 +430,6 @@ OS_RETURN_E cpu_enable_sse(void);
 __inline__ static uint32_t cpu_get_cpuid_max (const uint32_t ext)
 {
     uint32_t regs[4];
-    if(cpu_cpuid_capable() == 0)
-    {
-        return 0;
-    }
 
     /* Host supports CPUID.  Return highest supported CPUID input value. */
     __asm__ __volatile__("cpuid":"=a"(*regs),"=b"(*(regs+1)),
@@ -484,10 +453,6 @@ __inline__ static uint32_t cpu_get_cpuid_max (const uint32_t ext)
 __inline__ static int32_t cpu_cpuid(const uint32_t code,
                                     uint32_t regs[4])
 {
-    if(cpu_cpuid_capable() == 0)
-    {
-        return 0;
-    }
     uint32_t ext = code & 0x80000000;
     uint32_t maxlevel = cpu_get_cpuid_max(ext);
 

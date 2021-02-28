@@ -128,7 +128,7 @@ endif
 
 qemu-grub:
 ifeq ($(target), x86_i386)
-	@make qemu-test-mode -f $(CONFIG_DIR)/arch/$(target)/makerun.mk BUILD_DIR=$(BUILD_DIR) KERNEL=$(KERNEL)
+	@make qemu-grub -f $(CONFIG_DIR)/arch/$(target)/makerun.mk BUILD_DIR=$(BUILD_DIR) KERNEL=$(KERNEL)
 else 
 	@echo "\e[1m\e[31m\n=== ERROR: Unknown target $(target)\e[22m\e[39m"
 	@echo "Available targets: $(TARGET_LIST)\n"
