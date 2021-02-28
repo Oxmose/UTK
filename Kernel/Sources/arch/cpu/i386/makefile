@@ -10,7 +10,7 @@
 ################################################################################
 
 # Dependencies 
-include ../../dependencies.mk
+include dependencies.mk
 include ../../../global/settings.mk
 
 # Variables definitions
@@ -69,7 +69,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.S
 
 # Clean 
 clean:
-	$(RM) -rf $(BUILD_DIR)
+	$(RM) -rf $(BUILD_DIR) $(BIN_DIR)
 	@echo "\e[1m\e[34m\n#-------------------------------------------------------------------------------\e[22m\e[39m"
 	@echo "\e[1m\e[34m| Cleaned i386 CPU module\e[22m\e[39m"
 	@echo "\e[1m\e[34m#-------------------------------------------------------------------------------\n\e[22m\e[39m"

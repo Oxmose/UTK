@@ -89,7 +89,7 @@ endif
 	@make -C $(SOURCE_DIR)/global clean
 
 # Clean kernel build directory
-	rm -rf  $(BUILD_DIR)
+	rm -rf  $(BUILD_DIR) $(BIN_DIR)
 
 	@echo "\e[1m\e[34m\n#-------------------------------------------------------------------------------\e[22m\e[39m"
 	@echo "\e[1m\e[34m| Cleaned kernel \e[22m\e[39m"
@@ -97,6 +97,7 @@ endif
 	
 	@rm -f Sources/global/settings.mk
 	@rm -f Sources/global/Config.h
+	@rm -f Sources/global/Config.inc
 
 run:
 ifeq ($(target), x86_i386)

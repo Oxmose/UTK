@@ -26,7 +26,18 @@
  */
 #define KERNEL_STACK_SIZE 0x1000
 
+/* Maximal number of CPU supported by the architecture */
+#define MAX_CPU_COUNT 4
+
 /* Architecture type */
 #define ARCH_32_BITS
+
+/* Kernel log level */
+#define DEBUG_LOG_LEVEL   3
+#define ERROR_LOG_LEVEL   2
+#define INFO_LOG_LEVEL    1
+#define NONE_LOG_LEVEL    0
+
+#define KERNEL_LOG_LEVEL INFO_LOG_LEVEL
 
 #endif /* #ifndef __GLOBAL_CONFIG_H__ */
