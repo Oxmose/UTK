@@ -44,7 +44,6 @@ extern _START_BSS_ADDR
 extern _END_BSS_ADDR
 extern _KERNEL_STACKS_BASE
 extern _KERNEL_MULTIBOOT_PTR
-extern cpu_info
 
 ;-------------------------------------------------------------------------------
 ; EXTERN FUNCTIONS
@@ -75,7 +74,7 @@ align 4
     dd FLAGS
     dd CHECKSUM
 
-section .startup_code
+section .low_startup_code
 align 4
 ;-------------------------------------------------------------------------------
 ; Kernel entry point
@@ -110,6 +109,8 @@ __bss_init:
     mov eax, __kinit_high
     jmp eax
 
+section .high_startup_code
+align 4
 ; High memory loader 
 __kinit_high:
     ; Save Multiboot info to memory
@@ -138,22 +139,6 @@ __kinit_end:
     cli 
     hlt
     jmp __kinit_end
-
-;-------------------------------------------------------------------------------
-; CPUID probing function
-__get_cpuid_flag:
-    pushfd                                  ;Save EFLAGS
-    pushfd                                  ;Store EFLAGS
-    xor    dword [esp], 0x00200000          ;Invert the ID bit in stored EFLAGS
-    popfd                                   ;Load stored EFLAGS
-    pushfd                                  ;Store EFLAGS again
-    pop    eax                              ;eax = modified EFLAGS
-    xor    eax, [esp]                       ;eax = whichever bits were changed
-    popfd                                   ;Restore original EFLAGS
-    and    eax, 0x00200000                  ;eax = 0 CPUID is not available
-    mov    edi, cpu_info
-    or     [edi], eax                       ; Store information in the structure
-    ret
 
 ;-------------------------------------------------------------------------------
 ; DATA

@@ -41,6 +41,3 @@ idt_ptr_t cpu_idt_ptr;
 
 /** @brief CPU TSS structures */
 cpu_tss_entry_t cpu_tss[MAX_CPU_COUNT] __attribute__((aligned(16)));
-
-/** @brief CPU info storage, stores basix CPU information. */
-cpu_info_t cpu_info;

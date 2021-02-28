@@ -8,7 +8,7 @@
  ******************************************************************************/
 
 /* Entry point */
-ENTRY(__kinit_low)
+ENTRY(__kinit)
 
 /* Kernel starts at 1M in physical addresse space
  * Add the offset, to fit with values in config.h and config.inc
@@ -18,26 +18,33 @@ KERNEL_MEM_OFFSET = 0xE0000000;
 /* Memory map */
 MEMORY
 {
-    STARTUP_CODE   (rx)    :   ORIGIN = 0xE0100000,    LENGTH = 8K
-    KERNEL_CODE    (rx)    :   ORIGIN = 0xE0102000,    LENGTH = 256K
-    KERNEL_RO_DATA (r)     :   ORIGIN = 0xE0200000,    LENGTH = 32K
-    KERNEL_RW_DATA (rw)    :   ORIGIN = 0xE0208000,    LENGTH = 512K
-    KERNEL_STACKS  (rw)    :   ORIGIN = 0xE0300000,    LENGTH = 32K
-    KERNEL_HEAP    (rw)    :   ORIGIN = 0xE0308000,    LENGTH = 32K    
+    LOW_STARTUP_CODE    (rx)    :   ORIGIN = 0x00100000,    LENGTH = 4K
+    HIGH_TARTUP_CODE    (rx)    :   ORIGIN = 0xE0101000,    LENGTH = 4K
+    KERNEL_CODE         (rx)    :   ORIGIN = 0xE0102000,    LENGTH = 256K
+    KERNEL_RO_DATA      (r)     :   ORIGIN = 0xE0200000,    LENGTH = 32K
+    KERNEL_RW_DATA      (rw)    :   ORIGIN = 0xE0208000,    LENGTH = 512K
+    KERNEL_STACKS       (rw)    :   ORIGIN = 0xE0300000,    LENGTH = 32K
+    KERNEL_HEAP         (rw)    :   ORIGIN = 0xE0308000,    LENGTH = 32K    
 }
 
 /* Memory layout */
 SECTIONS
 {
     /* Contains the startup code used by grub to bootstrap the kernel */
-    . = ORIGIN(STARTUP_CODE);
-    .startup ALIGN(4K) : AT(ADDR(.startup) - KERNEL_MEM_OFFSET)
+    . = ORIGIN(LOW_STARTUP_CODE);
+    .low_startup ALIGN(4K) :
     {
         *(.multiboot)
 
         . = ALIGN(16);
-        *(.startup_code)
-    } > STARTUP_CODE
+        *(.low_startup_code)
+    } > LOW_STARTUP_CODE
+    . = ORIGIN(HIGH_TARTUP_CODE);
+    .high_startup ALIGN(4K) : AT(ADDR(.high_startup) - KERNEL_MEM_OFFSET)
+    {
+        . = ALIGN(16);
+        *(.high_startup_code)
+    } > HIGH_TARTUP_CODE
 
     /* Contains the kernel code */
     . = ORIGIN(KERNEL_CODE);
