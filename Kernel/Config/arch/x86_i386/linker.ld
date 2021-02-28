@@ -18,7 +18,6 @@ KERNEL_MEM_OFFSET = 0xE0000000;
 /* Memory map */
 MEMORY
 {
-    /* Memory map on x86 is detected automatically but we define a baseline */
     STARTUP_CODE   (rx)    :   ORIGIN = 0xE0100000,    LENGTH = 8K
     KERNEL_CODE    (rx)    :   ORIGIN = 0xE0102000,    LENGTH = 256K
     KERNEL_RO_DATA (r)     :   ORIGIN = 0xE0200000,    LENGTH = 32K

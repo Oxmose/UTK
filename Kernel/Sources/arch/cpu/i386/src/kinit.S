@@ -44,6 +44,7 @@ extern _START_BSS_ADDR
 extern _END_BSS_ADDR
 extern _KERNEL_STACKS_BASE
 extern _KERNEL_MULTIBOOT_PTR
+extern cpu_info
 
 ;-------------------------------------------------------------------------------
 ; EXTERN FUNCTIONS
@@ -129,12 +130,30 @@ __kinit_high:
     mov eax, 1
     mov [_kernel_init_cpu_count], eax
 
+    ; Jump to kickstart
+    jmp kernel_kickstart
+
 __kinit_end:
     ; Disable interrupt and loop forever
     cli 
     hlt
     jmp __kinit_end
 
+;-------------------------------------------------------------------------------
+; CPUID probing function
+__get_cpuid_flag:
+    pushfd                                  ;Save EFLAGS
+    pushfd                                  ;Store EFLAGS
+    xor    dword [esp], 0x00200000          ;Invert the ID bit in stored EFLAGS
+    popfd                                   ;Load stored EFLAGS
+    pushfd                                  ;Store EFLAGS again
+    pop    eax                              ;eax = modified EFLAGS
+    xor    eax, [esp]                       ;eax = whichever bits were changed
+    popfd                                   ;Restore original EFLAGS
+    and    eax, 0x00200000                  ;eax = 0 CPUID is not available
+    mov    edi, cpu_info
+    or     [edi], eax                       ; Store information in the structure
+    ret
 
 ;-------------------------------------------------------------------------------
 ; DATA
@@ -159,7 +178,7 @@ _kinit_pgdir:
     dd 0x00800083
     ; This page directory entry defines a 4MB page containing the kernel.
     dd 0x00C00083
-    times (1024 - KERNEL_START_PAGE_ID - 5) dd 0  ; Pages after the kernel image.
+    times (1024 - KERNEL_START_PAGE_ID - 4) dd 0  ; Pages after the kernel image.
 
 ; Multiboot structues pointer
 _kernel_multiboot_ptr:

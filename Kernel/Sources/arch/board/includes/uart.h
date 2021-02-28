@@ -1,0 +1,145 @@
+/*******************************************************************************
+ * @file uart.h
+ *
+ * @author Alexy Torres Aurora Dugo
+ *
+ * @date 25/12/2017
+ *
+ * @version 1.0
+ *
+ * @brief UART communication driver.
+ * 
+ * @details UART communication driver. Initializes the uart ports as in and
+ * output. The uart can be used to output data or communicate with other 
+ * prepherals that support this communication method
+ * 
+ * @copyright Alexy Torres Aurora Dugo
+ ******************************************************************************/
+
+#ifndef __UART_H_
+#define __UART_H_
+
+#include <stdint.h> /* Generic int types */
+#include <stddef.h> /* Standard definitions */
+#include <graphic.h> /* Graphic definitions */
+
+/*******************************************************************************
+ * DEFINITIONS
+ ******************************************************************************/
+
+/** @brief UART driver structure. */
+extern kernel_graphic_driver_t uart_text_driver;
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
+
+/**
+ * @brief Initializes the uart driver structures and hardware.
+ * 
+ * @details Initializes all the uart communication ports supported by the 
+ * driver and ennables the interrupt related to the uart hardware.
+ *
+ * @return The success state or the error code. 
+ * - OS_NO_ERR is returned if no error is encountered. 
+ * - There is not other possible return value.
+ */
+OS_RETURN_E uart_init(void);
+
+/**
+ * @brief Writes the data given as patameter on the desired port.
+ * 
+ * @details The function will output the data given as parameter on the selected
+ * port. This call is blocking until the data has been sent to the uart port
+ * controler.
+ *
+ * @param[in] port The desired port to write the data to.
+ * @param[in] data The byte to write to the uart port.
+ */
+void uart_write(const uint32_t port, const uint8_t data);
+
+/**
+ * @brief Write the string given as patameter on the debug port.
+ * 
+ * @details The function will output the data given as parameter on the debug
+ * port. This call is blocking until the data has been sent to the uart port
+ * controler.
+ *
+ * @param[in] string The string to write to the uart port.
+ * 
+ * @warning string must be NULL terminated.
+ */
+void uart_put_string(const char* string);
+
+/**
+ * @brief Write the character given as patameter on the debug port.
+ * 
+ * @details The function will output the character given as parameter on the 
+ * debug port. This call is blocking until the data has been sent to the uart 
+ * port controler.
+ *
+ * @param[in] character The character to write to the uart port.
+ */
+void uart_put_char(const char character);
+
+/**
+ * @brief Tells if the data on the uart port are ready to be read.
+ * 
+ * @details The function will returns 1 if a data was received by the uart
+ * port referenced by the port given as parameter.
+ *
+ * @param[in] port The uart port on which the test should be executed.
+ * 
+ * @return 1 is returned if data can be read from the port. 0 is returned
+ * otherwise.
+ */
+uint8_t uart_received(const uint32_t port);
+
+/** 
+ * @brief Reads a byte from the uart port given as parameter.
+ * 
+ * @details The function will read the input data on the selected port. This 
+ * call is blocking until the data has been received by the uart port
+ * controler.
+ *
+ * @param port The port on whichthe data should be read.
+ * 
+ * @return The byte that has been read on the uart port.
+ */
+uint8_t uart_read(const uint32_t port);
+
+/**
+ * @brief Clears the screen.
+ * 
+ * @details On 80x25 uart screen, this function will print 80 line feeds
+ * and thus, clear the screen.
+ */
+void uart_clear_screen(void);
+
+/**
+ * @brief Scrolls the screen downn.
+ * 
+ * @details Scrolls the screen by printing lines feed to the uart.
+ * This function can only be called with parameter direction to 
+ * SCROLL_DOWN. Otherwise, this function has no effect.
+ * 
+ * @param direction Should always be SCROLL_DOWN.
+ * 
+ * @param lines_count The amount of lines to scroll down.
+ */
+void uart_scroll(const SCROLL_DIRECTION_E direction,
+                   const uint32_t lines_count);
+
+/**
+ * @brief Write the string given as patameter on the debug port.
+ * 
+ * @details The function will output the data given as parameter on the debug
+ * port. This call is blocking until the data has been sent to the uart port
+ * controler.
+ *
+ * @param[in] string The string to write to the uart port.
+ * @param[in] len The length of the string to print.
+ */
+void uart_console_write_keyboard(const char* str, const size_t len);
+
+#endif /* #ifndef __UART_H_ */

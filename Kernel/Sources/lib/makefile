@@ -40,8 +40,7 @@ init:
 	@mkdir -p $(BIN_DIR)
 
 module: compile_asm compile_cc
-	@ar r $(BIN_DIR)/libkernel.a $(BUILD_DIR)/* 
-	@$(RM) -rf $(BUILD_DIR)
+	@ar r $(BIN_DIR)/liblib.a $(BUILD_DIR)/* 
 	@echo "\e[1m\e[92m=> Generated lib module\e[22m\e[39m"
 	@echo "\e[1m\e[92m--------------------------------------------------------------------------------\n\e[22m\e[39m"
 
@@ -68,7 +67,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.S
 
 # Clean 
 clean:
-	$(RM) -rf $(BUILD_DIR)
+	$(RM) -rf $(BUILD_DIR) $(BIN_DIR)
 	@echo "\e[1m\e[34m\n#-------------------------------------------------------------------------------\e[22m\e[39m"
 	@echo "\e[1m\e[34m| Cleaned lib module\e[22m\e[39m"
 	@echo "\e[1m\e[34m#-------------------------------------------------------------------------------\n\e[22m\e[39m"
