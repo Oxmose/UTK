@@ -51,6 +51,9 @@ OS_RETURN_E graphic_set_selected_driver(const kernel_graphic_driver_t* driver)
 
 	graphic_driver = *driver;
 
+    /* On driver change, clear the output */
+    graphic_clear_screen();
+
     return OS_NO_ERR;
 }
 

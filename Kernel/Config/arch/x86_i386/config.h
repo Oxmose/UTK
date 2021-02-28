@@ -38,6 +38,6 @@
 #define INFO_LOG_LEVEL    1
 #define NONE_LOG_LEVEL    0
 
-#define KERNEL_LOG_LEVEL INFO_LOG_LEVEL
+#define KERNEL_LOG_LEVEL DEBUG_LOG_LEVEL
 
 #endif /* #ifndef __GLOBAL_CONFIG_H__ */

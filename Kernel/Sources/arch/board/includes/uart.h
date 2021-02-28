@@ -128,7 +128,7 @@ void uart_clear_screen(void);
  * @param lines_count The amount of lines to scroll down.
  */
 void uart_scroll(const SCROLL_DIRECTION_E direction,
-                   const uint32_t lines_count);
+                 const uint32_t lines_count);
 
 /**
  * @brief Write the string given as patameter on the debug port.

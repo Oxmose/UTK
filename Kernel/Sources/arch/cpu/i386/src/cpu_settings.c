@@ -757,7 +757,7 @@ void cpu_setup_gdt(void)
     /* Load the GDT */
     __asm__ __volatile__("lgdt %0" :: "m" (cpu_gdt_ptr.size), "m" (cpu_gdt_ptr.base));
 
-    /* Load segment selectors with a far jump for CS*/
+    /* Load segment selectors with a far jump for CS */
     __asm__ __volatile__("movw %w0,%%ds\n\t"
                          "movw %w0,%%es\n\t"
                          "movw %w0,%%fs\n\t"
