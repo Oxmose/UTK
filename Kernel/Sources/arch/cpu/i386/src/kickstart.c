@@ -18,10 +18,13 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#include <cpu_settings.h>  /* CPU management */
-#include <graphic.h>       /* Output manager */
-#include <kernel_output.h> /* Kernel output */
-#include <uart.h>          /* uart driver */
+#include <cpu_settings.h>          /* CPU management */
+#include <graphic.h>               /* Output manager */
+#include <kernel_output.h>         /* Kernel output */
+#include <uart.h>                  /* uart driver */
+#include <vga_text.h>              /* VGA drivers */
+#include <stddef.h>                /* Standard definitions */
+#include <string.h>                /* String manipulations */
 
 /* UTK configuration file */
 #include <config.h>
@@ -74,6 +77,8 @@ static void validate_architecture(void)
  */
 void kernel_kickstart(void)
 {
+    OS_RETURN_E   err;
+
     /* Init uart for basic log */
     graphic_set_selected_driver(&uart_text_driver);
     uart_init();
@@ -86,6 +91,19 @@ void kernel_kickstart(void)
     cpu_setup_idt();
     cpu_setup_tss();
 
-    KERNEL_SUCCESS("Kernel initialized");
+#if TEST_MODE_ENABLED
+    boot_test();
+    output_test();
+    panic_test();
+#endif
+
+    /* Start the VGA driver */
+    err =  vga_init();
+    err |= graphic_set_selected_driver(&vga_text_driver);
+    INIT_MSG("VGA driver initialized\n", 
+             "Could not initialize VGA driver [%u]\n",
+             err, 1);
+
+    KERNEL_SUCCESS("Kernel initialized\n");
     while(1);
 }
