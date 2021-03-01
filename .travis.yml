@@ -48,6 +48,7 @@ addons:
             - libpulse-dev 
             - libpulse0
             - grub-pc-bin
+            - ninja-build
 
 cache:
     directories:
