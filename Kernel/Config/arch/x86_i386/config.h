@@ -16,6 +16,10 @@
 #ifndef __GLOBAL_CONFIG_H__
 #define __GLOBAL_CONFIG_H__
 
+/* Architecture definitions */
+#define ARCH_I386    1
+#define ARCH_32_BITS 1
+
 /* Kernel memory offset 
  * WARNING This value should be updated to fit other configuration files
  */
@@ -29,8 +33,6 @@
 /* Maximal number of CPU supported by the architecture */
 #define MAX_CPU_COUNT 4
 
-/* Architecture type */
-#define ARCH_32_BITS
 
 /* Kernel log level */
 #define DEBUG_LOG_LEVEL   3

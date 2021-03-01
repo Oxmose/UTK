@@ -5,7 +5,7 @@
  *
  * @author Alexy Torres Aurora Dugo
  *
- * @date 03/10/2017
+ * @date 28/02/2021
  *
  * @version 1.5
  *
@@ -29,8 +29,8 @@
 #include <config.h>
 
 /* Tests header file */
-#if TEST_MODE_ENABLED
-#include <Tests/test_bank.h>
+#ifdef TEST_MODE_ENABLED
+#include <test_bank.h>
 #endif
 
 /* Header file */
@@ -271,10 +271,6 @@ OS_RETURN_E vga_init(void)
 
     err = OS_NO_ERR;
 
-#if TEST_MODE_ENABLED
-    vga_test();
-#endif
-
     return err;
 }
 
@@ -456,30 +452,3 @@ void vga_console_write_keyboard(const char* string, const size_t size)
         vga_process_char(string[i]);
     }
 }
-
-#if 0
-OS_RETURN_E vga_map_memory(void)
-{
-    uint32_t    page_count;
-    uint32_t    size;
-    OS_RETURN_E err;
-
-    size       = sizeof(uint16_t) * 
-                 VGA_TEXT_SCREEN_COL_SIZE * 
-                 VGA_TEXT_SCREEN_LINE_SIZE;
-    page_count = size / KERNEL_PAGE_SIZE;
-    if(size % KERNEL_PAGE_SIZE)
-    {
-        ++page_count;
-    }
-
-    /* Get memory pages */
-    vga_framebuffer = (void*)VGA_TEXT_FRAMEBUFFER;
-
-    /* Ask for the kernel to map the buffer */
-    err = kernel_mmap_hw(vga_framebuffer, (void*)VGA_TEXT_FRAMEBUFFER, 
-                         size, 0, 0);
-
-    return err;
-}
-#endif
