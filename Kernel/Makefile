@@ -18,8 +18,6 @@ CONFIG_DIR= ./Config
 
 BUILD_DIR = build
 
-MODULES= -larch
-
 KERNEL = utk
 
 .PHONY: all
@@ -40,24 +38,31 @@ endif
 
 build_modules:
 
-# Build the architecture module
+
 ifeq ($(target), x86_i386)
+# Build the architecture module
 	@make -C $(SOURCE_DIR)/arch target_board=x86 target_cpu=i386
+
 else 
 	@echo "\e[1m\e[31m\n=== ERROR: Unknown target $(target)\e[22m\e[39m"
 	@echo "Available targets: $(TARGET_LIST)\n"
 	@exit 1
 endif
 
-# Build the user module 
-	@make -C $(SOURCE_DIR)/user
+ifeq ($(TESTS), TRUE)
+	# Build the tests module 
+	@make -C $(SOURCE_DIR)/tests target=$(target)
+endif
+
 # Build the io module 
 	@make -C $(SOURCE_DIR)/io
 # Build the core module 
 	@make -C $(SOURCE_DIR)/core
-# Build the lob module 
+# Build the lib module 
 	@make -C $(SOURCE_DIR)/lib
-
+# Build the memory module 
+	@make -C $(SOURCE_DIR)/memory 
+	
 build_kernel:
 	@echo "\e[1m\e[34m\n#-------------------------------------------------------------------------------\e[22m\e[39m"
 	@echo "\e[1m\e[34m| Building kernel for target $(target)\e[22m\e[39m"
@@ -82,11 +87,12 @@ else
 endif
 
 # Clean general modules
-	@make -C $(SOURCE_DIR)/user clean
+	@make -C $(SOURCE_DIR)/tests clean
 	@make -C $(SOURCE_DIR)/lib clean
 	@make -C $(SOURCE_DIR)/io clean
 	@make -C $(SOURCE_DIR)/core clean
 	@make -C $(SOURCE_DIR)/global clean
+	@make -C $(SOURCE_DIR)/memory clean
 
 # Clean kernel build directory
 	rm -rf  $(BUILD_DIR) $(BIN_DIR)

@@ -27,8 +27,8 @@
 #include <config.h>
 
 /* Tests header file */
-#if TEST_MODE_ENABLED
-#include <Tests/test_bank.h>
+#ifdef TEST_MODE_ENABLED
+#include <test_bank.h>
 #endif
 
 /* Header file */
@@ -767,7 +767,7 @@ void cpu_setup_gdt(void)
 
     KERNEL_SUCCESS("GDT Initialized at 0x%p\n", cpu_gdt_ptr.base);
 
-#if TEST_MODE_ENABLED
+#ifdef TEST_MODE_ENABLED
     gdt_test();
 #endif
 }
@@ -800,7 +800,7 @@ void cpu_setup_idt(void)
 
     KERNEL_SUCCESS("IDT Initialized at 0x%p\n", cpu_idt_ptr.base);
 
-#if TEST_MODE_ENABLED
+#ifdef TEST_MODE_ENABLED
     idt_test();
 #endif
 }
@@ -835,7 +835,7 @@ void cpu_setup_tss(void)
 
     KERNEL_SUCCESS("TSS Initialized at 0x%p\n", cpu_tss);
 
-#if TEST_MODE_ENABLED
+#ifdef TEST_MODE_ENABLED
     tss_test();
 #endif
 }

@@ -5,7 +5,7 @@
  *
  * @author Alexy Torres Aurora Dugo
  *
- * @date 25/12/2017
+ * @date 28/02/2021
  *
  * @version 1.0
  *
@@ -33,8 +33,8 @@
 #include <config.h>
 
 /* Tests header file */
-#if TEST_MODE_ENABLED
-#include <Tests/test_bank.h>
+#ifdef TEST_MODE_ENABLED
+#include <test_bank.h>
 #endif
 
 /* Header */
@@ -203,7 +203,7 @@ OS_RETURN_E uart_init(void)
 
     KERNEL_DEBUG("[SERIAL] Serial initialization end\n");
 
-#if TEST_MODE_ENABLED
+#ifdef TEST_MODE_ENABLED
     uart_test();
 #endif
 

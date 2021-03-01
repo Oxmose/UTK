@@ -376,24 +376,6 @@ typedef struct cpu_info cpu_info_t;
  ******************************************************************************/
 
 /**
- * @brief Fills the structure in parameters with the CPU information.
- *
- * @details The function will copy the data gathered at boot to the buffer
- * given as parameter. If the pointer to the buffer is NULL then the function
- * returns an error.
- *
- * @param[out] info The pointer to the structure to receive the data.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - OS_ERR_NULL_POINTER is returned if info if NULL.
- *
- * @warning The function cpu_detect() must have been called at least once before
- * using cpu_get_info. Otherwise the data gatered are undefined.
- */
-OS_RETURN_E cpu_get_info(cpu_info_t* info);
-
-/**
  * @brief Return the SSE state.
  *
  * @details Return the SSE state.

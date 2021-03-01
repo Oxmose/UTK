@@ -26,13 +26,15 @@
 #include <vga_text.h>              /* VGA drivers */
 #include <stddef.h>                /* Standard definitions */
 #include <string.h>                /* String manipulations */
+#include <kheap.h>                 /* Kernel heap */
+#include <interrupts.h>            /* Interrupt manager */
 
 /* UTK configuration file */
 #include <config.h>
 
 /* Tests header file */
-#if TEST_MODE_ENABLED
-#include <Tests/test_bank.h>
+#ifdef TEST_MODE_ENABLED
+#include <test_bank.h>
 #endif
 
 /*******************************************************************************
@@ -396,7 +398,7 @@ void kernel_kickstart(void)
     cpu_setup_idt();
     cpu_setup_tss();
 
-#if TEST_MODE_ENABLED
+#ifdef TEST_MODE_ENABLED
     boot_test();
     output_test();
     panic_test();
@@ -413,6 +415,16 @@ void kernel_kickstart(void)
 
     /* Validate architecture support */
     validate_architecture();
+
+    err = kheap_init();
+    INIT_MSG("Kernel heap initialized\n",
+             "Could not initialize kernel heap [%u]\n",
+             err, 1);
+
+    err = kernel_interrupt_init();
+    INIT_MSG("Interrupt manager initialized\n",
+             "Could not initialize interrupt manager [%u]\n",
+             err, 1);
 
     KERNEL_SUCCESS("Kernel initialized\n");
     while(1);

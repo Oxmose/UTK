@@ -1,5 +1,5 @@
 ################################################################################
-# LUTk Makefile
+# UTK Makefile
 # 
 # Created: 23/05/2020
 #
@@ -22,7 +22,12 @@ EXTRA_FLAGS = -O2
 CFLAGS = -m32 -std=c11 -nostdinc -fno-builtin -nostdlib -fno-stack-protector \
          -nostartfiles -nodefaultlibs -Wall -Wextra -Werror -c -fno-pie \
 		 -no-pie -MD -ffreestanding -Wno-address-of-packed-member
+TESTS_FLAGS = -DTEST_MODE_ENABLED
 		 
+ifeq ($(TESTS), TRUE)
+CFLAGS += $(TESTS_FLAGS)
+endif
+
 ifeq ($(DEBUG), TRUE)
 CFLAGS += $(DEBUG_FLAGS)
 else

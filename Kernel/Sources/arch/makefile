@@ -1,5 +1,5 @@
 ################################################################################
-# LUTk Makefile
+# UTK Makefile
 # 
 # Created: 23/05/2020
 #
@@ -47,7 +47,7 @@ endif
 
 build_modules: build_cpu build_board
 # Merge the two modules
-	@ar r $(BIN_DIR)/libarch.a $(BUILD_DIR)/* 
+	@ar r $(BIN_DIR)/libarch.a $(BUILD_DIR)/*.o
 	@echo "\e[1m\e[92m\n=> Generated ARCH module\e[22m\e[39m"
 	@echo "\e[1m\e[92m--------------------------------------------------------------------------------\n\e[22m\e[39m"
 
