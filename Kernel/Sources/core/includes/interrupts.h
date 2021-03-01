@@ -18,8 +18,8 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#ifndef __INTERRUPTS_INTERRUPTS_H_
-#define __INTERRUPTS_INTERRUPTS_H_
+#ifndef __CORE_INTERRUPTS_H_
+#define __CORE_INTERRUPTS_H_
 
 #include <stdint.h>      /* Generic int types */
 #include <stddef.h>      /* Standard definitions */
@@ -322,4 +322,4 @@ OS_RETURN_E kernel_interrupt_set_irq_mask(const uint32_t irq_number,
 OS_RETURN_E kernel_interrupt_set_irq_eoi(const uint32_t irq_number);
 
 
-#endif /* #ifndef __INTERRUPTS_INTERRUPTS_H_ */
+#endif /* #ifndef __CORE_INTERRUPTS_H_ */

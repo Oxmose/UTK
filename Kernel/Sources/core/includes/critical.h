@@ -17,8 +17,8 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#ifndef __SYNC_CRITICAL_H_
-#define __SYNC_CRITICAL_H_
+#ifndef __CORE_CRITICAL_H_
+#define __CORE_CRITICAL_H_
 
 #include <stdint.h>     /* Generic int types */
 #include <interrupts.h> /* Interrupts management */
@@ -62,4 +62,4 @@
     kernel_interrupt_restore(x);     \
 }
 
-#endif /* #ifndef __SYNC_CRITICAL_H_ */
+#endif /* #ifndef __CORE_CRITICAL_H_ */
