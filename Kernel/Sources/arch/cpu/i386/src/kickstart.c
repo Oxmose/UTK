@@ -28,7 +28,8 @@
 #include <string.h>                /* String manipulations */
 #include <kheap.h>                 /* Kernel heap */
 #include <interrupts.h>            /* Interrupt manager */
-
+#include <exceptions.h>            /* Exception manager */
+#include <panic.h>                 /* Kernel panic */
 /* UTK configuration file */
 #include <config.h>
 
@@ -426,6 +427,16 @@ void kernel_kickstart(void)
              "Could not initialize interrupt manager [%u]\n",
              err, 1);
 
+    err = kernel_exception_init();
+    INIT_MSG("Exception manager initialized\n",
+             "Could not initialize exception manager [%u]\n",
+             err, 1);
+        
+
     KERNEL_SUCCESS("Kernel initialized\n");
+    
     while(1);
+    
+    /* We should never get here once the scheduler has been called */
+    kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
 }
