@@ -30,6 +30,8 @@
 #include <interrupts.h>            /* Interrupt manager */
 #include <exceptions.h>            /* Exception manager */
 #include <panic.h>                 /* Kernel panic */
+#include <meminfo.h>               /* Memory mapping informations */
+
 /* UTK configuration file */
 #include <config.h>
 
@@ -416,6 +418,11 @@ void kernel_kickstart(void)
 
     /* Validate architecture support */
     validate_architecture();
+
+    err = memory_map_init();
+    INIT_MSG("",
+             "Could not get memory map [%u]\n",
+             err, 1);
 
     err = kheap_init();
     INIT_MSG("Kernel heap initialized\n",
