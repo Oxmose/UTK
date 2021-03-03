@@ -19,7 +19,7 @@ KERNEL_MEM_OFFSET = 0xE0000000;
 MEMORY
 {
     LOW_STARTUP_CODE    (rx)    :   ORIGIN = 0x00100000,    LENGTH = 4K
-    HIGH_TARTUP_CODE    (rx)    :   ORIGIN = 0xE0101000,    LENGTH = 4K
+    HIGH_STARTUP_CODE   (rx)    :   ORIGIN = 0xE0101000,    LENGTH = 4K
     KERNEL_CODE         (rx)    :   ORIGIN = 0xE0102000,    LENGTH = 256K
     KERNEL_RO_DATA      (r)     :   ORIGIN = 0xE0200000,    LENGTH = 32K
     KERNEL_RW_DATA      (rw)    :   ORIGIN = 0xE0208000,    LENGTH = 512K
@@ -34,17 +34,20 @@ SECTIONS
     . = ORIGIN(LOW_STARTUP_CODE);
     .low_startup ALIGN(4K) :
     {
+        _START_LOW_STARTUP_ADDR = .;
         *(.multiboot)
-
         . = ALIGN(16);
         *(.low_startup_code)
+        _END_LOW_STARTUP_ADDR = .;
     } > LOW_STARTUP_CODE
-    . = ORIGIN(HIGH_TARTUP_CODE);
+    . = ORIGIN(HIGH_STARTUP_CODE);
     .high_startup ALIGN(4K) : AT(ADDR(.high_startup) - KERNEL_MEM_OFFSET)
     {
         . = ALIGN(16);
+        _START_HIGH_STARTUP_ADDR = .;
         *(.high_startup_code)
-    } > HIGH_TARTUP_CODE
+        _END_HIGH_STARTUP_ADDR = .;
+    } > HIGH_STARTUP_CODE
 
     /* Contains the kernel code */
     . = ORIGIN(KERNEL_CODE);
@@ -93,6 +96,8 @@ SECTIONS
 
         _END_BSS_ADDR = .;
     } > KERNEL_RW_DATA
+
+    _KERNEL_STATIC_END = .;
 }
 
 /* Symbols */
