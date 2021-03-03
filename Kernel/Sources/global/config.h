@@ -33,6 +33,10 @@
 /* Maximal number of CPU supported by the architecture */
 #define MAX_CPU_COUNT 4
 
+/* Maximal number of memory regions to be detected by the kernel, increase this
+ * value if not all your memory or hardware is detected.
+ */
+#define MAX_MEMORY_REGION_DETECT 20
 
 /* Kernel log level */
 #define DEBUG_LOG_LEVEL   3
