@@ -24,6 +24,7 @@
  * WARNING This value should be updated to fit other configuration files
  */
 #define KERNEL_MEM_OFFSET 0xE0000000 
+#define KERNEL_MEM_START  0x00100000
 
 /* Kernel stack default size
  * WARNING This value should be updated to fit other configuration files
@@ -33,11 +34,6 @@
 /* Maximal number of CPU supported by the architecture */
 #define MAX_CPU_COUNT 4
 
-/* Maximal number of memory regions to be detected by the kernel, increase this
- * value if not all your memory or hardware is detected.
- */
-#define MAX_MEMORY_REGION_DETECT 20
-
 /* Kernel log level */
 #define DEBUG_LOG_LEVEL   3
 #define INFO_LOG_LEVEL    2
@@ -45,5 +41,8 @@
 #define NONE_LOG_LEVEL    0
 
 #define KERNEL_LOG_LEVEL DEBUG_LOG_LEVEL
+
+/* Defines the kernel frame size */ 
+#define KERNEL_FRAME_SIZE 0x1000
 
 #endif /* #ifndef __GLOBAL_CONFIG_H__ */

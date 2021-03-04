@@ -1,7 +1,7 @@
 /*******************************************************************************
- * @file meminfo.h
+ * @file memmgt.h
  * 
- * @see meminfo.c
+ * @see memmgt.c
  *
  * @author Alexy Torres Aurora Dugo
  *
@@ -9,9 +9,10 @@
  *
  * @version 1.0
  *
- * @brief Kernel memory detector.
- * 
- * @details This module is used to detect the memory mapping of the system.
+ * @brief Kernel physical memory manager.
+ *
+ * @details This module is used to detect the memory mapping of the system and 
+ * manage physical memory.
  * 
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
