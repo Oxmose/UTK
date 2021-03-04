@@ -30,7 +30,7 @@
 #include <interrupts.h>            /* Interrupt manager */
 #include <exceptions.h>            /* Exception manager */
 #include <panic.h>                 /* Kernel panic */
-#include <meminfo.h>               /* Memory mapping informations */
+#include <memmgt.h>               /* Memory mapping informations */
 
 /* UTK configuration file */
 #include <config.h>
@@ -376,6 +376,9 @@ static void validate_architecture(void)
         while(1);
     }
 
+    /* Might be used in future to check extended features */
+    (void)regs_ext;
+
     KERNEL_DEBUG("Validating architecture end\n");
 }
 
@@ -419,14 +422,14 @@ void kernel_kickstart(void)
     /* Validate architecture support */
     validate_architecture();
 
-    err = memory_map_init();
-    INIT_MSG("",
-             "Could not get memory map [%u]\n",
-             err, 1);
-
     err = kheap_init();
     INIT_MSG("Kernel heap initialized\n",
              "Could not initialize kernel heap [%u]\n",
+             err, 1);
+
+    err = memory_map_init();
+    INIT_MSG("",
+             "Could not get memory map [%u]\n",
              err, 1);
 
     err = kernel_interrupt_init();

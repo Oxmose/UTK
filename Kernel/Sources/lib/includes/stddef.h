@@ -218,4 +218,14 @@ typedef uint32_t uintptr_t;
 #error Architecture is not supported by the standard library
 #endif
 
+#ifdef ARCH_64_BITS
+/** @brief Defines the format for a pointer */
+#define PRIPTR  "%lu"
+#elif defined(ARCH_32_BITS)
+/** @brief Defines the format for a pointer */
+#define PRIPTR  "%u"
+#else 
+#error Architecture is not supported by the standard library
+#endif
+
 #endif /* __STDDEF_H_ */
