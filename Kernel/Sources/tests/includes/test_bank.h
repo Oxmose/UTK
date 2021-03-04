@@ -40,9 +40,11 @@ void exception_test(void);
 #define OUTPUT_TEST 0
 #define KHEAP_TEST 0
 #define PANIC_TEST 0
+#define QUEUE_TEST 0
 
 void output_test(void);
 void kheap_test(void);
 void panic_test(void);
+void queue_test(void);
 
 #endif /* __TEST_BANK_H_ */

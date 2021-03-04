@@ -427,6 +427,10 @@ void kernel_kickstart(void)
              "Could not initialize kernel heap [%u]\n",
              err, 1);
 
+#ifdef TEST_MODE_ENABLED
+    queue_test();
+#endif
+
     err = memory_map_init();
     INIT_MSG("",
              "Could not get memory map [%u]\n",
