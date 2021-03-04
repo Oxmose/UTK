@@ -67,9 +67,13 @@ SECTIONS
     {
         _START_RO_DATA_ADDR = .;
 
-        *(.eh_frame)
         *(.rodata)
         *(.rodata*)
+        
+    } > KERNEL_RO_DATA
+    .eh_frame ALIGN(4K) : AT(ADDR(.eh_frame) - KERNEL_MEM_OFFSET)
+    {
+        *(.eh_frame)
 
         _END_RODATA_ADDR = .;
     } > KERNEL_RO_DATA
