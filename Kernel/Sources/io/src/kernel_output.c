@@ -139,10 +139,10 @@ static void tolower(char* string)
 static void formater(const char* str, __builtin_va_list args, 
                      output_t used_output)
 {
-    size_t pos;
-    size_t str_length;
-    size_t seq_val;
-    size_t str_size;
+    size_t   pos;
+    size_t   str_length;
+    uint64_t seq_val;
+    size_t   str_size;
 
    
     uint8_t  modifier;
