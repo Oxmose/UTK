@@ -28,6 +28,10 @@
 /* UTK configuration file */
 #include <config.h>
 
+#ifdef TEST_MODE_ENABLED
+#include <test_bank.h>
+#endif
+
 /* Header file */
 #include <memmgt.h>
 
@@ -169,7 +173,7 @@ static void detect_memory(void)
         /* Everything over the 4G limit is not registered on 32 bits systems */
         if(mmap->addr > 0xFFFFFFFFULL)
         {
-            KERNEL_DEBUG("HM detection, skipped region at 0x%llX\n", mmap->addr);
+            KERNEL_DEBUG("[MEMMGT] HM detection, skipped region at 0x%llX\n", mmap->addr);
             mmap = (multiboot_memory_map_t*)
                    ((uintptr_t)mmap + mmap->size + sizeof(mmap->size));
 
@@ -321,8 +325,8 @@ static void setup_mem_table(void)
     }
 
     /* Update free memory */
-    KERNEL_DEBUG("Kernel physical memory end: 0x%p\n", free_mem_head);
-    KERNEL_DEBUG("Kernel virtual memory end: 0x%p\n", 
+    KERNEL_DEBUG("[MEMMGT] Kernel physical memory end: 0x%p\n", free_mem_head);
+    KERNEL_DEBUG("[MEMMGT] Kernel virtual memory end: 0x%p\n", 
                  free_mem_head + KERNEL_MEM_OFFSET);
 
     available_memory -= free_mem_head - KERNEL_MEM_START;
@@ -497,7 +501,7 @@ OS_RETURN_E memory_manager_init(void)
     _kernel_multiboot_ptr = (multiboot_info_t*)
                             ((uintptr_t)_kernel_multiboot_ptr + 
                              KERNEL_MEM_OFFSET);
-    KERNEL_DEBUG("Reading memory configuration from 0x%p\n", 
+    KERNEL_DEBUG("[MEMMGT] Reading memory configuration from 0x%p\n", 
                  _kernel_multiboot_ptr);
 
     /* Detect memory */
@@ -532,6 +536,11 @@ OS_RETURN_E memory_manager_init(void)
     }
     KERNEL_INFO("Total available memory: " PRIPTR "KB\n",
                  available_memory >> 10);
+
+#ifdef TEST_MODE_ENABLED
+    memmgr_test();
+#endif
+
     return OS_NO_ERR;
 }
 
@@ -544,7 +553,8 @@ void* alloc_kframes(const size_t frame_count, OS_RETURN_E* err)
 
     address = get_block(free_memory_map, frame_count, err);
 
-    KERNEL_DEBUG("Allocated %u frames, at 0x%p\n", frame_count, address);
+    KERNEL_DEBUG("[MEMMGT] Allocated %u frames, at 0x%p\n", 
+                 frame_count, address);
 
     available_memory -= KERNEL_FRAME_SIZE * frame_count;
 
@@ -584,7 +594,8 @@ OS_RETURN_E free_kframes(void* frame_addr, const size_t frame_count)
 
     err = add_block(free_memory_map, (uintptr_t)frame_addr, frame_count);
 
-    KERNEL_DEBUG("Deallocated %u frames, at 0x%p\n", frame_count, frame_addr);
+    KERNEL_DEBUG("[MEMMGT]  Deallocated %u frames, at 0x%p\n", 
+                 frame_count, frame_addr);
 
     EXIT_CRITICAL(int_state);
     return err;
@@ -599,7 +610,8 @@ void* alloc_kpages(const size_t page_count, OS_RETURN_E* err)
 
     address = get_block(free_kernel_pages, page_count, err);
 
-    KERNEL_DEBUG("Allocated %u pages, at 0x%p \n", page_count, address);
+    KERNEL_DEBUG("[MEMMGT] Allocated %u pages, at 0x%p \n", 
+                 page_count, address);
 
     EXIT_CRITICAL(int_state);
     return (void*)address;
@@ -626,7 +638,8 @@ OS_RETURN_E free_kpages(void* page_addr, const size_t page_count)
 
     err = add_block(free_kernel_pages, (uintptr_t)page_addr, page_count);
 
-    KERNEL_DEBUG("Deallocated %u pages, at 0x%p \n", page_count, page_addr);
+    KERNEL_DEBUG("[MEMMGT] Deallocated %u pages, at 0x%p \n", 
+                 page_count, page_addr);
 
     EXIT_CRITICAL(int_state);
     return err;

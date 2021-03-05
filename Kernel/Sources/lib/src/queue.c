@@ -136,7 +136,7 @@ OS_RETURN_E queue_push(queue_node_t* node, queue_t* queue)
 {
     uint32_t word;
 
-    KERNEL_DEBUG("Enqueue 0x%p in queue 0x%p\n", node, queue);
+    KERNEL_DEBUG("[QUEUE] queue 0x%p in queue 0x%p\n", node, queue);
 
     if(node == NULL || queue == NULL)
     {
@@ -166,8 +166,8 @@ OS_RETURN_E queue_push(queue_node_t* node, queue_t* queue)
     ++queue->size;
     node->enlisted = 1;
 
-    KERNEL_DEBUG("Enqueue element 0x%p in queue 0x%p\n", node, queue);
-    KERNEL_DEBUG("Enqueue element 0x%p 0x%p 0x%p 0x%p 0x%p\n",
+    KERNEL_DEBUG("[QUEUE] Enqueue element 0x%p in queue 0x%p\n", node, queue);
+    KERNEL_DEBUG("[QUEUE] Enqueue element 0x%p 0x%p 0x%p 0x%p 0x%p\n",
             node->next, node->prev, node->enlisted, node->priority, node->data);
 
 
@@ -190,11 +190,11 @@ OS_RETURN_E queue_push_prio(queue_node_t* node,
     queue_node_t* cursor;
     uint32_t      word;
 
-    KERNEL_DEBUG("Enqueue 0x%p in queue 0x%p\n", node, queue);
+    KERNEL_DEBUG("[QUEUE] Enqueue 0x%p in queue 0x%p\n", node, queue);
 
     if(node == NULL || queue == NULL)
     {
-        KERNEL_DEBUG("Enqueue NULL\n");
+        KERNEL_DEBUG("[QUEUE] Enqueue NULL\n");
         return OS_ERR_NULL_POINTER;
     }
 
@@ -245,8 +245,8 @@ OS_RETURN_E queue_push_prio(queue_node_t* node,
     ++queue->size;
     node->enlisted = 1;
 
-    KERNEL_DEBUG("Enqueue element 0x%p in queue 0x%p\n", node, queue);
-    KERNEL_DEBUG("Enqueue element 0x%p 0x%p 0x%p 0x%p 0x%p\n",
+    KERNEL_DEBUG("[QUEUE] Enqueue element 0x%p in queue 0x%p\n", node, queue);
+    KERNEL_DEBUG("[QUEUE] Enqueue element 0x%p 0x%p 0x%p 0x%p 0x%p\n",
             node->next, node->prev, node->enlisted, node->priority, node->data);
 
     if(node->next != NULL && node->prev != NULL && node->next == node->prev)
@@ -265,7 +265,7 @@ queue_node_t* queue_pop(queue_t* queue, OS_RETURN_E* error)
     queue_node_t* node;
     uint32_t      word;
 
-    KERNEL_DEBUG("Dequeue element in queue 0x%p\n", queue);
+    KERNEL_DEBUG("[QUEUE] Dequeue element in queue 0x%p\n", queue);
 
     if(queue == NULL)
     {
@@ -293,8 +293,8 @@ queue_node_t* queue_pop(queue_t* queue, OS_RETURN_E* error)
     /* Dequeue the last item */
     node = queue->tail;
 
-    KERNEL_DEBUG("Dequeue element 0x%p in queue 0x%p\n", node, queue);
-    KERNEL_DEBUG("Element 0x%p 0x%p 0x%p 0x%p 0x%p\n",
+    KERNEL_DEBUG("[QUEUE] Dequeue element 0x%p in queue 0x%p\n", node, queue);
+    KERNEL_DEBUG("[QUEUE] Element 0x%p 0x%p 0x%p 0x%p 0x%p\n",
             node->next, node->prev, node->enlisted, node->priority, node->data);
 
     if(node->prev != NULL)
@@ -328,7 +328,7 @@ queue_node_t* queue_find(queue_t* queue, void* data, OS_RETURN_E *error)
     queue_node_t* node;
     uint32_t      word;
 
-    KERNEL_DEBUG("Find data 0x%p in queue 0x%p\n", data, queue);
+    KERNEL_DEBUG("[QUEUE] Find data 0x%p in queue 0x%p\n", data, queue);
 
     /* If this queue is empty */
     if(queue == NULL)
@@ -379,7 +379,7 @@ OS_RETURN_E queue_remove(queue_t* queue, queue_node_t* node)
         return OS_ERR_NULL_POINTER;
     }
 
-    KERNEL_DEBUG("Remove node node 0x%p in queue 0x%p\n", node, queue);
+    KERNEL_DEBUG("[QUEUE] Remove node node 0x%p in queue 0x%p\n", node, queue);
 
     ENTER_CRITICAL(word);
 

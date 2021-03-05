@@ -143,6 +143,9 @@ divide your request into mulstiple read/write");
         case OS_ERR_KERNEL_MEM_OFFSET_UNALIGNED:
             printf("Kernel alignment error");
             break;
+        case OS_ERR_NOT_SUPPORTED:
+            printf("Feature not supported");
+            break;
         default:
             printf("Unknown error");
     }

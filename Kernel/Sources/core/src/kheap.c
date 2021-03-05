@@ -461,7 +461,7 @@ void kfree(void* ptr)
 		push_free(chunk);
     }
 
-    KERNEL_DEBUG("Kheap freed 0x%p -> %uB\n", ptr, used);
+    KERNEL_DEBUG("[KHEAP] Kheap freed 0x%p -> %uB\n", ptr, used);
 
     EXIT_CRITICAL(int_state);
 }

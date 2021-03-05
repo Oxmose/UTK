@@ -121,8 +121,7 @@ static void validate_architecture(void)
     else
     {
         KERNEL_ERROR("Architecture does not support CPUID\n");
-        /* TODO Kernel panic */
-        while(1);
+        kernel_panic(OS_ERR_NOT_SUPPORTED);
     }
 
     /* Get CPUID features */
@@ -339,50 +338,43 @@ static void validate_architecture(void)
     if((regs[3] & EDX_SEP) != EDX_SEP)
     {
         KERNEL_ERROR("Architecture does not support SYSENTER\n");
-        /* TODO Kernel panic */
-        while(1);
+        kernel_panic(OS_ERR_NOT_SUPPORTED);
     }
     if((regs[3] & EDX_FPU) != EDX_FPU)
     {
         KERNEL_ERROR("Architecture does not support FPU\n");
-        /* TODO Kernel panic */
-        while(1);
+        kernel_panic(OS_ERR_NOT_SUPPORTED);
     }
     if((regs[3] & EDX_TSC) != EDX_TSC)
     {
         KERNEL_ERROR("Architecture does not support TSC\n");
-        /* TODO Kernel panic */
-        while(1);
+        kernel_panic(OS_ERR_NOT_SUPPORTED);
     }
     if((regs[3] & EDX_APIC) != EDX_APIC)
     {
         KERNEL_ERROR("Architecture does not support APIC\n");
-        /* TODO Kernel panic */
-        while(1);
+        kernel_panic(OS_ERR_NOT_SUPPORTED);
     }
     if((regs[3] & EDX_FXSR) != EDX_FXSR)
     {
         KERNEL_ERROR("Architecture does not support FX instructions\n");
-        /* TODO Kernel panic */
-        while(1);
+        kernel_panic(OS_ERR_NOT_SUPPORTED);
     }
     if((regs[3] & EDX_SSE) != EDX_SSE)
     {
         KERNEL_ERROR("Architecture does not support SSE\n");
-        /* TODO Kernel panic */
-        while(1);
+        kernel_panic(OS_ERR_NOT_SUPPORTED);
     }
     if((regs[3] & EDX_SSE2) != EDX_SSE2)
     {
         KERNEL_ERROR("Architecture does not support SSE2\n");
-        /* TODO Kernel panic */
-        while(1);
+        kernel_panic(OS_ERR_NOT_SUPPORTED);
     }
 
     /* Might be used in future to check extended features */
     (void)regs_ext;
 
-    KERNEL_DEBUG("Validating architecture end\n");
+    KERNEL_DEBUG("[KICKSTART] Validating architecture end\n");
 }
 
 /**
@@ -410,7 +402,6 @@ void kernel_kickstart(void)
 #ifdef TEST_MODE_ENABLED
     boot_test();
     output_test();
-    panic_test();
 #endif
 
     KERNEL_DEBUG("[KICKSTART] Kickstarting kernel\n");
@@ -437,14 +428,10 @@ void kernel_kickstart(void)
              "Could not initialize exception manager [%u]\n",
              err, 1);
 
-
     err = memory_manager_init();
     INIT_MSG("Initialized memory manager\n",
              "Could not get memory manager [%u]\n",
              err, 1);
-#if TEST_MODE_ENABLED == 1
-    memmgr_test();
-#endif
 
     err = paging_init();
     INIT_MSG("Initialized paging\n",
@@ -460,7 +447,9 @@ void kernel_kickstart(void)
 
     KERNEL_SUCCESS("Kernel initialized\n");
     
-    while(1);
+#ifdef TEST_MODE_ENABLED
+    panic_test();
+#endif
     
     /* We should never get here once the scheduler has been called */
     kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
