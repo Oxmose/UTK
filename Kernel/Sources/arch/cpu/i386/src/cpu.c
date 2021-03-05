@@ -29,7 +29,7 @@
 #include <config.h>
 
 /* Tests header file */
-#if TEST_MODE_ENABLED
+#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
 #endif
 

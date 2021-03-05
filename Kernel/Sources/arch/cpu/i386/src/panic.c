@@ -100,6 +100,11 @@ void panic(cpu_state_t* cpu_state, uintptr_t int_id, stack_state_t* stack_state)
         }
     }
 
+    panic_scheme.background = BG_BLACK;
+    panic_scheme.foreground = FG_CYAN;
+    panic_scheme.vga_color  = 1;
+
+    graphic_set_color_scheme(panic_scheme);
 
     kernel_printf("\n##############################    KERNEL PANIC    ##########"
                     "####################\n");
