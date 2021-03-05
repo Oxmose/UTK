@@ -2,7 +2,6 @@ DEP_INCLUDES = -I ../../../lib/includes
 DEP_INCLUDES += -I ../../../io/includes
 DEP_INCLUDES += -I ../../../global
 DEP_INCLUDES += -I ../../../core/includes
-DEP_INCLUDES += -I ../../../memory/includes
 DEP_INCLUDES += -I ../../cpu/i386/includes
 DEP_INCLUDES += -I ../../cpu/includes
 DEP_INCLUDES += -I includes

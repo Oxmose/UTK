@@ -189,7 +189,7 @@ void queue_test(void)
     /* Enqueue nodes with prio */
     for(uint8_t i = 0; i < 40; ++i)
     {
-        error = queue_push_prio(nodes[i], queue, (uint32_t)nodes[i]->data);
+        error = queue_push_prio(nodes[i], queue, (uintptr_t)nodes[i]->data);
         if(error != OS_NO_ERR)
         {
             kernel_error("TEST_KQUEUE 12\n");

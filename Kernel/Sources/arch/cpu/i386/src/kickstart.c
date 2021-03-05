@@ -50,12 +50,15 @@
  * FUNCTIONS
  ******************************************************************************/
 
-/* TODO Add panic when needed */
 #define INIT_MSG(msg_success, msg_error, error, panic) \
     {                                                  \
         if (error != OS_NO_ERR)                        \
         {                                              \
             KERNEL_ERROR(msg_error, error);            \
+            if(panic != 0)                             \
+            {                                          \
+                kernel_panic(error);                   \
+            }                                          \
         }                                              \
         else if (strlen(msg_success) != 0)             \
         {                                              \
@@ -431,11 +434,13 @@ void kernel_kickstart(void)
     queue_test();
 #endif
 
-    err = memory_map_init();
+    err = memory_manager_init();
     INIT_MSG("",
-             "Could not get memory map [%u]\n",
+             "Could not get memory manager [%u]\n",
              err, 1);
-
+#if TEST_MODE_ENABLED == 1
+    memmgr_test();
+#endif
     err = kernel_interrupt_init();
     INIT_MSG("Interrupt manager initialized\n",
              "Could not initialize interrupt manager [%u]\n",
@@ -446,6 +451,16 @@ void kernel_kickstart(void)
              "Could not initialize exception manager [%u]\n",
              err, 1);
         
+#if KERNEL_VESA_ENABLE
+    err = vesa_init();
+    INIT_MSG("VESA driver initialized\n",
+             "Could not initialize VESA driver [%u]\n",
+             err, 1);
+
+    err = vesa_text_vga_to_vesa();
+    INIT_MSG("",
+             "Could not switch to VESA driver [%u]\n",
+#endif
 
     KERNEL_SUCCESS("Kernel initialized\n");
     

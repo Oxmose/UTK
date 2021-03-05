@@ -185,7 +185,7 @@ OS_RETURN_E queue_push(queue_node_t* node, queue_t* queue)
 
 OS_RETURN_E queue_push_prio(queue_node_t* node, 
                             queue_t* queue, 
-                            const uint32_t priority)
+                            const uintptr_t priority)
 {
     queue_node_t* cursor;
     uint32_t      word;

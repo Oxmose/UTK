@@ -20,8 +20,8 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#ifndef __MEMORY_KHEAP_H_
-#define __MEMORY_KHEAP_H_
+#ifndef __CORE_KHEAP_H_
+#define __CORE_KHEAP_H_
 
 #include <stdint.h> /* Generic int types */
 #include <stddef.h> /* Standard definitions */
@@ -126,4 +126,4 @@ void* kmalloc(const size_t size);
  */
 void kfree(void* ptr);
 
-#endif /* #ifndef __MEMORY_KHEAP_H_ */
+#endif /* #ifndef __CORE_KHEAP_H_ */
