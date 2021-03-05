@@ -438,12 +438,15 @@ void kernel_kickstart(void)
              "Could not initialize kernel paging [%u]\n",
              err, 1);
     
-    /* Start the VGA driver */
     err =  vga_init();
     err |= graphic_set_selected_driver(&vga_text_driver);
     INIT_MSG("VGA driver initialized\n", 
              "Could not initialize VGA driver [%u]\n",
              err, 1);
+
+#if TEST_MODE_ENABLED
+    bios_call_test();
+#endif
 
     KERNEL_SUCCESS("Kernel initialized\n");
     
