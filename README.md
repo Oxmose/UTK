@@ -13,8 +13,8 @@
 
 | Status | Master | Dev |
 | --- | --- | --- |
-| Travis CI | [![Build Status](https://travis-ci.org/Oxmose/UTK.svg?branch=master)](https://travis-ci.org/Oxmose/UTK) | [![Build Status](https://travis-ci.org/Oxmose/UTK.svg?branch=dev)](https://travis-ci.org/Oxmose/UTK) |
-| Codacy | [![Codacy Badge](https://api.codacy.com/project/badge/Grade/14abd7a3d98d40d1abeb2ba71a06e054)](https://www.codacy.com/app/Oxmose/UTK?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Oxmose/UTK&amp;utm_campaign=Badge_Grade)| N/A |
+| Travis CI | [![Build Status](https://www.travis-ci.com/Oxmose/UTK-Reboot.svg?branch=master)](https://www.travis-ci.com/Oxmose/UTK-Reboot) | [![Build Status](https://www.travis-ci.com/Oxmose/UTK-Reboot.svg?branch=dev)](https://www.travis-ci.com/Oxmose/UTK-Reboot) |
+| Codacy | [![Codacy Badge](https://app.codacy.com/project/badge/Grade/ae0df892bb124da8b16d015e4f4f2aeb)](https://www.codacy.com/gh/Oxmose/UTK-Reboot/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Oxmose/UTK-Reboot&amp;utm_campaign=Badge_Grade)| N/A |
 
 
 ----------

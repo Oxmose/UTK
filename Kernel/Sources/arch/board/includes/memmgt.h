@@ -17,8 +17,8 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#ifndef __BSP_MEMINFO_H_
-#define __BSP_MEMINFO_H_
+#ifndef __BSP_MEMMGT_H_
+#define __BSP_MEMMGT_H_
 
 #include <stddef.h> /* Standard definition */
 #include <stdint.h> /* Generic int types */
@@ -123,4 +123,4 @@ void* alloc_kpages(const size_t page_count, OS_RETURN_E* err);
  */
 OS_RETURN_E free_kpages(void* page_addr, const size_t page_count);
 
-#endif /* #ifndef __BSP_MEMINFO_H_ */
+#endif /* #ifndef __BSP_MEMMGT_H_ */

@@ -134,7 +134,7 @@ void memmgr_test(void)
     kernel_printf("[TESTMODE]Silent alloc\n");
     for(uint32_t i = 0; i < 100; ++i)
     {
-        page = alloc_kpages(1, NULL);
+        alloc_kpages(1, NULL);
     }
     for(uint32_t i = 0; i < 30; ++i)
     {
@@ -219,7 +219,7 @@ void memmgr_test(void)
     kernel_printf("[TESTMODE]Silent alloc\n");
     for(uint32_t i = 0; i < 100; ++i)
     {
-        frame = alloc_kframes(1, &error);
+        alloc_kframes(1, &error);
         if(error != OS_NO_ERR)
         {
             kernel_error("Error during slient alloc: %d\n", error);
@@ -237,7 +237,7 @@ void memmgr_test(void)
     while(cursor)
     {
         range = (mem_range_t*)cursor->data;
-        kernel_printf("[TESTMODE] Page range 0x%08x -> 0x%08x\n",
+        kernel_printf("[TESTMODE] Frame range 0x%08x -> 0x%08x\n",
         range->base, range->limit);
         cursor = cursor->next;
     }
@@ -250,7 +250,7 @@ void memmgr_test(void)
     while(cursor)
     {
         range = (mem_range_t*)cursor->data;
-        kernel_printf("[TESTMODE] Page range 0x%08x -> 0x%08x\n",
+        kernel_printf("[TESTMODE] Frame range 0x%08x -> 0x%08x\n",
         range->base, range->limit);
         cursor = cursor->next;
     }
@@ -263,7 +263,7 @@ void memmgr_test(void)
     while(cursor)
     {
         range = (mem_range_t*)cursor->data;
-        kernel_printf("[TESTMODE] Page range 0x%08x -> 0x%08x\n",
+        kernel_printf("[TESTMODE] Frame range 0x%08x -> 0x%08x\n",
         range->base, range->limit);
         cursor = cursor->next;
     }
@@ -276,7 +276,7 @@ void memmgr_test(void)
     while(cursor)
     {
         range = (mem_range_t*)cursor->data;
-        kernel_printf("[TESTMODE] Page range 0x%08x -> 0x%08x\n",
+        kernel_printf("[TESTMODE] Frame range 0x%08x -> 0x%08x\n",
         range->base, range->limit);
         cursor = cursor->next;
     }
@@ -292,7 +292,7 @@ void memmgr_test(void)
     while(cursor)
     {
         range = (mem_range_t*)cursor->data;
-        kernel_printf("[TESTMODE] Page range 0x%08x -> 0x%08x\n",
+        kernel_printf("[TESTMODE] Frame range 0x%08x -> 0x%08x\n",
         range->base, range->limit);
         cursor = cursor->next;
     }
