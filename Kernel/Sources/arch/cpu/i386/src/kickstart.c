@@ -460,6 +460,7 @@ void kernel_kickstart(void)
     err = vesa_text_vga_to_vesa();
     INIT_MSG("",
              "Could not switch to VESA driver [%u]\n",
+             err, 1);
 #endif
 
     KERNEL_SUCCESS("Kernel initialized\n");

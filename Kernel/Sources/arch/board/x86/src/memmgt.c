@@ -465,7 +465,7 @@ static OS_RETURN_E add_block(queue_t* list,
         if(range == NULL)
         {
             KERNEL_ERROR("Could not crate node data in memory manager\n");
-            return err;
+            return OS_ERR_MALLOC;
         }
         range->base    = first_frame;
         range->limit   = limit;

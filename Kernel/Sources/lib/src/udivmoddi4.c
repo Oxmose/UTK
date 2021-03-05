@@ -21,6 +21,7 @@ uint64_t __udivmoddi4 (uint64_t num, uint64_t den, uint64_t* rem_p)
  
     if(den == 0) 
     {
+        /* Force divide by 0 */
         return 1 / ((unsigned)den);
     }
  

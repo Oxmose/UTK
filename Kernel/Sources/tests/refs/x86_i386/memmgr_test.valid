@@ -106,20 +106,20 @@
 [TESTMODE]Allocated 0x00390000
 [TESTMODE]Allocated 0x00391000
 [TESTMODE] ---
-[TESTMODE] Page range 0x00392000 -> 0xbffdf000
+[TESTMODE] Frame range 0x00392000 -> 0xbffdf000
 [TESTMODE] ---
-[TESTMODE] Page range 0x00380000 -> 0x00382000
-[TESTMODE] Page range 0x00392000 -> 0xbffdf000
+[TESTMODE] Frame range 0x00380000 -> 0x00382000
+[TESTMODE] Frame range 0x00392000 -> 0xbffdf000
 [TESTMODE] ---
-[TESTMODE] Page range 0x00380000 -> 0x00384000
-[TESTMODE] Page range 0x00392000 -> 0xbffdf000
+[TESTMODE] Frame range 0x00380000 -> 0x00384000
+[TESTMODE] Frame range 0x00392000 -> 0xbffdf000
 [TESTMODE] ---
-[TESTMODE] Page range 0x00380000 -> 0x00384000
-[TESTMODE] Page range 0x00392000 -> 0xbffdf000
+[TESTMODE] Frame range 0x00380000 -> 0x00384000
+[TESTMODE] Frame range 0x00392000 -> 0xbffdf000
 [TESTMODE] Wanted error: 10
 [TESTMODE] Unauthorized action
 [TESTMODE] ---
-[TESTMODE] Page range 0x00380000 -> 0x00384000
-[TESTMODE] Page range 0x00392000 -> 0xbffdf000
+[TESTMODE] Frame range 0x00380000 -> 0x00384000
+[TESTMODE] Frame range 0x00392000 -> 0xbffdf000
 [TESTMODE] Wanted error: 10
 [TESTMODE] Unauthorized action
