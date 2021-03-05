@@ -24,7 +24,6 @@
 #include <stdint.h>               /* Generic int types */
 #include <stdio.h>                /* Error string */
 #include <cpu.h>                  /* CPU management */
-#include <vga_text.h>             /* VGA driver */
 
 /* UTK configuration file */
 #include <config.h>
@@ -88,15 +87,6 @@ void panic(cpu_state_t* cpu_state, uintptr_t int_id, stack_state_t* stack_state)
     }
 
     cpu_clear_interrupt();
-
-    /* VGA switch */
-    graphic_set_selected_driver(&vga_text_driver);
-    
-    panic_scheme.background = BG_BLACK;
-    panic_scheme.foreground = FG_CYAN;
-    panic_scheme.vga_color  = 1;
-
-    graphic_set_color_scheme(panic_scheme);
 
     /* Test mode probing */
     if(panic_code == 666)

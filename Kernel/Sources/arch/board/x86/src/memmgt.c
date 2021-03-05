@@ -632,6 +632,103 @@ OS_RETURN_E free_kpages(void* page_addr, const size_t page_count)
     return err;
 }
 
+void memory_get_klowstartup_range(uintptr_t* start, uintptr_t* end)
+{
+    if(start != NULL)
+    {
+        *start = (uintptr_t)&_START_LOW_STARTUP_ADDR;
+    }
+    if(end != NULL)
+    {
+        *end = (uintptr_t)&_END_LOW_STARTUP_ADDR;
+    }
+}
+
+void memory_get_khighstartup_range(uintptr_t* start, uintptr_t* end)
+{
+    if(start != NULL)
+    {
+        *start = (uintptr_t)&_START_HIGH_STARTUP_ADDR;
+    }
+    if(end != NULL)
+    {
+        *end = (uintptr_t)&_END_HIGH_STARTUP_ADDR;
+    }
+}
+
+void memory_get_ktext_range(uintptr_t* start, uintptr_t* end)
+{
+    if(start != NULL)
+    {
+        *start = (uintptr_t)&_START_TEXT_ADDR;
+    }
+    if(end != NULL)
+    {
+        *end = (uintptr_t)&_END_TEXT_ADDR;
+    }
+}
+
+void memory_get_krodata_range(uintptr_t* start, uintptr_t* end)
+{
+    if(start != NULL)
+    {
+        *start = (uintptr_t)&_START_RO_DATA_ADDR;
+    }
+    if(end != NULL)
+    {
+        *end = (uintptr_t)&_END_RODATA_ADDR;
+    }
+}
+
+void memory_get_kdata_range(uintptr_t* start, uintptr_t* end)
+{
+    if(start != NULL)
+    {
+        *start = (uintptr_t)&_START_DATA_ADDR;
+    }
+    if(end != NULL)
+    {
+        *end = (uintptr_t)&_END_DATA_ADDR;
+    }
+}
+
+void memory_get_kbss_range(uintptr_t* start, uintptr_t* end)
+{
+    if(start != NULL)
+    {
+        *start = (uintptr_t)&_START_BSS_ADDR;
+    }
+    if(end != NULL)
+    {
+        *end = (uintptr_t)&_END_BSS_ADDR;
+    }
+}
+
+void memory_get_kstacks_range(uintptr_t* start, uintptr_t* end)
+{
+    if(start != NULL)
+    {
+        *start = (uintptr_t)&_KERNEL_STACKS_BASE;
+    }
+    if(end != NULL)
+    {
+        *end = (uintptr_t)&_KERNEL_STACKS_BASE + 
+               (uintptr_t)&_KERNEL_STACKS_SIZE;
+    }
+}
+
+void memory_get_kheap_range(uintptr_t* start, uintptr_t* end)
+{
+    if(start != NULL)
+    {
+        *start = (uintptr_t)&_KERNEL_HEAP_BASE;
+    }
+    if(end != NULL)
+    {
+        *end = (uintptr_t)&_KERNEL_HEAP_BASE + (uintptr_t)&_KERNEL_HEAP_SIZE;
+    }
+}
+
 /* Test Mode */
 #ifdef TEST_MODE_ENABLED
 queue_t* paging_get_free_frames(void)

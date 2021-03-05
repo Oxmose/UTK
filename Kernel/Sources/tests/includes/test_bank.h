@@ -28,6 +28,7 @@ void kill_qemu(void);
 #define INTERRUPT_TEST 0
 #define EXCEPTION_TEST 0
 #define MEMMGR_TEST 0
+#define PAGING_TEST 0
 
 void uart_test(void);
 void idt_test(void);
@@ -37,6 +38,7 @@ void boot_test(void);
 void interrupt_test(void);
 void exception_test(void);
 void memmgr_test(void);
+void paging_test(void);
 #endif 
 
 #define OUTPUT_TEST 0
