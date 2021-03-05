@@ -30,8 +30,8 @@
 #include <interrupts.h>            /* Interrupt manager */
 #include <exceptions.h>            /* Exception manager */
 #include <panic.h>                 /* Kernel panic */
-#include <memmgt.h>               /* Memory mapping informations */
-
+#include <memmgt.h>                /* Memory mapping informations */
+#include <paging.h>                /* Memory paging */
 /* UTK configuration file */
 #include <config.h>
 
@@ -415,13 +415,6 @@ void kernel_kickstart(void)
 
     KERNEL_DEBUG("[KICKSTART] Kickstarting kernel\n");
 
-    /* Start the VGA driver */
-    err =  vga_init();
-    err |= graphic_set_selected_driver(&vga_text_driver);
-    INIT_MSG("VGA driver initialized\n", 
-             "Could not initialize VGA driver [%u]\n",
-             err, 1);
-
     /* Validate architecture support */
     validate_architecture();
 
@@ -434,13 +427,6 @@ void kernel_kickstart(void)
     queue_test();
 #endif
 
-    err = memory_manager_init();
-    INIT_MSG("",
-             "Could not get memory manager [%u]\n",
-             err, 1);
-#if TEST_MODE_ENABLED == 1
-    memmgr_test();
-#endif
     err = kernel_interrupt_init();
     INIT_MSG("Interrupt manager initialized\n",
              "Could not initialize interrupt manager [%u]\n",
@@ -450,18 +436,27 @@ void kernel_kickstart(void)
     INIT_MSG("Exception manager initialized\n",
              "Could not initialize exception manager [%u]\n",
              err, 1);
-        
-#if KERNEL_VESA_ENABLE
-    err = vesa_init();
-    INIT_MSG("VESA driver initialized\n",
-             "Could not initialize VESA driver [%u]\n",
-             err, 1);
 
-    err = vesa_text_vga_to_vesa();
-    INIT_MSG("",
-             "Could not switch to VESA driver [%u]\n",
+
+    err = memory_manager_init();
+    INIT_MSG("Initialized memory manager\n",
+             "Could not get memory manager [%u]\n",
              err, 1);
+#if TEST_MODE_ENABLED == 1
+    memmgr_test();
 #endif
+
+    err = paging_init();
+    INIT_MSG("Initialized paging\n",
+             "Could not initialize kernel paging [%u]\n",
+             err, 1);
+    
+    /* Start the VGA driver */
+    err =  vga_init();
+    err |= graphic_set_selected_driver(&vga_text_driver);
+    INIT_MSG("VGA driver initialized\n", 
+             "Could not initialize VGA driver [%u]\n",
+             err, 1);
 
     KERNEL_SUCCESS("Kernel initialized\n");
     

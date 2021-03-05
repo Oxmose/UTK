@@ -24,6 +24,7 @@
 #include <cpu.h>             /* CPU port manipulation */
 #include <uart.h>            /* UART driver */
 #include <kernel_output.h>   /* Kernel output manager */
+#include <paging.h>          /* Paging manager */
 
 /* UTK configuration file */
 #include <config.h>
@@ -269,7 +270,12 @@ OS_RETURN_E vga_init(void)
     /* Init framebuffer */
     vga_framebuffer = (uint16_t*)VGA_TEXT_FRAMEBUFFER;
 
-    err = OS_NO_ERR;
+    /* Map the driver's memory */
+    err = paging_kmmap_hw(vga_framebuffer, 
+                          vga_framebuffer,
+                          VGA_TEXT_FRAMEBUFFER_SIZE,
+                          0,
+                          0);
 
     return err;
 }

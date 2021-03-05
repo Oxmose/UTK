@@ -34,6 +34,9 @@
 /** @brief VGA frame buffer base physical address. */
 #define VGA_TEXT_FRAMEBUFFER 0xB8000
 
+/** @brief VGA frame buffer size */
+#define VGA_TEXT_FRAMEBUFFER_SIZE 0x7D00
+
 /** @brief VGA CPU management data port. */
 #define VGA_TEXT_SCREEN_DATA_PORT 0x3D5
 /** @brief VGA CPU management command port. */

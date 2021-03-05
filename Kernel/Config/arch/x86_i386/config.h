@@ -42,8 +42,9 @@
 
 #define KERNEL_LOG_LEVEL DEBUG_LOG_LEVEL
 
-/* Defines the kernel frame size */ 
+/* Defines the kernel frame and page size */ 
 #define KERNEL_FRAME_SIZE 0x1000
+#define KERNEL_PAGE_SIZE  KERNEL_FRAME_SIZE
 
 /* Enable or disable VESA drivers */
 #define KERNEL_VESA_ENABLE 0
@@ -51,5 +52,11 @@
 /* Defines the limit address allocable by the kernel */
 #define KERNEL_VIRTUAL_ADDR_MAX 0x100000000
 #define KERNEL_VIRTUAL_ADDR_MAX_MASK 0xFFFFFFFF
+
+/** @brief Defines the minimal amount of memory blocks reserved for kernel paging.
+ * One block is 4Kb and can map 4MB. Set this number to map the entierety of the
+ * kernel.
+ */
+#define KERNEL_RESERVED_PAGING 4
 
 #endif /* #ifndef __GLOBAL_CONFIG_H__ */
