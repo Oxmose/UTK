@@ -140,8 +140,6 @@ static OS_RETURN_E acpi_parse_apic(acpi_madt_t* madt_ptr)
         return err;
     }
 
-    err = OS_NO_ERR;
-
     KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "[ACPI] Parsing MADT at 0x%p", madt_ptr);
 
     /* Verify checksum */
@@ -253,7 +251,6 @@ static OS_RETURN_E acpi_parse_apic(acpi_madt_t* madt_ptr)
                     }
                     madt_entry += header->length;
                 }
-               
             }
         }
         else
@@ -353,8 +350,6 @@ static OS_RETURN_E acpi_parse_fadt(acpi_fadt_t* fadt_ptr)
     {
         return err;
     }
-
-    err = OS_NO_ERR;
 
     KERNEL_DEBUG(ACPI_DEBUG_ENABLED,"[ACPI] Parsing FADT at 0x%p", fadt_ptr);
 
@@ -643,8 +638,6 @@ static OS_RETURN_E acpi_parse_rsdp(rsdp_descriptor_t* rsdp_desc)
     {
         return OS_ERR_NULL_POINTER;
     }
-
-    err = OS_NO_ERR;
 
     KERNEL_DEBUG(ACPI_DEBUG_ENABLED, 
                  "[ACPI] Parsing RSDP at 0x%p", 
