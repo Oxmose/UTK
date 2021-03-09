@@ -33,6 +33,8 @@ void kill_qemu(void);
 #define BIOS_CALL_TEST 0
 #define ACPI_TEST 0
 #define PIC_TEST 0
+#define IO_APIC_TEST 0
+#define LAPIC_TEST 0
 
 void uart_test(void);
 void idt_test(void);
@@ -46,6 +48,8 @@ void paging_test(void);
 void bios_call_test(void);
 void acpi_test(void);
 void pic_test(void);
+void io_apic_test(void);
+void lapic_test(void);
 
 #endif 
 

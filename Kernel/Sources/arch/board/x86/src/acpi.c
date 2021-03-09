@@ -783,7 +783,7 @@ OS_RETURN_E acpi_init(void)
     return err;
 }
 
-int32_t acpi_get_io_apic_available(void)
+int32_t acpi_get_io_apic_count(void)
 {
     if(acpi_initialized != 1)
     {
@@ -793,7 +793,7 @@ int32_t acpi_get_io_apic_available(void)
     return io_apic_count;
 }
 
-int32_t acpi_get_lapic_available(void)
+int32_t acpi_get_lapic_count(void)
 {
     if(acpi_initialized != 1)
     {
@@ -803,7 +803,7 @@ int32_t acpi_get_lapic_available(void)
     return cpu_count;
 }
 
-int32_t acpi_get_remmaped_irq(const uint32_t irq_number)
+int32_t acpi_get_remaped_irq(const uint32_t irq_number)
 {
     uint8_t* base;
     uint8_t* limit;
@@ -915,4 +915,9 @@ OS_RETURN_E acpi_check_lapic_id(const uint32_t lapic_id)
 int32_t acpi_get_cpu_count(void)
 {
     return cpu_count;
+}
+
+const queue_t* acpi_get_io_apics(void)
+{
+    return io_apics;
 }
