@@ -43,7 +43,7 @@
 
 /* CPU informations */
 /** @brief Stores the number of detected CPU. */
-static uint32_t cpu_count = 0;
+static uint32_t cpu_count;
 
 /** @brief Stores the detected CPUs' lapics. */
 static queue_t* cpu_lapics;
@@ -919,7 +919,7 @@ OS_RETURN_E acpi_check_lapic_id(const uint32_t lapic_id)
     return err;
 }
 
-int32_t acpi_get_detected_cpu_count(void)
+int32_t acpi_get_cpu_count(void)
 {
     return cpu_count;
 }

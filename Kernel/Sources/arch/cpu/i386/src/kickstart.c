@@ -33,6 +33,7 @@
 #include <memmgt.h>                /* Memory mapping informations */
 #include <paging.h>                /* Memory paging */
 #include <acpi.h>                  /* ACPI manager */
+#include <pic.h>                   /* PIC driver */
 
 /* UTK configuration file */
 #include <config.h>
@@ -452,7 +453,14 @@ void kernel_kickstart(void)
              "Could not initialize ACPI [%u]\n",
              err, 1);
 
-#if TEST_MODE_ENABLED
+    KERNEL_INFO("Number of detected CPU: %d\n", acpi_get_cpu_count());
+
+    err = pic_init();
+    INIT_MSG("PIC initialized\n",
+             "Could not initialize PIC [%u]\n",
+             err, 1);
+
+#ifdef TEST_MODE_ENABLED
     bios_call_test();
 #endif
 
