@@ -6,7 +6,7 @@
 
 void uart_test(void)
 {
-    uart_put_string("[TESTMODE] Serial test passed\n");
+    uart_put_string("\n[TESTMODE] Serial test passed\n");
 
     kill_qemu();
 }
