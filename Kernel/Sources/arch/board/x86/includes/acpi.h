@@ -428,16 +428,4 @@ OS_RETURN_E acpi_check_lapic_id(const uint32_t lapic_id);
  */
 int32_t acpi_get_cpu_count(void);
 
-/**
- * @brief Returns a pointer to the array of CPU lapics.
- * 
- * @details Returns a pointer to the array of CPU lapics. The array might be 
- * wider than the number of CPU detected in the system. In that case, all data 
- * present after the last detected CPU ID is not to be considered.
- * 
- * 
- * @return A pointer to the array of CPU lapics.
- */
-const local_apic_t** acpi_get_cpu_lapics(void);
-
 #endif /* #ifndef __X86_ACPI_H_ */
