@@ -82,7 +82,8 @@ static OS_RETURN_E set_line(const uint8_t attr, const uint8_t com)
 {
     cpu_outb(attr, SERIAL_LINE_COMMAND_PORT(com));
 
-    KERNEL_DEBUG("[SERIAL] Set line attributes of port 0x%04x to %u\n", 
+    KERNEL_DEBUG(SERIAL_DEBUG_ENABLED,
+                 "[SERIAL] Set line attributes of port 0x%04x to %u", 
                  com, attr);
 
     return OS_NO_ERR;
@@ -102,8 +103,9 @@ static OS_RETURN_E set_buffer(const uint8_t attr, const uint8_t com)
 {
     cpu_outb(attr, SERIAL_FIFO_COMMAND_PORT(com));
 
-    KERNEL_DEBUG("[SERIAL] Set buffer attributes of port 0x%04x to %u\n", 
-                  com, attr);
+    KERNEL_DEBUG(SERIAL_DEBUG_ENABLED,
+                 "[SERIAL] Set buffer attributes of port 0x%04x to %u", 
+                 com, attr);
 
     return OS_NO_ERR;
 }
@@ -124,7 +126,9 @@ static OS_RETURN_E set_baudrate(SERIAL_BAUDRATE_E rate, const uint8_t com)
     cpu_outb((rate >> 8) & 0x00FF, SERIAL_DATA_PORT(com));
     cpu_outb(rate & 0x00FF, SERIAL_DATA_PORT_2(com));
 
-    KERNEL_DEBUG("[SERIAL] Set baud rate of port 0x%04x to %u\n", com, rate);
+    KERNEL_DEBUG(SERIAL_DEBUG_ENABLED,
+                 "[SERIAL] Set baud rate of port 0x%04x to %u", 
+                 com, rate);
 
     return OS_NO_ERR;
 }
@@ -201,7 +205,7 @@ OS_RETURN_E uart_init(void)
 
     serial_init_done = 1;
 
-    KERNEL_DEBUG("[SERIAL] Serial initialization end\n");
+    KERNEL_DEBUG(SERIAL_DEBUG_ENABLED, "[SERIAL] Serial initialization end");
 
 #ifdef TEST_MODE_ENABLED
     uart_test();

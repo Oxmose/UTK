@@ -28,6 +28,7 @@
 #include <kernel_output.h>        /* Kernel output methods */
 #include <critical.h>             /* Critical sections */
 #include <x86memmgt.h>            /* X86 memory management */
+#include <cpu.h>                  /* CPU management */
 
 #ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
@@ -95,8 +96,10 @@ static void map_kernel_section(uintptr_t start_addr, uintptr_t end_addr,
     /* Align start addr */
     start_addr = (uintptr_t)start_addr & PAGE_ALIGN_MASK;
 
-    KERNEL_DEBUG("[PAGING] Mapping kernel section at 0x%p -> 0x%p\n", 
-                 start_addr, end_addr);
+    KERNEL_DEBUG(PAGING_DEBUG_ENABLED, 
+                 "[PAGING] Mapping kernel section at 0x%p -> 0x%p", 
+                 start_addr, 
+                 end_addr);
     while(start_addr < end_addr)
     {
         /* Get entry indexes */
@@ -162,7 +165,9 @@ static void paging_fault_general_handler(cpu_state_t* cpu_state, uintptr_t int_i
     kill_qemu();
 #endif
 
-    KERNEL_DEBUG("[PAGING] Page fault at 0x%p\n", fault_address);
+    KERNEL_DEBUG(PAGING_DEBUG_ENABLED, 
+                 "[PAGING] Page fault at 0x%p", 
+                 fault_address);
 
     /* Kernel cannot handle page fault at the moment */
     panic(cpu_state, int_id, stack_state);
@@ -334,8 +339,10 @@ static OS_RETURN_E kernel_mmap_internal(const void* virt_addr,
             (hardware ? PAGE_FLAG_HARDWARE : 0) |
             PAGE_FLAG_PRESENT;
 
-        KERNEL_DEBUG("[PAGING] Mapped page at 0x%p -> 0x%p\n", 
-                     virt_align, phys_align);
+        KERNEL_DEBUG(PAGING_DEBUG_ENABLED, 
+                     "[PAGING] Mapped page at 0x%p -> 0x%p", 
+                     virt_align, 
+                     phys_align);
 
         /* Update addresses and size */
         virt_align += KERNEL_PAGE_SIZE;
@@ -362,7 +369,7 @@ OS_RETURN_E paging_init(void)
 
     err = OS_NO_ERR;
 
-    KERNEL_DEBUG("[PAGING] Initializing paging\n");
+    KERNEL_DEBUG(PAGING_DEBUG_ENABLED, "[PAGING] Initializing paging");
 
     /* Initialize kernel page directory */
     for(i = 0; i < KERNEL_PGDIR_SIZE; ++i)
@@ -430,12 +437,21 @@ OS_RETURN_E paging_enable(void)
 
     ENTER_CRITICAL(int_state);
 
-    /* Enable paging and write protect */
+    /* Enable paging, write protect and PCID */
     __asm__ __volatile__("mov %%cr0, %%eax\n\t"
                          "or $0x80010000, %%eax\n\t"
-                         "mov %%eax, %%cr0" : : : "eax");
+                         "mov %%eax, %%cr0\n\t"
+                         : : : "eax");
 
-    KERNEL_DEBUG("[PAGING] Paging enabled\n");
+    if(cpu_is_pcid_capable() == 1)
+    {
+        __asm__ __volatile__("mov %%cr4, %%eax\n\t"
+                            "or $0x00020000, %%eax\n\t"
+                            "mov %%eax, %%cr4\n\t"
+                            : : : "eax");
+    }
+
+    KERNEL_DEBUG(PAGING_DEBUG_ENABLED, "[PAGING] Paging enabled");
 
     enabled = 1;
 
@@ -465,7 +481,7 @@ OS_RETURN_E paging_disable(void)
                          "and $0x7FF7FFFF, %%eax\n\t"
                          "mov %%eax, %%cr0" : : : "eax");
 
-    KERNEL_DEBUG("[PAGING] Paging disabled\n");
+    KERNEL_DEBUG(PAGING_DEBUG_ENABLED, "[PAGING] Paging disabled");
 
     enabled = 0;
 
@@ -485,7 +501,8 @@ OS_RETURN_E paging_kmmap_hw(const void* virt_addr,
 
     ENTER_CRITICAL(int_state);
 
-    KERNEL_DEBUG("[PAGING] Request HW mappping at 0x%p -> 0x%p (%uB)\n", 
+    KERNEL_DEBUG(PAGING_DEBUG_ENABLED, 
+                 "[PAGING] Request HW mappping at 0x%p -> 0x%p (%uB)", 
                  virt_addr, 
                  phys_addr,
                  mapping_size);
@@ -529,7 +546,8 @@ OS_RETURN_E paging_kmmap(const void* virt_addr,
         return err;
     }
 
-    KERNEL_DEBUG("[PAGING] Request regular mappping at 0x%p -> 0x%p (%uB)\n",
+    KERNEL_DEBUG(PAGING_DEBUG_ENABLED, 
+                 "[PAGING] Request regular mappping at 0x%p -> 0x%p (%uB)",
                  virt_addr, 
                  frames,
                  mapping_size);
@@ -559,7 +577,8 @@ OS_RETURN_E paging_kmunmap(const void* virt_addr, const size_t mapping_size)
     uint32_t    acc;
     uint32_t    int_state;
 
-    KERNEL_DEBUG("[PAGING] Request unmappping at 0x%p (%uB)\n",
+    KERNEL_DEBUG(PAGING_DEBUG_ENABLED, 
+                 "[PAGING] Request unmappping at 0x%p (%uB)",
                  virt_addr, 
                  mapping_size);
 
@@ -595,13 +614,10 @@ OS_RETURN_E paging_kmunmap(const void* virt_addr, const size_t mapping_size)
 
             if((pgtable[pgtable_entry] & PAGE_FLAG_PRESENT) != 0)
             {
-                /* Check if it was hardware mapping, release otherwise */
-                if((pgtable[pgtable_entry] & PAGE_FLAG_HARDWARE) == 0)
-                {
-                    free_kframes(
-                        (void*)(pgtable[pgtable_entry] & PG_ENTRY_MASK), 1);
-                }
                 /* Unmap */
+                KERNEL_DEBUG(PAGING_DEBUG_ENABLED, 
+                             "[PAGING] Unmapped page at 0x%p", 
+                             start_map);
                 pgtable[pgtable_entry] = 0;
                 INVAL_PAGE(start_map);
             }

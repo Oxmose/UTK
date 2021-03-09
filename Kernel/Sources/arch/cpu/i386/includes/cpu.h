@@ -397,6 +397,16 @@ uint8_t cpu_is_sse_enabled(void);
 OS_RETURN_E cpu_enable_sse(void);
 
 /**
+ * @brief Returns if the CPU is capable of using PCID.
+ * 
+ * @details Returns if the CPU is capable of using PCID by reading CPUID 
+ * registers.
+ * 
+ * @return 1 is returned if the CPU can use PCID. 0 is returned otherwise.
+ */
+uint8_t cpu_is_pcid_capable(void);
+
+/**
  * @brief Returns the highest support CPUID feature request ID.
  *
  * @details Returns the highest supported input value for CPUID instruction.
