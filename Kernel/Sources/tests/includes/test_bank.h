@@ -21,7 +21,7 @@ void kill_qemu(void);
 
 #ifdef ARCH_I386
 
-#define UART_TEST 1
+#define UART_TEST 0
 #define IDT_TEST 0
 #define GDT_TEST 0
 #define TSS_TEST 0
@@ -32,6 +32,7 @@ void kill_qemu(void);
 #define PAGING_TEST 0
 #define BIOS_CALL_TEST 0
 #define ACPI_TEST 0
+#define PIC_TEST 0
 
 void uart_test(void);
 void idt_test(void);
@@ -44,6 +45,7 @@ void memmgr_test(void);
 void paging_test(void);
 void bios_call_test(void);
 void acpi_test(void);
+void pic_test(void);
 
 #endif 
 
