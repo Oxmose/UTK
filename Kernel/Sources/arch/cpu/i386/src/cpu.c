@@ -837,3 +837,11 @@ uint32_t cpu_get_saved_interrupt_state(const cpu_state_t* cpu_state,
     (void) cpu_state;
     return stack_state->eflags & CPU_EFLAGS_IF;
 }
+
+uint8_t cpu_is_pcid_capable(void)
+{
+    volatile int32_t  regs[4] = {0};
+    cpu_cpuid(CPUID_GETFEATURES, (uint32_t*)regs);
+
+    return ((regs[2] & ECX_PCID) != 0 ? 1 : 0);
+}

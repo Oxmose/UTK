@@ -83,7 +83,8 @@ OS_RETURN_E kernel_exception_init(void)
 {
     OS_RETURN_E err;
 
-    KERNEL_DEBUG("[EXCEPTIONS] Initializing exception manager.\n");
+    KERNEL_DEBUG(EXCEPTIONS_DEBUG_ENABLED, 
+                 "[EXCEPTIONS] Initializing exception manager.");
 
     err = kernel_exception_register_handler(DIV_BY_ZERO_LINE,
                                             div_by_zero_handler);
@@ -130,8 +131,10 @@ OS_RETURN_E kernel_exception_register_handler(const uint32_t exception_line,
     kernel_interrupt_handlers[exception_line].handler = handler;
     kernel_interrupt_handlers[exception_line].enabled = 1;
 
-    KERNEL_DEBUG("[EXCEPTIONS] Added exception %u handler at 0x%p\n",
-                 exception_line, handler);
+    KERNEL_DEBUG(EXCEPTIONS_DEBUG_ENABLED, 
+                 "[EXCEPTIONS] Added exception %u handler at 0x%p",
+                 exception_line, 
+                 handler);
 
     EXIT_CRITICAL(int_state);
     return OS_NO_ERR;
@@ -158,7 +161,9 @@ OS_RETURN_E kernel_exception_remove_handler(const uint32_t exception_line)
     kernel_interrupt_handlers[exception_line].handler = NULL;
     kernel_interrupt_handlers[exception_line].enabled = 0;
 
-    KERNEL_DEBUG("[EXCEPTIONS] Removed exception %u handle\n", exception_line);
+    KERNEL_DEBUG(EXCEPTIONS_DEBUG_ENABLED, 
+                 "[EXCEPTIONS] Removed exception %u handle", 
+                 exception_line);
     EXIT_CRITICAL(int_state);
 
     return OS_NO_ERR;

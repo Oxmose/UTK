@@ -32,6 +32,8 @@
 #include <panic.h>                 /* Kernel panic */
 #include <memmgt.h>                /* Memory mapping informations */
 #include <paging.h>                /* Memory paging */
+#include <acpi.h>                  /* ACPI manager */
+
 /* UTK configuration file */
 #include <config.h>
 
@@ -94,7 +96,7 @@ static void validate_architecture(void)
     output_buff_index = 0;
 #endif 
 
-    KERNEL_DEBUG("[KICKSTART] Detecting cpu\n"); 
+    KERNEL_DEBUG(KICKSTART_DEBUG_ENABLED, "[KICKSTART] Detecting cpu"); 
 
     ret = cpu_cpuid(CPUID_GETVENDORSTRING, (uint32_t*)regs);
 
@@ -374,7 +376,8 @@ static void validate_architecture(void)
     /* Might be used in future to check extended features */
     (void)regs_ext;
 
-    KERNEL_DEBUG("[KICKSTART] Validating architecture end\n");
+    KERNEL_DEBUG(KICKSTART_DEBUG_ENABLED, 
+                 "[KICKSTART] Validating architecture end");
 }
 
 /**
@@ -404,7 +407,7 @@ void kernel_kickstart(void)
     output_test();
 #endif
 
-    KERNEL_DEBUG("[KICKSTART] Kickstarting kernel\n");
+    KERNEL_DEBUG(KICKSTART_DEBUG_ENABLED, "[KICKSTART] Kickstarting kernel");
 
     /* Validate architecture support */
     validate_architecture();
@@ -429,12 +432,12 @@ void kernel_kickstart(void)
              err, 1);
 
     err = memory_manager_init();
-    INIT_MSG("Initialized memory manager\n",
+    INIT_MSG("Memory manager initialized\n",
              "Could not get memory manager [%u]\n",
              err, 1);
 
     err = paging_init();
-    INIT_MSG("Initialized paging\n",
+    INIT_MSG("Paging initialized\n",
              "Could not initialize kernel paging [%u]\n",
              err, 1);
     
@@ -442,6 +445,11 @@ void kernel_kickstart(void)
     err |= graphic_set_selected_driver(&vga_text_driver);
     INIT_MSG("VGA driver initialized\n", 
              "Could not initialize VGA driver [%u]\n",
+             err, 1);
+
+    err = acpi_init();
+    INIT_MSG("ACPI initialized\n",
+             "Could not initialize ACPI [%u]\n",
              err, 1);
 
 #if TEST_MODE_ENABLED

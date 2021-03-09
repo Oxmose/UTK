@@ -59,4 +59,26 @@
  */
 #define KERNEL_RESERVED_PAGING 4
 
+/** @brief Defines the maximum number of process in the system. This number is
+ * limited by the PCID feature.*/
+#define KERNEL_MAX_PROCESS 4096 
+
+/*******************************************************************************
+ * DEBUG Configuration
+ * 
+ * Set to 0 to disable debug output for a specific module
+ * Set to 1 to enable debug output for a specific module
+ ******************************************************************************/
+#define ACPI_DEBUG_ENABLED 1
+#define CPU_DEBUG_ENABLED 0
+#define EXCEPTIONS_DEBUG_ENABLED 0
+#define INTERRUPTS_DEBUG_ENABLED 0
+#define KHEAP_DEBUG_ENABLED 0
+#define KICKSTART_DEBUG_ENABLED 0
+#define MEMMGT_DEBUG_ENABLED 0
+#define PAGING_DEBUG_ENABLED 0
+#define QUEUE_DEBUG_ENABLED 0
+#define SERIAL_DEBUG_ENABLED 0
+#define VGA_DEBUG_ENABLED 0
+
 #endif /* #ifndef __GLOBAL_CONFIG_H__ */
