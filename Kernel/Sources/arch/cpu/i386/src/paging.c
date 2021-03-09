@@ -209,7 +209,6 @@ static uint32_t is_mapped(const uintptr_t start_addr, const size_t size)
         if((pgdir_rec_addr[pgdir_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
         {
              /* Check present in page table */
-            pgtable = (uint32_t*)(pgdir_rec_addr[pgdir_entry] & PG_ENTRY_MASK);
             pgtable = (uint32_t*)(PAGING_RECUR_PG_TABLE + 
                                   KERNEL_PAGE_SIZE * 
                                   pgdir_entry);
@@ -366,8 +365,6 @@ OS_RETURN_E paging_init(void)
     uintptr_t   start_addr;
     uintptr_t   end_addr;
     OS_RETURN_E err;
-
-    err = OS_NO_ERR;
 
     KERNEL_DEBUG(PAGING_DEBUG_ENABLED, "[PAGING] Initializing paging");
 
