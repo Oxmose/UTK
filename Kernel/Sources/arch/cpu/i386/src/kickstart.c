@@ -34,6 +34,8 @@
 #include <paging.h>                /* Memory paging */
 #include <acpi.h>                  /* ACPI manager */
 #include <pic.h>                   /* PIC driver */
+#include <io_apic.h>               /* IO APIC driver */
+#include <lapic.h>                 /* LAPIC driver */
 
 /* UTK configuration file */
 #include <config.h>
@@ -459,6 +461,38 @@ void kernel_kickstart(void)
     INIT_MSG("PIC initialized\n",
              "Could not initialize PIC [%u]\n",
              err, 1);
+
+    if(io_apic_capable() == 1)
+    {
+        err = pic_disable();
+        INIT_MSG("",
+                 "Could not disable PIC [%u]\n",
+                 err, 1);
+
+        err = io_apic_init();
+        INIT_MSG("IO-APIC initialized\n",
+                 "Could not initialize IO-APIC [%u]\n",
+                 err, 1);
+
+        KERNEL_DEBUG(KICKSTART_DEBUG_ENABLED, "[KICKSTART] Using IO-APIC");
+        err = kernel_interrupt_set_driver(&io_apic_driver);
+        INIT_MSG("",
+                 "Could not set IO-APIC driver [%u]\n",
+                 err, 1);
+
+        err = lapic_init();
+        INIT_MSG("LAPIC initialized\n",
+                 "Could not enable LAPIC [%u]\n",
+                 err, 1);
+    }
+    else
+    {
+        KERNEL_DEBUG(KICKSTART_DEBUG_ENABLED, "[KICKSTART] Using PIC");
+        err = kernel_interrupt_set_driver(&pic_driver);
+        INIT_MSG("",
+                 "Could not set PIC driver [%u]\n",
+                 err, 1);
+    }
 
 #ifdef TEST_MODE_ENABLED
     bios_call_test();

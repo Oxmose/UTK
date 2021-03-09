@@ -21,6 +21,7 @@
 
 #include <stdint.h> /* Generic int types */
 #include <stddef.h> /* Standard definitions */
+#include <queue.h>  /* Queue library */
 
 /*******************************************************************************
  * CONSTANTS
@@ -427,5 +428,16 @@ OS_RETURN_E acpi_check_lapic_id(const uint32_t lapic_id);
  * @return The number of CPU detected in the system, -1 is returned on error.
  */
 int32_t acpi_get_cpu_count(void);
+
+/**
+ * @brief Returns the list of IO apics registered.
+ * 
+ * @details Returns the list of IO apics registered. The number of IO APIC
+ * detected might differ from the actual number of the user choose to restrict
+ * the numer of detected IO APICS.
+ *
+ * @return Returns the list of IO apics registered.
+ */
+const queue_t* acpi_get_io_apics(void);
 
 #endif /* #ifndef __X86_ACPI_H_ */
