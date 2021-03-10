@@ -48,7 +48,7 @@ void pic_test(void)
     }
 
     /* TEST EOI > MAX */
-    if((err = pic_set_irq_eoi(PIC_MAX_IRQ_LINE + 1)) != OS_ERR_NO_SUCH_IRQ_LINE)
+    if(pic_set_irq_eoi(PIC_MAX_IRQ_LINE + 1) != OS_ERR_NO_SUCH_IRQ_LINE)
     {
         kernel_error("[TESTMODE] TEST_PIC 1\n");
     }
@@ -64,7 +64,7 @@ void pic_test(void)
     /* TEST MASK SET */
     for(i = 0; i <= PIC_MAX_IRQ_LINE; ++i)
     {
-        if((err = pic_set_irq_mask(i, 1)) != OS_NO_ERR)
+        if(pic_set_irq_mask(i, 1) != OS_NO_ERR)
         {
             kernel_error("[TESTMODE] TEST_PIC 2\n");
         }
@@ -89,7 +89,7 @@ void pic_test(void)
     /* TEST MASK CLEAR */
     for(i = 0; i <= PIC_MAX_IRQ_LINE; ++i)
     {
-        if((err = pic_set_irq_mask(i, 0)) != OS_NO_ERR)
+        if(pic_set_irq_mask(i, 0) != OS_NO_ERR)
         {
             kernel_error("[TESTMODE] TEST_PIC 4\n");
         }

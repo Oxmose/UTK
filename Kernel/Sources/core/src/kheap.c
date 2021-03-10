@@ -75,68 +75,68 @@ static uint32_t mem_meta;
 
 #define LIST_INIT(v, l) list_init(&v->l)
 
-#define LIST_REMOVE_FROM(h, d, l)					    \
-{								                    	\
-    __typeof__(**h) **h_ = h, *d_ = d;					\
-  	list_t* head = &(*h_)->l;					        \
-  	remove_from(&head, &d_->l);					        \
-  	if (head == NULL)                                   \
-    {						                            \
-  	    *h_ = NULL;							            \
-  	}                                                   \
+#define LIST_REMOVE_FROM(h, d, l)                        \
+{                                                        \
+    __typeof__(**h) **h_ = h, *d_ = d;                    \
+      list_t* head = &(*h_)->l;                            \
+      remove_from(&head, &d_->l);                            \
+      if (head == NULL)                                   \
+    {                                                    \
+          *h_ = NULL;                                        \
+      }                                                   \
     else                                                \
-    {							                        \
-        *h_ = CONTAINER(__typeof__(**h), l, head);	    \
-    }								                    \
+    {                                                    \
+        *h_ = CONTAINER(__typeof__(**h), l, head);        \
+    }                                                    \
 }
 
-#define LIST_PUSH(h, v, l)			    	  \
-{									          \
-  	__typeof__(*v) **h_ = h, *v_ = v;		  \
-  	list_t* head = &(*h_)->l;				  \
+#define LIST_PUSH(h, v, l)                      \
+{                                              \
+      __typeof__(*v) **h_ = h, *v_ = v;          \
+      list_t* head = &(*h_)->l;                  \
     if (*h_ == NULL)                          \
     {                                         \
-         head = NULL;	               	      \
+         head = NULL;                             \
     }                                         \
-  	push(&head, &v_->l);					  \
-  	*h_ = CONTAINER(__typeof__(*v), l, head); \
+      push(&head, &v_->l);                      \
+      *h_ = CONTAINER(__typeof__(*v), l, head); \
 }
 
-#define LIST_POP(h, l)						       \
+#define LIST_POP(h, l)                               \
 __extension__                                      \
-({									               \
-    __typeof__(**h) **h_ = h;					   \
-  	list_t* head = &(*h_)->l;					   \
-  	list_t* res = pop(&head);					   \
-  	if (head == NULL)                              \
-    {						                       \
-  	     *h_ = NULL;					           \
-  	}                                              \
+({                                                   \
+    __typeof__(**h) **h_ = h;                       \
+      list_t* head = &(*h_)->l;                       \
+      list_t* res = pop(&head);                       \
+      if (head == NULL)                              \
+    {                                               \
+           *h_ = NULL;                               \
+      }                                              \
     else                                           \
-    {							                   \
-  	    *h_ = CONTAINER(__typeof__(**h), l, head); \
-  	}							                   \
-  	CONTAINER(__typeof__(**h), l, res);			   \
+    {                                               \
+          *h_ = CONTAINER(__typeof__(**h), l, head); \
+      }                                               \
+      CONTAINER(__typeof__(**h), l, res);               \
 })
 
-#define LIST_ITERATOR_BEGIN(h, l, it)				            	    \
-{								                                    	\
-    __typeof__(*h) *h_ = h;						                        \
-  	list_t* last_##it = h_->l.prev, *iter_##it = &h_->l, *next_##it;	\
+#define LIST_ITERATOR_BEGIN(h, l, it)                                    \
+{                                                                        \
+    __typeof__(*h) *h_ = h;                                                \
+      list_t* last_##it = h_->l.prev, *iter_##it = &h_->l, *next_##it;    \
     do                                                                  \
-    {								                                    \
-  	     if (iter_##it == last_##it)                                    \
-         {				                                                \
-             next_##it = NULL;					                        \
-  	     }                                                              \
+    {                                                                    \
+           if (iter_##it == last_##it)                                    \
+         {                                                                \
+             next_##it = NULL;                                            \
+           }                                                              \
          else                                                           \
-         {							                                    \
-             next_##it = iter_##it->next;				                \
-         }								                                \
+         {                                                                \
+             next_##it = iter_##it->next;                                \
+         }                                                                \
          __typeof__(*h)* it = CONTAINER(__typeof__(*h), l, iter_##it);  \
 
-#define LIST_ITERATOR_END(it)						\
-    } while((iter_##it = next_##it));				\
+#define LIST_ITERATOR_END(it)                        \
+    } while((iter_##it = next_##it));                \
 }
 
 #define LIST_ITERATOR_REMOVE_FROM(h, it, l) LIST_REMOVE_FROM(h, iter_##it, l)
@@ -182,7 +182,7 @@ __inline__ static void push(list_t** list, list_t* node)
 
     if (*list != NULL)
     {
-	       insert_before(*list, node);
+           insert_before(*list, node);
     }
 
     *list = node;
@@ -198,11 +198,11 @@ __inline__ static list_t* pop(list_t** list)
 
     if (top == next_top)
     {
-	       *list = NULL;
+           *list = NULL;
     }
     else
     {
-	       *list = next_top;
+           *list = next_top;
     }
 
     return top;
@@ -212,11 +212,11 @@ __inline__ static void remove_from(list_t** list, list_t* node)
 {
     if (*list == node)
     {
-	       pop(list);
+           pop(list);
     }
     else
     {
-	       remove(node);
+           remove(node);
     }
 }
 
@@ -249,8 +249,8 @@ static int32_t memory_chunk_slot(uint32_t size)
     int32_t n = -1;
     while(size > 0)
     {
-	    ++n;
-    	size /= 2;
+        ++n;
+        size /= 2;
     }
     return n;
 }
@@ -357,51 +357,51 @@ void* kmalloc(size_t size)
 
     size = (size + ALIGN - 1) & (~(ALIGN - 1));
 
-	if (size < MIN_SIZE)
+    if (size < MIN_SIZE)
     {
          size = MIN_SIZE;
     }
 
-	n = memory_chunk_slot(size - 1) + 1;
+    n = memory_chunk_slot(size - 1) + 1;
 
-	if (n >= NUM_SIZES)
+    if (n >= NUM_SIZES)
     {
         EXIT_CRITICAL(int_state);
         return NULL;
     }
 
-	while(free_chunk[n] == 0)
+    while(free_chunk[n] == 0)
     {
-		++n;
-		if (n >= NUM_SIZES)
+        ++n;
+        if (n >= NUM_SIZES)
         {
             EXIT_CRITICAL(int_state);
             return NULL;
         }
     }
 
-	chunk = LIST_POP(&free_chunk[n], free);
+    chunk = LIST_POP(&free_chunk[n], free);
     size2 = memory_chunk_size(chunk);
     len = 0;
 
-	if (size + sizeof(mem_chunk_t) <= size2)
+    if (size + sizeof(mem_chunk_t) <= size2)
     {
-		chunk2 = (mem_chunk_t*)(((int8_t*)chunk) + HEADER_SIZE + size);
+        chunk2 = (mem_chunk_t*)(((int8_t*)chunk) + HEADER_SIZE + size);
 
-		memory_chunk_init(chunk2);
+        memory_chunk_init(chunk2);
 
-		insert_after(&chunk->all, &chunk2->all);
+        insert_after(&chunk->all, &chunk2->all);
 
-		len = memory_chunk_size(chunk2);
-		n = memory_chunk_slot(len);
+        len = memory_chunk_size(chunk2);
+        n = memory_chunk_slot(len);
 
-		LIST_PUSH(&free_chunk[n], chunk2, free);
+        LIST_PUSH(&free_chunk[n], chunk2, free);
 
-		mem_meta += HEADER_SIZE;
-		mem_free += len - HEADER_SIZE;
+        mem_meta += HEADER_SIZE;
+        mem_free += len - HEADER_SIZE;
     }
 
-	chunk->used = 1;
+    chunk->used = 1;
 
     mem_free -= size2;
     kheap_mem_used += size2 - len - HEADER_SIZE;
@@ -442,27 +442,27 @@ void kfree(void* ptr)
 
     if (next->used == 0)
     {
-		remove_free(next);
-		remove(&next->all);
+        remove_free(next);
+        remove(&next->all);
 
-		mem_meta -= HEADER_SIZE;
-		mem_free += HEADER_SIZE;
+        mem_meta -= HEADER_SIZE;
+        mem_free += HEADER_SIZE;
     }
 
     if (prev->used == 0)
     {
-		remove_free(prev);
-		remove(&chunk->all);
+        remove_free(prev);
+        remove(&chunk->all);
 
-		push_free(prev);
-		mem_meta -= HEADER_SIZE;
-		mem_free += HEADER_SIZE;
+        push_free(prev);
+        mem_meta -= HEADER_SIZE;
+        mem_free += HEADER_SIZE;
     }
     else
     {
-		chunk->used = 0;
-		LIST_INIT(chunk, free);
-		push_free(chunk);
+        chunk->used = 0;
+        LIST_INIT(chunk, free);
+        push_free(chunk);
     }
 
     KERNEL_DEBUG(KHEAP_DEBUG_ENABLED, 

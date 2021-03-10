@@ -22,10 +22,10 @@ MEMORY
     LOW_STARTUP_CODE        (rx)    :   ORIGIN = 0x00100000,    LENGTH = 4K
     HIGH_STARTUP_CODE       (rx)    :   ORIGIN = 0xE0101000,    LENGTH = 4K
     KERNEL_CODE             (rx)    :   ORIGIN = 0xE0102000,    LENGTH = 256K
-    KERNEL_RO_DATA          (r)     :   ORIGIN = 0xE0200000,    LENGTH = 32K
-    KERNEL_RW_DATA          (rw)    :   ORIGIN = 0xE0208000,    LENGTH = 512K
-    KERNEL_STACKS           (rw)    :   ORIGIN = 0xE0300000,    LENGTH = 32K
-    KERNEL_HEAP             (rw)    :   ORIGIN = 0xE0308000,    LENGTH = 32K    
+    KERNEL_RO_DATA          (r)     :   ORIGIN = 0xE0200000,    LENGTH = 64K
+    KERNEL_RW_DATA          (rw)    :   ORIGIN = 0xE0210000,    LENGTH = 512K
+    KERNEL_STACKS           (rw)    :   ORIGIN = 0xE0310000,    LENGTH = 32K
+    KERNEL_HEAP             (rw)    :   ORIGIN = 0xE0318000,    LENGTH = 32K    
 }
 
 /* Memory layout */

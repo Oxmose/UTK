@@ -321,8 +321,6 @@ static OS_RETURN_E kernel_mmap_internal(const void* virt_addr,
         }
         else 
         {
-            pgtable = (uint32_t*)(pgdir_rec_addr[pgdir_entry] & PG_ENTRY_MASK);
-
             /* Get recursive virtual address */
             pgtable = (uint32_t*)(PAGING_RECUR_PG_TABLE + 
                                   KERNEL_PAGE_SIZE * 

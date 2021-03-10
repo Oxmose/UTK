@@ -13,8 +13,8 @@
  * settings that the user can set before generating the kernel's binary.
  ******************************************************************************/
 
-#ifndef __GLOBAL_CONFIG_H__
-#define __GLOBAL_CONFIG_H__
+#ifndef __GLOBAL_CONFIG_H_
+#define __GLOBAL_CONFIG_H_
 
 /* Architecture definitions */
 #define ARCH_I386    1
@@ -63,6 +63,15 @@
  * limited by the PCID feature.*/
 #define KERNEL_MAX_PROCESS 4096 
 
+/** @brief System's main timer interrupt frequency */
+#define KERNEL_MAIN_TIMER_FREQ 100
+
+/** @brief System's RTC interrupt frequency */
+#define KERNEL_RTC_TIMER_FREQ 5
+
+/** @brief Current year */
+#define CURRENT_YEAR 2021
+
 /*******************************************************************************
  * DEBUG Configuration
  * 
@@ -80,8 +89,11 @@
 #define MEMMGT_DEBUG_ENABLED 0
 #define PAGING_DEBUG_ENABLED 0
 #define PIC_DEBUG_ENABLED 0
+#define PIT_DEBUG_ENABLED 0
 #define QUEUE_DEBUG_ENABLED 0
+#define RTC_DEBUG_ENABLED 0
 #define SERIAL_DEBUG_ENABLED 0
+#define TIME_MGT_DEBUG_ENABLED 0
 #define VGA_DEBUG_ENABLED 0
 
-#endif /* #ifndef __GLOBAL_CONFIG_H__ */
+#endif /* #ifndef __GLOBAL_CONFIG_H_ */

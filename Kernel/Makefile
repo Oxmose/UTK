@@ -60,7 +60,9 @@ endif
 	@make -C $(SOURCE_DIR)/core
 # Build the lib module 
 	@make -C $(SOURCE_DIR)/lib
-	
+# Build the time module 
+	@make -C $(SOURCE_DIR)/time
+
 build_kernel:
 	@echo "\e[1m\e[34m\n#-------------------------------------------------------------------------------\e[22m\e[39m"
 	@echo "\e[1m\e[34m| Building kernel for target $(target)\e[22m\e[39m"
@@ -90,6 +92,7 @@ endif
 	@make -C $(SOURCE_DIR)/io clean
 	@make -C $(SOURCE_DIR)/core clean
 	@make -C $(SOURCE_DIR)/global clean
+	@make -C $(SOURCE_DIR)/time clean
 
 # Clean kernel build directory
 	rm -rf  $(BUILD_DIR) $(BIN_DIR)
