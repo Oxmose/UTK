@@ -35,6 +35,8 @@ void kill_qemu(void);
 #define PIC_TEST 0
 #define IO_APIC_TEST 0
 #define LAPIC_TEST 0
+#define PIT_TEST 0
+#define RTC_TEST 0
 
 void uart_test(void);
 void idt_test(void);
@@ -50,6 +52,8 @@ void acpi_test(void);
 void pic_test(void);
 void io_apic_test(void);
 void lapic_test(void);
+void pit_test(void);
+void rtc_test(void);
 
 #endif 
 
@@ -57,10 +61,12 @@ void lapic_test(void);
 #define KHEAP_TEST 0
 #define PANIC_TEST 0
 #define QUEUE_TEST 0
+#define TIME_TEST 0
 
 void output_test(void);
 void kheap_test(void);
 void panic_test(void);
 void queue_test(void);
+void time_test(void);
 
 #endif /* __TEST_BANK_H_ */

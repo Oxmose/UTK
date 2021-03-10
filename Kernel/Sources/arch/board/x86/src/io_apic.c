@@ -122,7 +122,7 @@ OS_RETURN_E io_apic_init(void)
     }
 
     /* Initialize all IO-APIC */
-    io_apics = kmalloc(sizeof(io_apic_t) * io_apic_count);
+    io_apics = kmalloc(sizeof(io_apic_data_t) * io_apic_count);
     if(io_apics == NULL)
     {
         KERNEL_ERROR("Could not allocated memory for IO-APIC\n");
@@ -282,7 +282,7 @@ INTERRUPT_TYPE_E io_apic_handle_spurious_irq(const uint32_t int_number)
     }
 
     KERNEL_DEBUG(IOAPIC_DEBUG_ENABLED, 
-                 "[IO-APIC] Spurious IRQ ? %d : %d\n", 
+                 "[IO-APIC] Spurious IRQ ? %d : %d", 
                  int_number, int_type);
 
     return int_type;

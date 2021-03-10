@@ -4,6 +4,7 @@ DEP_INCLUDES += -I ../../../global
 DEP_INCLUDES += -I ../../../core/includes
 DEP_INCLUDES += -I ../../cpu/i386/includes
 DEP_INCLUDES += -I ../../cpu/includes
+DEP_INCLUDES += -I ../../../time/includes
 DEP_INCLUDES += -I includes
 DEP_INCLUDES += -I ../includes
 

@@ -36,6 +36,10 @@
 #include <pic.h>                   /* PIC driver */
 #include <io_apic.h>               /* IO APIC driver */
 #include <lapic.h>                 /* LAPIC driver */
+#include <rt_clock.h>              /* RTC driver */
+#include <pit.h>                   /* PIT driver */
+#include <time_management.h>       /* Timer factory */
+#include <bsp_api.h>               /* BSP API */
 
 /* UTK configuration file */
 #include <config.h>
@@ -455,7 +459,7 @@ void kernel_kickstart(void)
              "Could not initialize ACPI [%u]\n",
              err, 1);
 
-    KERNEL_INFO("Number of detected CPU: %d\n", acpi_get_cpu_count());
+    KERNEL_INFO("Number of detected CPU: %d\n", get_cpu_count());
 
     err = pic_init();
     INIT_MSG("PIC initialized\n",
@@ -493,6 +497,23 @@ void kernel_kickstart(void)
                  "Could not set PIC driver [%u]\n",
                  err, 1);
     }
+
+
+    err = pit_init();
+    INIT_MSG("PIT initialized\n",
+             "Could not initialize PIT driver [%u]\n",
+             err, 1);
+
+    err = rtc_init();
+    INIT_MSG("RTC initialized\n",
+             "Could not initialize RTC driver [%u]\n",
+             err, 1);
+
+    /* TODO: Update with lapic */
+    err = time_init(&pit_driver, &rtc_driver);
+    INIT_MSG("Timer factory initialized\n",
+             "Could not initialize timer factory [%u]\n",
+             err, 1);
 
 #ifdef TEST_MODE_ENABLED
     bios_call_test();

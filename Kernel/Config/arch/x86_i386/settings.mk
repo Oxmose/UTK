@@ -17,11 +17,12 @@ OBJCOPY = objcopy
 LINKER_FILE = ../../Config/arch/x86_i386/linker.ld
 
 DEBUG_FLAGS = -O0 -g3
-EXTRA_FLAGS = -O3
+EXTRA_FLAGS = -O3 -fno-asynchronous-unwind-tables
 
 CFLAGS = -m32 -std=c11 -nostdinc -fno-builtin -nostdlib -fno-stack-protector \
          -nostartfiles -nodefaultlibs -Wall -Wextra -Werror -c -fno-pie \
 		 -no-pie -MD -ffreestanding -Wno-address-of-packed-member
+		 
 TESTS_FLAGS = -DTEST_MODE_ENABLED
 		 
 ifeq ($(TESTS), TRUE)

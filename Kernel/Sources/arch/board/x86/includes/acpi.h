@@ -420,16 +420,6 @@ void* acpi_get_lapic_addr(void);
 OS_RETURN_E acpi_check_lapic_id(const uint32_t lapic_id);
 
 /**
- * @brief Returns the number of CPU detected on the system. 
- * 
- * @details Returns the number of CPU detected on the system. This function must 
- * be called after the init_acpi function.
- *
- * @return The number of CPU detected in the system, -1 is returned on error.
- */
-int32_t acpi_get_cpu_count(void);
-
-/**
  * @brief Returns the list of IO apics registered.
  * 
  * @details Returns the list of IO apics registered. The number of IO APIC

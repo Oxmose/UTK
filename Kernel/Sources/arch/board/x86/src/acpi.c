@@ -25,6 +25,7 @@
 #include <panic.h>         /* Kernel panic */
 #include <queue.h>         /* Queue library */
 #include <kheap.h>         /* Kernel heap */
+#include <lapic.h>         /* LAPIC driver */
 
 /* UTK configuration file */
 #include <config.h>
@@ -129,6 +130,9 @@ static OS_RETURN_E acpi_parse_apic(acpi_madt_t* madt_ptr)
     OS_RETURN_E    err;
     queue_node_t*  new_node;
 
+    cpu_count = 0;
+    io_apic_count = 0;
+
     if(madt_ptr == NULL)
     {
         return OS_ERR_NULL_POINTER;
@@ -159,9 +163,7 @@ static OS_RETURN_E acpi_parse_apic(acpi_madt_t* madt_ptr)
             err = acpi_map_data(madt_entry, 
                                 (uintptr_t)madt_limit - (uintptr_t)madt_entry);
             if(err == OS_NO_ERR)
-            {
-                cpu_count = 0;
-                io_apic_count = 0;
+            {                
                 while (madt_entry < madt_limit)
                 {
                     uint8_t type;
@@ -912,12 +914,46 @@ OS_RETURN_E acpi_check_lapic_id(const uint32_t lapic_id)
     return err;
 }
 
-int32_t acpi_get_cpu_count(void)
-{
-    return cpu_count;
-}
-
 const queue_t* acpi_get_io_apics(void)
 {
     return io_apics;
+}
+
+int32_t get_cpu_count(void)
+{
+    if(cpu_count == 0 || acpi_initialized == 0)
+    {
+        return 1;
+    }
+    return cpu_count;
+}
+
+int32_t cpu_get_id(void)
+{   
+    uint32_t i;
+    uint32_t lapic_id;
+    queue_node_t* node;
+    local_apic_t* lapic;
+
+    /* If lapic is not activated but we only use one CPU */
+    if(cpu_count == 0 || acpi_initialized == 0)
+    {
+        return 0;
+    }    
+
+    node = cpu_lapics->tail;
+    i = 0;
+    lapic_id = lapic_get_id();
+    while(node != NULL)
+    {
+        lapic = (local_apic_t*)node->data;
+        if(lapic->apic_id == lapic_id)
+        {
+            return i;
+        }
+        node = node->prev;
+        ++i;
+    }
+
+    return 0;
 }
