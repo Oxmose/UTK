@@ -498,7 +498,6 @@ void kernel_kickstart(void)
                  err, 1);
     }
 
-
     err = pit_init();
     INIT_MSG("PIT initialized\n",
              "Could not initialize PIT driver [%u]\n",
@@ -509,11 +508,30 @@ void kernel_kickstart(void)
              "Could not initialize RTC driver [%u]\n",
              err, 1);
 
-    /* TODO: Update with lapic */
-    err = time_init(&pit_driver, &rtc_driver);
-    INIT_MSG("Timer factory initialized\n",
-             "Could not initialize timer factory [%u]\n",
-             err, 1);
+    if(io_apic_capable() == 1)
+    {
+        err = lapic_timer_init();
+        INIT_MSG("LAPIC timer initialized\n",
+                 "Could not initialize LAPIC timer driver [%u]\n",
+                 err, 1);
+
+        err = pit_disable();
+        INIT_MSG("",
+                 "Could disable PIT driver [%u]\n",
+                 err, 1);
+        err = time_init(&lapic_timer_driver, &rtc_driver);
+        INIT_MSG("Timer factory initialized\n",
+                 "Could not initialize timer factory [%u]\n",
+                 err, 1);
+    }
+    else 
+    {
+        err = time_init(&pit_driver, &rtc_driver);
+        INIT_MSG("Timer factory initialized\n",
+                 "Could not initialize timer factory [%u]\n",
+                 err, 1);
+    }
+    
 
 #ifdef TEST_MODE_ENABLED
     bios_call_test();

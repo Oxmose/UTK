@@ -17,7 +17,7 @@
  * thanks to the driver.
  *
  * @warning This driver uses the PIT (Programmable interval timer) to initialize
- * the LAPIC timer. the PIC must be present and initialized to use this driver.
+ * the LAPIC timer. The PIT must be present and initialized to use this driver.
  *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
@@ -30,12 +30,14 @@
 #include <paging.h>               /* Memory management */
 #include <critical.h>             /* Critical sections */
 #include <kernel_output.h>        /* Output manager */
+#include <time_management.h>      /* Timer factory */
+#include <pit.h>                  /* PIT driver */
 
 /* UTK configuration file */
 #include <config.h>
 
 /* Tests header file */
-#if TEST_MODE_ENABLED
+#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
 #endif
 
@@ -52,11 +54,13 @@ static void* lapic_base_addr;
 /** @brief LAPIC state */
 static uint32_t initialized = 0;
 
-/* TODO: Add timer and proper doc*/
-#if 0
-/* Lapic TIMER settings */
+/** @brief Wait interrupt flag. */
 static volatile uint8_t  wait_int;
+
+/** @brief LAPIC frequency in Hz */
 static uint32_t          global_lapic_freq;
+
+/** @brief Initial LAPIC frequency in Hz */
 static uint32_t          init_lapic_timer_frequency;
 
 /** @brief LAPIC timer driver instance. */
@@ -69,17 +73,16 @@ kernel_timer_t lapic_timer_driver = {
     .remove_handler = lapic_timer_remove_handler,
     .get_irq        = lapic_timer_get_irq
 };
-#endif
-
-/* TODO: Fix documentation in this page */
 
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
 
-/* Read Local APIC register, the acces is a memory mapped IO.
+/**
+ * @brief Read Local APIC register, the access is a memory mapped IO.
  *
- * @param reg The register of the Local APIC to read.
+ * @param reg[in] The register of the Local APIC to read.
+ * 
  * @return The value contained in the Local APIC register.
  */
 __inline__ static uint32_t lapic_read(uint32_t reg)
@@ -87,23 +90,26 @@ __inline__ static uint32_t lapic_read(uint32_t reg)
     return mapped_io_read_32((void*)((uintptr_t)lapic_base_addr + reg));
 }
 
-/* Write Local APIC register, the acces is a memory mapped IO.
+/**
+ * @brief Write Local APIC register, the acces is a memory mapped IO.
  *
- * @param reg The register of the Local APIC to write.
- * @param data The value to write in the register.
+ * @param reg[in] The register of the Local APIC to write.
+ * @param data[in] The value to write in the register.
  */
 __inline__ static void lapic_write(uint32_t reg, uint32_t data)
 {
     mapped_io_write_32((void*)((uintptr_t)lapic_base_addr + reg), data);
 }
 
-/* TODO: Add timer and proper doc*/
-#if 0
-/* LAPIC dummy hamdler.
- * @param cpu_state The cpu registers structure.
- * @param int_id The interrupt number.
- * @param stack_state The stack state before the interrupt that contain cs, eip,
- * error code and the eflags register value.
+/**
+ * @brief LAPIC dummy handler.
+ * 
+ * @details LAPIC dummy handler. This handler simply acknowledge the interrut.
+ * 
+ * @param cpu_state[in] The cpu registers structure.
+ * @param int_id[in] The interrupt number.
+ * @param stack_state[in] The stack state before the interrupt that contain cs, 
+ * eip, error code and the eflags register value.
  */
 static void lapic_dummy_handler(cpu_state_t* cpu_state, uintptr_t int_id,
                                 stack_state_t* stack_state)
@@ -115,13 +121,17 @@ static void lapic_dummy_handler(cpu_state_t* cpu_state, uintptr_t int_id,
     kernel_interrupt_set_irq_eoi(LAPIC_TIMER_INTERRUPT_LINE);
 }
 
-/* Initialisation handler. The PIT will trigger two interrupts to init the
- * LAPIC timer. This is used to get the LAPIC timer frequency.
+/**
+ * @brief PIT interrupt initialisation handler. 
+ * 
+ * @details PIT interrupt initialisation handler. The PIT will trigger two 
+ * interrupts to init the LAPIC timer. This is used to get the LAPIC timer 
+ * frequency.
  *
- * @param cpu_state The cpu registers structure.
- * @param int_id The interrupt number.
- * @param stack_state The stack state before the interrupt that contain cs, eip,
- * error code and the eflags register value.
+ * @param cpu_state[in] The cpu registers structure.
+ * @param int_id[in] The interrupt number.
+ * @param stack_state[in] The stack state before the interrupt that contain cs, 
+ * eip, error code and the eflags register value.
  */
 static void lapic_init_pit_handler(cpu_state_t* cpu_state, uintptr_t int_id,
                                    stack_state_t* stack_state)
@@ -146,7 +156,6 @@ static void lapic_init_pit_handler(cpu_state_t* cpu_state, uintptr_t int_id,
     kernel_interrupt_set_irq_eoi(PIT_IRQ_LINE);
 }
 
-#endif
 OS_RETURN_E lapic_init(void)
 {
     OS_RETURN_E err;
@@ -179,7 +188,7 @@ OS_RETURN_E lapic_init(void)
 
     KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "[LAPIC] Initialized");
 
-#if TEST_MODE_ENABLED
+#ifdef TEST_MODE_ENABLED
     lapic_test();
 #endif
 
@@ -323,19 +332,16 @@ OS_RETURN_E lapic_set_int_eoi(const uint32_t interrupt_line)
     return OS_NO_ERR;
 }
 
-/* TODO: Add timer factory */
-#if 0
+
 OS_RETURN_E lapic_timer_init(void)
 {
     uint32_t    lapic_timer_tick_10ms;
     OS_RETURN_E err;
 
-#if LAPIC_KERNEL_DEBUG == 1
-    kernel_serial_debug("LAPIC Timer Initialization\n");
-#endif
+    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "[LAPIC] Timer Initialization");
 
     /* Check IO-APIC support */
-    if(acpi_get_io_apic_available() == 0 || acpi_get_lapic_available() == 0)
+    if(initialized == 0)
     {
         return OS_ERR_NOT_SUPPORTED;
     }
@@ -407,56 +413,11 @@ OS_RETURN_E lapic_timer_init(void)
 
     lapic_set_int_eoi(LAPIC_TIMER_INTERRUPT_LINE);
 
-#if TEST_MODE_ENABLED
+#ifdef TEST_MODE_ENABLED
     lapic_timer_test();
 #endif
 
     return err;
-}
-
-OS_RETURN_E lapic_ap_timer_init(void)
-{
-    uint32_t int_state;
-
-#if MAX_CPU_COUNT > 1
-    int32_t cpu_id;
-    cpu_id = cpu_get_id();
-#endif
-
-#if LAPIC_KERNEL_DEBUG == 1
-    kernel_serial_debug("LAPIC Timer AP Initialization\n");
-#endif
-
-    /* Check IO-APIC support */
-    if(acpi_get_io_apic_available() == 0 || acpi_get_lapic_available() == 0)
-    {
-        return OS_ERR_NOT_SUPPORTED;
-    }
-
-#if MAX_CPU_COUNT > 1
-    ENTER_CRITICAL(int_state, &timer_lock[cpu_id]);
-#else
-    ENTER_CRITICAL(int_state);
-#endif
-
-    /* Init LAPIC TIMER */
-    lapic_write(LAPIC_TDCR, LAPIC_DIVIDER_16);
-
-    /* Init interrupt */
-    lapic_write(LAPIC_TIMER, LAPIC_TIMER_INTERRUPT_LINE |
-                LAPIC_TIMER_MODE_PERIODIC);
-
-    /* Set new timer count */
-    lapic_write(LAPIC_TDCR, LAPIC_DIVIDER_16);
-    lapic_write(LAPIC_TICR, global_lapic_freq);
-
-#if MAX_CPU_COUNT > 1
-    EXIT_CRITICAL(int_state, &timer_lock[cpu_id]);
-#else
-    EXIT_CRITICAL(int_state);
-#endif
-
-    return OS_NO_ERR;
 }
 
 uint32_t lapic_timer_get_frequency(void)
@@ -464,24 +425,11 @@ uint32_t lapic_timer_get_frequency(void)
     uint32_t freq;
     uint32_t int_state;
 
-#if MAX_CPU_COUNT > 1
-    int32_t cpu_id;
-    cpu_id = cpu_get_id();
-#endif
-
-#if MAX_CPU_COUNT > 1
-    ENTER_CRITICAL(int_state, &timer_lock[cpu_id]);
-#else
     ENTER_CRITICAL(int_state);
-#endif
 
     freq = init_lapic_timer_frequency / global_lapic_freq;
     
-#if MAX_CPU_COUNT > 1
-    EXIT_CRITICAL(int_state, &timer_lock[cpu_id]);
-#else
     EXIT_CRITICAL(int_state);
-#endif
 
     return freq;
 }
@@ -490,26 +438,17 @@ OS_RETURN_E lapic_timer_set_frequency(const uint32_t frequency)
 {
     uint32_t int_state;
 
-#if MAX_CPU_COUNT > 1
-    int32_t cpu_id;
-    cpu_id = cpu_get_id();
-#endif
-
-#if LAPIC_KERNEL_DEBUG == 1
-    kernel_serial_debug("LAPIC Timer set frequency %d\n", frequency);
-#endif
-
     /* Check IO-APIC support */
-    if(acpi_get_io_apic_available() == 0 || acpi_get_lapic_available() == 0)
+    if(initialized == 0)
     {
         return OS_ERR_NOT_SUPPORTED;
     }
 
-#if MAX_CPU_COUNT > 1
-    ENTER_CRITICAL(int_state, &timer_lock[cpu_id]);
-#else
+    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, 
+                 "[LAPIC] Timer set frequency %d", 
+                 frequency);
+
     ENTER_CRITICAL(int_state);
-#endif
 
     /* Compute the new tick count */
     global_lapic_freq = init_lapic_timer_frequency / frequency;
@@ -518,11 +457,7 @@ OS_RETURN_E lapic_timer_set_frequency(const uint32_t frequency)
     lapic_write(LAPIC_TDCR, LAPIC_DIVIDER_16);
     lapic_write(LAPIC_TICR, global_lapic_freq);
 
-#if MAX_CPU_COUNT > 1
-    EXIT_CRITICAL(int_state, &timer_lock[cpu_id]);
-#else
     EXIT_CRITICAL(int_state);
-#endif
 
     return OS_NO_ERR;
 }
@@ -531,36 +466,21 @@ OS_RETURN_E lapic_timer_enable(void)
 {
     uint32_t int_state;
 
-#if MAX_CPU_COUNT > 1
-    int32_t cpu_id;
-    cpu_id = cpu_get_id();
-#endif
-
-#if LAPIC_KERNEL_DEBUG == 1
-    kernel_serial_debug("LAPIC Timer enable\n");
-#endif
-
-    /* Check IO-APIC support */
-    if(acpi_get_io_apic_available() == 0 || acpi_get_lapic_available() == 0)
+    /* Check support */
+    if(initialized == 0)
     {
         return OS_ERR_NOT_SUPPORTED;
     }
 
-#if MAX_CPU_COUNT > 1
-    ENTER_CRITICAL(int_state, &timer_lock[cpu_id]);
-#else
+    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "[LAPIC] Timer enable");
+
     ENTER_CRITICAL(int_state);
-#endif
 
     /* Enable interrupt */
     lapic_write(LAPIC_TIMER, LAPIC_TIMER_INTERRUPT_LINE |
                 LAPIC_TIMER_MODE_PERIODIC);
 
-#if MAX_CPU_COUNT > 1
-    EXIT_CRITICAL(int_state, &timer_lock[cpu_id]);
-#else
     EXIT_CRITICAL(int_state);
-#endif
 
     return OS_NO_ERR;
 }
@@ -569,36 +489,20 @@ OS_RETURN_E lapic_timer_disable(void)
 {
     uint32_t int_state;
 
-#if MAX_CPU_COUNT > 1
-    int32_t cpu_id;
-    cpu_id = cpu_get_id();
-#endif
-
-#if LAPIC_KERNEL_DEBUG == 1
-    kernel_serial_debug("LAPIC Timer disable\n");
-#endif
-
-    /* Check IO-APIC support */
-    if(acpi_get_io_apic_available() == 0 || acpi_get_lapic_available() == 0)
+    /* Check support */
+    if(initialized == 0)
     {
         return OS_ERR_NOT_SUPPORTED;
     }
 
-#if MAX_CPU_COUNT > 1
-    ENTER_CRITICAL(int_state, &timer_lock[cpu_id]);
-#else
+    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "[LAPIC] Timer disable");
+
     ENTER_CRITICAL(int_state);
-#endif
 
     /* Disable interrupt */
     lapic_write(LAPIC_TIMER, LAPIC_LVT_INT_MASKED);
 
-#if MAX_CPU_COUNT > 1
-    EXIT_CRITICAL(int_state, &timer_lock[cpu_id]);
-#else
     EXIT_CRITICAL(int_state);
-#endif
-
     return OS_NO_ERR;
 }
 
@@ -611,17 +515,8 @@ OS_RETURN_E lapic_timer_set_handler(void(*handler)(
     OS_RETURN_E err;
     uint32_t    int_state;
 
-#if MAX_CPU_COUNT > 1
-    int32_t cpu_id;
-    cpu_id = cpu_get_id();
-#endif
-
-#if LAPIC_KERNEL_DEBUG == 1
-    kernel_serial_debug("LAPIC timer set handler\n");
-#endif
-
-    /* Check IO-APIC support */
-    if(acpi_get_io_apic_available() == 0 || acpi_get_lapic_available() == 0)
+    /* Check support */
+    if(initialized == 0)
     {
         return OS_ERR_NOT_SUPPORTED;
     }
@@ -637,21 +532,13 @@ OS_RETURN_E lapic_timer_set_handler(void(*handler)(
         return err;
     }
 
-#if MAX_CPU_COUNT > 1
-    ENTER_CRITICAL(int_state, &timer_lock[cpu_id]);
-#else
     ENTER_CRITICAL(int_state);
-#endif
 
     /* Remove the current handler */
     err = kernel_interrupt_remove_int_handler(LAPIC_TIMER_INTERRUPT_LINE);
     if(err != OS_NO_ERR)
     {
-#if MAX_CPU_COUNT > 1
-        EXIT_CRITICAL(int_state, &timer_lock[cpu_id]);
-#else
         EXIT_CRITICAL(int_state);
-#endif
         lapic_timer_enable();
         return err;
     }
@@ -660,37 +547,29 @@ OS_RETURN_E lapic_timer_set_handler(void(*handler)(
                                                 handler);
     if(err != OS_NO_ERR)
     {
-#if MAX_CPU_COUNT > 1
-        EXIT_CRITICAL(int_state, &timer_lock[cpu_id]);
-#else
         EXIT_CRITICAL(int_state);
-#endif
         return err;
     }
 
-#if MAX_CPU_COUNT > 1
-    EXIT_CRITICAL(int_state, &timer_lock[cpu_id]);
-#else
     EXIT_CRITICAL(int_state);
-#endif
 
-#if LAPIC_KERNEL_DEBUG == 1
-    kernel_serial_debug("New LAPIC handler set (0x%p)\n", handler);
-#endif
+    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, 
+                 "[LAPIC] New LAPIC timer handler set (0x%p)",
+                 handler);
 
     return lapic_timer_enable();
 }
 
 OS_RETURN_E lapic_timer_remove_handler(void)
 {
-#if LAPIC_KERNEL_DEBUG == 1
-    kernel_serial_debug("LAPIC Remove Handler\n");
-#endif
-    /* Check IO-APIC support */
-    if(acpi_get_io_apic_available() == 0 || acpi_get_lapic_available() == 0)
+    /* Check support */
+    if(initialized == 0)
     {
         return OS_ERR_NOT_SUPPORTED;
     }
+
+    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, 
+                 "[LAPIC] Removed timer handler");
 
     return lapic_timer_set_handler(lapic_dummy_handler);
 }
@@ -699,5 +578,3 @@ uint32_t lapic_timer_get_irq(void)
 {
     return LAPIC_TIMER_INTERRUPT_LINE;
 }
-
-#endif

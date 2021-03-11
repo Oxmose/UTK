@@ -34,10 +34,9 @@ void pic_test(void)
     uint8_t  pic0_mask_save;
     uint8_t  pic1_mask_save;
     uint32_t i;
-    OS_RETURN_E err;
 
     /* TEST MASK > MAX */
-    if((err = pic_set_irq_mask(PIC_MAX_IRQ_LINE + 1, 0)) != 
+    if(pic_set_irq_mask(PIC_MAX_IRQ_LINE + 1, 0) != 
        OS_ERR_NO_SUCH_IRQ_LINE)
     {
         kernel_error("[TESTMODE] TEST_PIC 0\n");

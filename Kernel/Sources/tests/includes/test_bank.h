@@ -37,6 +37,7 @@ void kill_qemu(void);
 #define LAPIC_TEST 0
 #define PIT_TEST 0
 #define RTC_TEST 0
+#define LAPIC_TIMER_TEST 0
 
 void uart_test(void);
 void idt_test(void);
@@ -54,6 +55,7 @@ void io_apic_test(void);
 void lapic_test(void);
 void pit_test(void);
 void rtc_test(void);
+void lapic_timer_test(void);
 
 #endif 
 
