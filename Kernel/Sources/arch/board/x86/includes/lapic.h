@@ -26,8 +26,9 @@
 #ifndef __X86_LAPIC_H_
 #define __X86_LAPIC_H_
 
-#include <stdint.h> /* Generic int types */
-#include <stddef.h> /* Standard definitions */
+#include <stdint.h>          /* Generic int types */
+#include <stddef.h>          /* Standard definitions */
+#include <time_management.h> /* Timers factory */
 
 /*******************************************************************************
  * CONSTANTS
@@ -146,8 +147,7 @@
  ******************************************************************************/
 
 /** @brief LAPIC Timer driver instance. */
-/* TODO: Add timer faility */
-//extern kernel_timer_t lapic_timer_driver;
+extern kernel_timer_t lapic_timer_driver;
 
 /*******************************************************************************
  * FUNCTIONS

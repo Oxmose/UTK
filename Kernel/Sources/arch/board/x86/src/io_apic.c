@@ -181,7 +181,7 @@ OS_RETURN_E io_apic_init(void)
         acpi_io_apic = acpi_io_apic->next;
     }
 
-#if TEST_MODE_ENABLED
+#ifdef TEST_MODE_ENABLED
     io_apic_test();
 #endif
 

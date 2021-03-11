@@ -600,8 +600,6 @@ OS_RETURN_E paging_kmunmap(const void* virt_addr, const size_t mapping_size)
         pgdir_rec_addr = (uint32_t*)PAGING_RECUR_PG_DIR;
         if((pgdir_rec_addr[pgdir_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
         {
-            pgtable = (uint32_t*)(pgdir_rec_addr[pgdir_entry] & PG_ENTRY_MASK);
-
             /* Get recursive virtual address */
             pgtable = (uint32_t*)(PAGING_RECUR_PG_TABLE + 
                                   KERNEL_PAGE_SIZE * 
