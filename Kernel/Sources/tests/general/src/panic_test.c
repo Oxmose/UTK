@@ -6,7 +6,7 @@
 
 void panic_test(void)
 {
-    kernel_panic(666);
+    KERNEL_PANIC(666);
 
     kill_qemu();
 }

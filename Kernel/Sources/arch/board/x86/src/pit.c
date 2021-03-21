@@ -105,6 +105,8 @@ OS_RETURN_E pit_init(void)
 
 #ifdef TEST_MODE_ENABLED
     pit_test();
+    pit_test2();
+    pit_test3();
 #endif
 
     /* Enable PIT IRQ */

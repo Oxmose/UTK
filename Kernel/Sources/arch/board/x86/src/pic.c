@@ -77,6 +77,8 @@ OS_RETURN_E pic_init(void)
 
 #ifdef TEST_MODE_ENABLED
     pic_test();
+    pic_test2();
+    pic_test3();
 #endif
 
     return OS_NO_ERR;

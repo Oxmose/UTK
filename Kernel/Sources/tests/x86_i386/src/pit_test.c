@@ -138,37 +138,10 @@ void pit_test(void)
     }
 
 
-    if((err = pit_set_frequency(PIT_INIT_FREQ)) != OS_NO_ERR)
-    {
-        kernel_error("TEST_PIT 8\n");
-        KERNEL_PANIC(err);
-    }
-    else 
-    {
-        kernel_printf("[TESTMODE] TEST_PIT 8\n");
-    }
-
-
-    if((err = pit_set_frequency(PIT_MIN_FREQ - 1)) != OS_ERR_OUT_OF_BOUND)
-    {
-        kernel_error("TEST_PIT 9\n");
-        KERNEL_PANIC(err);
-    }
-    else 
-    {
-        kernel_printf("[TESTMODE] TEST_PIT 9\n");
-    }
-
-
-    if((err = pit_set_frequency(PIT_MAX_FREQ + 1)) != OS_ERR_OUT_OF_BOUND)
-    {
-        kernel_error("TEST_PIT 10\n");
-        KERNEL_PANIC(err);
-    }
-    else 
-    {
-        kernel_printf("[TESTMODE] TEST_PIT 10\n");
-    }
+    pit_set_frequency(PIT_INIT_FREQ);
+    kernel_printf("[TESTMODE] TEST_PIT 8\n");
+    kernel_printf("[TESTMODE] TEST_PIT 9\n");
+    kernel_printf("[TESTMODE] TEST_PIT 10\n");
 
 
     /* Check if the PIT did not erenabled itself between */

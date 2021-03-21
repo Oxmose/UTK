@@ -185,6 +185,7 @@ OS_RETURN_E lapic_init(void)
 
 #ifdef TEST_MODE_ENABLED
     lapic_test();
+    lapic_test2();
 #endif
 
     initialized = 1;

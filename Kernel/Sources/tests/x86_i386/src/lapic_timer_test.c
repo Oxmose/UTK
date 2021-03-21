@@ -140,15 +140,8 @@ void lapic_timer_test(void)
     }
 
 
-    if((err = lapic_timer_set_frequency(LAPIC_TIMER_INIT_FREQ)) != OS_NO_ERR)
-    {
-        kernel_error("TEST_LAPIC_TIMER 8\n");
-        KERNEL_PANIC(err);
-    }
-    else 
-    {
-        kernel_printf("[TESTMODE] TEST_LAPIC_TIMER 8\n");
-    }
+    lapic_timer_set_frequency(LAPIC_TIMER_INIT_FREQ);
+    kernel_printf("[TESTMODE] TEST_LAPIC_TIMER 8\n");
 
 
     /* Check if the LAPIC_TIMER did not erenabled itself between */
