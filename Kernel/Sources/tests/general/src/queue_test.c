@@ -32,7 +32,7 @@ void queue_test(void)
     if(nodes[0] == NULL || error != OS_NO_ERR)
     {
         kernel_error("TEST_KQUEUE 0\n");
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
     else 
     {
@@ -44,7 +44,7 @@ void queue_test(void)
     if(nodes[0] != NULL || error != OS_NO_ERR)
     {
         kernel_error("TEST_KQUEUE 1\n");
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
     else 
     {
@@ -58,7 +58,7 @@ void queue_test(void)
     if(nodes[0] == NULL || error != OS_NO_ERR)
     {
         kernel_error("TEST_KQUEUE 2\n");
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
     else 
     {
@@ -72,7 +72,7 @@ void queue_test(void)
     if(queue == NULL || error != OS_NO_ERR)
     {
         kernel_error("TEST_KQUEUE 3\n");
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
     else 
     {
@@ -84,7 +84,7 @@ void queue_test(void)
     if(queue != NULL || error != OS_NO_ERR)
     {
         kernel_error("TEST_KQUEUE 4\n");
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
     else 
     {
@@ -98,7 +98,7 @@ void queue_test(void)
     if(queue == NULL || error != OS_NO_ERR)
     {
         kernel_error("TEST_KQUEUE 5\n");
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
     else 
     {
@@ -110,7 +110,7 @@ void queue_test(void)
     if(error != OS_NO_ERR)
     {
         kernel_error("TEST_KQUEUE 6\n");
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
     else 
     {
@@ -122,7 +122,7 @@ void queue_test(void)
     if(nodes[0] == NULL || error != OS_ERR_UNAUTHORIZED_ACTION)
     {
         kernel_error("TEST_KQUEUE 7 %d %d\n", nodes[0], error);
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
     else 
     {
@@ -134,7 +134,7 @@ void queue_test(void)
     if(error != OS_ERR_NULL_POINTER)
     {
         kernel_error("TEST_KQUEUE 8\n");
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
     else 
     {
@@ -146,7 +146,7 @@ void queue_test(void)
     if(queue == NULL || error != OS_ERR_UNAUTHORIZED_ACTION)
     {
         kernel_error("TEST_KQUEUE 9\n");
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
     else 
     {
@@ -160,7 +160,7 @@ void queue_test(void)
     if(nodes[0] == NULL || error != OS_NO_ERR)
     {
         kernel_error("TEST_KQUEUE 10\n");
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
     else 
     {
@@ -176,7 +176,7 @@ void queue_test(void)
         if(nodes[i] == NULL || error != OS_NO_ERR)
         {
             kernel_error("TEST_KQUEUE 11\n");
-            kernel_panic(error);
+            KERNEL_PANIC(error);
         }
         else 
         {
@@ -193,7 +193,7 @@ void queue_test(void)
         if(error != OS_NO_ERR)
         {
             kernel_error("TEST_KQUEUE 12\n");
-            kernel_panic(error);
+            KERNEL_PANIC(error);
         }
         else 
         {
@@ -211,7 +211,7 @@ void queue_test(void)
         if(nodes[i] == NULL || error != OS_NO_ERR)
         {
             kernel_error("TEST_KQUEUE 14\n");
-            kernel_panic(error);
+            KERNEL_PANIC(error);
         }
         else 
         {
@@ -220,7 +220,7 @@ void queue_test(void)
         if((uint32_t)nodes[i]->data != sorted[i])
         {
             kernel_error("TEST_KQUEUE 15\n");
-            kernel_panic(error);
+            KERNEL_PANIC(error);
         }
         else 
         {
@@ -236,7 +236,7 @@ void queue_test(void)
     if(queue->size != 0)
     {
         kernel_error("TEST_KQUEUE 16\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -250,7 +250,7 @@ void queue_test(void)
         if(nodes[i] != NULL || error != OS_NO_ERR)
         {
             kernel_error("TEST_KQUEUE 17\n");
-            kernel_panic(error);
+            KERNEL_PANIC(error);
         }
         else 
         {
@@ -266,7 +266,7 @@ void queue_test(void)
         if(nodes[i] == NULL || error != OS_NO_ERR)
         {
             kernel_error("TEST_KQUEUE 18\n");
-            kernel_panic(error);
+            KERNEL_PANIC(error);
         }
         else 
         {
@@ -284,7 +284,7 @@ void queue_test(void)
         if(error != OS_NO_ERR)
         {
             kernel_error("TEST_KQUEUE 19\n");
-            kernel_panic(error);
+            KERNEL_PANIC(error);
         }
         else 
         {
@@ -302,7 +302,7 @@ void queue_test(void)
     if(find == NULL || error != OS_NO_ERR || find->data != (void*) 9)
     {
         kernel_error("TEST_KQUEUE 20\n");
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
     else 
     {
@@ -316,7 +316,7 @@ void queue_test(void)
     if(find != NULL || error != OS_ERR_NO_SUCH_ID)
     {
         kernel_error("TEST_KQUEUE 21\n");
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
     else 
     {
@@ -332,7 +332,7 @@ void queue_test(void)
         if(nodes[i] == NULL || error != OS_NO_ERR)
         {
             kernel_error("TEST_KQUEUE 22\n");
-            kernel_panic(error);
+            KERNEL_PANIC(error);
         }
         else 
         {
@@ -342,7 +342,7 @@ void queue_test(void)
         {
 
             kernel_error("TEST_KQUEUE 23 %d %d %d\n", (uint32_t)nodes[i]->data, unsorted[i%10], i);
-            kernel_panic(error);
+            KERNEL_PANIC(error);
         }
         else 
         {
@@ -355,7 +355,7 @@ void queue_test(void)
     if(queue->size != 0)
     {
         kernel_error("TEST_KQUEUE 24\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -367,7 +367,7 @@ void queue_test(void)
     if(find != NULL || error != OS_NO_ERR)
     {
         kernel_error("TEST_KQUEUE 25\n");
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
     else 
     {
@@ -379,7 +379,7 @@ void queue_test(void)
     if(queue != NULL || error != OS_NO_ERR)
     {
         kernel_error("TEST_KQUEUE 26\n");
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
     else 
     {
@@ -391,7 +391,7 @@ void queue_test(void)
     if(error != OS_ERR_NULL_POINTER)
     {
         kernel_error("TEST_KQUEUE 27\n");
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
     else 
     {
@@ -403,7 +403,7 @@ void queue_test(void)
     if(find != NULL || error != OS_ERR_NULL_POINTER)
     {
         kernel_error("TEST_KQUEUE 28\n");
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
     else 
     {
@@ -417,7 +417,7 @@ void queue_test(void)
         if(nodes[i] != NULL || error != OS_NO_ERR)
         {
             kernel_error("TEST_KQUEUE 29\n");
-            kernel_panic(error);
+            KERNEL_PANIC(error);
         }
         else 
         {

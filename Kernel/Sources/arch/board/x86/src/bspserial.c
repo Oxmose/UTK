@@ -75,18 +75,14 @@ kernel_graphic_driver_t uart_text_driver =
  *
  * @param[in] attr The settings for the port's line.
  * @param[in] com The port to set.
- *
- * @return OS_NO_ERR on success, no other value is returned.
  */
-static OS_RETURN_E set_line(const uint8_t attr, const uint8_t com)
+static void set_line(const uint8_t attr, const uint8_t com)
 {
     cpu_outb(attr, SERIAL_LINE_COMMAND_PORT(com));
 
     KERNEL_DEBUG(SERIAL_DEBUG_ENABLED,
                  "[SERIAL] Set line attributes of port 0x%04x to %u", 
                  com, attr);
-
-    return OS_NO_ERR;
 }
 
 /**
@@ -99,15 +95,13 @@ static OS_RETURN_E set_line(const uint8_t attr, const uint8_t com)
  *
  * @return OS_NO_ERR on success, no other value is returned.
  */
-static OS_RETURN_E set_buffer(const uint8_t attr, const uint8_t com)
+static void set_buffer(const uint8_t attr, const uint8_t com)
 {
     cpu_outb(attr, SERIAL_FIFO_COMMAND_PORT(com));
 
     KERNEL_DEBUG(SERIAL_DEBUG_ENABLED,
                  "[SERIAL] Set buffer attributes of port 0x%04x to %u", 
                  com, attr);
-
-    return OS_NO_ERR;
 }
 
 /**
@@ -117,10 +111,8 @@ static OS_RETURN_E set_buffer(const uint8_t attr, const uint8_t com)
  *
  * @param[in] rate The desired baudrate for the port.
  * @param[in] com The port to set.
- *
- * @return OS_NO_ERR on success, no other value is returned.
  */
-static OS_RETURN_E set_baudrate(SERIAL_BAUDRATE_E rate, const uint8_t com)
+static void set_baudrate(SERIAL_BAUDRATE_E rate, const uint8_t com)
 {
     cpu_outb(SERIAL_DLAB_ENABLED, SERIAL_LINE_COMMAND_PORT(com));
     cpu_outb((rate >> 8) & 0x00FF, SERIAL_DATA_PORT(com));
@@ -129,13 +121,10 @@ static OS_RETURN_E set_baudrate(SERIAL_BAUDRATE_E rate, const uint8_t com)
     KERNEL_DEBUG(SERIAL_DEBUG_ENABLED,
                  "[SERIAL] Set baud rate of port 0x%04x to %u", 
                  com, rate);
-
-    return OS_NO_ERR;
 }
 
 OS_RETURN_E uart_init(void)
 {
-    OS_RETURN_E err;
     uint8_t i;
 
     /* Init all comm ports */
@@ -177,27 +166,11 @@ OS_RETURN_E uart_init(void)
             cpu_outb(0x00, SERIAL_DATA_PORT_2(com));
         }
 
-        /* Init baud rate */
-        err = set_baudrate(BAUDRATE_9600, com);
-        if(err != OS_NO_ERR)
-        {
-            return err;
-        }
-
-        /* Configure the line */
-        err = set_line(attr, com);
-        if(err != OS_NO_ERR)
-        {
-            return err;
-        }
-
-        err = set_buffer(0xC0 | SERIAL_ENABLE_FIFO | SERIAL_CLEAR_RECV_FIFO |
-                         SERIAL_CLEAR_SEND_FIFO | SERIAL_FIFO_DEPTH_14,
-                         com);
-        if(err != OS_NO_ERR)
-        {
-            return err;
-        }
+        /* Init line */
+        set_baudrate(BAUDRATE_9600, com);
+        set_line(attr, com);
+        set_buffer(0xC0 | SERIAL_ENABLE_FIFO | SERIAL_CLEAR_RECV_FIFO |
+                   SERIAL_CLEAR_SEND_FIFO | SERIAL_FIFO_DEPTH_14, com);
 
         /* Enable interrupt */
         cpu_outb(0x0B, SERIAL_MODEM_COMMAND_PORT(com));
@@ -211,7 +184,7 @@ OS_RETURN_E uart_init(void)
     uart_test();
 #endif
 
-    return err;
+    return OS_NO_ERR;
 }
 
 void uart_write(const uint32_t port, const uint8_t data)

@@ -23,7 +23,7 @@
 #include <string.h>             /* String manipulation */
 #include <cpu_settings.h>       /* CPU settings */
 #include <cpu_structs.h>        /* CPU structures */
-#include <cpu.h>                /* CPU management */
+#include <cpu_api.h>            /* CPU management */
 #include <interrupt_settings.h> /* CPU interrupts settings */
 #include <panic.h>              /* Kernel panic */
 #include <kernel_output.h>      /* Kernel output methods */
@@ -61,18 +61,15 @@ static uint32_t spurious_interrupt;
  ******************************************************************************/
 
 
-static OS_RETURN_E init_driver_set_irq_mask(const uint32_t irq_number, 
-                                            const uint32_t enabled)
+static void init_driver_set_irq_mask(const uint32_t irq_number, 
+                                     const uint32_t enabled)
 {
     (void)irq_number;
     (void)enabled;
-
-    return OS_NO_ERR;
 }
-static OS_RETURN_E init_driver_set_irq_eoi(const uint32_t irq_number)
+static void init_driver_set_irq_eoi(const uint32_t irq_number)
 {
     (void)irq_number;
-    return OS_NO_ERR;
 }
 static INTERRUPT_TYPE_E init_driver_handle_spurious(const uint32_t int_number)
 {   
@@ -365,22 +362,22 @@ uint32_t kernel_interrupt_get_state(void)
     return cpu_get_interrupt_state();
 }
 
-OS_RETURN_E kernel_interrupt_set_irq_mask(const uint32_t irq_number,
-                                          const uint32_t enabled)
+void kernel_interrupt_set_irq_mask(const uint32_t irq_number,
+                                   const uint32_t enabled)
 {
     KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED, 
                  "[INTERRUPTS] IRQ Mask change: %u %u", 
                  irq_number, 
                  enabled);
-    return interrupt_driver.driver_set_irq_mask(irq_number, enabled);
+    interrupt_driver.driver_set_irq_mask(irq_number, enabled);
 }
 
-OS_RETURN_E kernel_interrupt_set_irq_eoi(const uint32_t irq_number)
+void kernel_interrupt_set_irq_eoi(const uint32_t irq_number)
 {
     KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED, 
                  "[INTERRUPTS] IRQ EOI: %u", 
                  irq_number);
-    return interrupt_driver.driver_set_irq_eoi(irq_number);
+    interrupt_driver.driver_set_irq_eoi(irq_number);
 }
 
 

@@ -57,39 +57,22 @@ struct kernel_timer
      * timer source. The frequency is defined in Hz.
      * 
      * @param[in] frequency The frequency to apply to the timer source.
-     * 
-     * @return The success state or the error code. 
-     * - OS_NO_ERR is returned if no error is rate. 
-     * - OS_ERR_OUT_OF_BOUND is returned if the frequency is out of the bounds
-     * defined by the timer source.
-     * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the IRQ number of the source is 
-     * not supported.
      */
-    OS_RETURN_E (*set_frequency)(const uint32_t frequency);
+    void (*set_frequency)(const uint32_t frequency);
 
     /**
      * @brief The function should enable the timer's inetrrupt.
      * 
      * @details The function should enable the timer's inetrrupt.
-     *
-     * @return The success state or the error code. 
-     * - OS_NO_ERR is returned if no error is encountered. 
-     * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the IRQ number of the timer is 
-     * not supported.
      */
-    OS_RETURN_E (*enable)(void);
+    void (*enable)(void);
 
     /**
      * @brief The function should disable the timer's inetrrupt.
      * 
      * @details The function should disable the timer's inetrrupt.
-     *
-     * @return The success state or the error code. 
-     * - OS_NO_ERR is returned if no error is encountered. 
-     * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the IRQ number of the timer is 
-     * not supported.
      */
-    OS_RETURN_E (*disable)(void);
+    void (*disable)(void);
 
     /**
      * @brief The function should set the timer's tick handler.

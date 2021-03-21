@@ -35,7 +35,7 @@ void rtc_test(void)
     if((err = rtc_set_handler(NULL)) != OS_ERR_NULL_POINTER)
     {
         kernel_error("TEST_RTC 0\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -46,7 +46,7 @@ void rtc_test(void)
     if((err = rtc_set_handler(rtc_handler)) != OS_NO_ERR)
     {
         kernel_error("TEST_RTC 1\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -58,7 +58,7 @@ void rtc_test(void)
     if((err = rtc_remove_handler()) != OS_NO_ERR)
     {
         kernel_error("TEST_RTC 2\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -70,7 +70,7 @@ void rtc_test(void)
     if((err = rtc_set_handler(rtc_handler)) != OS_NO_ERR)
     {
         kernel_error("TEST_RTC 3\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -89,7 +89,7 @@ void rtc_test(void)
     if(counter == 0)
     {
         kernel_error("TEST_RTC 4\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -101,7 +101,7 @@ void rtc_test(void)
     if(counter != cnt_val)
     {
         kernel_error("TEST_RTC 5\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -119,7 +119,7 @@ void rtc_test(void)
     if(counter == 0)
     {
         kernel_error("TEST_RTC 6\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -131,7 +131,7 @@ void rtc_test(void)
     if(counter != cnt_val)
     {
         kernel_error("TEST_RTC 7\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -142,7 +142,7 @@ void rtc_test(void)
     if((err = rtc_set_frequency(RTC_INIT_RATE)) != OS_NO_ERR)
     {
         kernel_error("TEST_RTC 8\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -153,7 +153,7 @@ void rtc_test(void)
     if((err = rtc_set_frequency(RTC_MIN_FREQ - 1)) != OS_ERR_OUT_OF_BOUND)
     {
         kernel_error("TEST_RTC 9\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -164,7 +164,7 @@ void rtc_test(void)
     if((err = rtc_set_frequency(RTC_MAX_FREQ + 1)) != OS_ERR_OUT_OF_BOUND)
     {
         kernel_error("TEST_RTC 10\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -177,7 +177,7 @@ void rtc_test(void)
     if(counter != cnt_val)
     {
         kernel_error("TEST_RTC 11\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -189,7 +189,7 @@ void rtc_test(void)
     if(rtc_remove_handler() != OS_NO_ERR)
     {
         kernel_error("TEST_RTC 12\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {

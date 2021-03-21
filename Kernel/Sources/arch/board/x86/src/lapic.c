@@ -32,6 +32,7 @@
 #include <kernel_output.h>        /* Output manager */
 #include <time_management.h>      /* Timer factory */
 #include <pit.h>                  /* PIT driver */
+#include <panic.h>                /* Kernel panic */
 
 /* UTK configuration file */
 #include <config.h>
@@ -158,8 +159,6 @@ static void lapic_init_pit_handler(cpu_state_t* cpu_state, uintptr_t int_id,
 
 OS_RETURN_E lapic_init(void)
 {
-    OS_RETURN_E err;
-
     /* Check IO-APIC support */
     if(acpi_get_io_apic_count() == 0 || acpi_get_lapic_count() == 0)
     {
@@ -170,11 +169,7 @@ OS_RETURN_E lapic_init(void)
     lapic_base_addr = acpi_get_lapic_addr();
 
     /* Map the LAPIC */
-    err = paging_kmmap_hw(lapic_base_addr, lapic_base_addr, 0x1000, 0, 0);
-    if(err != OS_NO_ERR && err != OS_ERR_MAPPING_ALREADY_EXISTS)
-    {
-        return err;
-    }
+    paging_kmmap_hw(lapic_base_addr, lapic_base_addr, 0x1000, 0, 0);
 
     /* Enable all interrupts */
     lapic_write(LAPIC_TPR, 0);
@@ -194,7 +189,7 @@ OS_RETURN_E lapic_init(void)
 
     initialized = 1;
 
-    return err;
+    return OS_NO_ERR;
 }
 
 int32_t lapic_get_id(void)
@@ -221,8 +216,6 @@ OS_RETURN_E lapic_send_ipi_init(const uint32_t lapic_id)
         return OS_ERR_NOT_SUPPORTED;
     }
 
-    
-
     /* Check LACPI id */
     err = acpi_check_lapic_id(lapic_id);
     if(err != OS_NO_ERR)
@@ -238,8 +231,7 @@ OS_RETURN_E lapic_send_ipi_init(const uint32_t lapic_id)
                 ICR_ASSERT | ICR_EDGE | ICR_NO_SHORTHAND);
 
     /* Wait for pending sends */
-    while ((lapic_read(LAPIC_ICRLO) & ICR_SEND_PENDING) != 0)
-    {}
+    while ((lapic_read(LAPIC_ICRLO) & ICR_SEND_PENDING) != 0);
 
     EXIT_CRITICAL(int_state);
 
@@ -318,18 +310,17 @@ OS_RETURN_E lapic_send_ipi(const uint32_t lapic_id, const uint32_t vector)
     return err;
 }
 
-OS_RETURN_E lapic_set_int_eoi(const uint32_t interrupt_line)
+void lapic_set_int_eoi(const uint32_t interrupt_line)
 {
     if(interrupt_line > MAX_INTERRUPT_LINE)
     {
-        return OS_ERR_NO_SUCH_IRQ_LINE;
+        KERNEL_ERROR("Could not EOI IRQ %d, IRQ not found\n", interrupt_line);
+        KERNEL_PANIC(OS_ERR_NO_SUCH_IRQ_LINE);
     }
 
     lapic_write(LAPIC_EOI, 0);
 
     KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "[LAPIC] EOI %d", interrupt_line);
-
-    return OS_NO_ERR;
 }
 
 
@@ -351,11 +342,7 @@ OS_RETURN_E lapic_timer_init(void)
     lapic_write(LAPIC_TDCR, LAPIC_DIVIDER_16);
 
     /* Set PIT period of 10 ms and handler */
-    err = pit_set_frequency(100);
-    if(err != OS_NO_ERR)
-    {
-        return err;
-    }
+    pit_set_frequency(100);
 
     err = pit_set_handler(lapic_init_pit_handler);
     if(err != OS_NO_ERR)
@@ -364,22 +351,13 @@ OS_RETURN_E lapic_timer_init(void)
     }
 
     /* Wait for interrupts to gather the timer data */
-    err = pit_enable();
-    if(err != OS_NO_ERR)
-    {
-        return err;
-    }
+    pit_enable();
 
     kernel_interrupt_restore(1);
     while(wait_int != 0);
     kernel_interrupt_disable();
 
-    err = pit_disable();
-    if(err != OS_NO_ERR)
-    {
-        return err;
-    }
-
+    pit_disable();
 
     err = pit_remove_handler();
     if(err != OS_NO_ERR)
@@ -434,14 +412,21 @@ uint32_t lapic_timer_get_frequency(void)
     return freq;
 }
 
-OS_RETURN_E lapic_timer_set_frequency(const uint32_t frequency)
+void lapic_timer_set_frequency(const uint32_t frequency)
 {
     uint32_t int_state;
 
     /* Check IO-APIC support */
     if(initialized == 0)
     {
-        return OS_ERR_NOT_SUPPORTED;
+        KERNEL_ERROR("Set LAPIC timer frequency before initialization\n");
+        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
+    }
+
+    if(frequency < 20 || frequency > 8000)
+    {
+        KERNEL_ERROR("Set LAPIC timer frequency out of bound: %d\n", frequency);
+        KERNEL_PANIC(OS_ERR_OUT_OF_BOUND);
     }
 
     KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, 
@@ -458,18 +443,17 @@ OS_RETURN_E lapic_timer_set_frequency(const uint32_t frequency)
     lapic_write(LAPIC_TICR, global_lapic_freq);
 
     EXIT_CRITICAL(int_state);
-
-    return OS_NO_ERR;
 }
 
-OS_RETURN_E lapic_timer_enable(void)
+void lapic_timer_enable(void)
 {
     uint32_t int_state;
 
     /* Check support */
     if(initialized == 0)
     {
-        return OS_ERR_NOT_SUPPORTED;
+        KERNEL_ERROR("Enable LAPIC timer frequency before initialization\n");
+        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
     }
 
     KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "[LAPIC] Timer enable");
@@ -481,18 +465,17 @@ OS_RETURN_E lapic_timer_enable(void)
                 LAPIC_TIMER_MODE_PERIODIC);
 
     EXIT_CRITICAL(int_state);
-
-    return OS_NO_ERR;
 }
 
-OS_RETURN_E lapic_timer_disable(void)
+void lapic_timer_disable(void)
 {
     uint32_t int_state;
 
     /* Check support */
     if(initialized == 0)
     {
-        return OS_ERR_NOT_SUPPORTED;
+        KERNEL_ERROR("Disable LAPIC timer frequency before initialization\n");
+        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
     }
 
     KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "[LAPIC] Timer disable");
@@ -503,7 +486,6 @@ OS_RETURN_E lapic_timer_disable(void)
     lapic_write(LAPIC_TIMER, LAPIC_LVT_INT_MASKED);
 
     EXIT_CRITICAL(int_state);
-    return OS_NO_ERR;
 }
 
 OS_RETURN_E lapic_timer_set_handler(void(*handler)(
@@ -526,11 +508,7 @@ OS_RETURN_E lapic_timer_set_handler(void(*handler)(
         return OS_ERR_NULL_POINTER;
     }
 
-    err = lapic_timer_disable();
-    if(err != OS_NO_ERR)
-    {
-        return err;
-    }
+    lapic_timer_disable();
 
     ENTER_CRITICAL(int_state);
 
@@ -557,7 +535,9 @@ OS_RETURN_E lapic_timer_set_handler(void(*handler)(
                  "[LAPIC] New LAPIC timer handler set (0x%p)",
                  handler);
 
-    return lapic_timer_enable();
+    lapic_timer_enable();
+
+    return OS_NO_ERR;
 }
 
 OS_RETURN_E lapic_timer_remove_handler(void)

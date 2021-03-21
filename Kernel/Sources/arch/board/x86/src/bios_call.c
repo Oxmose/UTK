@@ -46,21 +46,16 @@ extern uint8_t _KERNEL_BIOS_MEMORY_SIZE;
 extern void __bios_call(uint8_t intnum, bios_int_regs_t* regs);
 
 
-OS_RETURN_E bios_call(uint32_t intnum, bios_int_regs_t* regs)
+void bios_call(uint32_t intnum, bios_int_regs_t* regs)
 {
-	OS_RETURN_E err;
 	uint32_t    int_state;
 
 	/* Map the RM core */
-	err = paging_kmmap_hw((void*)&_KERNEL_BIOS_MEMORY_BASE, 
-	                      (void*)&_KERNEL_BIOS_MEMORY_BASE, 
-	                      (size_t)&_KERNEL_BIOS_MEMORY_SIZE, 
-						  0, 
-						  1);
-	if(err != OS_NO_ERR && err != OS_ERR_MAPPING_ALREADY_EXISTS)
-	{
-		return err;
-	}
+	paging_kmmap_hw((void*)&_KERNEL_BIOS_MEMORY_BASE, 
+					(void*)&_KERNEL_BIOS_MEMORY_BASE, 
+					(size_t)&_KERNEL_BIOS_MEMORY_SIZE, 
+					0, 
+					1);
 
     ENTER_CRITICAL(int_state);
 
@@ -69,12 +64,6 @@ OS_RETURN_E bios_call(uint32_t intnum, bios_int_regs_t* regs)
     EXIT_CRITICAL(int_state);
 
 	/* Unmap RM core */
-	err = paging_kmunmap((void*)&_KERNEL_BIOS_MEMORY_BASE, 
-	                    (size_t)&_KERNEL_BIOS_MEMORY_SIZE);
-	if(err != OS_NO_ERR)
-	{
-		return err;
-	}
-
-	return OS_NO_ERR;
+	paging_kmunmap((void*)&_KERNEL_BIOS_MEMORY_BASE, 
+	               (size_t)&_KERNEL_BIOS_MEMORY_SIZE);
 }

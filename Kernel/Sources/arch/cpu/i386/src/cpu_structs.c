@@ -30,14 +30,14 @@
  ******************************************************************************/
 
 /** @brief CPU GDT space in memory. */
-uint64_t cpu_gdt[GDT_ENTRY_COUNT] __attribute__((aligned(16)));
+uint64_t cpu_gdt[GDT_ENTRY_COUNT] __attribute__((aligned(8)));
 /** @brief Kernel GDT structure */
-gdt_ptr_t cpu_gdt_ptr __attribute__((aligned(16)));
+gdt_ptr_t cpu_gdt_ptr __attribute__((aligned(8)));
 
 /** @brief CPU IDT space in memory. */
-uint64_t cpu_idt[IDT_ENTRY_COUNT] __attribute__((aligned(16)));
+uint64_t cpu_idt[IDT_ENTRY_COUNT] __attribute__((aligned(8)));
 /** @brief Kernel IDT structure */
-idt_ptr_t cpu_idt_ptr;
+idt_ptr_t cpu_idt_ptr __attribute__((aligned(8)));
 
 /** @brief CPU TSS structures */
-cpu_tss_entry_t cpu_tss[MAX_CPU_COUNT] __attribute__((aligned(16)));
+cpu_tss_entry_t cpu_tss[MAX_CPU_COUNT] __attribute__((aligned(8)));

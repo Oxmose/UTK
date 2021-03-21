@@ -17,7 +17,7 @@ void lapic_test(void)
     if((err = lapic_set_int_eoi(0)) != OS_NO_ERR)
     {
         kernel_error("TEST_LAPIC 0\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
 
     /* TEST OEI > MAX */
@@ -25,7 +25,7 @@ void lapic_test(void)
        OS_ERR_NO_SUCH_IRQ_LINE)
     {
         kernel_error("TEST_LAPIC 1\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
 
     kernel_printf("[TESTMODE] Local APIC tests passed\n");

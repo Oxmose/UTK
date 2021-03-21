@@ -195,7 +195,7 @@ static void formater(const char* str, __builtin_va_list args,
                 /* Specifier mods */
                 case 's':
 					args_value = __builtin_va_arg(args, char*);
-					current_output.puts(args_value);
+					used_output.puts(args_value);
                     break;
                 case 'd':
                 case 'i':

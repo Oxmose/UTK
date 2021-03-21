@@ -32,6 +32,7 @@
 #include <critical.h>           /* Critical sections */
 #include <kheap.h>              /* Kernel heap */
 #include <queue.h>              /* Queue library */
+#include <panic.h>              /* Kernel panic */
 
 /* UTK configuration file */
 #include <config.h>
@@ -108,7 +109,6 @@ OS_RETURN_E io_apic_init(void)
     uint32_t            i;
     uint32_t            j;
     uint32_t            read_count;
-    OS_RETURN_E         err;
     const queue_node_t* acpi_io_apic;
     io_apic_t*          cursor_apic;
 
@@ -125,8 +125,8 @@ OS_RETURN_E io_apic_init(void)
     io_apics = kmalloc(sizeof(io_apic_data_t) * io_apic_count);
     if(io_apics == NULL)
     {
-        KERNEL_ERROR("Could not allocated memory for IO-APIC\n");
-        return OS_ERR_MALLOC;
+        KERNEL_ERROR("Could not allocate memory for IO-APIC\n");
+        KERNEL_PANIC(OS_ERR_MALLOC);
     }
 
     acpi_io_apic = acpi_get_io_apics()->head;
@@ -139,21 +139,11 @@ OS_RETURN_E io_apic_init(void)
         io_apics[i].gsib      = cursor_apic->global_system_interrupt_base;
 
         /* Map the IO-APIC */
-        err = paging_kmmap_hw((void*)io_apics[i].base_addr, 
-                              (void*)io_apics[i].base_addr, 
-                              0x1000, 
-                              0, 
-                              0);
-        if(err != OS_NO_ERR)
-        {
-            /* Clean mapping */
-            for(j = 0; j < i; ++j)
-            {
-                paging_kmunmap((void*)io_apics[i].base_addr, 0x1000);
-            }
-            kfree(io_apics);
-            return err;
-        }
+        paging_kmmap_hw((void*)io_apics[i].base_addr, 
+                        (void*)io_apics[i].base_addr, 
+                        0x1000, 
+                        0, 
+                        0);
 
         KERNEL_DEBUG(IOAPIC_DEBUG_ENABLED, 
                      "[IO-APIC] Address mapped to 0x%p on IO-APIC",
@@ -166,17 +156,7 @@ OS_RETURN_E io_apic_init(void)
         /* Redirect and disable all interrupts */
         for (j = 0; j < io_apics[i].max_redirect_count; ++j)
         {
-            err = io_apic_set_irq_mask(j, 0);
-            if(err != OS_NO_ERR)
-            {
-                /* Clean mapping */
-                for(j = 0; j <= i; ++j)
-                {
-                    paging_kmunmap((void*)io_apics[i].base_addr, 0x1000);
-                }
-                kfree(io_apics);
-                return err;
-            }
+            io_apic_set_irq_mask(j, 0);
         }
         acpi_io_apic = acpi_io_apic->next;
     }
@@ -190,8 +170,7 @@ OS_RETURN_E io_apic_init(void)
     return OS_NO_ERR;
 }
 
-OS_RETURN_E io_apic_set_irq_mask(const uint32_t irq_number,
-                                 const uint32_t enabled)
+void io_apic_set_irq_mask(const uint32_t irq_number, const uint32_t enabled)
 {
     uint32_t  entry_lo;
     uint32_t  entry_hi;
@@ -216,10 +195,8 @@ OS_RETURN_E io_apic_set_irq_mask(const uint32_t irq_number,
 
     if(base_addr == 0)
     {
-        KERNEL_DEBUG(IOAPIC_DEBUG_ENABLED, 
-                 "[IO-APIC] Could not find IO APIC handler for IRQ %d",
-                 irq_number);
-        return OS_ERR_NO_SUCH_IRQ_LINE;
+        KERNEL_ERROR("Could not find IO APIC IRQ %d", irq_number);
+        KERNEL_PANIC(OS_ERR_NO_SUCH_IRQ_LINE);
     }
 
     /* Set the interrupt line */
@@ -240,19 +217,13 @@ OS_RETURN_E io_apic_set_irq_mask(const uint32_t irq_number,
     KERNEL_DEBUG(IOAPIC_DEBUG_ENABLED, 
                  "[IO-APIC] Mask IRQ %d (%d): %d",
                  irq_number, actual_irq, enabled);
-
-    return OS_NO_ERR;
 }
 
-OS_RETURN_E io_apic_set_irq_eoi(const uint32_t irq_number)
+void io_apic_set_irq_eoi(const uint32_t irq_number)
 {
-    OS_RETURN_E err;
-
     KERNEL_DEBUG(IOAPIC_DEBUG_ENABLED, "[IO-APIC] Set IRQ EOI %d", irq_number);
 
-    err = lapic_set_int_eoi(irq_number);
-
-    return err;
+    lapic_set_int_eoi(irq_number);
 }
 
 INTERRUPT_TYPE_E io_apic_handle_spurious_irq(const uint32_t int_number)
@@ -305,11 +276,5 @@ int32_t io_apic_get_irq_int_line(const uint32_t irq_number)
 
 uint8_t io_apic_capable(void)
 {
-    /* Check IO-APIC support */
-    if(acpi_get_io_apic_count() == 0 || acpi_get_lapic_count() == 0)
-    {
-        
-        return 0;
-    }
-    return 1;
+    return (acpi_get_io_apic_count() != 0 && acpi_get_lapic_count() != 0);
 }

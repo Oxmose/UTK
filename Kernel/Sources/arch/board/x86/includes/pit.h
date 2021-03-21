@@ -73,25 +73,15 @@ OS_RETURN_E pit_init(void);
  * @brief Enables PIT ticks.
  * 
  * @details Enables PIT ticks by clearing the PIT's IRQ mask.
- *
- * @return The success state or the error code. 
- * - OS_NO_ERR is returned if no error is encountered. 
- * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the IRQ number of the PIT is not 
- *   supported.
  */
-OS_RETURN_E pit_enable(void);
+void pit_enable(void);
 
 /**
  * @brief Disables PIT ticks.
  * 
  * @details Disables PIT ticks by setting the PIT's IRQ mask.
- *
- * @return The success state or the error code. 
- * - OS_NO_ERR is returned if no error is encountered. 
- * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the IRQ number of the PIT is not 
- *   supported.
  */
-OS_RETURN_E pit_disable(void);
+void pit_disable(void);
 
 /** 
  * @brief Sets the PIT's tick frequency.
@@ -102,14 +92,8 @@ OS_RETURN_E pit_disable(void);
  * @warning The value must be between 20Hz and 8000Hz
  *
  * @param[in] freq The new frequency to be set to the PIT.
- * 
- * @return The success state or the error code. 
- * - OS_NO_ERR is returned if no error is encountered. 
- * - OS_ERR_OUT_OF_BOUND is returned if the frequency is out of bounds.
- * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the IRQ number of the PIT is not 
- *   supported.
  */
-OS_RETURN_E pit_set_frequency(const uint32_t freq);
+void pit_set_frequency(const uint32_t freq);
 
 /**
  * @brief Returns the PIT tick frequency in Hz.

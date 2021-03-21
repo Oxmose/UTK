@@ -23,6 +23,7 @@
 
 #include <stddef.h>         /* Standard definitions */
 #include <stdint.h>         /* Generic int types */
+#include <ctrl_block.h>     /* Kernel process structure */
 
 /*******************************************************************************
  * CONSTANTS
@@ -110,16 +111,11 @@ OS_RETURN_E paging_disable(void);
  * @param[in] mapping_size The size of the region to map.
  * @param[in] read_only Sets the read only flag.
  * @param[in] exec Sets the executable flag.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - OS_ERR_PAGING_NOT_INIT is returned if paging has not been initialized.
- * - OS_ERR_MAPPING_ALREADY_EXISTS is returned if the page is already mapped.
  */
-OS_RETURN_E paging_kmmap(const void* virt_addr, 
-                         const size_t mapping_size,
-                         const uint8_t read_only,
-                         const uint8_t exec);
+void paging_kmmap(const void* virt_addr, 
+                  const size_t mapping_size,
+                  const uint8_t read_only,
+                  const uint8_t exec);
 
 /**
  * @brief Maps a kernel virtual memory region to a memory mapped hardware.
@@ -134,17 +130,12 @@ OS_RETURN_E paging_kmmap(const void* virt_addr,
  * @param[in] mapping_size The size of the region to map.
  * @param[in] read_only Sets the read only flag.
  * @param[in] exec Sets the executable flag.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - OS_ERR_PAGING_NOT_INIT is returned if paging has not been initialized.
- * - OS_ERR_MAPPING_ALREADY_EXISTS is returned if the page is already mapped.
  */
-OS_RETURN_E paging_kmmap_hw(const void* virt_addr, 
-                            const void* phys_addr,
-                            const size_t mapping_size,
-                            const uint8_t read_only,
-                            const uint8_t exec);
+void paging_kmmap_hw(const void* virt_addr, 
+                     const void* phys_addr,
+                     const size_t mapping_size,
+                     const uint8_t read_only,
+                     const uint8_t exec);
 
 /**
  * @brief Un-maps a kernel virtual memory region from a corresponding physical
@@ -155,12 +146,24 @@ OS_RETURN_E paging_kmmap_hw(const void* virt_addr,
  *
  * @param[in] virt_addr The virtual address to map.
  * @param[in] mapping_size The size of the region to map.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - OS_ERR_PAGING_NOT_INIT is returned if paging has not been initialized.
- * - OS_ERR_MEMORY_NOT_MAPPED is returned if the page is not mapped.
  */
-OS_RETURN_E paging_kmunmap(const void* virt_addr, const size_t mapping_size);
+void paging_kmunmap(const void* virt_addr, const size_t mapping_size);
+
+/** 
+ * @brief Copies a process memory image.
+ * 
+ * @details Copies a process memory image. This function copies the page memory
+ * image of a process, copies the free page table of the source process,
+ * assign a new page directory to the new process and updates its translation.
+ * 
+ * @param[out] dst_process The process that will receive the image copy.
+ * @param[in] src_process The process to copy.
+ * 
+ * @return OS_NO_ERR is returned on success. Otherwise an error code is 
+ * returned.
+ */
+OS_RETURN_E memory_copy_process_image(kernel_process_t* dst_process,
+                                      const kernel_process_t* src_process);
+
 
 #endif /* #ifndef __CPU_PAGING_H_ */

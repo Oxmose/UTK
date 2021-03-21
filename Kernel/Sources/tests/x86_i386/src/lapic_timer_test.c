@@ -36,7 +36,7 @@ void lapic_timer_test(void)
     if((err = lapic_timer_set_handler(NULL)) != OS_ERR_NULL_POINTER)
     {
         kernel_error("TEST_LAPIC_TIMER 0\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -47,7 +47,7 @@ void lapic_timer_test(void)
     if((err = lapic_timer_set_handler(lapic_timer_handler)) != OS_NO_ERR)
     {
         kernel_error("TEST_LAPIC_TIMER 1\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -59,7 +59,7 @@ void lapic_timer_test(void)
     if((err = lapic_timer_remove_handler()) != OS_NO_ERR)
     {
         kernel_error("TEST_LAPIC_TIMER 2\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -71,7 +71,7 @@ void lapic_timer_test(void)
     if((err = lapic_timer_set_handler(lapic_timer_handler)) != OS_NO_ERR)
     {
         kernel_error("TEST_LAPIC_TIMER 3\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -90,7 +90,7 @@ void lapic_timer_test(void)
     if(counter == 0)
     {
         kernel_error("TEST_LAPIC_TIMER 4\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -102,7 +102,7 @@ void lapic_timer_test(void)
     if(counter != cnt_val)
     {
         kernel_error("TEST_LAPIC_TIMER 5\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -120,7 +120,7 @@ void lapic_timer_test(void)
     if(counter == 0)
     {
         kernel_error("TEST_LAPIC_TIMER 6\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -132,7 +132,7 @@ void lapic_timer_test(void)
     if(counter != cnt_val)
     {
         kernel_error("TEST_LAPIC_TIMER 7\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -143,7 +143,7 @@ void lapic_timer_test(void)
     if((err = lapic_timer_set_frequency(LAPIC_TIMER_INIT_FREQ)) != OS_NO_ERR)
     {
         kernel_error("TEST_LAPIC_TIMER 8\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -156,7 +156,7 @@ void lapic_timer_test(void)
     if(counter != cnt_val)
     {
         kernel_error("TEST_LAPIC_TIMER 9\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -168,7 +168,7 @@ void lapic_timer_test(void)
     if(lapic_timer_remove_handler() != OS_NO_ERR)
     {
         kernel_error("TEST_LAPIC_TIMER 10\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {

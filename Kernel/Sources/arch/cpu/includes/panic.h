@@ -32,6 +32,9 @@
  */
 #define PANIC_NMI_CODE 0xFFFFFFFF
 
+/** @brief Defines the maximal file name lenght for the panic */
+#define PANIC_MAX_FILE_NAME_LENGTH 256
+
 /*******************************************************************************
  * STRUCTURES
  ******************************************************************************/
@@ -39,6 +42,10 @@
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
+
+#define KERNEL_PANIC(ERROR) { 				  \
+    kernel_panic(ERROR, __FILE__, __LINE__);  \
+}
 
 /**
  * @brief Displays the kernel panic screen.
@@ -63,7 +70,11 @@ void panic(cpu_state_t* cpu_state,
  * @details Causes a kernel panic by raising the kernel panic interrupt line.
  *
  * @param[in] error_code The error code to display on the kernel panic's screen.
+ * @param[in] file The name of the source file where the panic was called.
+ * @param[in] line The line at which the panic was called.
  */
-void kernel_panic(const uint32_t error_code);
+void kernel_panic(const uint32_t error_code, 
+                  const char* file, 
+                  const uint32_t line);
 
 #endif /* #ifndef __CPU_PANIC_H_ */

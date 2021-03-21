@@ -119,12 +119,8 @@ OS_RETURN_E pic_init(void);
  * @param[in] irq_number The irq number to enable/disable.
  * @param[in] enabled Must be set to 1 to enable the IRQ or 0 to disable the
  * IRQ.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the IRQ number is not supported.
  */
-OS_RETURN_E pic_set_irq_mask(const uint32_t irq_number, const uint32_t enabled);
+void pic_set_irq_mask(const uint32_t irq_number, const uint32_t enabled);
 
 /**
  * @brief Acknowleges an IRQ.
@@ -132,12 +128,8 @@ OS_RETURN_E pic_set_irq_mask(const uint32_t irq_number, const uint32_t enabled);
  * @details Acknowlege an IRQ by setting the End Of Interrupt bit for this IRQ.
  *
  * @param[in] irq_number The irq number to Acknowlege.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR if no error is encountered.
- * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the IRQ number is not supported.
  */
-OS_RETURN_E pic_set_irq_eoi(const uint32_t irq_number);
+void pic_set_irq_eoi(const uint32_t irq_number);
 
 /**
  * @brief Checks if the serviced interrupt is a spurious
@@ -158,12 +150,8 @@ INTERRUPT_TYPE_E pic_handle_spurious_irq(const uint32_t int_number);
  * @brief Disables the PIC.
  *
  * @details Disables the PIC by masking all interrupts.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR if no error is encountered.
- * - No other return value is possible.
  */
-OS_RETURN_E pic_disable(void);
+void pic_disable(void);
 
 /**
  * @brief Returns the interrupt line attached to an IRQ.

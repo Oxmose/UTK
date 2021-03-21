@@ -106,13 +106,8 @@ void vga_clear_screen(void);
  *
  * @param[in] line The line index where to place the cursor.
  * @param[in] column The column index where to place the cursor.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - OS_ERR_OUT_OF_BOUND is returned if the coordinates are
- * out of bound.
  */
-OS_RETURN_E vga_put_cursor_at(const uint32_t line, const uint32_t column);
+void vga_put_cursor_at(const uint32_t line, const uint32_t column);
 
 /**
  * @brief Saves the cursor attributes in the buffer given as parameter.
@@ -122,12 +117,8 @@ OS_RETURN_E vga_put_cursor_at(const uint32_t line, const uint32_t column);
  *
  * @param[out] buffer The cursor buffer in which the current cursor possition is
  * going to be saved.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - OS_ERR_UNULL_POINTER is returned if the buffer pointer is NULL.
  */
-OS_RETURN_E vga_save_cursor(cursor_t* buffer);
+void vga_save_cursor(cursor_t* buffer);
 
 /**
  * @brief Restores the cursor attributes from the buffer given as parameter.
@@ -137,13 +128,8 @@ OS_RETURN_E vga_save_cursor(cursor_t* buffer);
  *
  * @param[in] buffer The cursor buffer containing the new coordinates of the
  * cursor.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - OS_ERR_OUT_OF_BOUND is returned if the coordinates set in the buffer are
- * out of bound.
  */
-OS_RETURN_E vga_restore_cursor(const cursor_t buffer);
+void vga_restore_cursor(const cursor_t buffer);
 
 /**
  * @brief Scrolls in the desired direction of lines_count lines.
@@ -174,12 +160,8 @@ void vga_set_color_scheme(const colorscheme_t color_scheme);
  *
  * @param[out] buffer The buffer that will receive the current color scheme used
  * by the screen console.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - OS_ERR_NULL_POINTER is returned if the buffer pointer is NULL.
  */
-OS_RETURN_E vga_save_color_scheme(colorscheme_t* buffer);
+void vga_save_color_scheme(colorscheme_t* buffer);
 
 /**
  * ­@brief Put a string to screen.
