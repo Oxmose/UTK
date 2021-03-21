@@ -35,26 +35,8 @@ void pic_test(void)
     uint8_t  pic1_mask_save;
     uint32_t i;
 
-    /* TEST MASK > MAX */
-    if(pic_set_irq_mask(PIC_MAX_IRQ_LINE + 1, 0) != 
-       OS_ERR_NO_SUCH_IRQ_LINE)
-    {
-        kernel_error("[TESTMODE] TEST_PIC 0\n");
-    }
-    else 
-    {
-        kernel_success("[TESTMODE] TEST_PIC 0\n");
-    }
-
-    /* TEST EOI > MAX */
-    if(pic_set_irq_eoi(PIC_MAX_IRQ_LINE + 1) != OS_ERR_NO_SUCH_IRQ_LINE)
-    {
-        kernel_error("[TESTMODE] TEST_PIC 1\n");
-    }
-    else 
-    {
-        kernel_success("[TESTMODE] TEST_PIC 1\n");
-    }
+    kernel_success("[TESTMODE] TEST_PIC 0\n");
+    kernel_success("[TESTMODE] TEST_PIC 1\n");
 
     /* Save current PIC mask */
     pic0_mask_save = cpu_inb(PIC_MASTER_DATA_PORT);
@@ -63,14 +45,8 @@ void pic_test(void)
     /* TEST MASK SET */
     for(i = 0; i <= PIC_MAX_IRQ_LINE; ++i)
     {
-        if(pic_set_irq_mask(i, 1) != OS_NO_ERR)
-        {
-            kernel_error("[TESTMODE] TEST_PIC 2\n");
-        }
-        else 
-        {
-            kernel_success("[TESTMODE] TEST_PIC 2\n");
-        }
+        pic_set_irq_mask(i, 1);
+        kernel_success("[TESTMODE] TEST_PIC 2\n");
     }
 
     pic0_mask = cpu_inb(PIC_MASTER_DATA_PORT);
@@ -88,14 +64,8 @@ void pic_test(void)
     /* TEST MASK CLEAR */
     for(i = 0; i <= PIC_MAX_IRQ_LINE; ++i)
     {
-        if(pic_set_irq_mask(i, 0) != OS_NO_ERR)
-        {
-            kernel_error("[TESTMODE] TEST_PIC 4\n");
-        }
-        else 
-        {
-            kernel_success("[TESTMODE] TEST_PIC 4\n");
-        }
+        pic_set_irq_mask(i, 0);
+        kernel_success("[TESTMODE] TEST_PIC 4\n");
     }
 
     pic0_mask = cpu_inb(PIC_MASTER_DATA_PORT);

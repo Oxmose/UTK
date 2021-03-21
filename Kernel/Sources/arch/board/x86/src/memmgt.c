@@ -544,6 +544,9 @@ OS_RETURN_E memory_manager_init(void)
 
 #ifdef TEST_MODE_ENABLED
     memmgr_test();
+    memmgr_test2();
+    memmgr_test3();
+    memmgr_test4();
 #endif
 
     return OS_NO_ERR;

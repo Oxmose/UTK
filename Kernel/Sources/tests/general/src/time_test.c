@@ -4,7 +4,7 @@
 
 #include <interrupts.h>
 #include <kernel_output.h>
-#include <cpu.h>
+#include <cpu_api.h>
 #include <time_management.h>
 #include <panic.h>
 #include <interrupt_settings.h>

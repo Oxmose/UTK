@@ -60,9 +60,6 @@
 [TESTMODE] ---
 [TESTMODE] Page range 0xe0380000 -> 0xe0382000
 [TESTMODE] Page range 0xe03da000 -> 0x00000000
-[TESTMODE] ---
-[TESTMODE] Page range 0xe0380000 -> 0xe0384000
-[TESTMODE] Page range 0xe03da000 -> 0x00000000
 [TESTMODE] Test frames
 [TESTMODE]Silent alloc
 [TESTMODE]Allocated 0x003bc000
@@ -103,3 +100,5 @@
 [TESTMODE] ---
 [TESTMODE] Frame range 0x00380000 -> 0x00384000
 [TESTMODE] Frame range 0x003da000 -> 0xbffdf000
+[ERROR] Tried to free an already free block
+[TESTMODE] PANIC

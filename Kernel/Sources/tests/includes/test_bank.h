@@ -29,14 +29,25 @@ void kill_qemu(void);
 #define INTERRUPT_TEST 0
 #define EXCEPTION_TEST 0
 #define MEMMGR_TEST 0
+#define MEMMGR_TEST2 0
+#define MEMMGR_TEST3 0
+#define MEMMGR_TEST4 0
 #define PAGING_TEST 0
 #define BIOS_CALL_TEST 0
 #define ACPI_TEST 0
 #define PIC_TEST 0
+#define PIC_TEST2 0
+#define PIC_TEST3 0
 #define IO_APIC_TEST 0
+#define IO_APIC_TEST2 0
 #define LAPIC_TEST 0
+#define LAPIC_TEST2 0
 #define PIT_TEST 0
+#define PIT_TEST2 0
+#define PIT_TEST3 0
 #define RTC_TEST 0
+#define RTC_TEST2 0
+#define RTC_TEST3 0
 #define LAPIC_TIMER_TEST 0
 
 void uart_test(void);
@@ -47,14 +58,25 @@ void boot_test(void);
 void interrupt_test(void);
 void exception_test(void);
 void memmgr_test(void);
+void memmgr_test2(void);
+void memmgr_test3(void);
+void memmgr_test4(void);
 void paging_test(void);
 void bios_call_test(void);
 void acpi_test(void);
 void pic_test(void);
+void pic_test2(void);
+void pic_test3(void);
 void io_apic_test(void);
+void io_apic_test2(void);
 void lapic_test(void);
+void lapic_test2(void);
 void pit_test(void);
+void pit_test2(void);
+void pit_test3(void);
 void rtc_test(void);
+void rtc_test2(void);
+void rtc_test3(void);
 void lapic_timer_test(void);
 
 #endif 

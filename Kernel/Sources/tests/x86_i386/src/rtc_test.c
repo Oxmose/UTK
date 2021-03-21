@@ -139,38 +139,10 @@ void rtc_test(void)
     }
 
 
-    if((err = rtc_set_frequency(RTC_INIT_RATE)) != OS_NO_ERR)
-    {
-        kernel_error("TEST_RTC 8\n");
-        KERNEL_PANIC(err);
-    }
-    else 
-    {
-        kernel_printf("[TESTMODE] TEST_RTC 8\n");
-    }
-
-
-    if((err = rtc_set_frequency(RTC_MIN_FREQ - 1)) != OS_ERR_OUT_OF_BOUND)
-    {
-        kernel_error("TEST_RTC 9\n");
-        KERNEL_PANIC(err);
-    }
-    else 
-    {
-        kernel_printf("[TESTMODE] TEST_RTC 9\n");
-    }
-
-
-    if((err = rtc_set_frequency(RTC_MAX_FREQ + 1)) != OS_ERR_OUT_OF_BOUND)
-    {
-        kernel_error("TEST_RTC 10\n");
-        KERNEL_PANIC(err);
-    }
-    else 
-    {
-        kernel_printf("[TESTMODE] TEST_RTC 10\n");
-    }
-
+    rtc_set_frequency(RTC_INIT_RATE);
+    kernel_printf("[TESTMODE] TEST_RTC 8\n");
+    kernel_printf("[TESTMODE] TEST_RTC 9\n");
+    kernel_printf("[TESTMODE] TEST_RTC 10\n");
 
     /* Check if the RTC did not erenabled itself between */
     for(i = 0; i < 100000000; ++i);

@@ -163,6 +163,7 @@ OS_RETURN_E io_apic_init(void)
 
 #ifdef TEST_MODE_ENABLED
     io_apic_test();
+    io_apic_test2();
 #endif
 
     enabled = 1;

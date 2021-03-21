@@ -9,7 +9,7 @@ function testcase() {
 
     echo -e "\e[94m################### Test $i/$total : $filename_up \e[39m"
     # Select the test
-    sed -i "s/$filename_up 0/$filename_up 1/g" includes/test_bank.h
+    sed -i "s/ $filename_up 0/ $filename_up 1/g" includes/test_bank.h
     # Execute the test
     {
     rm -f *.out
@@ -35,7 +35,7 @@ function testcase() {
     #Clean data
     rm *.out
     #Restore non testmode
-    sed -i "s/$filename_up 1/$filename_up 0/g" includes/test_bank.h
+    sed -i "s/ $filename_up 1/ $filename_up 0/g" includes/test_bank.h
 }
 
 function testcase_arch() {
@@ -47,7 +47,7 @@ function testcase_arch() {
 
     echo -e "\e[94m################### Test $i/$total : $filename_up \e[39m"
     # Select the test
-    sed -i "s/$filename_up 0/$filename_up 1/g" includes/test_bank.h
+    sed -i "s/ $filename_up 0/ $filename_up 1/g" includes/test_bank.h
     # Execute the test
     {
     rm -f *.out
@@ -73,7 +73,7 @@ function testcase_arch() {
     #Clean data
     rm *.out
     #Restore non testmode
-    sed -i "s/$filename_up 1/$filename_up 0/g" includes/test_bank.h
+    sed -i "s/ $filename_up 1/ $filename_up 0/g" includes/test_bank.h
 }
 
 error=0
@@ -89,7 +89,7 @@ do
         filename=$(basename -- "$entry")
         filename="${filename%.*}"
         filename_up=${filename^^}
-        sed -i "s/$filename_up 1/$filename_up 0/g" includes/test_bank.h
+        sed -i "s/ $filename_up 1/ $filename_up 0/g" includes/test_bank.h
     fi
 done
 for entry in "./general/src/"/*.c
@@ -99,7 +99,7 @@ do
     filename=$(basename -- "$entry")
     filename="${filename%.*}"
     filename_up=${filename^^}
-    sed -i "s/$filename_up 1/$filename_up 0/g" includes/test_bank.h
+    sed -i "s/ $filename_up 1/ $filename_up 0/g" includes/test_bank.h
 done
 
 make -C ../../ clean

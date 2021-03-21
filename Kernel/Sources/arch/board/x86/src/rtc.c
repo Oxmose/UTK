@@ -144,6 +144,8 @@ OS_RETURN_E rtc_init(void)
 
 #ifdef TEST_MODE_ENABLED
     rtc_test();
+    rtc_test2();
+    rtc_test3();
 #endif
 
     KERNEL_DEBUG(RTC_DEBUG_ENABLED, "[RTC] Initialized");

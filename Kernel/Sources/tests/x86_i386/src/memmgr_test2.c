@@ -1,7 +1,7 @@
 
 #include <test_bank.h>
 
-#if MEMMGR_TEST  == 1
+#if MEMMGR_TEST2  == 1
 
 #include <stdio.h>
 #include <stdint.h>
@@ -15,7 +15,7 @@ extern queue_t* paging_get_free_pages(void);
 extern void testmode_paging_add_page(uintptr_t start, uint64_t size);
 extern queue_t* testmode_paging_get_area(void);
 
-void memmgr_test(void)
+void memmgr_test2(void)
 {
     queue_node_t* cursor;
     queue_t* frames;
@@ -179,61 +179,13 @@ void memmgr_test(void)
         cursor = cursor->next;
     }
 
-/************************** TEST FRAMES ***************************************/
-    kernel_printf("\n[TESTMODE] Test frames\n");
-    uint32_t* frame;
-    kernel_printf("[TESTMODE]Silent alloc\n");
-    for(uint32_t i = 0; i < 100; ++i)
-    {
-        alloc_kframes(1);
-    }
-    for(uint32_t i = 0; i < 30; ++i)
-    {
-        frame = alloc_kframes(1);
-        kernel_printf("[TESTMODE]Allocated 0x%08x\n", frame);
-    }
-
-    kernel_printf("[TESTMODE] ---\n");
-
-    cursor = paging_get_free_frames()->head;
-    while(cursor)
-    {
-        range = (mem_range_t*)cursor->data;
-        kernel_printf("[TESTMODE] Frame range 0x%08x -> 0x%08x\n",
-        range->base, range->limit);
-        cursor = cursor->next;
-    }
-
-    free_kframes((void*)0x00380000, 2);
-
-    kernel_printf("[TESTMODE] ---\n");
-
-    cursor = paging_get_free_frames()->head;
-    while(cursor)
-    {
-        range = (mem_range_t*)cursor->data;
-        kernel_printf("[TESTMODE] Frame range 0x%08x -> 0x%08x\n",
-        range->base, range->limit);
-        cursor = cursor->next;
-    }
-
-    free_kframes((void*)0x00382000, 2);
-
-    kernel_printf("[TESTMODE] ---\n");
+    free_kpages((void*)0xe0382000, 2);
     
-    cursor = paging_get_free_frames()->head;
-    while(cursor)
-    {
-        range = (mem_range_t*)cursor->data;
-        kernel_printf("[TESTMODE] Frame range 0x%08x -> 0x%08x\n",
-        range->base, range->limit);
-        cursor = cursor->next;
-    }
 
     kill_qemu();
 }
 #else
-void memmgr_test(void)
+void memmgr_test2(void)
 {
 }
 #endif
