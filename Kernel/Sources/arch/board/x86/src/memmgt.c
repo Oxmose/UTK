@@ -24,6 +24,7 @@
 #include <multiboot.h>     /* Multiboot specification */
 #include <queue.h>         /* Queue structures */
 #include <kheap.h>         /* Kernel heap allocator */
+#include <paging.h>        /* Paging manager */
 
 /* UTK configuration file */
 #include <config.h>
@@ -88,6 +89,7 @@ static queue_t* free_kernel_pages;
 
 /** @brief Stores the total available memory */
 static uintptr_t available_memory;
+
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
@@ -156,14 +158,14 @@ static void detect_memory(void)
     if(error != OS_NO_ERR)
     {
         KERNEL_ERROR("Could not allocate HW memory map queue\n");
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
     free_memory_map = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree), 
                                          &error);
     if(error != OS_NO_ERR)
     {
         KERNEL_ERROR("Could not allocate free memory map queue\n");
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
     
     available_memory = 0;
@@ -186,7 +188,7 @@ static void detect_memory(void)
         if(mem_range == NULL)
         {
             KERNEL_ERROR("Could not allocate memory range structure\n");
-            kernel_panic(OS_ERR_MALLOC);
+            KERNEL_PANIC(OS_ERR_MALLOC);
         }
         node = queue_create_node(mem_range, 
                                  QUEUE_ALLOCATOR(kmalloc, kfree), 
@@ -194,7 +196,7 @@ static void detect_memory(void)
         if(error != OS_NO_ERR)
         {
             KERNEL_ERROR("Could not allocate memory range node\n");
-            kernel_panic(error);
+            KERNEL_PANIC(error);
         }
         mem_range->base  = (uintptr_t)mmap->addr;
         mem_range->limit = (uintptr_t)mmap->addr + (uintptr_t)mmap->len;
@@ -208,7 +210,7 @@ static void detect_memory(void)
             if(mem_range2 == NULL)
             {
                 KERNEL_ERROR("Could not allocate memory range structure\n");
-                kernel_panic(OS_ERR_MALLOC);
+                KERNEL_PANIC(OS_ERR_MALLOC);
             }
             node2 = queue_create_node(mem_range2, 
                                       QUEUE_ALLOCATOR(kmalloc, kfree), 
@@ -216,7 +218,7 @@ static void detect_memory(void)
             if(error != OS_NO_ERR)
             {
                 KERNEL_ERROR("Could not allocate memory range node\n");
-                kernel_panic(error);
+                KERNEL_PANIC(error);
             }
             mem_range2->base  = (uintptr_t)mmap->addr;
             mem_range2->limit = (uintptr_t)mmap->addr + (uintptr_t)mmap->len;
@@ -226,7 +228,7 @@ static void detect_memory(void)
             if(error != OS_NO_ERR)
             {
                 KERNEL_ERROR("Could not enqueue memory range node\n");
-                kernel_panic(error);
+                KERNEL_PANIC(error);
             }
             available_memory += (uintptr_t)mmap->len;
         }
@@ -235,7 +237,7 @@ static void detect_memory(void)
         if(error != OS_NO_ERR)
         {
             KERNEL_ERROR("Could not enqueue memory range node\n");
-            kernel_panic(error);
+            KERNEL_PANIC(error);
         }
 
         mmap = (multiboot_memory_map_t*)
@@ -271,7 +273,7 @@ static void setup_mem_table(void)
             {
                 KERNEL_ERROR("Kernel was not loaded in the first available"
                              " memory region");
-                kernel_panic(OS_ERR_OUT_OF_BOUND);
+                KERNEL_PANIC(OS_ERR_OUT_OF_BOUND);
             }   
             break;
         }
@@ -281,7 +283,7 @@ static void setup_mem_table(void)
     {
         KERNEL_ERROR("Kernel was not loaded in the first available"
                      " memory region");
-        kernel_panic(OS_ERR_OUT_OF_BOUND);
+        KERNEL_PANIC(OS_ERR_OUT_OF_BOUND);
     }
 
     /* Remove static kernel size from first region */
@@ -290,7 +292,7 @@ static void setup_mem_table(void)
     if(mem_range->base > mem_range->limit)
     {
         KERNEL_ERROR("Kernel was loaded on different regions\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     } 
 
     /* Initialize kernel pages */
@@ -299,13 +301,13 @@ static void setup_mem_table(void)
     if(error != OS_NO_ERR)
     {
         KERNEL_ERROR("Could not initialize free kernel pages queue\n");
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
     mem_range = kmalloc(sizeof(mem_range_t));
     if(mem_range == NULL)
     {
         KERNEL_ERROR("Could not allocate kernel page range structure\n");
-        kernel_panic(OS_ERR_MALLOC);
+        KERNEL_PANIC(OS_ERR_MALLOC);
     }
     node = queue_create_node(mem_range, 
                                 QUEUE_ALLOCATOR(kmalloc, kfree), 
@@ -313,7 +315,7 @@ static void setup_mem_table(void)
     if(error != OS_NO_ERR)
     {
         KERNEL_ERROR("Could not initialize free kernel pages node\n");
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
     mem_range->base  = free_mem_head + KERNEL_MEM_OFFSET;
     mem_range->limit = (uintptr_t)KERNEL_VIRTUAL_ADDR_MAX;
@@ -323,7 +325,7 @@ static void setup_mem_table(void)
     if(error != OS_NO_ERR)
     {
         KERNEL_ERROR("Could not enqueue free kernel pages node\n");
-        kernel_panic(error);
+        KERNEL_PANIC(error);
     }
 
     /* Update free memory */
@@ -387,9 +389,7 @@ static void* get_block(queue_t* list, const size_t length, OS_RETURN_E* err)
     return (void*)address;
 }
 
-static OS_RETURN_E add_block(queue_t* list, 
-                             uintptr_t first_frame, 
-                             const size_t length)
+static void add_block(queue_t* list, uintptr_t first_frame, const size_t length)
 {
     queue_node_t* cursor;
     queue_node_t* new_node;
@@ -401,7 +401,8 @@ static OS_RETURN_E add_block(queue_t* list,
 
     if(list == NULL)
     {
-        return OS_ERR_NULL_POINTER;
+        KERNEL_ERROR("Tried to add a memory block to a NULL list\n");
+        KERNEL_PANIC(OS_ERR_NULL_POINTER);
     }
 
     limit = first_frame + length * KERNEL_FRAME_SIZE;
@@ -452,8 +453,8 @@ static OS_RETURN_E add_block(queue_t* list,
         }
         else if(range->base <= first_frame && range->limit > first_frame)
         {
-            /* Here we free memory that is already free */
-            return OS_ERR_UNAUTHORIZED_ACTION;
+            KERNEL_ERROR("Tried to free an already free block\n");
+            KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
         }
         else if(range->limit < first_frame)
         {
@@ -473,8 +474,8 @@ static OS_RETURN_E add_block(queue_t* list,
         range = kmalloc(sizeof(mem_range_t));
         if(range == NULL)
         {
-            KERNEL_ERROR("Could not crate node data in memory manager\n");
-            return OS_ERR_MALLOC;
+            KERNEL_ERROR("Could not create node data in memory manager\n");
+            KERNEL_PANIC(OS_ERR_MALLOC);
         }
         range->base    = first_frame;
         range->limit   = limit;
@@ -486,13 +487,11 @@ static OS_RETURN_E add_block(queue_t* list,
         if(err != OS_NO_ERR)
         {
             KERNEL_ERROR("Could not crate queue node in memory manager\n");
-            return err;
+            KERNEL_PANIC(err);
         }
 
         queue_push_prio(new_node, list, first_frame);        
     }
-    
-    return OS_NO_ERR;
 }
 
 OS_RETURN_E memory_manager_init(void)
@@ -550,14 +549,21 @@ OS_RETURN_E memory_manager_init(void)
     return OS_NO_ERR;
 }
 
-void* alloc_kframes(const size_t frame_count, OS_RETURN_E* err)
+void* alloc_kframes(const size_t frame_count)
 {
-    uint32_t int_state;
-    void*    address;
+    uint32_t    int_state;
+    void*       address;
+    OS_RETURN_E err;
 
     ENTER_CRITICAL(int_state);
 
-    address = get_block(free_memory_map, frame_count, err);
+    address = get_block(free_memory_map, frame_count, &err);
+    if(err != OS_NO_ERR)
+    {
+        KERNEL_ERROR("Could not allocate new frame\n");
+        KERNEL_PANIC(err);
+    }
+
 
     KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
                  "[MEMMGT] Allocated %u frames, at 0x%p", 
@@ -569,9 +575,8 @@ void* alloc_kframes(const size_t frame_count, OS_RETURN_E* err)
     return (void*)address;
 }
 
-OS_RETURN_E free_kframes(void* frame_addr, const size_t frame_count)
+void free_kframes(void* frame_addr, const size_t frame_count)
 {
-    OS_RETURN_E   err;
     uint32_t      int_state;
     queue_node_t* cursor;
     mem_range_t*  mem_range;
@@ -594,30 +599,34 @@ OS_RETURN_E free_kframes(void* frame_addr, const size_t frame_count)
     }
     if(cursor == NULL)
     {
-        /* Trying to free a frame that does not exist of is hardware */
-        EXIT_CRITICAL(int_state);
-        return OS_ERR_UNAUTHORIZED_ACTION;
+        KERNEL_ERROR("Tried to free non existent frame\n");
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);        
     }
 
-    err = add_block(free_memory_map, (uintptr_t)frame_addr, frame_count);
+    add_block(free_memory_map, (uintptr_t)frame_addr, frame_count);
 
     KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
                  "[MEMMGT] Deallocated %u frames, at 0x%p", 
                  frame_count, frame_addr);
 
     EXIT_CRITICAL(int_state);
-    return err;
 }
 
-void* alloc_kpages(const size_t page_count, OS_RETURN_E* err)
+void* alloc_kpages(const size_t page_count)
 {
-    void*    address;
-    uint32_t int_state;
+    void*       address;
+    uint32_t    int_state;
+    OS_RETURN_E err;
 
     ENTER_CRITICAL(int_state);
 
-    address = get_block(free_kernel_pages, page_count, err);
-
+    address = get_block(free_kernel_pages, page_count, &err);
+    if(err != OS_NO_ERR)
+    {
+        KERNEL_ERROR("Could not allocate new page\n");
+        KERNEL_PANIC(err);
+    }
+    
     KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
                  "[MEMMGT] Allocated %u pages, at 0x%p", 
                  page_count, 
@@ -627,26 +636,27 @@ void* alloc_kpages(const size_t page_count, OS_RETURN_E* err)
     return (void*)address;
 }
 
-OS_RETURN_E free_kpages(void* page_addr, const size_t page_count)
+void free_kpages(void* page_addr, const size_t page_count)
 {
-    OS_RETURN_E err;
     uint32_t    int_state;
 
     if((uintptr_t)page_addr < KERNEL_MEM_OFFSET)
     {
-        return OS_ERR_UNAUTHORIZED_ACTION;
+        KERNEL_ERROR("Tried to free non kernel page\n");
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);  
     }
 #ifdef ARCH_64_BITS
     if((uintptr_t)page_addr & KERNEL_VIRTUAL_ADDR_MAX_MASK)  > 
         KERNEL_VIRTUAL_ADDR_MAX)
     {
-        return OS_ERR_UNAUTHORIZED_ACTION;
+        KERNEL_ERROR("Tried to free non kernel page\n");
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION); 
     }
 #endif 
 
     ENTER_CRITICAL(int_state);
 
-    err = add_block(free_kernel_pages, (uintptr_t)page_addr, page_count);
+    add_block(free_kernel_pages, (uintptr_t)page_addr, page_count);
 
     KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
                  "[MEMMGT] Deallocated %u pages, at 0x%p", 
@@ -654,7 +664,6 @@ OS_RETURN_E free_kpages(void* page_addr, const size_t page_count)
                  page_addr);
 
     EXIT_CRITICAL(int_state);
-    return err;
 }
 
 void memory_get_klowstartup_range(uintptr_t* start, uintptr_t* end)
@@ -754,6 +763,11 @@ void memory_get_kheap_range(uintptr_t* start, uintptr_t* end)
     }
 }
 
+queue_t* memory_get_kernel_free_pages(void)
+{
+    return free_kernel_pages;
+}
+
 /* Test Mode */
 #ifdef TEST_MODE_ENABLED
 queue_t* paging_get_free_frames(void)
@@ -777,7 +791,7 @@ void testmode_paging_add_page(uintptr_t start, size_t size)
         if(error != OS_NO_ERR)
         {
             KERNEL_ERROR("Could not initialize free kernel pages queue\n");
-            kernel_panic(error);
+            KERNEL_PANIC(error);
         }
     }
     add_block(test_page, start, size);

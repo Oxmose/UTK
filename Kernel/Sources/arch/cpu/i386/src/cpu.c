@@ -5,7 +5,7 @@
  *
  * @author Alexy Torres Aurora Dugo
  *
- * @date 28/02/2020
+ * @date 28/02/2021
  *
  * @version 1.0
  *
@@ -25,6 +25,8 @@
 #include <panic.h>              /* Kernel panic */
 #include <cpu_structs.h>        /* CPU structures */
 #include <interrupts.h>         /* INterrupt manager */
+#include <thread.h>             /* CPU thread structures */
+
 /* UTK configuration file */
 #include <config.h>
 
@@ -823,7 +825,9 @@ OS_RETURN_E cpu_raise_interrupt(const uint32_t interrupt_line)
             break;
     }
 
-    return kernel_interrupt_set_irq_eoi(interrupt_line);
+    kernel_interrupt_set_irq_eoi(interrupt_line);
+
+    return OS_NO_ERR;
 }
 
 uint32_t cpu_get_interrupt_state(void)
@@ -844,4 +848,120 @@ uint8_t cpu_is_pcid_capable(void)
     cpu_cpuid(CPUID_GETFEATURES, (uint32_t*)regs);
 
     return ((regs[2] & ECX_PCID) != 0 ? 1 : 0);
+}
+
+
+void cpu_init_thread_context(void (*entry_point)(void), 
+                             const uintptr_t stack_index,
+                             kernel_thread_t* thread)
+{
+    /* Set EIP, ESP and EBP */
+    thread->cpu_context.eip = (uintptr_t)entry_point;
+    thread->cpu_context.esp = thread->kstack + (stack_index - 17) * 
+                              sizeof(uintptr_t);
+    thread->cpu_context.ebp = thread->kstack + (stack_index - 1) * 
+                               sizeof(uintptr_t);
+
+    /* Init thread stack */
+    if(thread->type == THREAD_TYPE_KERNEL)
+    {
+        ((uint32_t*)thread->kstack)[stack_index - 1]  = K_THREAD_INIT_EFLAGS;
+        ((uint32_t*)thread->kstack)[stack_index - 2]  = K_THREAD_INIT_CS;
+        ((uint32_t*)thread->kstack)[stack_index - 6]  = K_THREAD_INIT_DS;
+        ((uint32_t*)thread->kstack)[stack_index - 7]  = K_THREAD_INIT_ES;
+        ((uint32_t*)thread->kstack)[stack_index - 8]  = K_THREAD_INIT_FS;
+        ((uint32_t*)thread->kstack)[stack_index - 9]  = K_THREAD_INIT_GS;
+        ((uint32_t*)thread->kstack)[stack_index - 10] = K_THREAD_INIT_SS;
+        ((uint32_t*)thread->kstack)[stack_index - 11] = K_THREAD_INIT_EAX;
+        ((uint32_t*)thread->kstack)[stack_index - 12] = K_THREAD_INIT_EBX;
+        ((uint32_t*)thread->kstack)[stack_index - 13] = K_THREAD_INIT_ECX;
+        ((uint32_t*)thread->kstack)[stack_index - 14] = K_THREAD_INIT_EDX;
+        ((uint32_t*)thread->kstack)[stack_index - 15] = K_THREAD_INIT_ESI;
+        ((uint32_t*)thread->kstack)[stack_index - 16] = K_THREAD_INIT_EDI;
+    }
+    else 
+    {
+        ((uint32_t*)thread->kstack)[stack_index - 1]  = U_THREAD_INIT_EFLAGS;
+        ((uint32_t*)thread->kstack)[stack_index - 2]  = U_THREAD_INIT_CS;
+        ((uint32_t*)thread->kstack)[stack_index - 6]  = U_THREAD_INIT_DS;
+        ((uint32_t*)thread->kstack)[stack_index - 7]  = U_THREAD_INIT_ES;
+        ((uint32_t*)thread->kstack)[stack_index - 8]  = U_THREAD_INIT_FS;
+        ((uint32_t*)thread->kstack)[stack_index - 9]  = U_THREAD_INIT_GS;
+        ((uint32_t*)thread->kstack)[stack_index - 10] = U_THREAD_INIT_SS;
+        ((uint32_t*)thread->kstack)[stack_index - 11] = U_THREAD_INIT_EAX;
+        ((uint32_t*)thread->kstack)[stack_index - 12] = U_THREAD_INIT_EBX;
+        ((uint32_t*)thread->kstack)[stack_index - 13] = U_THREAD_INIT_ECX;
+        ((uint32_t*)thread->kstack)[stack_index - 14] = U_THREAD_INIT_EDX;
+        ((uint32_t*)thread->kstack)[stack_index - 15] = U_THREAD_INIT_ESI;
+        ((uint32_t*)thread->kstack)[stack_index - 16] = U_THREAD_INIT_EDI;
+    }
+    
+    ((uint32_t*)thread->kstack)[stack_index - 3]  = thread->cpu_context.eip;
+    ((uint32_t*)thread->kstack)[stack_index - 4]  = 0; /* UNUSED (error) */
+    ((uint32_t*)thread->kstack)[stack_index - 5]  = 0; /* UNUSED (int id) */
+    ((uint32_t*)thread->kstack)[stack_index - 17] = thread->cpu_context.ebp;
+    ((uint32_t*)thread->kstack)[stack_index - 18] = thread->cpu_context.esp;
+}
+
+uintptr_t cpu_get_current_pgdir(void)
+{
+    uintptr_t current_pgdir;
+
+        /* Init thread context */
+    __asm__ __volatile__(
+        "mov %%cr3, %%eax\n\t"
+        "mov %%eax, %0\n\t"
+        : "=m" (current_pgdir)
+        : /* no input */
+        : "%eax"
+    );
+
+    return current_pgdir;
+}
+
+void cpu_save_context(const uint32_t first_sched,
+                      const cpu_state_t* cpu_state, 
+                      const stack_state_t* stack_state, 
+                      kernel_thread_t* thread)
+{
+    (void)stack_state;
+    /* Save the actual ESP (not the fist time since the first schedule should
+     * dissociate the boot sequence (pointed by the current esp) and the IDLE
+     * thread.*/
+    if(first_sched == 1)
+    {
+        thread->cpu_context.esp = cpu_state->esp;
+    }
+}
+
+void cpu_restore_context(cpu_state_t* cpu_state, 
+                         const stack_state_t* stack_state, 
+                         const kernel_thread_t* thread)
+{
+    (void)stack_state;
+
+    /* Update esp */
+    cpu_state->esp = thread->cpu_context.esp;
+
+    /* On context restore, the CR0.TS bit is set to catch FPU/SSE use */
+    __asm__ __volatile__(
+        "mov %%cr0, %%eax\n\t"
+        "or  $0x00000008, %%eax\n\t"
+        "mov %%eax, %%cr0\n\t"
+    :::"eax");
+}
+
+void cpu_update_pgdir(const uintptr_t new_pgdir)
+{
+    /* Update CR3 */
+    __asm__ __volatile__("mov %%eax, %%cr3": :"a"(new_pgdir));
+}
+
+void cpu_set_next_thread_instruction(const cpu_state_t* cpu_state,
+                                     stack_state_t* stack_state, 
+                                     const uintptr_t next_inst)
+{
+    (void) cpu_state;
+    /* Set next instruction */
+    stack_state->eip = next_inst;
 }

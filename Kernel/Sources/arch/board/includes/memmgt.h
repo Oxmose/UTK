@@ -20,8 +20,9 @@
 #ifndef __BSP_MEMMGT_H_
 #define __BSP_MEMMGT_H_
 
-#include <stddef.h> /* Standard definition */
-#include <stdint.h> /* Generic int types */
+#include <stddef.h>     /* Standard definition */
+#include <stdint.h>     /* Generic int types */
+#include <queue.h>      /* Queue library */
 
 /*******************************************************************************
  * CONSTANTS
@@ -74,12 +75,11 @@ OS_RETURN_E memory_manager_init(void);
  * of contiguous frames from the kernel frame pool and allocate them.
  * 
  * @param[in] frame_count The number of desired frames to allocate.
- * @param[out] err The error return pointer. OS_NO_ERR in case of success.
  * 
  * @return The address of the first frame of the contiguous block is 
  * returned.
  */
-void* alloc_kframes(const size_t frame_count, OS_RETURN_E* err);
+void* alloc_kframes(const size_t frame_count);
 
 /**
  * @brief Kernel memory frame release.
@@ -89,11 +89,8 @@ void* alloc_kframes(const size_t frame_count, OS_RETURN_E* err);
  * 
  * @param[in] frame_addr The address of the first frame to release.
  * @param[in] frame_count The number of desired frames to release.
- * 
- * @return OS_NO_ERR is returned on success. Otherwise an error code is 
- * returned.
  */
-OS_RETURN_E free_kframes(void* frame_addr, const size_t frame_count);
+void free_kframes(void* frame_addr, const size_t frame_count);
 
 /**
  * @brief Kernel memory page allocation.
@@ -102,12 +99,11 @@ OS_RETURN_E free_kframes(void* frame_addr, const size_t frame_count);
  * of contiguous pages from the kernel page pool and allocate them.
  * 
  * @param[in] page_count The number of desired pages to allocate.
- * @param[out] err The error return pointer. OS_NO_ERR in case of success.
  * 
  * @return The address of the first page of the contiguous block is 
  * returned.
  */
-void* alloc_kpages(const size_t page_count, OS_RETURN_E* err);
+void* alloc_kpages(const size_t page_count);
 
 /**
  * @brief Kernel memory page release.
@@ -117,10 +113,16 @@ void* alloc_kpages(const size_t page_count, OS_RETURN_E* err);
  * 
  * @param[in] page_addr The address of the first page to release.
  * @param[in] page_count The number of desired pages to release.
- * 
- * @return OS_NO_ERR is returned on success. Otherwise an error code is 
- * returned.
  */
-OS_RETURN_E free_kpages(void* page_addr, const size_t page_count);
+void free_kpages(void* page_addr, const size_t page_count);
+
+/**
+ * @brief Returns the kernel free pages table.
+ * 
+ * @details Returns the kernel free pages table list as a queue.
+ * 
+ * @return The kernel free pages table is returned. * 
+ */
+queue_t* memory_get_kernel_free_pages(void);
 
 #endif /* #ifndef __BSP_MEMMGT_H_ */

@@ -26,7 +26,7 @@
 #include <cpu_settings.h>       /* CPU settings */
 #include <interrupt_settings.h> /* CPU interrupts settings */
 #include <interrupts.h>         /* Interrupts manager */
-#include <cpu.h>                /* CPU management */
+#include <cpu_api.h>            /* CPU management */
 #include <kernel_output.h>      /* Kernel output methods */
 #include <critical.h>           /* Critical sections */
 

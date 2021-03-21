@@ -34,7 +34,7 @@ void pit_test(void)
     if((err = pit_set_handler(NULL)) != OS_ERR_NULL_POINTER)
     {
         kernel_error("TEST_PIT 0\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -45,7 +45,7 @@ void pit_test(void)
     if((err = pit_set_handler(pit_handler)) != OS_NO_ERR)
     {
         kernel_error("TEST_PIT 1\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -57,7 +57,7 @@ void pit_test(void)
     if((err = pit_remove_handler()) != OS_NO_ERR)
     {
         kernel_error("TEST_PIT 2\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -69,7 +69,7 @@ void pit_test(void)
     if((err = pit_set_handler(pit_handler)) != OS_NO_ERR)
     {
         kernel_error("TEST_PIT 3\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -88,7 +88,7 @@ void pit_test(void)
     if(counter == 0)
     {
         kernel_error("TEST_PIT 4\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -100,7 +100,7 @@ void pit_test(void)
     if(counter != cnt_val)
     {
         kernel_error("TEST_PIT 5\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -118,7 +118,7 @@ void pit_test(void)
     if(counter == 0)
     {
         kernel_error("TEST_PIT 6\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -130,7 +130,7 @@ void pit_test(void)
     if(counter != cnt_val)
     {
         kernel_error("TEST_PIT 7\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -141,7 +141,7 @@ void pit_test(void)
     if((err = pit_set_frequency(PIT_INIT_FREQ)) != OS_NO_ERR)
     {
         kernel_error("TEST_PIT 8\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -152,7 +152,7 @@ void pit_test(void)
     if((err = pit_set_frequency(PIT_MIN_FREQ - 1)) != OS_ERR_OUT_OF_BOUND)
     {
         kernel_error("TEST_PIT 9\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -163,7 +163,7 @@ void pit_test(void)
     if((err = pit_set_frequency(PIT_MAX_FREQ + 1)) != OS_ERR_OUT_OF_BOUND)
     {
         kernel_error("TEST_PIT 10\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -176,7 +176,7 @@ void pit_test(void)
     if(counter != cnt_val)
     {
         kernel_error("TEST_PIT 11\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -188,7 +188,7 @@ void pit_test(void)
     if(pit_remove_handler() != OS_NO_ERR)
     {
         kernel_error("TEST_PIT 12\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {

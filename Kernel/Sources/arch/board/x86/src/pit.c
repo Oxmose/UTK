@@ -25,6 +25,7 @@
 #include <stddef.h>             /* Standard definition */
 #include <time_management.h>    /* Timer factory */
 #include <critical.h>           /* Critical sections */
+#include <panic.h>              /* Kernel panic */
 
 /* UTK configuration file */
 #include <config.h>
@@ -91,11 +92,7 @@ OS_RETURN_E pit_init(void)
     disabled_nesting = 1;
 
     /* Set PIT frequency */
-    err = pit_set_frequency(PIT_INIT_FREQ);
-    if(err != OS_NO_ERR)
-    {
-        return err;
-    }
+    pit_set_frequency(PIT_INIT_FREQ);
 
     /* Set PIT interrupt handler */
     err = kernel_interrupt_register_irq_handler(PIT_IRQ_LINE, dummy_handler);
@@ -111,10 +108,12 @@ OS_RETURN_E pit_init(void)
 #endif
 
     /* Enable PIT IRQ */
-    return pit_enable();
+    pit_enable();
+
+    return err;
 }
 
-OS_RETURN_E pit_enable(void)
+void pit_enable(void)
 {
     uint32_t int_state;
 
@@ -131,18 +130,14 @@ OS_RETURN_E pit_enable(void)
 
     if(disabled_nesting == 0)
     {
-        EXIT_CRITICAL(int_state);
-        return kernel_interrupt_set_irq_mask(PIT_IRQ_LINE, 1);
+        kernel_interrupt_set_irq_mask(PIT_IRQ_LINE, 1);
     }
 
     EXIT_CRITICAL(int_state);
-
-    return OS_NO_ERR;
 }
 
-OS_RETURN_E pit_disable(void)
+void pit_disable(void)
 {
-    OS_RETURN_E err;
     uint32_t    int_state;
 
     ENTER_CRITICAL(int_state);
@@ -155,31 +150,25 @@ OS_RETURN_E pit_disable(void)
     KERNEL_DEBUG(PIT_DEBUG_ENABLED, 
                  "[PIT] Disable (nesting %d)", 
                  disabled_nesting);
-    err = kernel_interrupt_set_irq_mask(PIT_IRQ_LINE, 0);
+    kernel_interrupt_set_irq_mask(PIT_IRQ_LINE, 0);
 
     EXIT_CRITICAL(int_state);
-    return err;
 }
 
-OS_RETURN_E pit_set_frequency(const uint32_t freq)
+void pit_set_frequency(const uint32_t freq)
 {
-    OS_RETURN_E err;
     uint32_t    int_state;
 
     if(freq < PIT_MIN_FREQ || freq > PIT_MAX_FREQ)
     {
-        return OS_ERR_OUT_OF_BOUND;
+        KERNEL_ERROR("Set PIT timer frequency out of bound: %d\n", freq);
+        KERNEL_PANIC(OS_ERR_OUT_OF_BOUND);
     }
 
     ENTER_CRITICAL(int_state);
 
     /* Disable PIT IRQ */
-    err = pit_disable();
-    if(err != OS_NO_ERR)
-    {
-        EXIT_CRITICAL(int_state);
-        return err;
-    }
+    pit_disable();
 
     tick_freq  = freq;
 
@@ -196,7 +185,7 @@ OS_RETURN_E pit_set_frequency(const uint32_t freq)
     EXIT_CRITICAL(int_state);
 
     /* Enable PIT IRQ */
-    return pit_enable();
+    pit_enable();
 }
 
 uint32_t pit_get_frequency(void)
@@ -220,12 +209,7 @@ OS_RETURN_E pit_set_handler(void(*handler)(
 
     ENTER_CRITICAL(int_state);
 
-    err = pit_disable();
-    if(err != OS_NO_ERR)
-    {
-        EXIT_CRITICAL(int_state);
-        return err;
-    }
+    pit_disable();
 
     /* Remove the current handler */
     err = kernel_interrupt_remove_irq_handler(PIT_IRQ_LINE);
@@ -249,7 +233,9 @@ OS_RETURN_E pit_set_handler(void(*handler)(
                  handler);
 
     EXIT_CRITICAL(int_state);
-    return pit_enable();
+    pit_enable();
+
+    return err;
 }
 
 OS_RETURN_E pit_remove_handler(void)

@@ -24,7 +24,7 @@
 #include <stddef.h>        /* Standard definitions */
 #include <string.h>        /* String manipulation */
 #include <cpu_structs.h>   /* CPU structures */
-#include <cpu.h>           /* CPU management */
+#include <cpu_api.h>       /* CPU management */
 #include <kheap.h>         /* Kernel heap */
 #include <bsp_api.h>       /* BSP API */
 #include <kernel_output.h> /* Kernel output manager */
@@ -217,13 +217,8 @@ OS_RETURN_E time_init(const kernel_timer_t* main_timer,
     memset(sys_tick_count, 0, sizeof(uint64_t) * cpu_count);
 
     /* Sets all the possible timer interrutps */
-    err = sys_main_timer.set_frequency(KERNEL_MAIN_TIMER_FREQ);
-    if(err != OS_NO_ERR)
-    {
-        kfree((void*)sys_tick_count);
-        kfree((void*)active_wait);
-        return err;
-    }
+    sys_main_timer.set_frequency(KERNEL_MAIN_TIMER_FREQ);
+
     err = sys_main_timer.set_handler(time_main_timer_handler);
     if(err != OS_NO_ERR)
     {
@@ -236,13 +231,8 @@ OS_RETURN_E time_init(const kernel_timer_t* main_timer,
 
     if(sys_rtc_timer.set_frequency != NULL)
     {
-        err = sys_rtc_timer.set_frequency(KERNEL_RTC_TIMER_FREQ);
-        if(err != OS_NO_ERR)
-        {
-            kfree((void*)sys_tick_count);
-            kfree((void*)active_wait);
-            return err;
-        }
+        sys_rtc_timer.set_frequency(KERNEL_RTC_TIMER_FREQ);
+        
         err = sys_rtc_timer.set_handler(time_rtc_timer_handler);
         if(err != OS_NO_ERR)
         {
@@ -255,22 +245,10 @@ OS_RETURN_E time_init(const kernel_timer_t* main_timer,
     KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED, "[TIME] Initialized RTC timer");
 
     /* Enables all the possible timers */
-    err = sys_main_timer.enable();
-    if(err != OS_NO_ERR)
-    {
-        kfree((void*)sys_tick_count);
-        kfree((void*)active_wait);
-        return err;
-    }
+    sys_main_timer.enable();
     if(sys_rtc_timer.set_frequency != NULL)
     {
-        err = sys_rtc_timer.enable();
-        if(err != OS_NO_ERR)
-        {
-            kfree((void*)sys_tick_count);
-            kfree((void*)active_wait);
-            return err;
-        }
+        sys_rtc_timer.enable();
     }
 
 #ifdef TEST_MODE_ENABLED

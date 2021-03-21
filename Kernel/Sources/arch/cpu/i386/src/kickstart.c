@@ -40,6 +40,7 @@
 #include <pit.h>                   /* PIT driver */
 #include <time_management.h>       /* Timer factory */
 #include <bsp_api.h>               /* BSP API */
+#include <scheduler.h>             /* Kernel scheduler */
 
 /* UTK configuration file */
 #include <config.h>
@@ -66,7 +67,7 @@
             KERNEL_ERROR(msg_error, error);            \
             if(panic != 0)                             \
             {                                          \
-                kernel_panic(error);                   \
+                KERNEL_PANIC(error);                   \
             }                                          \
         }                                              \
         else if (strlen(msg_success) != 0)             \
@@ -130,7 +131,7 @@ static void validate_architecture(void)
     else
     {
         KERNEL_ERROR("Architecture does not support CPUID\n");
-        kernel_panic(OS_ERR_NOT_SUPPORTED);
+        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
     }
 
     /* Get CPUID features */
@@ -347,37 +348,37 @@ static void validate_architecture(void)
     if((regs[3] & EDX_SEP) != EDX_SEP)
     {
         KERNEL_ERROR("Architecture does not support SYSENTER\n");
-        kernel_panic(OS_ERR_NOT_SUPPORTED);
+        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
     }
     if((regs[3] & EDX_FPU) != EDX_FPU)
     {
         KERNEL_ERROR("Architecture does not support FPU\n");
-        kernel_panic(OS_ERR_NOT_SUPPORTED);
+        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
     }
     if((regs[3] & EDX_TSC) != EDX_TSC)
     {
         KERNEL_ERROR("Architecture does not support TSC\n");
-        kernel_panic(OS_ERR_NOT_SUPPORTED);
+        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
     }
     if((regs[3] & EDX_APIC) != EDX_APIC)
     {
         KERNEL_ERROR("Architecture does not support APIC\n");
-        kernel_panic(OS_ERR_NOT_SUPPORTED);
+        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
     }
     if((regs[3] & EDX_FXSR) != EDX_FXSR)
     {
         KERNEL_ERROR("Architecture does not support FX instructions\n");
-        kernel_panic(OS_ERR_NOT_SUPPORTED);
+        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
     }
     if((regs[3] & EDX_SSE) != EDX_SSE)
     {
         KERNEL_ERROR("Architecture does not support SSE\n");
-        kernel_panic(OS_ERR_NOT_SUPPORTED);
+        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
     }
     if((regs[3] & EDX_SSE2) != EDX_SSE2)
     {
         KERNEL_ERROR("Architecture does not support SSE2\n");
-        kernel_panic(OS_ERR_NOT_SUPPORTED);
+        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
     }
 
     /* Might be used in future to check extended features */
@@ -385,6 +386,11 @@ static void validate_architecture(void)
 
     KERNEL_DEBUG(KICKSTART_DEBUG_ENABLED, 
                  "[KICKSTART] Validating architecture end");
+}
+
+int ftest(void)
+{
+    return 5;
 }
 
 /**
@@ -399,6 +405,8 @@ static void validate_architecture(void)
 void kernel_kickstart(void)
 {
     OS_RETURN_E   err;
+
+    ftest();
 
     /* Init uart for basic log */
     graphic_set_selected_driver(&uart_text_driver);
@@ -468,10 +476,7 @@ void kernel_kickstart(void)
 
     if(io_apic_capable() == 1)
     {
-        err = pic_disable();
-        INIT_MSG("",
-                 "Could not disable PIC [%u]\n",
-                 err, 1);
+        pic_disable();
 
         err = io_apic_init();
         INIT_MSG("IO-APIC initialized\n",
@@ -515,10 +520,8 @@ void kernel_kickstart(void)
                  "Could not initialize LAPIC timer driver [%u]\n",
                  err, 1);
 
-        err = pit_disable();
-        INIT_MSG("",
-                 "Could disable PIT driver [%u]\n",
-                 err, 1);
+        pit_disable();
+        
         err = time_init(&lapic_timer_driver, &rtc_driver);
         INIT_MSG("Timer factory initialized\n",
                  "Could not initialize timer factory [%u]\n",
@@ -530,19 +533,25 @@ void kernel_kickstart(void)
         INIT_MSG("Timer factory initialized\n",
                  "Could not initialize timer factory [%u]\n",
                  err, 1);
-    }
-    
+    }    
 
 #ifdef TEST_MODE_ENABLED
     bios_call_test();
-#endif
-
-    KERNEL_SUCCESS("Kernel initialized\n");
-    
-#ifdef TEST_MODE_ENABLED
     panic_test();
 #endif
     
-    /* We should never get here once the scheduler has been called */
-    kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+    err = sched_init();
+    INIT_MSG("Scheduler initialized\n",
+             "Could not initialize scheduler [%u]\n",
+             err, 1);
+    
+    KERNEL_SUCCESS("Kernel initialized\n");
+
+    /* First schedule, we should never return from here */
+    sched_schedule();
+
+    INIT_MSG("",
+             "Kernel returned to kickstart\n", 
+             OS_ERR_UNAUTHORIZED_ACTION, 
+             1);
 }

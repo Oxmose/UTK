@@ -17,14 +17,15 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#include <cpu.h>               /* CPU manipulation */
-#include <kernel_output.h>     /* Kernel output methods */
-#include <interrupts.h>        /* Interrupts management */
+#include <cpu.h>                /* CPU manipulation */
+#include <kernel_output.h>      /* Kernel output methods */
+#include <interrupts.h>         /* Interrupts management */
 #include <interrupt_settings.h> /* Interrupts settings */
 #include <stdint.h>             /* Generic int types */
 #include <stddef.h>             /* Standard definition */
 #include <time_management.h>    /* Timer factory */
 #include <critical.h>           /* Critical sections */
+#include <panic.h>              /* Kernel panic */
 
 /* UTK configuration file */
 #include <config.h>
@@ -127,11 +128,7 @@ OS_RETURN_E rtc_init(void)
     }
 
     /* Set mask before setting IRQ */
-    err = kernel_interrupt_set_irq_mask(RTC_IRQ_LINE, 1);
-    if(err != OS_NO_ERR)
-    {
-        return err;
-    }
+    kernel_interrupt_set_irq_mask(RTC_IRQ_LINE, 1);
 
     /* Just dummy read register C to unlock interrupt */
     cpu_outb(CMOS_REG_C, CMOS_COMM_PORT);
@@ -141,7 +138,7 @@ OS_RETURN_E rtc_init(void)
 
     rtc_set_frequency(KERNEL_RTC_TIMER_FREQ);
 
-    err = rtc_enable();
+    rtc_enable();
 
     rtc_update_time();
 
@@ -154,7 +151,7 @@ OS_RETURN_E rtc_init(void)
     return err;
 }
 
-OS_RETURN_E rtc_enable(void)
+void rtc_enable(void)
 {
     uint32_t int_state;
 
@@ -170,20 +167,14 @@ OS_RETURN_E rtc_enable(void)
                  disabled_nesting);
     if(disabled_nesting == 0)
     {
-        
-
-        EXIT_CRITICAL(int_state);
-        return kernel_interrupt_set_irq_mask(RTC_IRQ_LINE, 1);
+        kernel_interrupt_set_irq_mask(RTC_IRQ_LINE, 1);
     }
 
     EXIT_CRITICAL(int_state);
-
-    return OS_NO_ERR;
 }
 
-OS_RETURN_E rtc_disable(void)
+void rtc_disable(void)
 {
-    OS_RETURN_E err;
     uint32_t    int_state;
 
     ENTER_CRITICAL(int_state);
@@ -196,22 +187,21 @@ OS_RETURN_E rtc_disable(void)
     KERNEL_DEBUG(RTC_DEBUG_ENABLED, 
                  "[RTC] Disable RTC (nesting %d)", 
                  disabled_nesting);
-    err = kernel_interrupt_set_irq_mask(RTC_IRQ_LINE, 0);
+    kernel_interrupt_set_irq_mask(RTC_IRQ_LINE, 0);
 
     EXIT_CRITICAL(int_state);
-    return err;
 }
 
-OS_RETURN_E rtc_set_frequency(const uint32_t frequency)
+void rtc_set_frequency(const uint32_t frequency)
 {
-    OS_RETURN_E err;
     uint32_t    prev_rate;
     uint32_t    rate;
     uint32_t    int_state;
 
     if(frequency < RTC_MIN_FREQ || frequency > RTC_MAX_FREQ)
     {
-        return OS_ERR_OUT_OF_BOUND;
+        KERNEL_ERROR("Set RTC timer frequency out of bound: %d\n", frequency);
+        KERNEL_PANIC(OS_ERR_OUT_OF_BOUND);
     }
 
     /* Choose the closest rate to the frequency */
@@ -271,12 +261,7 @@ OS_RETURN_E rtc_set_frequency(const uint32_t frequency)
     ENTER_CRITICAL(int_state);
 
     /* Disable RTC IRQ */
-    err = rtc_disable();
-    if(err != OS_NO_ERR)
-    {
-        EXIT_CRITICAL(int_state);
-        return err;
-    }
+    rtc_disable();
 
     /* Set clock frequency */
      /* Init CMOS IRQ8 rate */
@@ -295,7 +280,7 @@ OS_RETURN_E rtc_set_frequency(const uint32_t frequency)
     EXIT_CRITICAL(int_state);
 
     /* Enable RTC IRQ */
-    return rtc_enable();
+    rtc_enable();
 }
 
 uint32_t rtc_get_frequency(void)
@@ -319,12 +304,7 @@ OS_RETURN_E rtc_set_handler(void(*handler)(
 
     ENTER_CRITICAL(int_state);
 
-    err = rtc_disable();
-    if(err != OS_NO_ERR)
-    {
-        EXIT_CRITICAL(int_state);
-        return err;
-    }
+    rtc_disable();
 
     /* Remove the current handler */
     err = kernel_interrupt_remove_irq_handler(RTC_IRQ_LINE);
@@ -348,7 +328,9 @@ OS_RETURN_E rtc_set_handler(void(*handler)(
 
     EXIT_CRITICAL(int_state);
 
-    return rtc_enable();
+    rtc_enable();
+
+    return err;
 }
 
 OS_RETURN_E rtc_remove_handler(void)
@@ -391,8 +373,6 @@ void rtc_update_time(void)
     /* Select CMOS hours register and read */
     cpu_outb(nmi_info | CMOS_HOURS_REGISTER, CMOS_COMM_PORT);
     hours = cpu_inb(CMOS_DATA_PORT);
-
-    /* Set date */
 
     /* Select CMOS day register and read */
     cpu_outb(nmi_info | CMOS_DAY_REGISTER, CMOS_COMM_PORT);

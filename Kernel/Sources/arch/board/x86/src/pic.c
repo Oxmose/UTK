@@ -22,6 +22,7 @@
 #include <stddef.h>        /* Standard definitions */
 #include <kernel_output.h> /* Kernel output methods */
 #include <critical.h>      /* Critical sections */
+#include <panic.h>         /* Kernel panic */
 
 /* UTK configuration file */
 #include <config.h>
@@ -81,7 +82,7 @@ OS_RETURN_E pic_init(void)
     return OS_NO_ERR;
 }
 
-OS_RETURN_E pic_set_irq_mask(const uint32_t irq_number, const uint32_t enabled)
+void pic_set_irq_mask(const uint32_t irq_number, const uint32_t enabled)
 {
     uint8_t  init_mask;
     uint32_t int_state;
@@ -89,7 +90,8 @@ OS_RETURN_E pic_set_irq_mask(const uint32_t irq_number, const uint32_t enabled)
 
     if(irq_number > PIC_MAX_IRQ_LINE)
     {
-        return OS_ERR_NO_SUCH_IRQ_LINE;
+        KERNEL_ERROR("Could not find PIC IRQ %d", irq_number);
+        KERNEL_PANIC(OS_ERR_NO_SUCH_IRQ_LINE);
     }
 
     ENTER_CRITICAL(int_state);
@@ -165,15 +167,14 @@ OS_RETURN_E pic_set_irq_mask(const uint32_t irq_number, const uint32_t enabled)
                  cpu_inb(PIC_SLAVE_DATA_PORT));
 
     EXIT_CRITICAL(int_state);
-
-    return OS_NO_ERR;
 }
 
-OS_RETURN_E pic_set_irq_eoi(const uint32_t irq_number)
+void pic_set_irq_eoi(const uint32_t irq_number)
 {
     if(irq_number > PIC_MAX_IRQ_LINE)
     {
-        return OS_ERR_NO_SUCH_IRQ_LINE;
+        KERNEL_ERROR("Could not find PIC IRQ %d", irq_number);
+        KERNEL_PANIC(OS_ERR_NO_SUCH_IRQ_LINE);
     }
 
     /* End of interrupt signal */
@@ -184,8 +185,6 @@ OS_RETURN_E pic_set_irq_eoi(const uint32_t irq_number)
     cpu_outb(PIC_EOI, PIC_MASTER_COMM_PORT);
 
     KERNEL_DEBUG(PIC_DEBUG_ENABLED, "[PIC] IRQ EOI");
-
-    return OS_NO_ERR;
 }
 
 INTERRUPT_TYPE_E pic_handle_spurious_irq(const uint32_t int_number)
@@ -246,7 +245,7 @@ INTERRUPT_TYPE_E pic_handle_spurious_irq(const uint32_t int_number)
     }
 }
 
-OS_RETURN_E pic_disable(void)
+void pic_disable(void)
 {
     uint32_t int_state;
 
@@ -259,8 +258,6 @@ OS_RETURN_E pic_disable(void)
     KERNEL_DEBUG(PIC_DEBUG_ENABLED, "[PIC] Disabled");
 
     EXIT_CRITICAL(int_state);
-
-    return OS_NO_ERR;
 }
 
 int32_t pic_get_irq_int_line(const uint32_t irq_number)

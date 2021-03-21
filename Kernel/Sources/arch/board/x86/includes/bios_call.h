@@ -80,10 +80,7 @@ typedef struct bios_int_regs bios_int_regs_t;
  * 
  * @param[in] intnum The interrupt number to raise.
  * @param[in] regs The array containing the registers values for the call.
- * 
- * @return OS_NO_ERR is returned in case of success. Otherwise an error code is
- * returned.
  */
-OS_RETURN_E bios_call(const uint32_t intnum, bios_int_regs_t* regs);
+void bios_call(const uint32_t intnum, bios_int_regs_t* regs);
 
 #endif /* #ifndef __X86_BIOS_CALL_H_  */

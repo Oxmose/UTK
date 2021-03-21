@@ -99,13 +99,8 @@ OS_RETURN_E io_apic_init(void);
  * @param[in] irq_number The irq number to enable/disable.
  * @param[in] enabled Must be set to 1 to enable the IRQ or 0 to disable the
  * IRQ.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the IRQ number is not supported.
  */
-OS_RETURN_E io_apic_set_irq_mask(const uint32_t irq_number,
-                                 const uint32_t enabled);
+void io_apic_set_irq_mask(const uint32_t irq_number, const uint32_t enabled);
 
 /**
  * @brief Acknowleges an IRQ.
@@ -113,12 +108,8 @@ OS_RETURN_E io_apic_set_irq_mask(const uint32_t irq_number,
  * @details Acknowlege an IRQ by setting the End Of Interrupt bit for this IRQ.
  *
  * @param[in] irq_number The irq number to Acknowlege.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR if no error is encountered.
- * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the IRQ number is not supported.
  */
-OS_RETURN_E io_apic_set_irq_eoi(const uint32_t irq_number);
+void io_apic_set_irq_eoi(const uint32_t irq_number);
 
 /**
  * @brief Checks if the serviced interrupt is a spurious

@@ -27,9 +27,7 @@ init:
 	@mkdir -p $(BUILD_DIR)
 
 ifeq ($(target), x86_i386)
-	@cp $(CONFIG_DIR)/arch/x86_i386/settings.mk Sources/global/
-	@cp $(CONFIG_DIR)/arch/x86_i386/config.h Sources/global/
-	@cp $(CONFIG_DIR)/arch/x86_i386/config.inc Sources/global/
+	$(CONFIG_DIR)/arch/x86_i386/init_build.sh
 else 
 	@echo "\e[1m\e[31m\n=== ERROR: Unknown target $(target)\e[22m\e[39m"
 	@echo "Available targets: $(TARGET_LIST)\n"

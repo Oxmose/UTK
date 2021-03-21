@@ -31,6 +31,9 @@
  */
 #define KERNEL_STACK_SIZE 0x1000
 
+/* Thread's kernel stack size in bytes */
+#define THREAD_KERNEL_STACK_SIZE 0x800
+
 /* Maximal number of CPU supported by the architecture */
 #define MAX_CPU_COUNT 4
 
@@ -53,7 +56,8 @@
 #define KERNEL_VIRTUAL_ADDR_MAX 0x100000000
 #define KERNEL_VIRTUAL_ADDR_MAX_MASK 0xFFFFFFFF
 
-/** @brief Defines the minimal amount of memory blocks reserved for kernel paging.
+/** 
+ * @brief Defines the minimal amount of memory blocks reserved for kernel paging
  * One block is 4Kb and can map 4MB. Set this number to map the entierety of the
  * kernel.
  */
@@ -71,6 +75,12 @@
 
 /** @brief Current year */
 #define CURRENT_YEAR 2021
+
+/** @brief Thread's private storage size in bytes */
+#define THREAD_PRIVATE_STORAGE_SIZE 0x200
+
+/* Stack default alignement */
+#define STACK_ALIGN 4
 
 /*******************************************************************************
  * DEBUG Configuration
@@ -92,8 +102,11 @@
 #define PIT_DEBUG_ENABLED 0
 #define QUEUE_DEBUG_ENABLED 0
 #define RTC_DEBUG_ENABLED 0
+#define SCHED_DEBUG_ENABLED 0
+#define SCHED_SWITCH_DEBUG_ENABLED 1
 #define SERIAL_DEBUG_ENABLED 0
-#define TIME_MGT_DEBUG_ENABLED 1
+#define TIME_MGT_DEBUG_ENABLED 0
 #define VGA_DEBUG_ENABLED 0
+
 
 #endif /* #ifndef __GLOBAL_CONFIG_H_ */

@@ -29,6 +29,7 @@
 #include <critical.h>             /* Critical sections */
 #include <x86memmgt.h>            /* X86 memory management */
 #include <cpu.h>                  /* CPU management */
+#include <ctrl_block.h>           /* Kernel process structure */
 
 #ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
@@ -181,7 +182,7 @@ static void paging_fault_general_handler(cpu_state_t* cpu_state, uintptr_t int_i
  * 
  * @return Returns 0 if the region is not mapped, 1 otherwise.
  */
-static uint32_t is_mapped(const uintptr_t start_addr, const size_t size)
+static uint8_t is_mapped(const uintptr_t start_addr, const size_t size)
 {
     uintptr_t start_align;
     uintptr_t to_check;
@@ -249,13 +250,13 @@ static uint32_t is_mapped(const uintptr_t start_addr, const size_t size)
  * region.
  * @param[in] hardware Set to 1 if this region is memory mapped hardware.
  */
-static OS_RETURN_E kernel_mmap_internal(const void* virt_addr,
-                                        const void* phys_addr,
-                                        const size_t mapping_size,
-                                        const uint8_t read_only,
-                                        const uint8_t exec,
-                                        const uint8_t cache_enabled,
-                                        const uint8_t hardware)
+static void kernel_mmap_internal(const void* virt_addr,
+                                 const void* phys_addr,
+                                 const size_t mapping_size,
+                                 const uint8_t read_only,
+                                 const uint8_t exec,
+                                 const uint8_t cache_enabled,
+                                 const uint8_t hardware)
 {
     (void)exec;
 
@@ -266,7 +267,6 @@ static OS_RETURN_E kernel_mmap_internal(const void* virt_addr,
     size_t      to_map;
     uint32_t*   pgdir_rec_addr; 
     uint32_t*   pgtable;
-    OS_RETURN_E err;
     uint32_t    i;
 
     /* Align addresses */
@@ -279,10 +279,9 @@ static OS_RETURN_E kernel_mmap_internal(const void* virt_addr,
     /* Check for existing mapping */
     if(is_mapped(virt_align, to_map))
     {
-        return OS_ERR_MAPPING_ALREADY_EXISTS;
+        KERNEL_ERROR("Trying to remap memory\n");
+        KERNEL_PANIC(OS_ERR_MAPPING_ALREADY_EXISTS);
     }
-
-    err = OS_NO_ERR;
 
     while(to_map)
     {
@@ -294,11 +293,7 @@ static OS_RETURN_E kernel_mmap_internal(const void* virt_addr,
         pgdir_rec_addr = (uint32_t*)PAGING_RECUR_PG_DIR;
         if((pgdir_rec_addr[pgdir_entry] & PG_DIR_FLAG_PAGE_PRESENT) == 0)
         {
-            pgtable = alloc_kframes(1, &err);
-            if(err != OS_NO_ERR)
-            {
-                break;
-            }
+            pgtable = alloc_kframes(1);
 
             /* Map page */
             pgdir_rec_addr[pgdir_entry] = 
@@ -353,8 +348,6 @@ static OS_RETURN_E kernel_mmap_internal(const void* virt_addr,
             to_map = 0;
         }
     }
-
-    return err;
 }
 
 OS_RETURN_E paging_init(void)
@@ -485,14 +478,13 @@ OS_RETURN_E paging_disable(void)
     return OS_NO_ERR;
 }
 
-OS_RETURN_E paging_kmmap_hw(const void* virt_addr,
-                            const void* phys_addr,
-                            const size_t mapping_size,
-                            const uint8_t read_only,
-                            const uint8_t exec)
+void paging_kmmap_hw(const void* virt_addr,
+                     const void* phys_addr,
+                     const size_t mapping_size,
+                     const uint8_t read_only,
+                     const uint8_t exec)
 {
-    uint32_t    int_state;
-    OS_RETURN_E err;
+    uint32_t int_state;
 
     ENTER_CRITICAL(int_state);
 
@@ -501,23 +493,21 @@ OS_RETURN_E paging_kmmap_hw(const void* virt_addr,
                  virt_addr, 
                  phys_addr,
                  mapping_size);
-    err = kernel_mmap_internal(virt_addr, phys_addr, 
-                               mapping_size, read_only, exec, 0, 1);
+    kernel_mmap_internal(virt_addr, phys_addr, 
+                         mapping_size, read_only, exec, 0, 1);
 
     EXIT_CRITICAL(int_state);
-    return err;
 }
 
-OS_RETURN_E paging_kmmap(const void* virt_addr, 
-                         const size_t mapping_size,
-                         const uint8_t read_only,
-                         const uint8_t exec)
+void paging_kmmap(const void* virt_addr, 
+                  const size_t mapping_size,
+                  const uint8_t read_only,
+                  const uint8_t exec)
 {
-    void*       frames;
+    void*       frame;
     uintptr_t   end_map;
     uintptr_t   start_map;
     size_t      page_count;
-    OS_RETURN_E err;
     uint32_t    int_state;
 
     /* Compute physical memory size */
@@ -534,32 +524,20 @@ OS_RETURN_E paging_kmmap(const void* virt_addr,
     ENTER_CRITICAL(int_state);
 
     /* Get a physical frame block */
-    frames = alloc_kframes(page_count, &err);
-    if(err != OS_NO_ERR)
-    {
-        EXIT_CRITICAL(int_state);
-        return err;
-    }
+    frame = alloc_kframes(page_count);
 
     KERNEL_DEBUG(PAGING_DEBUG_ENABLED, 
                  "[PAGING] Request regular mappping at 0x%p -> 0x%p (%uB)",
                  virt_addr, 
-                 frames,
+                 frame,
                  mapping_size);
 
-    err = kernel_mmap_internal(virt_addr, frames, 
-                               mapping_size, read_only, exec, 1, 0);
-    if(err != OS_NO_ERR)
-    {
-        /* Free allocated frames */
-        free_kframes(frames, page_count);
-    }
-    
+    kernel_mmap_internal(virt_addr, frame, mapping_size, read_only, exec, 1, 0);
+
     EXIT_CRITICAL(int_state);
-    return err;
 }
 
-OS_RETURN_E paging_kmunmap(const void* virt_addr, const size_t mapping_size)
+void paging_kmunmap(const void* virt_addr, const size_t mapping_size)
 {
     uintptr_t   end_map;
     uintptr_t   start_map;
@@ -645,5 +623,290 @@ OS_RETURN_E paging_kmunmap(const void* virt_addr, const size_t mapping_size)
     }
 
     EXIT_CRITICAL(int_state);
-    return OS_NO_ERR;
 }
+#if 0
+OS_RETURN_E paging_copy_process_image(kernel_process_t* dst_process, 
+                                      const kernel_process_t* src_process)
+{
+    uintptr_t*  new_pgdir_frame;
+    uintptr_t*  new_pgdir_page;  
+
+    uintptr_t*  src_pgdir_frame;
+    uintptr_t*  src_pgdir_page;
+
+    uintptr_t*  src_pgtable_page; 
+    uintptr_t*  src_pgtable_frame;
+
+    uintptr_t*  new_pg_table_frame; 
+    uintptr_t*  new_pg_table_page;
+
+    uintptr_t*  new_data_frame;
+    uintptr_t*  new_data_page;
+
+    uintptr_t*  src_data_page;
+
+    OS_RETURN_E err;
+    uint32_t    int_state;
+    uint32_t    i;
+    uint32_t    j;
+
+    if(dst_process == NULL || src_process == NULL)
+    {
+        return OS_ERR_NULL_POINTER;
+    }
+
+    ENTER_CRITICAL(int_state);
+
+    /* Create a new page directory and map for kernel */
+    new_pgdir_frame = (uintptr_t*)alloc_kframes(1, &err);
+    if(err != OS_NO_ERR)
+    {
+        kernel_error("Error while copying process : %d\n", err);
+        KERNEL_PANIC(err);
+    }
+    new_pgdir_page = (uintptr_t*)alloc_kpages(1, &err)
+    if(err != OS_NO_ERR)
+    {
+        kernel_error("Error while copying process : %d\n", err);
+        KERNEL_PANIC(err);
+    }
+    err = paging_kmmap_hw(new_pgdir_page, 
+                          new_pgdir_frame, 
+                          KERNEL_PAGE_SIZE, 
+                          0, 
+                          0);
+    if(err != OS_NO_ERR)
+    {
+        kernel_error("Error while copying process : %d\n", err);
+        KERNEL_PANIC(err);
+    }
+
+    /* Mapp the current page directory */
+    src_pgdir_page = alloc_kpages(1, &err);
+    if(err != OS_NO_ERR)
+    {
+        kernel_error("Error while copying process : %d\n", err);
+        KERNEL_PANIC(err);
+    }
+    src_pgdir_frame = (uintptr_t*)src_process->page_dir;
+    err = paging_kmmap_hw(src_pgdir_page, 
+                          src_pgdir_frame, 
+                          KERNEL_PAGE_SIZE, 
+                          1, 
+                          0);
+
+     /* Allocate temporary pages */
+    new_pg_table_page = alloc_kpages(1, &err);
+    if(err != OS_NO_ERR)
+    {
+        kernel_error("Error while copying process : %d\n", err);
+        KERNEL_PANIC(err);
+    }
+    src_pgtable_page = alloc_kpages(1, &err);
+    if(err != OS_NO_ERR)
+    {
+        kernel_error("Error while copying process : %d\n", err);
+        KERNEL_PANIC(err);
+    }
+
+    new_data_page = alloc_kpages(1, &err);
+    if(err != OS_NO_ERR)
+    {
+        kernel_error("Error while copying process : %d\n", err);
+        KERNEL_PANIC(err);
+    }
+    src_data_page = alloc_kpages(1, &err);
+    if(err != OS_NO_ERR)
+    {
+        kernel_error("Error while copying process : %d\n", err);
+        KERNEL_PANIC(err);
+    } 
+    
+    /* Copy the page directory kernel entries */    
+    for(i = KERNEL_FIRST_PGDIR_ENTRY; i < KERNEL_PGDIR_SIZE; ++i)
+    {
+        new_pgdir_page[i] = src_pgdir_page[i];
+    }
+
+    /* Copy the memory of the process and map entries to the new page tables */
+    for(i = 0; i < KERNEL_FIRST_PGDIR_ENTRY; ++i)
+    {
+        if(src_pgdir_page[i] & PG_DIR_FLAG_PAGE_PRESENT != 0)
+        {
+            src_pgtable_frame = src_pgdir_page[i] & PG_ENTRY_MASK;
+
+            /* Mapp src page */
+            err = paging_kmmap_hw(src_pgtable_page, 
+                                  src_pgtable_frame, 
+                                  KERNEL_PAGE_SIZE,
+                                  1, 
+                                  0);
+            if(err != OS_NO_ERR)
+            {
+                kernel_error("Error while copying process : %d\n", err);
+                KERNEL_PANIC(err);
+            }
+
+            /* Create new page table */
+            new_pg_table_frame = alloc_kframes(1, &err);
+            if(err != OS_NO_ERR)
+            {
+                kernel_error("Error while copying process : %d\n", err);
+                KERNEL_PANIC(err);
+            }            
+            err = paging_kmmap_hw(new_pg_table_page,
+                                  new_pg_table_frame, 
+                                  KERNEL_PAGE_SIZE, 
+                                  0, 
+                                  0);
+            if(err != OS_NO_ERR)
+            {
+                kernel_error("Error while copying process : %d\n", err);
+                KERNEL_PANIC(err);
+            }
+
+            new_pgdir_page[i] = (src_pgdir_page[i] & ~PG_ENTRY_MASK) | 
+                                (uintptr_t)new_pg_table_frame;
+            
+            for(j = 0; j < KERNEL_PGDIR_SIZE; ++j)
+            {
+                if(src_pgtable_page[j] & PG_DIR_FLAG_PAGE_PRESENT != 0)
+                {
+                    /* Alloc new frame */
+                    new_data_frame = alloc_kframes(1, &err)
+                    if(err != OS_NO_ERR)
+                    {
+                        kernel_error("Error while copying process : %d\n", err);
+                        KERNEL_PANIC(err);
+                    }
+
+                    /* Map src and dst frames */
+                    err = paging_kmmap_hw(new_data_page, 
+                                          new_data_frame, 
+                                          KERNEL_PAGE_SIZE, 
+                                          0, 
+                                          0);
+                    if(err != OS_NO_ERR)
+                    {
+                        kernel_error("Error while copying process : %d\n", err);
+                        KERNEL_PANIC(err);
+                    }
+                    err = paging_kmmap_hw(src_data_page, 
+                                          src_pgtable_page[j] & PG_ENTRY_MASK, 
+                                          KERNEL_PAGE_SIZE, 
+                                          0, 
+                                          0);
+                    if(err != OS_NO_ERR)
+                    {
+                        kernel_error("Error while copying process : %d\n", err);
+                        KERNEL_PANIC(err);
+                    }
+
+                    /* Copy frames */
+                    memcpy(new_data_page, src_data_page, KERNEL_PAGE_SIZE);
+
+                    /* Mapp the frame in the destination page directory */
+                    new_pg_table_page[j] = 
+                        (src_pgtable_page[j] & ~PG_ENTRY_MASK) | 
+                        (uintptr_t)new_data_frame;
+
+                    /* Unmap new frame and src frame */
+                    err = paging_kmunmap(new_data_page, KERNEL_PAGE_SIZE);
+                    if(err != OS_NO_ERR)
+                    {
+                        kernel_error("Error while copying process : %d\n", err);
+                        KERNEL_PANIC(err);
+                    }
+                    err = paging_kmunmap(src_data_page, KERNEL_PAGE_SIZE);
+                    if(err != OS_NO_ERR)
+                    {
+                        kernel_error("Error while copying process : %d\n", err);
+                        KERNEL_PANIC(err);
+                    }                    
+                }
+            }
+            
+            err = paging_kmunmap(src_pgtable_page, KERNEL_PAGE_SIZE);
+            if(err != OS_NO_ERR)
+            {
+                kernel_error("Error while copying process : %d\n", err);
+                KERNEL_PANIC(err);
+            } 
+            err = paging_kmunmap(new_pg_table_page, KERNEL_PAGE_SIZE);
+            if(err != OS_NO_ERR)
+            {
+                kernel_error("Error while copying process : %d\n", err);
+                KERNEL_PANIC(err);
+            } 
+        }
+        
+    }
+    
+    err = free_kpages(new_pgdir_page, 1);
+    if(err != OS_NO_ERR)
+    {
+        kernel_error("Error while copying process : %d\n", err);
+        KERNEL_PANIC(err);
+    }
+    err = paging_kmunmap(new_pgdir_page, KERNEL_PAGE_SIZE);
+    if(err != OS_NO_ERR)
+    {
+        kernel_error("Error while copying process : %d\n", err);
+        KERNEL_PANIC(err);
+    }
+
+    /* Mapp the current page directory */
+    err = paging_kmunmap(src_pgdir_page, KERNEL_PAGE_SIZE);
+    if(err != OS_NO_ERR)
+    {
+        kernel_error("Error while copying process : %d\n", err);
+        KERNEL_PANIC(err);
+    }
+    err = free_kpages(src_pgdir_page, 1);
+    if(err != OS_NO_ERR)
+    {
+        kernel_error("Error while copying process : %d\n", err);
+        KERNEL_PANIC(err);
+    }
+    err = free_kpages(src_pgtable_page, 1);
+    if(err != OS_NO_ERR)
+    {
+        kernel_error("Error while copying process : %d\n", err);
+        KERNEL_PANIC(err);
+    }
+    err = free_kpages(new_data_page, 1);
+    if(err != OS_NO_ERR)
+    {
+        kernel_error("Error while copying process : %d\n", err);
+        KERNEL_PANIC(err);
+    }
+    err = free_kpages(src_data_page, 1);
+    if(err != OS_NO_ERR)
+    {
+        kernel_error("Error while copying process : %d\n", err);
+        KERNEL_PANIC(err);
+    } 
+    err = free_kpages(new_pg_table_page, 1);
+    if(err != OS_NO_ERR)
+    {
+        kernel_error("Error while copying process : %d\n", err);
+        KERNEL_PANIC(err);
+    }
+
+    /* Set the process page directory */
+    dst_process->page_dir = new_pgdir_frame;
+
+    /* Copy the free page table */
+    err = queue_deep_copy(dst_process->free_page_table, 
+                          src_process->free_page_table);
+    if(err != OS_NO_ERR)
+    {
+        kernel_error("Error while copying process : %d\n", err);
+        KERNEL_PANIC(err);
+    }
+
+    EXIT_CRITICAL(int_state);
+
+    return err;
+}
+#endif

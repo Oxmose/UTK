@@ -12,6 +12,7 @@ ENTRY(__kinit)
 
 /* Kernel starts at 1M in physical addresse space
  * Add the offset, to fit with values in config.h and config.inc
+ * WARNING: Must be aligned on 4MB
  */
 KERNEL_MEM_OFFSET = 0xE0000000;
 
@@ -25,7 +26,7 @@ MEMORY
     KERNEL_RO_DATA          (r)     :   ORIGIN = 0xE0200000,    LENGTH = 64K
     KERNEL_RW_DATA          (rw)    :   ORIGIN = 0xE0210000,    LENGTH = 512K
     KERNEL_STACKS           (rw)    :   ORIGIN = 0xE0310000,    LENGTH = 32K
-    KERNEL_HEAP             (rw)    :   ORIGIN = 0xE0318000,    LENGTH = 32K    
+    KERNEL_HEAP             (rw)    :   ORIGIN = 0xE0318000,    LENGTH = 256K    
 }
 
 /* Memory layout */

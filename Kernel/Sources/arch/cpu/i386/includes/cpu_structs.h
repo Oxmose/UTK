@@ -178,10 +178,7 @@ struct virtual_cpu_context
     /** @brief Thread's specific EBP registers. */
     uint32_t ebp;
     /** @brief Thread's specific EIP registers. */
-    uint32_t eip;
-
-     /** @brief Thread's CR3 page directory pointer. */
-    uint32_t cr3;    
+    uint32_t eip;  
 };
 
 /** @brief Shortcut name for the struct virtual_cpu_context structure. */

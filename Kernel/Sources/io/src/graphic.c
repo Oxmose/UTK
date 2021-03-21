@@ -70,39 +70,27 @@ void graphic_clear_screen(void)
     }
 }
 
-OS_RETURN_E graphic_put_cursor_at(const uint32_t line, const uint32_t column)
+void graphic_put_cursor_at(const uint32_t line, const uint32_t column)
 {
     if(graphic_driver.put_cursor_at != NULL)
     {
-	    return graphic_driver.put_cursor_at(line, column);
-    }
-    else 
-    {
-        return OS_ERR_NOT_SUPPORTED;
+	    graphic_driver.put_cursor_at(line, column);
     }
 }
 
-OS_RETURN_E graphic_save_cursor(cursor_t* buffer)
+void graphic_save_cursor(cursor_t* buffer)
 {
 	if(graphic_driver.save_cursor != NULL)
     {
 	    return graphic_driver.save_cursor(buffer);
     }
-    else 
-    {
-        return OS_ERR_NOT_SUPPORTED;
-    }
 }
 
-OS_RETURN_E graphic_restore_cursor(const cursor_t buffer)
+void graphic_restore_cursor(const cursor_t buffer)
 {
 	if(graphic_driver.restore_cursor != NULL)
     {
 	    return graphic_driver.restore_cursor(buffer);
-    }
-    else 
-    {
-        return OS_ERR_NOT_SUPPORTED;
     }
 }
 
@@ -123,15 +111,11 @@ void graphic_set_color_scheme(colorscheme_t color_scheme)
     }
 }
 
-OS_RETURN_E graphic_save_color_scheme(colorscheme_t* buffer)
+void graphic_save_color_scheme(colorscheme_t* buffer)
 {
 	if(graphic_driver.save_color_scheme != NULL)
     {
 	    return graphic_driver.save_color_scheme(buffer);
-    }
-    else 
-    {
-        return OS_ERR_NOT_SUPPORTED;
     }
 }
 

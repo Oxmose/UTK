@@ -75,25 +75,15 @@ OS_RETURN_E rtc_init(void);
  * @brief Enables RTC ticks.
  * 
  * @details Enables RTC ticks by clearing the RTC's IRQ mask.
- *
- * @return The success state or the error code. 
- * - OS_NO_ERR is returned if no error is encountered. 
- * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the IRQ number of the RTC is not 
- *   supported.
  */
-OS_RETURN_E rtc_enable(void);
+void rtc_enable(void);
 
 /**
  * @brief Disables RTC ticks.
  * 
  * @details Disables RTC ticks by setting the RTC's IRQ mask.
- *
- * @return The success state or the error code. 
- * - OS_NO_ERR is returned if no error is encountered. 
- * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the IRQ number of the RTC is not 
- *   supported.
  */
-OS_RETURN_E rtc_disable(void);
+void rtc_disable(void);
 
 /** 
  * @brief Sets the RTC's tick frequency.
@@ -106,14 +96,8 @@ OS_RETURN_E rtc_disable(void);
  * frequencies).
  *
  * @param[in] frequency The new frequency to be set to the RTC.
- * 
- * @return The success state or the error code. 
- * - OS_NO_ERR is returned if no error is detected. 
- * - OS_ERR_OUT_OF_BOUND is returned if the frequency is out of bounds.
- * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the IRQ number of the RTC is not 
- *   supported.
  */
-OS_RETURN_E rtc_set_frequency(const uint32_t frequency);
+void rtc_set_frequency(const uint32_t frequency);
 
 /**
  * @brief Returns the RTC tick frequency in Hz.

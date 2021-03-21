@@ -79,13 +79,9 @@ struct interrupt_driver
      * @param[in] irq_number The number of the IRQ to enable/disable.
      * @param[in] enabled Must be set to 1 to enable the IRQ and 0 to disable
      * the IRQ.
-     * 
-     * @return The success state or the error code. 
-     * - OS_NO_ERR is returned if no error is encountered. 
-     * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the desired IRQ is not allowed. 
      */
-    OS_RETURN_E (*driver_set_irq_mask)(const uint32_t irq_number, 
-                                       const uint32_t enabled);
+    void (*driver_set_irq_mask)(const uint32_t irq_number, 
+                                const uint32_t enabled);
 
     /**
      * @brief The function should acknowleges an IRQ.
@@ -93,12 +89,8 @@ struct interrupt_driver
      * @details The function should acknowleges an IRQ.
      * 
      * @param[in] irq_number The irq number to acknowledge.
-     * 
-     * @return The success state or the error code. 
-     * - OS_NO_ERR is returned if no error is encountered. 
-     * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the desired IRQ is not allowed. 
      */
-    OS_RETURN_E (*driver_set_irq_eoi)(const uint32_t irq_number);
+    void (*driver_set_irq_eoi)(const uint32_t irq_number);
 
     /**
      * @brief The function should check if the serviced interrupt is a spurious 
@@ -299,14 +291,10 @@ uint32_t kernel_interrupt_get_state(void);
  *
  * @param[in] irq_number The irq number to enable/disable.
  * @param[in] enabled Must be set to 1 to enable the IRQ or 0 to disable the 
- * IRQ.
- * 
- * @return The success state or the error code. 
- * - OS_NO_ERR is returned if no error is encountered. 
- * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the desired IRQ is not allowed. 
+ * IRQ. 
  */
-OS_RETURN_E kernel_interrupt_set_irq_mask(const uint32_t irq_number, 
-                                          const uint32_t enabled);
+void kernel_interrupt_set_irq_mask(const uint32_t irq_number, 
+                                   const uint32_t enabled);
 
 /**
  * @brief Acknowleges an IRQ.
@@ -314,12 +302,8 @@ OS_RETURN_E kernel_interrupt_set_irq_mask(const uint32_t irq_number,
  * @details Acknowleges an IRQ.
  * 
  * @param[in] irq_number The irq number to acknowledge.
- * 
- * @return The success state or the error code. 
- * - OS_NO_ERR is returned if no error is encountered. 
- * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the desired IRQ is not allowed. 
  */
-OS_RETURN_E kernel_interrupt_set_irq_eoi(const uint32_t irq_number);
+void kernel_interrupt_set_irq_eoi(const uint32_t irq_number);
 
 
 #endif /* #ifndef __CORE_INTERRUPTS_H_ */

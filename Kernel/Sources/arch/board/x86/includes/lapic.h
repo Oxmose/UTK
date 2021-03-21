@@ -268,39 +268,22 @@ OS_RETURN_E lapic_send_ipi(const uint32_t lapic_id,
  * @details Sets END OF INTERRUPT for the current CPU Local APIC.
  *
  * @param[in] interrupt_line The intrrupt line for which the EOI should be set.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - OS_ERR_NOT_SUPPORTED is returned if the LAPIC is not supported by the
- * current system.
- * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the interurpt number is not
- * supported.
  */
-OS_RETURN_E lapic_set_int_eoi(const uint32_t interrupt_line);
+void lapic_set_int_eoi(const uint32_t interrupt_line);
 
 /**
  * @brief Enables LAPIC Timer ticks.
  *
  * @details Enables LAPIC Timer ticks by clearing the LAPIC Timer's IRQ mask.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the IRQ number of the LAPIC Timer is
- * not supported.
  */
-OS_RETURN_E lapic_timer_enable(void);
+void lapic_timer_enable(void);
 
 /**
  * @brief Disables LAPIC Timer ticks.
  *
  * @details Disables LAPIC Timer ticks by setting the LAPIC Timer's IRQ mask.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the IRQ number of the LAPIC Timer is
- * not supported.
  */
-OS_RETURN_E lapic_timer_disable(void);
+void lapic_timer_disable(void);
 
 /**
  * @brief Sets the LAPIC Timer's tick frequency.
@@ -311,14 +294,8 @@ OS_RETURN_E lapic_timer_disable(void);
  * @warning The value must be between 20Hz and 8000Hz
  *
  * @param[in] freq The new frequency to be set to the LAPIC Timer.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - OS_ERR_OUT_OF_BOUND is returned if the frequency is out of bounds.
- * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the IRQ number of the LAPIC Timer is
- * not supported.
  */
-OS_RETURN_E lapic_timer_set_frequency(const uint32_t freq);
+void lapic_timer_set_frequency(const uint32_t freq);
 
 /**
  * @brief Returns the LAPIC Timer tick frequency in Hz.

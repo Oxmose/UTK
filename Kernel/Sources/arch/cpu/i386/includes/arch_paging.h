@@ -96,6 +96,9 @@
 /** @brief Custom define flag: hardware mapped. */
 #define PAGE_FLAG_HARDWARE       0x00000200
 
+/** @brief Defines the first kernel page directory entry. */
+#define KERNEL_FIRST_PGDIR_ENTRY (KERNEL_MEM_OFFSET >> PG_DIR_OFFSET)
+
 /*******************************************************************************
  * STRUCTURES
  ******************************************************************************/

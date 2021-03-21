@@ -46,7 +46,7 @@ static void test_sw_interupts_lock(void)
     if((err = kernel_interrupt_register_int_handler(MIN_INTERRUPT_LINE, incrementer_handler)))
     {
         kernel_error("TEST_SW_INT_LOCK INIT\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -56,7 +56,7 @@ static void test_sw_interupts_lock(void)
     if((err = kernel_interrupt_register_int_handler(MIN_INTERRUPT_LINE + 1, decrementer_handler)))
     {
         kernel_error("TEST_SW_INT_LOCK INIT\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -74,7 +74,7 @@ static void test_sw_interupts_lock(void)
     if(cnt_val != counter)
     {
         kernel_error("TEST_SW_INT_LOCK 0 %d != %d\n", cnt_val, counter);
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -86,7 +86,7 @@ static void test_sw_interupts_lock(void)
     if(cnt_val != counter)
     {
         kernel_error("TEST_SW_INT_LOCK 1 %d != %d\n", cnt_val, counter);
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -100,7 +100,7 @@ static void test_sw_interupts_lock(void)
     if(cnt_val + 3 * MIN_INTERRUPT_LINE != counter)
     {
         kernel_error("TEST_SW_INT_LOCK 2 %d != %d\n", cnt_val, counter);
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -117,7 +117,7 @@ static void test_sw_interupts_lock(void)
     if(cnt_val != counter)
     {
         kernel_error("TEST_SW_INT_LOCK 3 %d != %d\n", cnt_val, counter);
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -131,7 +131,7 @@ static void test_sw_interupts_lock(void)
     if(cnt_val != counter)
     {
         kernel_error("TEST_SW_INT_LOCK 4 %d != %d\n", cnt_val, counter);
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -145,7 +145,7 @@ static void test_sw_interupts_lock(void)
     if(cnt_val != counter)
     {
         kernel_error("TEST_SW_INT_LOCK 5 %d != %d\n", cnt_val, counter);
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -159,7 +159,7 @@ static void test_sw_interupts_lock(void)
     if(cnt_val + MIN_INTERRUPT_LINE != counter)
     {
         kernel_error("TEST_SW_INT_LOCK 6 %d != %d\n", cnt_val, counter);
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -177,7 +177,7 @@ static void test_sw_interupts_lock(void)
     if(cnt_val != counter)
     {
         kernel_error("TEST_SW_INT_LOCK 7 %d != %d\n", cnt_val, counter);
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -188,7 +188,7 @@ static void test_sw_interupts_lock(void)
     if((err = kernel_interrupt_remove_int_handler(MIN_INTERRUPT_LINE)))
     {
         kernel_error("TEST_SW_INT_LOCK 8\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -198,7 +198,7 @@ static void test_sw_interupts_lock(void)
     if((err = kernel_interrupt_remove_int_handler(MIN_INTERRUPT_LINE + 1)))
     {
         kernel_error("TEST_SW_INT_LOCK 9\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -224,7 +224,7 @@ void test_sw_interupts(void)
      != OR_ERR_UNAUTHORIZED_INTERRUPT_LINE)
     {
         kernel_error("TEST_SW_INT 0\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -236,7 +236,7 @@ void test_sw_interupts(void)
      != OR_ERR_UNAUTHORIZED_INTERRUPT_LINE)
     {
         kernel_error("TEST_SW_INT 1\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -248,7 +248,7 @@ void test_sw_interupts(void)
      != OR_ERR_UNAUTHORIZED_INTERRUPT_LINE)
     {
         kernel_error("TEST_SW_INT 2\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -260,7 +260,7 @@ void test_sw_interupts(void)
      != OR_ERR_UNAUTHORIZED_INTERRUPT_LINE)
     {
         kernel_error("TEST_SW_INT 3\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -272,7 +272,7 @@ void test_sw_interupts(void)
      != OS_ERR_NULL_POINTER)
     {
         kernel_error("TEST_SW_INT 4\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -284,7 +284,7 @@ void test_sw_interupts(void)
      != OS_ERR_INTERRUPT_NOT_REGISTERED)
     {
         kernel_error("TEST_SW_INT 5\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -296,7 +296,7 @@ void test_sw_interupts(void)
      != OS_NO_ERR)
     {
         kernel_error("TEST_SW_INT 6\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -307,7 +307,7 @@ void test_sw_interupts(void)
      != OS_ERR_INTERRUPT_ALREADY_REGISTERED)
     {
         kernel_error("TEST_SW_INT 7\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -318,7 +318,7 @@ void test_sw_interupts(void)
     if((err = kernel_interrupt_remove_int_handler(MIN_INTERRUPT_LINE)) != OS_NO_ERR)
     {
         kernel_error("TEST_SW_INT 8\n");
-        kernel_panic(err);
+        KERNEL_PANIC(err);
     }
     else 
     {
@@ -342,7 +342,7 @@ void test_sw_interupts(void)
         if(err != OS_NO_ERR)
         {
             kernel_error("TEST_SW_INT 9 [%d]\n", err);
-            kernel_panic(err);
+            KERNEL_PANIC(err);
         }
         else 
         {
@@ -579,7 +579,7 @@ void test_sw_interupts(void)
     if(cnt_val != counter)
     {
         kernel_error("TEST_SW_INT 10\n");
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -598,7 +598,7 @@ void test_sw_interupts(void)
         if((err = kernel_interrupt_remove_int_handler(i)) != OS_NO_ERR)
         {
             kernel_error("TEST_SW_INT 11\n");
-            kernel_panic(err);
+            KERNEL_PANIC(err);
         }
         else 
         {
@@ -619,7 +619,7 @@ void test_sw_interupts(void)
         if((err = kernel_interrupt_register_int_handler(i, decrementer_handler)) != OS_NO_ERR)
         {
             kernel_error("TEST_SW_INT 12\n");
-            kernel_panic(err);
+            KERNEL_PANIC(err);
         }
         else 
         {
@@ -856,7 +856,7 @@ void test_sw_interupts(void)
     if(cnt_val != counter)
     {
         kernel_error("TEST_SW_INT 13 %d != %d\n", cnt_val, counter);
-        kernel_panic(OS_ERR_UNAUTHORIZED_ACTION);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
     }
     else 
     {
@@ -875,7 +875,7 @@ void test_sw_interupts(void)
         if((err = kernel_interrupt_remove_int_handler(i)) != OS_NO_ERR)
         {
             kernel_error("TEST_SW_INT 14\n");
-            kernel_panic(err);
+            KERNEL_PANIC(err);
         }
         else 
         {
