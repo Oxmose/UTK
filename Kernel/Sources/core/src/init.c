@@ -21,6 +21,9 @@
 #include <kernel_output.h> /* Kernel output methods */
 #include <scheduler.h>     /* Kernel scheduler */
 #include <panic.h>         /* Kernel panic */
+
+#include <sys/process.h> 
+
 /* UTK configuration file */
 #include <config.h>
 
@@ -37,12 +40,20 @@
 
 void* init_sys(void* args)
 {
+    int32_t pid;
     (void)args;
 
     KERNEL_INFO("INIT Started | PID: %d | TID: %d\n", 
                 sched_get_pid(), 
                 sched_get_tid());
-    //while(1);
+
+    pid = fork();
+    kernel_printf("Got pid 0x%x\n", pid);
+
+    while(1)
+    {
+        sched_sleep(100);
+    }
 
     /* If we return better go away and cry in a corner */
     KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);

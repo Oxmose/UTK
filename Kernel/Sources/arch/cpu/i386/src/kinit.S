@@ -91,7 +91,7 @@ __kinit:
     or  eax, 0x00000010
     mov cr4, eax
 
-    ; Enable paging
+    ; Enable paging and write protect
     mov eax, cr0
     or  eax, 0x80010000
     mov cr0, eax

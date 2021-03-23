@@ -1,5 +1,5 @@
 /******************************************************************************
- * @file arch_paging.h
+ * @file arch_memmgt.h
  *
  * @author Alexy Torres Aurora Dugo
  *
@@ -14,8 +14,8 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#ifndef __I386_ARCH_PAGING_H_
-#define __I386_ARCH_PAGING_H_
+#ifndef __I386_ARCH_MEMMGT_H_
+#define __I386_ARCH_MEMMGT_H_
 
 /*******************************************************************************
  * CONSTANTS
@@ -34,6 +34,9 @@
 
 /** @brief Kernel page table offset. */
 #define PG_TABLE_OFFSET 12
+
+/** @brief Kernel page table mask */
+#define PG_TABLE_OFFSET_MASK 0x3FF
 
 /** @brief Architecture maximal address. */
 #define ARCH_MAX_ADDRESS 0xFFFFFFFF
@@ -95,9 +98,30 @@
 #define PAGE_FLAG_NOT_PRESENT    0x00000000
 /** @brief Custom define flag: hardware mapped. */
 #define PAGE_FLAG_HARDWARE       0x00000200
+/** @brief Custom define flag: copy on write. */
+#define PAGE_FLAG_COPY_ON_WRITE  0x00000400
 
 /** @brief Defines the first kernel page directory entry. */
 #define KERNEL_FIRST_PGDIR_ENTRY (KERNEL_MEM_OFFSET >> PG_DIR_OFFSET)
+
+/** @brief Frame reference directory entry offset */
+#define FRAME_REF_DIR_ENTRY_OFFSET 22
+/** @brief Frame reference table entry offset */
+#define FRAME_REF_TABLE_ENTRY_OFFSET 12
+/** @brief Frame reference table entry offset mask */
+#define FRAME_REF_TABLE_ENTRY_OFFSET_MASK 0x3FF
+
+/** @brief Frame reference directory size */
+#define FRAME_REF_DIR_SIZE   0x1000
+/** @brief Frame reference table size */
+#define FRAME_REF_TABLE_SIZE 0x1000
+
+/** @brief Frame reference table present flag */
+#define FRAME_REF_PRESENT    0x80000000
+/** @brief Frame reference table hardware flag */
+#define FRAME_REF_IS_HW      0x40000000
+/** @brief Frame reference table reference count mask */
+#define FRAME_REF_COUNT_MASK 0x0000FFFF
 
 /*******************************************************************************
  * STRUCTURES
@@ -111,4 +135,4 @@
 
 /* None */
 
-#endif /* #ifndef __I386_ARCH_PAGING_H_ */
+#endif /* #ifndef __I386_ARCH_MEMMGT_H_ */

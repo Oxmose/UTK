@@ -9,7 +9,7 @@
 # virtualbox.
 ################################################################################
 
-QEMUOPTS = -cpu coreduo,-syscall,-lm -d guest_errors -rtc base=localtime -m 6G \
+QEMUOPTS = -cpu coreduo,-syscall,-lm -d guest_errors -rtc base=localtime -m 256M \
            -gdb tcp::1234 -smp 4 -serial stdio
 
 QEMU = qemu-system-i386

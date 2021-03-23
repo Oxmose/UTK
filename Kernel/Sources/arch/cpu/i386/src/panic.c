@@ -287,7 +287,8 @@ void panic(cpu_state_t* cpu_state, uintptr_t int_id, stack_state_t* stack_state)
     uint32_t minutes;
     uint32_t seconds;
 
-    
+    kernel_process_t* process;
+    kernel_thread_t*  thread;    
 
     time = rtc_get_current_daytime();
     hours = time / 3600;
@@ -338,21 +339,24 @@ void panic(cpu_state_t* cpu_state, uintptr_t int_id, stack_state_t* stack_state)
         error_code = stack_state->error_code;
     }
 
+    process = sched_get_current_process();
+    thread = sched_get_self();
+
     print_panic_header(int_id, stack_state, error_code);
     print_cpu_state(cpu_state, stack_state);
     print_cpu_flags(stack_state);
 
     kernel_printf("------------------------------- ADDITIONAL INFO ------------"
                     "--------------------\n");
-    kernel_printf("  Core ID: %u  |  TID:  %u |  PID:  %u  |  Time of panic: "
+    kernel_printf("  Core ID: %u | TID:  %u | PID:  %u | Time of panic: "
                   "%02u:%02u:%02u\n", cpu_id, sched_get_tid(), sched_get_pid(),
                   hours, minutes, seconds);
     kernel_printf("  Error: ");
     perror(error_code);
     kernel_printf(" (%d)\n", error_code);
     kernel_printf("  Process: %s | Thread: %s\n", 
-                  sched_get_self()->process->name,
-                  sched_get_self()->name);
+                  process != NULL ? process->name : "NO_PROCESS",
+                  thread != NULL ? thread->name : "NO_THREAD");
     kernel_printf("  File: %s at line %d\n", panic_file, panic_line);
 
     kernel_printf("\n\n\n\n\n");

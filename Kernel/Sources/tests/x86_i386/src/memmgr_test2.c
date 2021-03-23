@@ -134,11 +134,11 @@ void memmgr_test2(void)
     kernel_printf("[TESTMODE]Silent alloc\n");
     for(uint32_t i = 0; i < 100; ++i)
     {
-        alloc_kpages(1);
+        memory_alloc_pages(1, MEM_ALLOC_BEGINING);
     }
     for(uint32_t i = 0; i < 30; ++i)
     {
-        page = alloc_kpages(1);
+        page = memory_alloc_pages(1, MEM_ALLOC_BEGINING);
         kernel_printf("[TESTMODE]Allocated 0x%08x\n", page);
     }
 
@@ -153,7 +153,7 @@ void memmgr_test2(void)
         cursor = cursor->next;
     }
 
-    free_kpages((void*)0xe0380000, 2);
+    memory_free_pages((void*)0xe0380000, 2);
 
     kernel_printf("[TESTMODE] ---\n");
 
@@ -166,7 +166,7 @@ void memmgr_test2(void)
         cursor = cursor->next;
     }
 
-    free_kpages((void*)0xe0382000, 2);
+    memory_free_pages((void*)0xe0382000, 2);
 
     kernel_printf("[TESTMODE] ---\n");
     
@@ -179,7 +179,7 @@ void memmgr_test2(void)
         cursor = cursor->next;
     }
 
-    free_kpages((void*)0xe0382000, 2);
+    memory_free_pages((void*)0xe0382000, 2);
     
 
     kill_qemu();

@@ -38,7 +38,7 @@
 #define IDLE_THREAD_PRIORITY    KERNEL_LOWEST_PRIORITY
 
 /** @brief Defines the idle task's stack size in bytes. */
-#define SCHEDULER_IDLE_STACK_SIZE 0x800
+#define SCHEDULER_IDLE_STACK_SIZE 0x1000
 /** @brief Defines the main task's stack size in bytes. */
 #define SCHEDULER_MAIN_STACK_SIZE KERNEL_STACK_SIZE
 
@@ -308,5 +308,67 @@ uint64_t sched_get_schedule_count(void);
  * @return The number of time the idle thread was schedulled.
  */
 uint64_t sched_get_idle_schedule_count(void);
+
+/**
+ * @brief Forks the current process.
+ * 
+ * @details Forks the current process. A complete copy of the current process
+ * will be done and memory will be marked as COW for both new and current 
+ * process. Only the calling thread will be copied to the new process.
+ * 
+ * @return -1 is retuned on error. 0 is returned for the new process and the PID
+ * of the new process is returned for the current calling process.
+ */
+int32_t sched_fork_process(void);
+
+/**
+ * @brief Creates a new kernel thread in the thread table.
+ *
+ * @details Creates a new thread added in the ready threads table. The thread
+ * might not be directly scheduled depending on its priority and the current
+ * system's load.
+ * A handle to the thread is given as parameter and set on success.
+ *
+ * @warning These are kernel threads, sharing the kernel memory space and using
+ * the kernel memory map and heap.
+ *
+ * @param[out] thread The pointer to the thread structure. This is the handle of
+ * the thread for the user.
+ * @param[in] priority The priority of the thread.
+ * @param[in] name The name of the thread.
+ * @param[in] type The thread type.
+ * @param[in] stack_size The thread's stack size in bytes, must be a multiple of 
+ * the system's page size.
+ * @param[in] function The thread routine to be executed.
+ * @param[in] args The arguments to be used by the thread.
+ *
+ * @return The success state or the error code.
+ * - OS_NO_ERR is returned if no error is encountered.
+ * - OS_ERR_FORBIDEN_PRIORITY is returned if the desired priority cannot be
+ * aplied to the thread.
+ * - OS_ERR_MALLOC is returned if the system could not allocate memory for the
+ * new thread.
+ * - OS_ERR_OUT_OF_BOUND if the desired stack size if out of the system's stack
+ * size bounds.
+ * - OS_ERR_UNAUTHORIZED_ACTION is the stack is not a multiple of the system's
+ * page size.
+ */
+OS_RETURN_E sched_create_kernel_thread(kernel_thread_t** thread,
+                                       const uint32_t priority,
+                                       const char* name,
+                                       const THREAD_TYPE_E type,
+                                       const size_t stack_size,
+                                       void* (*function)(void*),
+                                       void* args);
+
+/**
+ * @brief Returns the current process handler.
+ * 
+ * @details Returns the current process handler. If the system is not yet 
+ * initialized, the kernel main process handler is returned,
+ * 
+ * @return The current process handler is returned.
+ */
+kernel_process_t* sched_get_current_process(void);
 
 #endif /* #ifndef __CORE_SCHEDULER_H_ */

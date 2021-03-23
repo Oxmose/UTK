@@ -31,7 +31,6 @@
 #include <exceptions.h>            /* Exception manager */
 #include <panic.h>                 /* Kernel panic */
 #include <memmgt.h>                /* Memory mapping informations */
-#include <paging.h>                /* Memory paging */
 #include <acpi.h>                  /* ACPI manager */
 #include <pic.h>                   /* PIC driver */
 #include <io_apic.h>               /* IO APIC driver */
@@ -41,6 +40,7 @@
 #include <time_management.h>       /* Timer factory */
 #include <bsp_api.h>               /* BSP API */
 #include <scheduler.h>             /* Kernel scheduler */
+#include <syscall.h>               /* System calls manager */
 
 /* UTK configuration file */
 #include <config.h>
@@ -450,11 +450,6 @@ void kernel_kickstart(void)
     INIT_MSG("Memory manager initialized\n",
              "Could not get memory manager [%u]\n",
              err, 1);
-
-    err = paging_init();
-    INIT_MSG("Paging initialized\n",
-             "Could not initialize kernel paging [%u]\n",
-             err, 1);
     
     err =  vga_init();
     err |= graphic_set_selected_driver(&vga_text_driver);
@@ -535,10 +530,17 @@ void kernel_kickstart(void)
                  err, 1);
     }    
 
+    err = syscall_init();
+    INIT_MSG("System calls initialized\n",
+             "Could not initialize System calls [%u]\n",
+             err, 1);
+
 #ifdef TEST_MODE_ENABLED
     bios_call_test();
     panic_test();
 #endif
+
+    
     
     err = sched_init();
     INIT_MSG("Scheduler initialized\n",

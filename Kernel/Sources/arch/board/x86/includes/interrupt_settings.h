@@ -72,6 +72,8 @@
 #define SCHEDULER_SW_INT_LINE      0x21
 /** @brief Defines the panic interrupt line. */
 #define PANIC_INT_LINE             0x2A
+/** @brief Defines the sys call interrupt line. */
+#define SYSCALL_INT_LINE           0x30
 
 /** @brief LAPIC spurious interrupt vector. */
 #define LAPIC_SPURIOUS_INT_LINE MAX_INTERRUPT_LINE

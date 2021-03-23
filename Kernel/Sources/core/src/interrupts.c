@@ -44,7 +44,9 @@
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/** @brief Stores the handlers for each interrupt. */
+/** @brief Stores the handlers for each interrupt. not static because used 
+ * by the exceptions module.
+ */
 custom_handler_t kernel_interrupt_handlers[INT_ENTRY_COUNT];
 
 /** @brief The current interrupt driver to be used by the kernel. */
@@ -109,8 +111,7 @@ static void spurious_handler(void)
  *
  * @param[in, out] cpu_state The cpu registers structure.
  * @param[in] int_id The interrupt number.
- * @param[in, out] stack_state The stack state before the interrupt that contain cs,
- * eip, error code and the eflags register value.
+ * @param[in, out] stack_state The stack state before the interrupt.
  */
 void kernel_interrupt_handler(cpu_state_t cpu_state,
                               uintptr_t int_id,

@@ -27,7 +27,7 @@
 #include <stddef.h>               /* Standard definitions */
 #include <interrupt_settings.h>   /* Interrupts settings */
 #include <acpi.h>                 /* ACPI driver */
-#include <paging.h>               /* Memory management */
+#include <memmgt.h>               /* Memory management */
 #include <critical.h>             /* Critical sections */
 #include <kernel_output.h>        /* Output manager */
 #include <time_management.h>      /* Timer factory */
@@ -159,6 +159,8 @@ static void lapic_init_pit_handler(cpu_state_t* cpu_state, uintptr_t int_id,
 
 OS_RETURN_E lapic_init(void)
 {
+    OS_RETURN_E err;
+
     /* Check IO-APIC support */
     if(acpi_get_io_apic_count() == 0 || acpi_get_lapic_count() == 0)
     {
@@ -169,7 +171,13 @@ OS_RETURN_E lapic_init(void)
     lapic_base_addr = acpi_get_lapic_addr();
 
     /* Map the LAPIC */
-    paging_kmmap_hw(lapic_base_addr, lapic_base_addr, 0x1000, 0, 0);
+    err = memory_declare_hw((uintptr_t)lapic_base_addr, KERNEL_PAGE_SIZE);
+    if(err != OS_NO_ERR)
+    {
+        KERNEL_ERROR("Could not declare IO-APIC region\n");
+        return err;
+    }
+    memory_mmap_direct(lapic_base_addr, lapic_base_addr, 0x1000, 0, 0, 1);
 
     /* Enable all interrupts */
     lapic_write(LAPIC_TPR, 0);
