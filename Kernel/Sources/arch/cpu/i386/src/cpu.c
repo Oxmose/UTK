@@ -852,9 +852,12 @@ uint8_t cpu_is_pcid_capable(void)
 
 
 void cpu_init_thread_context(void (*entry_point)(void), 
-                             const uintptr_t stack_index,
                              kernel_thread_t* thread)
 {
+    uintptr_t stack_index;
+
+    stack_index = thread->kstack_size / sizeof(uintptr_t);
+
     /* Set EIP, ESP and EBP */
     thread->cpu_context.eip = (uintptr_t)entry_point;
     thread->cpu_context.esp = thread->kstack + (stack_index - 17) * 
@@ -865,42 +868,42 @@ void cpu_init_thread_context(void (*entry_point)(void),
     /* Init thread stack */
     if(thread->type == THREAD_TYPE_KERNEL)
     {
-        ((uint32_t*)thread->kstack)[stack_index - 1]  = K_THREAD_INIT_EFLAGS;
-        ((uint32_t*)thread->kstack)[stack_index - 2]  = K_THREAD_INIT_CS;
-        ((uint32_t*)thread->kstack)[stack_index - 6]  = K_THREAD_INIT_DS;
-        ((uint32_t*)thread->kstack)[stack_index - 7]  = K_THREAD_INIT_ES;
-        ((uint32_t*)thread->kstack)[stack_index - 8]  = K_THREAD_INIT_FS;
-        ((uint32_t*)thread->kstack)[stack_index - 9]  = K_THREAD_INIT_GS;
-        ((uint32_t*)thread->kstack)[stack_index - 10] = K_THREAD_INIT_SS;
-        ((uint32_t*)thread->kstack)[stack_index - 11] = K_THREAD_INIT_EAX;
-        ((uint32_t*)thread->kstack)[stack_index - 12] = K_THREAD_INIT_EBX;
-        ((uint32_t*)thread->kstack)[stack_index - 13] = K_THREAD_INIT_ECX;
-        ((uint32_t*)thread->kstack)[stack_index - 14] = K_THREAD_INIT_EDX;
-        ((uint32_t*)thread->kstack)[stack_index - 15] = K_THREAD_INIT_ESI;
-        ((uint32_t*)thread->kstack)[stack_index - 16] = K_THREAD_INIT_EDI;
+        ((uintptr_t*)thread->kstack)[stack_index - 1]  = K_THREAD_INIT_EFLAGS;
+        ((uintptr_t*)thread->kstack)[stack_index - 2]  = K_THREAD_INIT_CS;
+        ((uintptr_t*)thread->kstack)[stack_index - 6]  = K_THREAD_INIT_DS;
+        ((uintptr_t*)thread->kstack)[stack_index - 7]  = K_THREAD_INIT_ES;
+        ((uintptr_t*)thread->kstack)[stack_index - 8]  = K_THREAD_INIT_FS;
+        ((uintptr_t*)thread->kstack)[stack_index - 9]  = K_THREAD_INIT_GS;
+        ((uintptr_t*)thread->kstack)[stack_index - 10] = K_THREAD_INIT_SS;
+        ((uintptr_t*)thread->kstack)[stack_index - 11] = K_THREAD_INIT_EAX;
+        ((uintptr_t*)thread->kstack)[stack_index - 12] = K_THREAD_INIT_EBX;
+        ((uintptr_t*)thread->kstack)[stack_index - 13] = K_THREAD_INIT_ECX;
+        ((uintptr_t*)thread->kstack)[stack_index - 14] = K_THREAD_INIT_EDX;
+        ((uintptr_t*)thread->kstack)[stack_index - 15] = K_THREAD_INIT_ESI;
+        ((uintptr_t*)thread->kstack)[stack_index - 16] = K_THREAD_INIT_EDI;
     }
     else 
     {
-        ((uint32_t*)thread->kstack)[stack_index - 1]  = U_THREAD_INIT_EFLAGS;
-        ((uint32_t*)thread->kstack)[stack_index - 2]  = U_THREAD_INIT_CS;
-        ((uint32_t*)thread->kstack)[stack_index - 6]  = U_THREAD_INIT_DS;
-        ((uint32_t*)thread->kstack)[stack_index - 7]  = U_THREAD_INIT_ES;
-        ((uint32_t*)thread->kstack)[stack_index - 8]  = U_THREAD_INIT_FS;
-        ((uint32_t*)thread->kstack)[stack_index - 9]  = U_THREAD_INIT_GS;
-        ((uint32_t*)thread->kstack)[stack_index - 10] = U_THREAD_INIT_SS;
-        ((uint32_t*)thread->kstack)[stack_index - 11] = U_THREAD_INIT_EAX;
-        ((uint32_t*)thread->kstack)[stack_index - 12] = U_THREAD_INIT_EBX;
-        ((uint32_t*)thread->kstack)[stack_index - 13] = U_THREAD_INIT_ECX;
-        ((uint32_t*)thread->kstack)[stack_index - 14] = U_THREAD_INIT_EDX;
-        ((uint32_t*)thread->kstack)[stack_index - 15] = U_THREAD_INIT_ESI;
-        ((uint32_t*)thread->kstack)[stack_index - 16] = U_THREAD_INIT_EDI;
+        ((uintptr_t*)thread->kstack)[stack_index - 1]  = U_THREAD_INIT_EFLAGS;
+        ((uintptr_t*)thread->kstack)[stack_index - 2]  = U_THREAD_INIT_CS;
+        ((uintptr_t*)thread->kstack)[stack_index - 6]  = U_THREAD_INIT_DS;
+        ((uintptr_t*)thread->kstack)[stack_index - 7]  = U_THREAD_INIT_ES;
+        ((uintptr_t*)thread->kstack)[stack_index - 8]  = U_THREAD_INIT_FS;
+        ((uintptr_t*)thread->kstack)[stack_index - 9]  = U_THREAD_INIT_GS;
+        ((uintptr_t*)thread->kstack)[stack_index - 10] = U_THREAD_INIT_SS;
+        ((uintptr_t*)thread->kstack)[stack_index - 11] = U_THREAD_INIT_EAX;
+        ((uintptr_t*)thread->kstack)[stack_index - 12] = U_THREAD_INIT_EBX;
+        ((uintptr_t*)thread->kstack)[stack_index - 13] = U_THREAD_INIT_ECX;
+        ((uintptr_t*)thread->kstack)[stack_index - 14] = U_THREAD_INIT_EDX;
+        ((uintptr_t*)thread->kstack)[stack_index - 15] = U_THREAD_INIT_ESI;
+        ((uintptr_t*)thread->kstack)[stack_index - 16] = U_THREAD_INIT_EDI;
     }
     
-    ((uint32_t*)thread->kstack)[stack_index - 3]  = thread->cpu_context.eip;
-    ((uint32_t*)thread->kstack)[stack_index - 4]  = 0; /* UNUSED (error) */
-    ((uint32_t*)thread->kstack)[stack_index - 5]  = 0; /* UNUSED (int id) */
-    ((uint32_t*)thread->kstack)[stack_index - 17] = thread->cpu_context.ebp;
-    ((uint32_t*)thread->kstack)[stack_index - 18] = thread->cpu_context.esp;
+    ((uintptr_t*)thread->kstack)[stack_index - 3]  = thread->cpu_context.eip;
+    ((uintptr_t*)thread->kstack)[stack_index - 4]  = 0; /* UNUSED (error) */
+    ((uintptr_t*)thread->kstack)[stack_index - 5]  = 0; /* UNUSED (int id) */
+    ((uintptr_t*)thread->kstack)[stack_index - 17] = thread->cpu_context.ebp;
+    ((uintptr_t*)thread->kstack)[stack_index - 18] = thread->cpu_context.esp;
 }
 
 uintptr_t cpu_get_current_pgdir(void)
@@ -964,4 +967,33 @@ void cpu_set_next_thread_instruction(const cpu_state_t* cpu_state,
     (void) cpu_state;
     /* Set next instruction */
     stack_state->eip = next_inst;
+}
+
+void cpu_syscall(uint32_t syscall_id, void* params)
+{
+    __asm__ __volatile__(
+        "mov %0, %%eax\n\t"
+        "mov %1, %%ebx\n\t"
+        "int %2\n\t" 
+        :
+        : "r" (syscall_id), "r" (params), "i" (SYSCALL_INT_LINE) 
+        : "%eax", "%ebx");
+}
+
+void cpu_get_syscall_data(const cpu_state_t* cpu_state, 
+                          const stack_state_t* stack_state, 
+                          uint32_t* syscall_id,
+                          void** params)
+{
+    (void)stack_state;
+
+    /* On the i386, the function ID is in EAX and the prameters in EBX */
+    if(syscall_id != NULL)
+    {
+        *syscall_id = cpu_state->eax;
+    }
+    if(params != NULL)
+    {
+        *params = (void*)cpu_state->ebx;
+    }
 }

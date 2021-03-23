@@ -26,6 +26,9 @@
 #define KERNEL_MEM_OFFSET 0xE0000000 
 #define KERNEL_MEM_START  0x00100000
 
+/* Defines the processes virtual space start address */
+#define PROCESS_START_VIRT_SPACE 0x00100000
+
 /* Kernel stack default size
  * WARNING This value should be updated to fit other configuration files
  */
@@ -96,17 +99,16 @@
 #define KHEAP_DEBUG_ENABLED 0
 #define KICKSTART_DEBUG_ENABLED 0
 #define LAPIC_DEBUG_ENABLED 0
-#define MEMMGT_DEBUG_ENABLED 0
-#define PAGING_DEBUG_ENABLED 0
+#define MEMMGT_DEBUG_ENABLED 1
 #define PIC_DEBUG_ENABLED 0
 #define PIT_DEBUG_ENABLED 0
 #define QUEUE_DEBUG_ENABLED 0
 #define RTC_DEBUG_ENABLED 0
 #define SCHED_DEBUG_ENABLED 0
-#define SCHED_SWITCH_DEBUG_ENABLED 1
+#define SCHED_SWITCH_DEBUG_ENABLED 0
 #define SERIAL_DEBUG_ENABLED 0
 #define TIME_MGT_DEBUG_ENABLED 0
 #define VGA_DEBUG_ENABLED 0
-
+#define SYSCALL_DEBUG_ENABLED 1
 
 #endif /* #ifndef __GLOBAL_CONFIG_H_ */

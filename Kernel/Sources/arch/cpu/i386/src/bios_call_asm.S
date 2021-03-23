@@ -163,7 +163,7 @@ section .text
         inc  eax
         mov  cr0, eax
 
-        ; Enable paging
+        ; Enable paging and write protect
         mov eax, cr0
         or  eax, 0x80010000
         mov cr0, eax

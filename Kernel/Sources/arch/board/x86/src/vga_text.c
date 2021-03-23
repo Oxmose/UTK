@@ -24,7 +24,7 @@
 #include <cpu.h>             /* CPU port manipulation */
 #include <uart.h>            /* UART driver */
 #include <kernel_output.h>   /* Kernel output manager */
-#include <paging.h>          /* Paging manager */
+#include <memmgt.h>          /* Memory management */
 
 /* UTK configuration file */
 #include <config.h>
@@ -258,19 +258,30 @@ inline uint16_t* vga_get_framebuffer(const uint32_t line, const uint32_t column)
 
 OS_RETURN_E vga_init(void)
 {
+    OS_RETURN_E err;
+
     KERNEL_DEBUG(VGA_DEBUG_ENABLED, "[VGA] Initializing VGA text driver");
 
     /* Init framebuffer */
     vga_framebuffer = (uint16_t*)VGA_TEXT_FRAMEBUFFER;
 
-    /* Map the driver's memory */
-    paging_kmmap_hw(vga_framebuffer, 
-                    vga_framebuffer,
-                    VGA_TEXT_FRAMEBUFFER_SIZE,
-                    0,
-                    0);
+    /* Declared the new hardware */
+    err = memory_declare_hw((uintptr_t)vga_framebuffer, 
+                             VGA_TEXT_FRAMEBUFFER_SIZE);
+    if(err != OS_NO_ERR)
+    {
+        return err;
+    }
 
-    return OS_NO_ERR;
+    /* Map the driver's memory */
+    memory_mmap_direct(vga_framebuffer, 
+                        vga_framebuffer,
+                        VGA_TEXT_FRAMEBUFFER_SIZE,
+                        0,
+                        0,
+                        1);
+
+    return err;
 }
 
 void vga_clear_screen(void)

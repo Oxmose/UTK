@@ -18,7 +18,7 @@
  ******************************************************************************/
 
 #include <stdint.h>   /* Generic int types */
-#include <paging.h>   /* Memory management */
+#include <memmgt.h>   /* Memory management */
 #include <panic.h>    /* Kernel panic */
 #include <critical.h> /* Critical sections */
 
@@ -50,20 +50,20 @@ void bios_call(uint32_t intnum, bios_int_regs_t* regs)
 {
 	uint32_t    int_state;
 
+	ENTER_CRITICAL(int_state);
 	/* Map the RM core */
-	paging_kmmap_hw((void*)&_KERNEL_BIOS_MEMORY_BASE, 
-					(void*)&_KERNEL_BIOS_MEMORY_BASE, 
-					(size_t)&_KERNEL_BIOS_MEMORY_SIZE, 
-					0, 
-					1);
-
-    ENTER_CRITICAL(int_state);
+	memory_mmap_direct((void*)&_KERNEL_BIOS_MEMORY_BASE, 
+						(void*)&_KERNEL_BIOS_MEMORY_BASE, 
+						(size_t)&_KERNEL_BIOS_MEMORY_SIZE, 
+						0, 
+						1,
+						1);
 
 	__bios_call(intnum, regs);
 
-    EXIT_CRITICAL(int_state);
-
 	/* Unmap RM core */
-	paging_kmunmap((void*)&_KERNEL_BIOS_MEMORY_BASE, 
+	memory_munmap((void*)&_KERNEL_BIOS_MEMORY_BASE, 
 	               (size_t)&_KERNEL_BIOS_MEMORY_SIZE);
+
+	EXIT_CRITICAL(int_state);
 }

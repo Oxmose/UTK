@@ -177,6 +177,8 @@ enum OS_RETURN
     OS_ERR_KERNEL_MEM_OFFSET_UNALIGNED     = 60,
     /** @brief UTK Error value. */
     OS_ERR_HANDLER_ALREADY_EXISTS          = 61,
+    /** @brief UTK Error value. */
+    OS_ERR_SYSCALL_UNKNOWN                 = 62,
 };
 
 /**

@@ -20,8 +20,8 @@
 #include <stddef.h>        /* Standard definitions */
 #include <string.h>        /* String manipualtion */
 #include <kernel_output.h> /* Kernel output methods */
-#include <paging.h>        /* Memory management */
-#include <arch_paging.h>   /* Memory information */
+#include <memmgt.h>        /* Memory management */
+#include <arch_memmgt.h>   /* Memory information */
 #include <panic.h>         /* Kernel panic */
 #include <queue.h>         /* Queue library */
 #include <kheap.h>         /* Kernel heap */
@@ -235,6 +235,7 @@ static void add_mapped_page(uintptr_t addr)
 static void acpi_map_data(const void* start_addr, size_t size)
 {
     uintptr_t   addr_align;
+    OS_RETURN_E err;
 
     /* Align address and size */
     addr_align = (uintptr_t)start_addr & PAGE_ALIGN_MASK;
@@ -253,11 +254,18 @@ static void acpi_map_data(const void* start_addr, size_t size)
             KERNEL_DEBUG(ACPI_DEBUG_ENABLED, 
                          "[ACPI] Mapping: 0x%p", 
                          addr_align);
-            paging_kmmap_hw((void*)addr_align, 
-                            (void*)addr_align, 
-                            KERNEL_PAGE_SIZE, 
-                            1, 
-                            0);
+            err = memory_declare_hw(addr_align, KERNEL_PAGE_SIZE);
+            if(err != OS_NO_ERR)
+            {
+                KERNEL_ERROR("Could not declare ACPI region\n");
+                KERNEL_PANIC(err)
+            }
+            memory_mmap_direct((void*)addr_align, 
+                                (void*)addr_align, 
+                                KERNEL_PAGE_SIZE, 
+                                1, 
+                                0,
+                                1);
             
             add_mapped_page(addr_align);
         }

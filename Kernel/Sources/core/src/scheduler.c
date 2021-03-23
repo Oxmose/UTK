@@ -24,7 +24,6 @@
 #include <stdlib.h>             /* Standard library */
 #include <kheap.h>              /* Kernel heap */
 #include <memmgt.h>             /* Memory management*/
-#include <paging.h>             /* Memory management */
 #include <cpu_api.h>            /* CPU management */
 #include <panic.h>              /* Kernel panic */
 #include <interrupts.h>         /* Interrupt management */
@@ -74,16 +73,17 @@ static volatile uint32_t first_sched;
 
 /** @brief Idle thread handle. */
 static kernel_thread_t* idle_thread;
-/** @brief Idle thread queue node. */
-static queue_node_t*    idle_thread_node;
 
 /** @brief Kernel main process. */
 static kernel_process_t main_kprocess;
 
 /** @brief Current active thread handle. */
-static kernel_thread_t* active_thread;
+static kernel_thread_t* active_thread = NULL;
 /** @brief Current active thread queue node. */
 static queue_node_t*    active_thread_node;
+
+/** @brief Current active process handler. */
+static kernel_process_t* active_process;
 
 /** @brief Current system state. */
 static volatile SYSTEM_STATE_E system_state;
@@ -111,9 +111,6 @@ static queue_t* active_threads_table[KERNEL_LOWEST_PRIORITY + 1];
  * value.
  */
 static queue_t* sleeping_threads_table;
-
-/** @brief Zombie threads table. */
-static queue_t* zombie_threads_table;
 
 /*******************************************************************************
  * FUNCTIONS
@@ -153,16 +150,6 @@ static void thread_exit(void)
 
     ENTER_CRITICAL(int_state);
 
-    /* Enqueue thread in zombie list. */
-    err = queue_push(active_thread_node, zombie_threads_table);
-    if(err != OS_NO_ERR)
-    {
-        EXIT_CRITICAL(int_state);
-
-        KERNEL_ERROR("Could not enqueue zombie thread[%d]\n", err);
-        KERNEL_PANIC(err);
-    }
-
     /* Search for joining thread */
     if(active_thread->joining_thread != NULL)
     {
@@ -187,12 +174,14 @@ static void thread_exit(void)
         }
     }
 
+    /* TODO: Clear process if there no no other thread that are not zombies */
+
     EXIT_CRITICAL(int_state);
 
     /* Schedule thread */
     sched_schedule();
 }
-#if 0
+
 /**
  * @brief Cleans a thread memory and resources.
  *
@@ -202,14 +191,57 @@ static void thread_exit(void)
  *
  * @param[in] thread The thread to clean.
  */
-void sched_clean_thread(kernel_thread_t* thread)
+static void sched_clean_thread(kernel_thread_t* thread)
 {
     /* Release memory */
     kfree((void*)thread->stack);
-    kfree((void*)thread->kstack);
+
+    /* TODO: Release thread,s stack from process */
+
     kfree(thread);
 }
 
+/**
+ * @brief Copy a kernel thread to another kernel thread.
+ * 
+ * @details Copy a kernel thread to another kernel thread. The copied thread 
+ * will be given a new tid, its state will be set to READY and the new thread 
+ * will not inherit the joining thread of the source thread. 
+ * 
+ * @param[out] dst_thread The thread that will receive the copy.
+ * @param[in] stc_thread The thread to copy.
+ * 
+ * @return OS_NO_ERR is returned on success. Otherwise an error code is 
+ * returned.
+ */
+static OS_RETURN_E sched_copy_kernel_thread(kernel_thread_t* dst_thread,
+                                            const kernel_thread_t* src_thread)
+{
+    uint32_t int_state;
+
+    if(dst_thread == NULL || src_thread == NULL)
+    {
+        return OS_ERR_NULL_POINTER;
+    }
+
+    /* Copy metadata */
+    memcpy(dst_thread, src_thread, sizeof(kernel_thread_t));
+
+    /* Init new thread private data */
+    dst_thread->state = THREAD_STATE_COPYING;
+    dst_thread->joining_thread = NULL;
+
+    /* Set new  TID */
+    ENTER_CRITICAL(int_state);
+
+    dst_thread->tid = last_given_tid++;  
+
+    EXIT_CRITICAL(int_state);
+    
+
+    return OS_NO_ERR;
+}                                        
+#if 0
 /**
  * @brief Cleans a joined thread footprint in the system.
  *
@@ -373,7 +405,7 @@ static void* idle_sys(void* args)
  * 
  * @return On success OS_NO_ERR is returned. Otherwise an error code is given.
  */
-static OS_RETURN_E create_main_kprocess()
+static OS_RETURN_E create_main_kprocess(void)
 {
     OS_RETURN_E err;
 
@@ -392,9 +424,17 @@ static OS_RETURN_E create_main_kprocess()
         queue_delete_queue(&main_kprocess.children);
         return err;
     }
-    main_kprocess.free_page_table = memory_get_kernel_free_pages();
+    main_kprocess.free_page_table = memory_create_free_page_table(&err);
+    if(err != OS_NO_ERR)
+    {
+        queue_delete_queue(&main_kprocess.children);
+        queue_delete_queue(&main_kprocess.threads);
+        return err;
+    }
     main_kprocess.page_dir = cpu_get_current_pgdir();
     strncpy(main_kprocess.name, "UTK-Kernel\0", 11);
+
+    active_process = &main_kprocess;
 
     return err;
 }
@@ -406,84 +446,23 @@ static OS_RETURN_E create_main_kprocess()
  * 
  * @return On success OS_NO_ERR is returned. Otherwise an error code is given.
  */
-static OS_RETURN_E create_idle(void)
+static void create_idle(void)
 {
-    OS_RETURN_E   err;
-    uint32_t      stack_index;
-    queue_node_t* idle_thread_node_list;
+    OS_RETURN_E err;
 
-    idle_thread = kmalloc(sizeof(kernel_thread_t));
-    if(idle_thread == NULL)
-    {
-        KERNEL_ERROR("Could not allocate IDLE thread structure\n");
-        KERNEL_PANIC(OS_ERR_MALLOC);
-    }
-    idle_thread_node = queue_create_node(idle_thread, 
-                                         QUEUE_ALLOCATOR(kmalloc, kfree), 
-                                         &err);
+    err = sched_create_kernel_thread(&idle_thread, 
+                                     IDLE_THREAD_PRIORITY, 
+                                     "IDLE", 
+                                     THREAD_TYPE_KERNEL, 
+                                     KERNEL_STACK_SIZE, 
+                                     idle_sys, 
+                                     NULL);
+
     if(err != OS_NO_ERR)
     {
-        KERNEL_ERROR("Could not create IDLE thread node\n");
+        KERNEL_ERROR("Could not create IDLE thread[%d]\n", err);
         KERNEL_PANIC(err);
     }
-    idle_thread_node_list = queue_create_node(idle_thread, 
-                                         QUEUE_ALLOCATOR(kmalloc, kfree), 
-                                         &err);
-    if(err != OS_NO_ERR )
-    {
-        KERNEL_ERROR("Could not create IDLE thread node list\n");
-        KERNEL_PANIC(err);
-    }
-
-    memset(idle_thread, 0, sizeof(kernel_thread_t));
-
-    /* Init thread settings */
-    idle_thread->tid         = last_given_tid;
-    idle_thread->type        = THREAD_TYPE_KERNEL;    
-    idle_thread->priority    = IDLE_THREAD_PRIORITY;
-    idle_thread->state       = THREAD_STATE_READY;
-    idle_thread->function    = idle_sys;
-    idle_thread->kstack_size = SCHEDULER_IDLE_STACK_SIZE;
-
-    strncpy(idle_thread->name, "IDLE\0", 5);
-
-    /* Init thread stack */
-    stack_index = (idle_thread->kstack_size + STACK_ALIGN - 1) & 
-                  (~(STACK_ALIGN - 1));
-    idle_thread->kstack = (uintptr_t)kmalloc(stack_index * sizeof(uint8_t));
-    if(idle_thread->kstack == (uintptr_t)NULL)
-    {
-        KERNEL_ERROR("Could not create IDLE thread stack\n");
-        KERNEL_PANIC(OS_ERR_MALLOC);
-    }
-
-    cpu_init_thread_context(thread_wrapper, stack_index, idle_thread);
-
-    /* Add the thread to the main kernel process. */
-    err = queue_push(idle_thread_node, main_kprocess.threads);
-    if(err != OS_NO_ERR)
-    {
-        KERNEL_ERROR("Could add IDLE thread to kernel main process\n");
-        KERNEL_PANIC(err);
-    }
-
-    /* Add idle to the list of read ythreads */
-    err = queue_push(idle_thread_node_list, 
-                     active_threads_table[idle_thread->priority]);
-    if(err != OS_NO_ERR)
-    {
-        KERNEL_ERROR("Could add IDLE thread to kernel main process\n");
-        KERNEL_PANIC(err);
-    }
-
-    idle_thread->process = &main_kprocess;
-
-    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "[SCHED] IDLE created");
-
-    ++thread_count;
-    ++last_given_tid;
-
-    return OS_NO_ERR;
 }
 
 
@@ -494,72 +473,39 @@ static OS_RETURN_E create_idle(void)
  * 
  * @return On success OS_NO_ERR is returned. Otherwise an error code is given.
  */
-static OS_RETURN_E create_init(void)
+static void create_init(void)
 {
-    OS_RETURN_E      err;
-    uint32_t         stack_index;
+    OS_RETURN_E err;
+
     kernel_thread_t* init_thread;
-    queue_node_t*    init_thread_node;
 
-    init_thread = kmalloc(sizeof(kernel_thread_t));
-    if(init_thread == NULL)
-    {
-        KERNEL_ERROR("Could not allocate INIT thread structure\n");
-        return OS_ERR_MALLOC;
-    }
-    init_thread_node = queue_create_node(init_thread, 
-                                         QUEUE_ALLOCATOR(kmalloc, kfree), 
-                                         &err);
-    if(err != OS_NO_ERR )
-    {
-        kfree(init_thread);
-        return err;
-    }
+    err = sched_create_kernel_thread(&init_thread, 
+                                     KERNEL_HIGHEST_PRIORITY, 
+                                     "INIT", 
+                                     THREAD_TYPE_KERNEL, 
+                                     KERNEL_STACK_SIZE, 
+                                     init_sys, 
+                                     NULL);
 
-    memset(init_thread, 0, sizeof(kernel_thread_t));
-
-    /* Init thread settings */
-    init_thread->tid         = last_given_tid;
-    init_thread->type        = THREAD_TYPE_KERNEL;    
-    init_thread->priority    = KERNEL_INIT_PRIORITY;
-    init_thread->state       = THREAD_STATE_RUNNING;
-    init_thread->function    = init_sys;
-    init_thread->kstack_size = KERNEL_STACK_SIZE;
-
-    strncpy(init_thread->name, "INIT\0", 5);
-
-    /* Init thread stack */
-    stack_index = (init_thread->kstack_size + STACK_ALIGN - 1) & 
-                  (~(STACK_ALIGN - 1));
-    init_thread->kstack = (uintptr_t)kmalloc(stack_index * sizeof(uint8_t));
-    if(init_thread->kstack == (uintptr_t)NULL)
-    {
-        KERNEL_ERROR("Could not allocate INIT stack structure\n");
-        kfree(init_thread);
-        return OS_ERR_MALLOC;
-    }
-
-    cpu_init_thread_context(thread_wrapper, stack_index, init_thread);
-
-    /* Add the thread to the main kernel process. */
-    err = queue_push(init_thread_node, main_kprocess.threads);
     if(err != OS_NO_ERR)
     {
-        KERNEL_ERROR("Could add INIT thread to kernel main process\n");
-        return err;
+        KERNEL_ERROR("Could not create INIT thread[%d]\n", err);
+        KERNEL_PANIC(err);
     }
-    init_thread->process = &main_kprocess;
-
-    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "[SCHED] INIT created");
-
-    ++thread_count;
-    ++last_given_tid;
 
     /* Initializes the scheduler active thread */
-    active_thread = init_thread;
-    active_thread_node = init_thread_node;
+    init_thread->state = SYSTEM_STATE_RUNNING;
+    active_thread      = init_thread;
+    active_thread_node = queue_find(
+        active_threads_table[KERNEL_HIGHEST_PRIORITY], 
+        init_thread, 
+        &err);
 
-    return OS_NO_ERR;
+    if(err != OS_NO_ERR)
+    {
+        KERNEL_ERROR("Could not create INIT thread[%d]\n", err);
+        KERNEL_PANIC(err);
+    }
 }
 /**
  * @brief Selects the next thread to be scheduled.
@@ -679,16 +625,19 @@ static void select_thread(void)
     }
 
     active_thread = (kernel_thread_t*)active_thread_node->data;
-
-    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, 
-                 "[SCHED] Elected new thread: %d", 
-                 active_thread->tid);
+    active_process = active_thread->process;
 
     if(active_thread == NULL)
     {
         KERNEL_ERROR("Next thread to schedule should not be NULL\n");
         KERNEL_PANIC(err);
     }
+
+    
+    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, 
+                 "[SCHED] Elected new thread: %d", 
+                 active_thread->tid);
+                 
     active_thread->state = THREAD_STATE_RUNNING;
 }
 
@@ -735,7 +684,7 @@ static void schedule_int(cpu_state_t* cpu_state, uintptr_t int_id,
 #endif
 
      /* Restore thread context */
-    cpu_update_pgdir(active_thread->process->page_dir);
+    cpu_update_pgdir(active_process->page_dir);
     cpu_restore_context(cpu_state, stack_state, active_thread);
 
     first_sched = 1;
@@ -775,19 +724,11 @@ OS_RETURN_E sched_init(void)
         }
     }
 
-    zombie_threads_table = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree), 
-                                              &err);
-    if(err != OS_NO_ERR)
-    {
-        KERNEL_ERROR("Could not create zombie_threads_table[%d]\n", err);
-        KERNEL_PANIC(err);
-    }
-
     sleeping_threads_table = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree),
                                                 &err);
     if(err != OS_NO_ERR)
     {
-        kernel_error("Could not create sleeping_threads_table [%d]\n",
+        KERNEL_ERROR("Could not create sleeping_threads_table [%d]\n",
                      err);
         KERNEL_PANIC(err);
     }
@@ -796,23 +737,13 @@ OS_RETURN_E sched_init(void)
     err = create_main_kprocess();
     if(err != OS_NO_ERR)
     {
-        kernel_error("Could not create main kernel process[%d]\n", err);
+        KERNEL_ERROR("Could not create main kernel process[%d]\n", err);
         KERNEL_PANIC(err);
     }
 
     /* Create idle and init thread */
-    err = create_idle();
-    if(err != OS_NO_ERR)
-    {
-        kernel_error("Could not create IDLE thread[%d]\n", err);
-        KERNEL_PANIC(err);
-    }
-    err = create_init();
-    if(err != OS_NO_ERR)
-    {
-        kernel_error("Could not create INIT thread[%d]\n", err);
-        KERNEL_PANIC(err);
-    }
+    create_idle();
+    create_init();
 
     /* Register SW interrupt scheduling */
     err = kernel_interrupt_register_int_handler(SCHEDULER_SW_INT_LINE,
@@ -873,6 +804,10 @@ uint32_t sched_get_thread_count(void)
 
 int32_t sched_get_tid(void)
 {
+    if(first_sched == 0)
+    {
+        return -1;
+    }
     return active_thread->tid;
 }
 
@@ -887,12 +822,16 @@ kernel_thread_t* sched_get_self(void)
 
 int32_t sched_get_pid(void)
 {
-    return active_thread->process->pid;
+    if(first_sched == 0)
+    {
+        return -1;
+    }
+    return active_process->pid;
 }
 
 int32_t sched_get_ppid(void)
 {
-    return active_thread->process->ppid;
+    return active_process->ppid;
 }
 
 uint32_t sched_get_priority(void)
@@ -943,8 +882,8 @@ uintptr_t sched_get_thread_phys_pgdir(void)
     return cpu_get_current_pgdir();
 }
 
-#if 0
-OS_RETURN_E sched_fork_process(void)
+
+int32_t sched_fork_process(void)
 {
 
     kernel_process_t* new_proc;
@@ -958,28 +897,17 @@ OS_RETURN_E sched_fork_process(void)
     new_proc = kmalloc(sizeof(kernel_process_t));
     if(new_proc == NULL)
     {
-        return OS_ERR_MALLOC;
+        return -1;
     }
     memset(new_proc, 0, sizeof(kernel_process_t));
-
-    /* Create new free page table and page directory */
-    err = memory_copy_process_image(&new_proc, 
-                                    &active_thread->process);
-    if(err != OS_NO_ERR)
-    {
-        kfree(new_proc);
-        return err;
-    }
 
     /* Set the process control block */
     new_proc->children = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree), 
                                             &err);
     if(err != OS_NO_ERR)
     {
-        memory_delete_proc_pgdir(new_proc->page_dir);
-        memory_delete_proc_free_pgtable(new_proc->free_page_table);
         kfree(new_proc);
-        return err;
+        return -1;
     }
     new_proc->threads = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree), 
                                             &err);
@@ -987,29 +915,35 @@ OS_RETURN_E sched_fork_process(void)
     {
         queue_delete_queue(&new_proc->children);
 
-        memory_delete_proc_pgdir(new_proc->page_dir);
-        memory_delete_proc_free_pgtable(new_proc->free_page_table);
-
         kfree(new_proc);
-        return err;
+        return -1;
     }    
     strncpy(new_proc->name, 
-            active_thread->process->name, 
+            active_process->name, 
             THREAD_NAME_MAX_LENGTH);
 
     /* Create the main process thread */
-    err = sched_copy_kernel_thread(&main_thread, active_thread);
+    main_thread = kmalloc(sizeof(kernel_thread_t));
+    if(main_thread == NULL)
+    {
+        queue_delete_queue(&new_proc->children);
+        queue_delete_queue(&new_proc->threads);
+
+        kfree(new_proc);
+        return -1;
+    }
+    main_thread->state = THREAD_STATE_COPYING;
+    err = sched_copy_kernel_thread(main_thread, active_thread);
     if(err != OS_NO_ERR)
     {
         queue_delete_queue(&new_proc->children);
         queue_delete_queue(&new_proc->threads);
 
-        memory_delete_proc_pgdir(new_proc->page_dir);
-        memory_delete_proc_free_pgtable(new_proc->free_page_table);
-
+        sched_clean_thread(main_thread);
         kfree(new_proc);
-        return err;
+        return -1;
     }  
+    main_thread->process = new_proc;
 
     /* Add the main process thread to the scheduler table and children table */
     main_thread_node = queue_create_node(&main_thread, 
@@ -1020,12 +954,9 @@ OS_RETURN_E sched_fork_process(void)
         queue_delete_queue(&new_proc->children);
         queue_delete_queue(&new_proc->threads);
 
-        memory_delete_proc_pgdir(new_proc->page_dir);
-        memory_delete_proc_free_pgtable(new_proc->free_page_table);
-
-        sched_delete_thread(main_thread);
+        sched_clean_thread(main_thread);
         kfree(new_proc);
-        return err;
+        return -1;
     }  
     err = queue_push(main_thread_node, new_proc->threads);
     if(err != OS_NO_ERR)
@@ -1035,12 +966,9 @@ OS_RETURN_E sched_fork_process(void)
 
         queue_delete_node(&main_thread_node);
 
-        memory_delete_proc_pgdir(new_proc->page_dir);
-        memory_delete_proc_free_pgtable(new_proc->free_page_table);
-
-        sched_delete_thread(main_thread);
+        sched_clean_thread(main_thread);
         kfree(new_proc);
-        return err;
+        return -1;
     }  
 
     main_thread_node_th = queue_create_node(&main_thread, 
@@ -1055,13 +983,13 @@ OS_RETURN_E sched_fork_process(void)
 
         queue_delete_node(&main_thread_node);
 
-        memory_delete_proc_pgdir(new_proc->page_dir);
-        memory_delete_proc_free_pgtable(new_proc->free_page_table);
-
-        sched_delete_thread(main_thread);
+        sched_clean_thread(main_thread);
         kfree(new_proc);
-        return err;
+        return -1;
     }  
+
+    ENTER_CRITICAL(int_state);
+    main_thread->state = THREAD_STATE_READY;
     err = queue_push(main_thread_node, 
                      active_threads_table[main_thread->priority]);
     if(err != OS_NO_ERR)
@@ -1074,14 +1002,13 @@ OS_RETURN_E sched_fork_process(void)
         queue_delete_node(&main_thread_node);
         queue_delete_node(&main_thread_node_th);
 
-        memory_delete_proc_pgdir(new_proc->page_dir);
-        memory_delete_proc_free_pgtable(new_proc->free_page_table);
-
-        sched_delete_thread(main_thread);
+        sched_clean_thread(main_thread);
         kfree(new_proc);
-        return err;
+        return -1;
     }  
 
+    /* Create new free page table and page directory */
+    err = memory_copy_self_mapping(new_proc);
     if(err != OS_NO_ERR)
     {
         queue_remove(new_proc->threads, main_thread_node);
@@ -1094,18 +1021,152 @@ OS_RETURN_E sched_fork_process(void)
         queue_delete_node(&main_thread_node);
         queue_delete_node(&main_thread_node_th);
 
-        memory_delete_proc_pgdir(new_proc->page_dir);
-        memory_delete_proc_free_pgtable(new_proc->free_page_table);
-
-        sched_delete_thread(main_thread);
+        sched_clean_thread(main_thread);
         kfree(new_proc);
-        return err;
+        return -1;
     } 
-
-    ENTER_CRITICAL(int_state);
-    new_proc->pid = last_given_pid++;
+    
+    new_proc->pid  = last_given_pid++;
+    new_proc->ppid = active_process->pid;
     EXIT_CRITICAL(int_state);
 
-    return OS_NO_ERR:
+    return new_proc->pid;
 }
-#endif
+
+OS_RETURN_E sched_create_kernel_thread(kernel_thread_t** thread,
+                                       const uint32_t priority,
+                                       const char* name,
+                                       const THREAD_TYPE_E type,
+                                       const size_t stack_size,
+                                       void* (*function)(void*),
+                                       void* args)
+{
+    OS_RETURN_E      err;
+    kernel_thread_t* new_thread;
+    queue_node_t*    new_thread_node;
+    queue_node_t*    new_thread_node_table;
+    uint32_t         int_state;
+
+    /* Check if priority is valid */
+    if(thread == NULL)
+    {
+        return OS_ERR_NULL_POINTER;
+    }
+    if(priority > KERNEL_LOWEST_PRIORITY)
+    {
+       return OS_ERR_FORBIDEN_PRIORITY;
+    }
+
+    if((stack_size & (KERNEL_PAGE_SIZE - 1)) != 0)
+    {
+        return OS_ERR_UNAUTHORIZED_ACTION;
+    }
+
+    new_thread = kmalloc(sizeof(kernel_thread_t));
+    if(new_thread == NULL)
+    {
+        KERNEL_ERROR("Could not allocate thread structure\n");
+        return OS_ERR_MALLOC;
+    }
+    new_thread_node = queue_create_node(new_thread, 
+                                        QUEUE_ALLOCATOR(kmalloc, kfree), 
+                                        &err);
+    if(err != OS_NO_ERR)
+    {
+        kfree(new_thread);
+        return err;
+    }
+
+    new_thread_node_table = queue_create_node(new_thread, 
+                                              QUEUE_ALLOCATOR(kmalloc, kfree), 
+                                              &err);
+    if(err != OS_NO_ERR)
+    {
+        queue_delete_node(&new_thread_node);
+        kfree(new_thread);
+        return err;
+    }
+
+    memset(new_thread, 0, sizeof(kernel_thread_t));
+
+    /* Init thread settings */
+    new_thread->process      = active_process;
+    new_thread->type         = type;    
+    new_thread->priority     = priority;
+    new_thread->state        = THREAD_STATE_READY;
+    new_thread->args         = args;
+    new_thread->function     = function;
+    new_thread->kstack_size  = KERNEL_STACK_SIZE;
+    new_thread->stack_size   = stack_size;
+
+    strncpy(new_thread->name, name, THREAD_NAME_MAX_LENGTH);
+
+    /* Init thread stack */
+    new_thread->kstack = (uintptr_t)memory_alloc_stack(new_thread->kstack_size);
+    if(new_thread->kstack == (uintptr_t)NULL)
+    {
+        KERNEL_ERROR("Could not allocate kernel stack structure\n");
+        queue_delete_node(&new_thread_node);
+        queue_delete_node(&new_thread_node_table);
+        kfree(new_thread);
+        return OS_ERR_MALLOC;
+    }
+    /* Kernel thread don't use the kernel stack */
+    if(type != THREAD_TYPE_KERNEL)
+    {
+        new_thread->stack = (uintptr_t)memory_alloc_stack(
+                                                        new_thread->stack_size);
+        if(new_thread->stack == (uintptr_t)NULL)
+        {
+            KERNEL_ERROR("Could not allocate stack structure\n");
+            queue_delete_node(&new_thread_node);
+            queue_delete_node(&new_thread_node_table);
+            memory_free_stack(new_thread->kstack, new_thread->kstack_size);
+            kfree(new_thread);
+            return OS_ERR_MALLOC;
+        }
+    }
+    cpu_init_thread_context(thread_wrapper, new_thread);
+
+    /* Add the thread to the main kernel process. */
+    err = queue_push(new_thread_node, main_kprocess.threads);
+    if(err != OS_NO_ERR)
+    {
+        queue_delete_node(&new_thread_node);
+        queue_delete_node(&new_thread_node_table);
+        memory_free_stack(new_thread->kstack, new_thread->kstack_size);
+        memory_free_stack(new_thread->stack, new_thread->stack_size);
+        kfree(new_thread);
+        KERNEL_ERROR("Could not add thread to process\n");
+        return err;
+    }
+    err = queue_push(new_thread_node_table, 
+                     active_threads_table[new_thread->priority]);
+    if(err != OS_NO_ERR)
+    {
+        queue_remove(main_kprocess.threads, new_thread_node);
+        queue_delete_node(&new_thread_node);
+        queue_delete_node(&new_thread_node_table);
+        memory_free_stack(new_thread->kstack, new_thread->kstack_size);
+        memory_free_stack(new_thread->stack, new_thread->stack_size);
+        kfree(new_thread);
+        KERNEL_ERROR("Could add thread to proess\n");
+        return err;
+    }
+
+    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "[SCHED] Kernel thread created");
+
+    ENTER_CRITICAL(int_state);
+    new_thread->tid = last_given_tid++;
+    ++thread_count;
+    EXIT_CRITICAL(int_state);
+
+    *thread = new_thread;
+
+    return OS_NO_ERR;
+}
+
+kernel_process_t* sched_get_current_process(void)
+{
+    return active_process;
+}

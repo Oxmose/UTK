@@ -28,7 +28,7 @@
 #include <acpi.h>               /* ACPI driver */
 #include <lapic.h>              /* LAPIC driver */
 #include <pic.h>                /* PIC driver */
-#include <paging.h>             /* Memory management */
+#include <memmgt.h>             /* Memory management */
 #include <critical.h>           /* Critical sections */
 #include <kheap.h>              /* Kernel heap */
 #include <queue.h>              /* Queue library */
@@ -111,6 +111,7 @@ OS_RETURN_E io_apic_init(void)
     uint32_t            read_count;
     const queue_node_t* acpi_io_apic;
     io_apic_t*          cursor_apic;
+    OS_RETURN_E         err;
 
     io_apics = NULL;
 
@@ -139,11 +140,18 @@ OS_RETURN_E io_apic_init(void)
         io_apics[i].gsib      = cursor_apic->global_system_interrupt_base;
 
         /* Map the IO-APIC */
-        paging_kmmap_hw((void*)io_apics[i].base_addr, 
-                        (void*)io_apics[i].base_addr, 
-                        0x1000, 
-                        0, 
-                        0);
+        err = memory_declare_hw(io_apics[i].base_addr, KERNEL_PAGE_SIZE);
+        if(err != OS_NO_ERR)
+        {
+            KERNEL_ERROR("Could not declare IO-APIC region\n");
+            return err;
+        }
+        memory_mmap_direct((void*)io_apics[i].base_addr, 
+                            (void*)io_apics[i].base_addr, 
+                            0x1000, 
+                            0, 
+                            0,
+                            1);
 
         KERNEL_DEBUG(IOAPIC_DEBUG_ENABLED, 
                      "[IO-APIC] Address mapped to 0x%p on IO-APIC",

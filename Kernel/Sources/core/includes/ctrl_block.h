@@ -53,7 +53,9 @@ enum THREAD_STATE
     /** @brief Thread's scheduling state: joining a thread. */
     THREAD_STATE_JOINING,
     /** @brief Thread's scheduling state: waiting on an condition. */
-    THREAD_STATE_WAITING
+    THREAD_STATE_WAITING,
+    /** @brief The thread is being copied. */
+    THREAD_STATE_COPYING
 };
 
 /**
@@ -84,7 +86,7 @@ enum THREAD_RETURN_STATE
     /** @brief The thread returned normally. */
     THREAD_RETURN_STATE_RETURNED,
     /** @brief The thread was killed before exiting normally. */
-    THREAD_RETURN_STATE_KILLED
+    THREAD_RETURN_STATE_KILLED,
 };
 
 /**
