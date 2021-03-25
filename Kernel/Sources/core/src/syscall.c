@@ -22,6 +22,7 @@
 #include <interrupt_settings.h> /* Interrupt settings */
 #include <cpu_api.h>            /* CPU API */
 #include <kernel_output.h>      /* Kernel output */
+#include <scheduler.h>          /* Scheduler */
 
 /* UTK configuration file */
 #include <config.h>
@@ -38,26 +39,14 @@
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-static void dummy_syscall_handler(SYSCALL_FUNCTION_E func, void* param);
-
 /** @brief Stores the handlers for each system call. */
 static syscall_handler_t kernel_interrupt_handlers[SYSCALL_MAX_ID] = {
-    {dummy_syscall_handler}
+    {sched_fork_process}
 };
 
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
-
-/**
- * @brief Dummy system handler, outputs the call id and parameters on the debug
- * output.
- */
-static void dummy_syscall_handler(SYSCALL_FUNCTION_E func, void* param)
-{
-    KERNEL_DEBUG(SYSCALL_DEBUG_ENABLED, "DUMMY SYSCALL %d 0x%p", func, param);
-    *(uint32_t*)param = 0xB1EB1E00;
-}
 
 /**
  * @brief Kernel's syscall interrupt handler.
@@ -85,7 +74,7 @@ static void syscall_handler(cpu_state_t *cpu_state,
 
     cpu_get_syscall_data(cpu_state, stack_state, &func, &params);
 
-    KERNEL_DEBUG(SYSCALL_DEBUG_ENABLED, "Request syscall %d", func);
+    KERNEL_DEBUG(SYSCALL_DEBUG_ENABLED, "[SYSCALL] Request syscall %d", func);
 
     if(func < SYSCALL_MAX_ID)
     {

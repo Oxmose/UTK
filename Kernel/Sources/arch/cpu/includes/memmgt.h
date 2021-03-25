@@ -182,14 +182,37 @@ queue_t* memory_create_free_page_table(OS_RETURN_E* err);
 uintptr_t memory_alloc_stack(const size_t stack_size);
 
 /**
- * @brief Release the meomry used by a stack.
+ * @brief Release the memory used by a stack.
  * 
- * @details Release the meomry used by a stack. 
+ * @details Release the memory used by a stack. 
  * 
  * @param[in] virt_addr The address of the stack to free.
  * @param[in] stack_size The size of the stack.
  */
 void memory_free_stack(uintptr_t virt_addr, const size_t stack_size);
+
+/**
+ * @brief Allocate a new kernel stack in the free memory.
+ * 
+ * @details Allocate a new stack in the free memory. The address returned is the
+ * begining of the stack (low address). The stack is also mapped in the memory.
+ * 
+ * @param[in] kstack_size The kernel stack size.
+ * 
+ * @return The address of the stack (low address) is returned on success. 
+ * Otherwise NULL is returned.
+ */
+uintptr_t memory_alloc_kstack(const size_t kstack_size);
+
+/**
+ * @brief Release the memory used by a kernel stack.
+ * 
+ * @details Release the memory used by a kernel stack. 
+ * 
+ * @param[in] kstack The kernel stack virtual address.
+ * @param[in] kstack_size The kernel stack size.
+ */
+void memory_free_kstack(const uintptr_t kstack, const size_t kstack_size);
 
 /**
  * @brief Enables paging.
@@ -244,6 +267,7 @@ void memory_mmap(const void* virt_addr,
  * @param[in] mapping_size The size of the region to map.
  * @param[in] read_only Sets the read only flag.
  * @param[in] exec Sets the executable flag.
+ * @param[in] cache_enable Tells if cache is enabled for this page.
  * @param[in] is_hw Tells if the mapping is a memory mapped hardware.
  */
 void memory_mmap_direct(const void* virt_addr,
@@ -251,6 +275,7 @@ void memory_mmap_direct(const void* virt_addr,
                          const size_t mapping_size,
                          const uint8_t read_only,
                          const uint8_t exec,
+                         const uint8_t cache_enable,
                          const uint8_t is_hw);
 
 /**
@@ -273,13 +298,20 @@ void memory_munmap(const void* virt_addr, const size_t mapping_size);
  * table of the source process, assign a new page directory to the new process 
  * and updates its translation. The current process's data are marked as copy
  * on write for the current and destination process.
+ * The function duplicates the main kernel stack used by the process to allow
+ * the kernel stack to be usable directly after the copy. This region will not
+ * be marked as copy on write.
  * 
  * @param[out] dst_process The process that will receive the image copy.
+ * @param[in] kstack The kernel stack address of the main process.
+ * @param[in] kstack_size The kernel stack size.
  * 
  * @return OS_NO_ERR is returned on success. Otherwise an error code is 
  * returned.
  */
-OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process);
+OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process,
+                                     const uintptr_t kstack,
+                                     const size_t kstack_size);
 
 /**
  * @brief Returns the physical address associated to the virtual address given

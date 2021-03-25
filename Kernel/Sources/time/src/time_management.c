@@ -104,8 +104,12 @@ static void time_main_timer_handler(cpu_state_t* cpu_state, uintptr_t int_id,
     /* Add a tick count */
     ++sys_tick_count[cpu_id];
 
+    /* EOI */
+    kernel_interrupt_set_irq_eoi(sys_main_timer.get_irq());
+
     if(schedule_routine != NULL)
     {
+        /* We might never come back from here */
         schedule_routine(cpu_state, int_id, stack);
     }
     else
@@ -125,9 +129,6 @@ static void time_main_timer_handler(cpu_state_t* cpu_state, uintptr_t int_id,
     }
 
     KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED, "[TIME] Time manager main handler");
-
-    /* EOI */
-    kernel_interrupt_set_irq_eoi(sys_main_timer.get_irq());
 }
 
 /**

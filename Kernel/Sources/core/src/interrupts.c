@@ -28,6 +28,7 @@
 #include <panic.h>              /* Kernel panic */
 #include <kernel_output.h>      /* Kernel output methods */
 #include <critical.h>           /* Critical sections */
+#include <scheduler.h>          /* Kernel scheduler */
 
 /* UTK configuration file */
 #include <config.h>
@@ -117,7 +118,15 @@ void kernel_interrupt_handler(cpu_state_t cpu_state,
                               uintptr_t int_id,
                               stack_state_t stack_state)
 {
+    kernel_thread_t* curr_thread;
     void(*handler)(cpu_state_t*, uintptr_t, stack_state_t*);
+
+    /* Save the thread context if exists */
+    curr_thread = sched_get_current_thread();
+    if(curr_thread != NULL)
+    {
+        cpu_save_context(&cpu_state, &stack_state, curr_thread);
+    }
 
     /* If interrupts are disabled */
     if(cpu_get_saved_interrupt_state(&cpu_state, &stack_state) == 0 &&

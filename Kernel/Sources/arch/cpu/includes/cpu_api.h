@@ -62,16 +62,6 @@ int32_t cpu_get_id(void);
 uintptr_t cpu_get_current_pgdir(void);
 
 /**
- * @brief Update the CPU's page directory.
- *
- * @details Update the current CPU CR3 with the new page directory
- * physical address.
- * 
- * @param[in] new_pgdir The physical address of the new page directory.
- */
-void cpu_update_pgdir(const uintptr_t new_pgdir);
-
-/**
  * @brief Raises CPU interrupt.
  * 
  * @details Raises a software CPU interrupt on the desired line.
@@ -133,26 +123,13 @@ void cpu_init_thread_context(void (*entry_point)(void),
  * @details Saves the current CPU context for the thread.
  * Registers (and other data) should be saved here.
  * 
- * @param[in] first_sche Should be 0 if the CPU has never been scheduled
- * before. Otherwise this value should be 1.
  * @param[in] cpu_state The current CPU state.
  * @param[in] stack_stack The current thread's stack state.
  * @param[out] thread The thread structure to save the data to.
  */
-void cpu_save_context(const uint32_t first_sched,
-                      const cpu_state_t* cpu_state, 
+void cpu_save_context(const cpu_state_t* cpu_state, 
                       const stack_state_t* stack_state, 
                       kernel_thread_t* thread);
-
-                      /**
- * @brief Update the CPU's page directory.
- *
- * @details Update the current CPU CR3 with the new page directory
- * physical address.
- * 
- * @param[in] new_pgdir The physical address of the new page directory.
- */
-void cpu_update_pgdir(const uintptr_t new_pgdir);
 
 /**
  * @brief Restores the thread's CPU context.

@@ -142,6 +142,8 @@ OS_RETURN_E rtc_init(void)
 
     rtc_update_time();
 
+    err = time_register_rtc_manager(rtc_update_time);
+
 #ifdef TEST_MODE_ENABLED
     rtc_test();
     rtc_test2();

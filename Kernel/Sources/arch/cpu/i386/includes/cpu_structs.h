@@ -179,6 +179,9 @@ struct virtual_cpu_context
     uint32_t ebp;
     /** @brief Thread's specific EIP registers. */
     uint32_t eip;  
+
+    /** @brief Last interrupt ESP */
+    uint32_t last_int_esp;
 };
 
 /** @brief Shortcut name for the struct virtual_cpu_context structure. */

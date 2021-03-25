@@ -541,16 +541,13 @@ void kernel_kickstart(void)
 #endif
 
     
-    
+    /* First schedule, we should never return from here */
     err = sched_init();
     INIT_MSG("Scheduler initialized\n",
              "Could not initialize scheduler [%u]\n",
              err, 1);
     
     KERNEL_SUCCESS("Kernel initialized\n");
-
-    /* First schedule, we should never return from here */
-    sched_schedule();
 
     INIT_MSG("",
              "Kernel returned to kickstart\n", 

@@ -279,6 +279,7 @@ OS_RETURN_E vga_init(void)
                         VGA_TEXT_FRAMEBUFFER_SIZE,
                         0,
                         0,
+                        0,
                         1);
 
     return err;

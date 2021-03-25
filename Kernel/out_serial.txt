@@ -1,0 +1,31 @@
+[OK] GDT Initialized at 0xe0212800
+[OK] IDT Initialized at 0xe0212000
+[OK] TSS Initialized at 0xe0212860
+[INFO] CPU Vendor: GenuineIntel
+[INFO] CPU Features: SSE3 - SSSE3 - PCID - SSE41 - SSE42 - FPU - VME - DE - PSE - TSC - MSR - PAE - MCE - CX8 - APIC - SEP - MTRR - PGE - MCA - CMOV - PAT - PSE36 - CLFLUSH - MMX - FXSR - SSE - SSE2 - HTT - XD - RDTSCP - LAHF_LM 
+[OK] Kernel heap initialized
+[OK] Interrupt manager initialized
+[OK] Exception manager initialized
+[INFO] === Kernel memory layout
+[INFO] Startup low     0x00100000 -> 0x00100048 | 0KB
+[INFO] Startup high    0xe0101000 -> 0xe010102c | 0KB
+[INFO] Code            0xe0102000 -> 0xe0111dae | 63KB
+[INFO] RO-Data         0xe0200000 -> 0xe0204000 | 16KB
+[INFO] Data            0xe0210000 -> 0xe0211108 | 4KB
+[INFO] BSS             0xe0212000 -> 0xe021e498 | 49KB
+[INFO] Stacks          0xe0310000 -> 0xe0318000 | 32KB
+[INFO] Heap            0xe0318000 -> 0xe0d18000 | 10240KB
+[ERROR] [MEMMGT] Memory manager cannot manage unaligned memory 0x00000000 -> 0x0009fc00, aligning to frame size
+[INFO] === Hardware memory map
+[INFO] Area 0xfffc0000 -> 0xffffffff | 02 | 256KB
+[INFO] Area 0xfee00000 -> 0xfee00fff | 02 | 4KB
+[INFO] Area 0xfec00000 -> 0xfec00fff | 02 | 4KB
+[INFO] Area 0xdfff0000 -> 0xdfffffff | 03 | 64KB
+[INFO] Area 0x00100000 -> 0xdffeffff | 01 | 3668928KB
+[INFO] Area 0x000f0000 -> 0x000fffff | 02 | 64KB
+[INFO] Area 0x0009fc00 -> 0x0009ffff | 02 | 1KB
+[INFO] Area 0x00000000 -> 0x0009fbff | 01 | 639KB
+[INFO] === Free memory map
+[INFO] Area 0x00d18000 -> 0xdffeffff | 3656544KB
+[INFO] Total available memory: 3656544KB
+[OK] Memory manager initialized

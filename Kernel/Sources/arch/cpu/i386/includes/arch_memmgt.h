@@ -41,12 +41,6 @@
 /** @brief Architecture maximal address. */
 #define ARCH_MAX_ADDRESS 0xFFFFFFFF
 
-/** @brief Recursive address for page directory */
-#define PAGING_RECUR_PG_DIR   0xFFFFF000
-
-/** @brief Recursive address for page directory */
-#define PAGING_RECUR_PG_TABLE 0xFFC00000
-
 /** @brief Page directory flag: 4Kb page size. */
 #define PG_DIR_FLAG_PAGE_SIZE_4KB       0x00000000
 /** @brief Page directory flag: 4Mb page size. */
@@ -96,10 +90,17 @@
 #define PAGE_FLAG_PRESENT        0x00000001
 /** @brief Page flag: page not present. */
 #define PAGE_FLAG_NOT_PRESENT    0x00000000
+/** @brief Custom define flag: regular memory. */
+#define PAGE_FLAG_REGULAR        0x00000000
 /** @brief Custom define flag: hardware mapped. */
 #define PAGE_FLAG_HARDWARE       0x00000200
 /** @brief Custom define flag: copy on write. */
 #define PAGE_FLAG_COPY_ON_WRITE  0x00000400
+/** @brief Custom define flag: private memory. */
+#define PAGE_FLAG_PRIVATE        0x00000600
+
+/** @brief Custome flag mask */
+#define PAGE_FLAG_OS_CUSTOM_MASK 0x00000E00
 
 /** @brief Defines the first kernel page directory entry. */
 #define KERNEL_FIRST_PGDIR_ENTRY (KERNEL_MEM_OFFSET >> PG_DIR_OFFSET)

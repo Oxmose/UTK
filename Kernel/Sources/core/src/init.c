@@ -23,6 +23,7 @@
 #include <panic.h>         /* Kernel panic */
 
 #include <sys/process.h> 
+#include <rt_clock.h>
 
 /* UTK configuration file */
 #include <config.h>
@@ -41,6 +42,8 @@
 void* init_sys(void* args)
 {
     int32_t pid;
+    uint32_t time;
+
     (void)args;
 
     KERNEL_INFO("INIT Started | PID: %d | TID: %d\n", 
@@ -48,11 +51,22 @@ void* init_sys(void* args)
                 sched_get_tid());
 
     pid = fork();
-    kernel_printf("Got pid 0x%x\n", pid);
+    if(pid)
+    {
+        fork();
+    }
 
+    kernel_printf("Hello from Init %d\n", sched_get_pid());
+
+    
     while(1)
     {
-        sched_sleep(100);
+        if(sched_get_pid() == 0)
+        {
+            time = rtc_get_current_daytime();
+            kernel_printf("\r%02d:%02d:%02d", time / 60 / 60, (time / 60) % 60, time % 60);
+        }
+        sched_sleep(1000);
     }
 
     /* If we return better go away and cry in a corner */

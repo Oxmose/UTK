@@ -189,6 +189,8 @@ OS_RETURN_E uart_init(void)
 
 void uart_write(const uint32_t port, const uint8_t data)
 {
+    uint32_t int_state;
+    
     if(serial_init_done == 0)
     {
         return;
@@ -199,6 +201,7 @@ void uart_write(const uint32_t port, const uint8_t data)
     }
 
     /* Wait for empty transmit */
+    ENTER_CRITICAL(int_state);
     while((cpu_inb(SERIAL_LINE_STATUS_PORT(port)) & 0x20) == 0);
     if(data == '\n')
     {
@@ -209,8 +212,8 @@ void uart_write(const uint32_t port, const uint8_t data)
     {
         cpu_outb(data, port);
     }
-
     while((cpu_inb(SERIAL_LINE_STATUS_PORT(port)) & 0x20) == 0);
+    EXIT_CRITICAL(int_state);
 }
 
 

@@ -81,6 +81,10 @@ extern uint8_t _KERNEL_HEAP_BASE;
 extern uint8_t _KERNEL_HEAP_SIZE;
 /** @brief Kernel memory end address. */
 extern uint8_t _KERNEL_MEMORY_END;
+/** @brief Kernel recursive mapping address for page tables */
+extern uint8_t _KERNEL_RECUR_PG_TABLE_BASE;
+/** @brief Kernel recursive mapping address for page directory */
+extern uint8_t *_KERNEL_RECUR_PG_DIR_BASE;
 
 /** @brief Multiboot memory pointer, fileld by the bootloader. */
 extern multiboot_info_t* _kernel_multiboot_ptr;
@@ -116,6 +120,20 @@ static uintptr_t frame_ref_dir[FRAME_REF_DIR_SIZE];
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
+
+#define INVAL_PAGE(virt_addr)                       \
+{                                                   \
+    __asm__ __volatile__(                           \
+        "invlpg (%0)": :"r"(virt_addr) : "memory"   \
+    );                                              \
+}
+
+#define INVAL_TLB()                                         \
+{                                                           \
+    __asm__ __volatile__(                                   \
+        "mov %%cr3, %%eax\n\tmov %%eax, %%cr3": : : "eax"   \
+    );                                                      \
+}
 
 static void memory_acquire_ref(uintptr_t phys_addr)
 {
@@ -213,6 +231,43 @@ static void memory_release_ref(uintptr_t phys_addr)
     }
 
     EXIT_CRITICAL(int_state);
+}
+
+uint32_t memory_get_ref_count(const uintptr_t phys_addr)
+{
+    uint16_t   dir_entry;
+    uint16_t   table_entry;
+    uint32_t   int_state;
+    uintptr_t* current_table;
+    uint32_t   ref_count;
+
+    ENTER_CRITICAL(int_state);
+
+    dir_entry   = phys_addr >> FRAME_REF_DIR_ENTRY_OFFSET;
+    table_entry = (phys_addr >> FRAME_REF_TABLE_ENTRY_OFFSET) &
+                  FRAME_REF_TABLE_ENTRY_OFFSET_MASK;
+
+    current_table = (uintptr_t*)frame_ref_dir[dir_entry];
+
+    if(current_table == NULL)
+    {
+        KERNEL_ERROR("Tried to get reference on non existing memory 0x%p\n", 
+                     phys_addr);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+    }
+
+    if(current_table[table_entry] == (uintptr_t)NULL)
+    {
+        KERNEL_ERROR("Tried to get reference on non existing memory 0x%p\n", 
+                     phys_addr);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+    }
+
+    ref_count = current_table[table_entry] & FRAME_REF_COUNT_MASK;
+
+    EXIT_CRITICAL(int_state);
+
+    return ref_count;
 }
 
 static void init_frame_ref_table(uintptr_t next_free_mem)
@@ -704,7 +759,7 @@ static void setup_mem_table(void)
         KERNEL_PANIC(error);
     }
     mem_range->base  = free_mem_head + KERNEL_MEM_OFFSET;
-    mem_range->limit = (uintptr_t)PAGING_RECUR_PG_TABLE;
+    mem_range->limit = (uintptr_t)&_KERNEL_RECUR_PG_TABLE_BASE;
     mem_range->type  = MULTIBOOT_MEMORY_AVAILABLE;
 
     error = queue_push_prio(node, free_kernel_pages, free_mem_head);
@@ -874,7 +929,8 @@ static void add_block(queue_t* list, uintptr_t first_frame, const size_t length)
         }
         else if(range->base <= first_frame && range->limit > first_frame)
         {
-            KERNEL_ERROR("Tried to free an already free block\n");
+            KERNEL_ERROR("Tried to free an already free block 0x%p\n",
+                          first_frame);
             KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
         }
         else if(range->limit < first_frame)
@@ -913,21 +969,6 @@ static void add_block(queue_t* list, uintptr_t first_frame, const size_t length)
 
         queue_push_prio(new_node, list, first_frame);        
     }
-}
-
-
-#define INVAL_PAGE(virt_addr)                       \
-{                                                   \
-    __asm__ __volatile__(                           \
-        "invlpg (%0)": :"r"(virt_addr) : "memory"   \
-    );                                              \
-}
-
-#define INVAL_TLB()                                         \
-{                                                           \
-    __asm__ __volatile__(                                   \
-        "mov %%cr3, %%eax\n\tmov %%eax, %%cr3": : : "eax"   \
-    );                                                      \
 }
 
 /** 
@@ -984,6 +1025,93 @@ static void map_kernel_section(uintptr_t start_addr, uintptr_t end_addr,
     }
 }
 
+OS_RETURN_E memory_invocate_cow(const uintptr_t addr)
+{
+    uintptr_t   start_align;
+    uintptr_t   old_frame;
+    uint16_t    pgdir_entry;
+    uint16_t    pgtable_entry;
+    uint32_t*   pgdir_rec_addr; 
+    uint32_t*   pgtable;
+    uintptr_t*  new_frame;
+    uintptr_t*  tmp_page;
+    OS_RETURN_E err;
+
+    err = OS_ERR_MEMORY_NOT_MAPPED;
+
+     /* Align addresses */
+    start_align = addr & PAGE_ALIGN_MASK;
+
+    /* Get entries */
+    pgdir_entry   = (start_align >> PG_DIR_OFFSET);
+    pgtable_entry = (start_align >> PG_TABLE_OFFSET) & PG_TABLE_OFFSET_MASK;
+
+    /* Check page directory presence and allocate if not present */
+    pgdir_rec_addr = (uintptr_t*)&_KERNEL_RECUR_PG_DIR_BASE;
+    if((pgdir_rec_addr[pgdir_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
+    {
+        /* Check present in page table */
+        pgtable = (uintptr_t*)(&_KERNEL_RECUR_PG_TABLE_BASE + 
+                                KERNEL_PAGE_SIZE * 
+                                pgdir_entry);
+        if((pgtable[pgtable_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0 &&
+           (pgtable[pgtable_entry] & PAGE_FLAG_OS_CUSTOM_MASK) == 
+            PAGE_FLAG_COPY_ON_WRITE)
+        {
+            /* Check reference count */
+            old_frame = pgtable[pgtable_entry] & PG_ENTRY_MASK;
+            if(memory_get_ref_count(old_frame) > 1)
+            {
+                /* Allocate new frame */
+                new_frame = memory_alloc_frames(1);
+                memory_acquire_ref((uintptr_t)new_frame);
+
+                /* Temporary map new frame */
+                tmp_page = memory_alloc_pages(1, MEM_ALLOC_BEGINING);
+                memory_mmap_direct(tmp_page, 
+                                   new_frame, 
+                                   KERNEL_PAGE_SIZE, 
+                                   0,
+                                   0, 
+                                   1, 
+                                   0);
+
+                /* Copy to new frame */
+                memcpy(tmp_page, (void*)start_align, KERNEL_PAGE_SIZE);
+
+                /* Unmap temporary mapping */
+                memory_munmap(tmp_page, KERNEL_PAGE_SIZE);
+                memory_free_pages(tmp_page, 1);
+
+                /* Update pg dir */
+                pgtable[pgtable_entry] = 
+                    (pgtable[pgtable_entry] & ~PG_ENTRY_MASK) |
+                    (uintptr_t)new_frame;
+
+                /* Decrement reference count */
+                memory_release_ref(old_frame);
+
+                KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
+                             "[MEMMGT] Copy on write copied 0x%p", 
+                             start_align);
+            }
+            pgtable[pgtable_entry] = 
+                ((pgtable[pgtable_entry] & ~PAGE_FLAG_OS_CUSTOM_MASK) & 
+                    ~PAGE_FLAG_READ_ONLY) |
+                PAGE_FLAG_REGULAR      | 
+                PAGE_FLAG_READ_WRITE;
+            
+            KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
+                             "[MEMMGT] Copy on write set attributes 0x%p", 
+                             start_align);
+
+            err = OS_NO_ERR;
+        }
+    }
+
+    return err;
+}
+
  /**
  * @brief Handle a page fault exception.
  *
@@ -1025,6 +1153,12 @@ static void paging_fault_general_handler(cpu_state_t* cpu_state, uintptr_t int_i
                  "[MEMMGT] Page fault at 0x%p", 
                  fault_address);
 
+    /* Check the copy on write mechanism */
+    if(memory_invocate_cow(fault_address) == OS_NO_ERR)
+    {
+        return;
+    }
+
     /* Kernel cannot handle page fault at the moment */
     panic(cpu_state, int_id, stack_state);
 }
@@ -1042,8 +1176,8 @@ static uint8_t is_mapped(const uintptr_t start_addr, const size_t size)
     uintptr_t start_align;
     uintptr_t to_check;
     uint32_t  found;
-    size_t    pgdir_entry;
-    size_t    pgtable_entry;
+    uint16_t  pgdir_entry;
+    uint16_t  pgtable_entry;
     uint32_t* pgdir_rec_addr; 
     uint32_t* pgtable;
 
@@ -1061,13 +1195,13 @@ static uint8_t is_mapped(const uintptr_t start_addr, const size_t size)
         pgtable_entry = (start_align >> PG_TABLE_OFFSET) & PG_TABLE_OFFSET_MASK;
 
         /* Check page directory presence and allocate if not present */
-        pgdir_rec_addr = (uint32_t*)PAGING_RECUR_PG_DIR;
+        pgdir_rec_addr = (uintptr_t*)&_KERNEL_RECUR_PG_DIR_BASE;
         if((pgdir_rec_addr[pgdir_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
         {
              /* Check present in page table */
-            pgtable = (uint32_t*)(PAGING_RECUR_PG_TABLE + 
-                                  KERNEL_PAGE_SIZE * 
-                                  pgdir_entry);
+            pgtable = (uintptr_t*)(&_KERNEL_RECUR_PG_TABLE_BASE + 
+                                   KERNEL_PAGE_SIZE * 
+                                   pgdir_entry);
             if((pgtable[pgtable_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
             {
                 found = 1;
@@ -1165,22 +1299,18 @@ static queue_t* paging_copy_free_page_table(void)
  * @param[in] exec Set to 1 if the region contains executable code.
  * @param[in] cache_enabled Set to 1 if the cache should be enabled for this 
  * region.
- * @param[in] hardware Set to 1 if this region is memory mapped hardware.
+ * @param[in] flags The flags used for mapping (eg hw, cow, etc).
  */
 static void kernel_mmap_internal(const void* virt_addr,
                                  const void* phys_addr,
                                  const size_t mapping_size,
-                                 const uint8_t read_only,
-                                 const uint8_t exec,
-                                 const uint8_t cache_enabled,
-                                 const uint8_t hardware)
+                                 const uintptr_t flags)
 {
-    (void)exec;
 
     uintptr_t   virt_align;
     uintptr_t   phys_align;
-    size_t      pgdir_entry;
-    size_t      pgtable_entry;
+    uint16_t    pgdir_entry;
+    uint16_t    pgtable_entry;
     size_t      to_map;
     uint32_t*   pgdir_rec_addr; 
     uint32_t*   pgtable;
@@ -1207,7 +1337,7 @@ static void kernel_mmap_internal(const void* virt_addr,
         pgtable_entry = (virt_align >> PG_TABLE_OFFSET) & PG_TABLE_OFFSET_MASK;
 
         /* Check page directory presence and allocate if not present */
-        pgdir_rec_addr = (uint32_t*)PAGING_RECUR_PG_DIR;
+        pgdir_rec_addr = (uint32_t*)&_KERNEL_RECUR_PG_DIR_BASE;
         if((pgdir_rec_addr[pgdir_entry] & PG_DIR_FLAG_PAGE_PRESENT) == 0)
         {
             pgtable = memory_alloc_frames(1);
@@ -1221,7 +1351,7 @@ static void kernel_mmap_internal(const void* virt_addr,
                 PG_DIR_FLAG_PAGE_PRESENT;
 
             /* Get recursive virtual address */
-            pgtable = (uint32_t*)(PAGING_RECUR_PG_TABLE + 
+            pgtable = (uint32_t*)(&_KERNEL_RECUR_PG_TABLE_BASE + 
                                   KERNEL_PAGE_SIZE * 
                                   pgdir_entry);
 
@@ -1234,7 +1364,7 @@ static void kernel_mmap_internal(const void* virt_addr,
         else 
         {
             /* Get recursive virtual address */
-            pgtable = (uint32_t*)(PAGING_RECUR_PG_TABLE + 
+            pgtable = (uint32_t*)(&_KERNEL_RECUR_PG_TABLE_BASE + 
                                   KERNEL_PAGE_SIZE * 
                                   pgdir_entry);
         }
@@ -1243,12 +1373,10 @@ static void kernel_mmap_internal(const void* virt_addr,
         pgtable[pgtable_entry] = 
             phys_align |
             PAGE_FLAG_SUPER_ACCESS |
-            (read_only ? PAGE_FLAG_READ_ONLY : PAGE_FLAG_READ_WRITE) |
-            (cache_enabled ? PAGE_FLAG_CACHE_WB : PAGE_FLAG_CACHE_DISABLED) |
-            (hardware ? PAGE_FLAG_HARDWARE : 0) |
+            flags |
             PAGE_FLAG_PRESENT;
 
-        memory_acquire_ref((uintptr_t)phys_addr);
+        memory_acquire_ref((uintptr_t)phys_align);
 
         KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
                      "[MEMMGT] Mapped page at 0x%p -> 0x%p", 
@@ -1269,6 +1397,49 @@ static void kernel_mmap_internal(const void* virt_addr,
         
     }
 }
+
+void* memory_alloc_kernel_pages(const size_t page_count, 
+                                const MEM_ALLOC_START_E start_pt)
+{
+    void*             address;
+    uint32_t          int_state;
+    OS_RETURN_E       err;    
+
+    ENTER_CRITICAL(int_state);
+
+
+    address = get_block(free_kernel_pages, page_count, start_pt, &err);
+    if(err != OS_NO_ERR)
+    {
+        KERNEL_ERROR("Could not allocate new page\n");
+        KERNEL_PANIC(err);
+    }
+    
+    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
+                 "[MEMMGT] Allocated %u pages, at 0x%p", 
+                 page_count, 
+                 address);
+
+    EXIT_CRITICAL(int_state);
+    return (void*)address;
+}
+
+void memory_free_kernel_pages(void* page_addr, const size_t page_count)
+{
+    uint32_t          int_state;
+
+    ENTER_CRITICAL(int_state);
+
+    add_block(free_kernel_pages, (uintptr_t)page_addr, page_count);
+
+    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
+                 "[MEMMGT] Deallocated %u pages, at 0x%p", 
+                 page_count, 
+                 page_addr);
+
+    EXIT_CRITICAL(int_state);
+}
+
 /**
  * @brief Initializes paging structures for the kernel.
  *
@@ -1284,7 +1455,6 @@ static void kernel_mmap_internal(const void* virt_addr,
  * 
  * @warning This function assumes the kernel is setup with basic paging.
  */
-
 static OS_RETURN_E paging_init(void)
 {
     uint32_t    i;
@@ -1326,6 +1496,8 @@ static OS_RETURN_E paging_init(void)
     memory_get_kheap_range(&start_addr, &end_addr);
     map_kernel_section(start_addr, end_addr, 0);
 
+    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, "[MEMMGT] Mapped all kernel sections");
+
     /* Add page fault exception */
     err = kernel_exception_register_handler(PAGE_FAULT_LINE,
                                             paging_fault_general_handler);
@@ -1333,6 +1505,9 @@ static OS_RETURN_E paging_init(void)
     /* Set CR3 register */
     __asm__ __volatile__("mov %%eax, %%cr3": :"a"((uintptr_t)kernel_pgdir -
                                                   KERNEL_MEM_OFFSET));
+
+    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, "[MEMMGT] Set new page directory and"
+                                       " page fault handler");
 
     init    = 1;
     memory_paging_enable();
@@ -1628,6 +1803,49 @@ void memory_free_stack(uintptr_t virt_addr, const size_t stack_size)
     EXIT_CRITICAL(int_state);
 }
 
+uintptr_t memory_alloc_kstack(const size_t kstack_size)
+{
+    uint32_t  int_state;
+    uint32_t  frame_count;
+    uintptr_t stack_frames;
+    uintptr_t stack_pages;    
+
+    ENTER_CRITICAL(int_state);
+
+    frame_count = kstack_size / KERNEL_FRAME_SIZE;
+    if(KERNEL_STACK_SIZE % KERNEL_FRAME_SIZE != 0)
+    {
+        ++frame_count;
+    }
+
+    /* Allocate frames and page */
+    stack_frames = (uintptr_t)memory_alloc_frames(frame_count);
+    stack_pages  = (uintptr_t)memory_alloc_pages(frame_count, MEM_ALLOC_END);
+    
+    /* Add mapping */
+    kernel_mmap_internal((void*)stack_pages, 
+                         (void*)stack_frames, 
+                         KERNEL_STACK_SIZE, 
+                         PAGE_FLAG_READ_WRITE |
+                         PAGE_FLAG_CACHE_WB   |
+                         PAGE_FLAG_PRIVATE);
+
+    EXIT_CRITICAL(int_state);
+
+    return stack_pages;
+}
+
+void memory_free_kstack(const uintptr_t kstack, const size_t kstack_size)
+{
+    uint32_t  int_state;
+
+    ENTER_CRITICAL(int_state);
+
+    memory_munmap((void*)kstack, kstack_size);
+
+    EXIT_CRITICAL(int_state);
+}
+
 OS_RETURN_E memory_paging_enable(void)
 {
     uint32_t int_state;
@@ -1644,21 +1862,13 @@ OS_RETURN_E memory_paging_enable(void)
 
     ENTER_CRITICAL(int_state);
 
-    /* Enable paging, write protect and PCID */
+    /* Enable paging, write protect */
     __asm__ __volatile__("mov %%cr0, %%eax\n\t"
                          "or $0x80010000, %%eax\n\t"
                          "mov %%eax, %%cr0\n\t"
                          : : : "eax");
 
-    if(cpu_is_pcid_capable() == 1)
-    {
-        __asm__ __volatile__("mov %%cr4, %%eax\n\t"
-                            "or $0x00020000, %%eax\n\t"
-                            "mov %%eax, %%cr4\n\t"
-                            : : : "eax");
-    }
-
-    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, "[MEMMGT] Paging enabled");
+    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, "[MEMMGT] Paging enabled");    
 
     enabled = 1;
 
@@ -1721,10 +1931,10 @@ void memory_mmap(const void* virt_addr,
     kernel_mmap_internal(virt_addr, 
                          phys_addr, 
                          to_map, 
-                         read_only, 
-                         exec, 
-                         1, 
-                         0);
+            (read_only ? PAGE_FLAG_READ_ONLY : PAGE_FLAG_READ_WRITE) |
+            PAGE_FLAG_CACHE_WB |
+            PAGE_FLAG_REGULAR  | 
+            (exec ? 0 : 0));
 
     EXIT_CRITICAL(int_state);
 }
@@ -1734,6 +1944,7 @@ void memory_mmap_direct(const void* virt_addr,
                          const size_t mapping_size,
                          const uint8_t read_only,
                          const uint8_t exec,
+                         const uint8_t cache_enabled,
                          const uint8_t is_hw)
 {
     uint32_t    int_state;
@@ -1743,10 +1954,10 @@ void memory_mmap_direct(const void* virt_addr,
     kernel_mmap_internal(virt_addr, 
                          phys_addr, 
                          mapping_size, 
-                         read_only, 
-                         exec, 
-                         is_hw, 
-                         is_hw);
+            (read_only ? PAGE_FLAG_READ_ONLY : PAGE_FLAG_READ_WRITE) |
+            (cache_enabled ? PAGE_FLAG_CACHE_WB : PAGE_FLAG_CACHE_DISABLED) |
+            (is_hw ? PAGE_FLAG_HARDWARE : PAGE_FLAG_REGULAR) | 
+            (exec ? 0 : 0));
 
     EXIT_CRITICAL(int_state);
 }
@@ -1755,8 +1966,8 @@ void memory_munmap(const void* virt_addr, const size_t mapping_size)
 {
     uintptr_t   end_map;
     uintptr_t   start_map;
-    uint32_t    pgdir_entry;
-    uint32_t    pgtable_entry;
+    uint16_t    pgdir_entry;
+    uint16_t    pgtable_entry;
     uint32_t*   pgdir_rec_addr;
     uint32_t*   pgtable;
     size_t      to_unmap;
@@ -1789,11 +2000,11 @@ void memory_munmap(const void* virt_addr, const size_t mapping_size)
         pgtable_entry = (start_map >> PG_TABLE_OFFSET) & PG_TABLE_OFFSET_MASK;
 
         /* Check page directory presence and allocate if not present */
-        pgdir_rec_addr = (uint32_t*)PAGING_RECUR_PG_DIR;
+        pgdir_rec_addr = (uint32_t*)&_KERNEL_RECUR_PG_DIR_BASE;
         if((pgdir_rec_addr[pgdir_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
         {
             /* Get recursive virtual address */
-            pgtable = (uint32_t*)(PAGING_RECUR_PG_TABLE + 
+            pgtable = (uint32_t*)(&_KERNEL_RECUR_PG_TABLE_BASE + 
                                   KERNEL_PAGE_SIZE * 
                                   pgdir_entry);
 
@@ -1842,7 +2053,9 @@ void memory_munmap(const void* virt_addr, const size_t mapping_size)
     EXIT_CRITICAL(int_state);
 }
 
-OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process)
+OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process,
+                                     const uintptr_t kstack_addr,
+                                     const size_t kstack_size)
 {
     uintptr_t*  new_pgdir_frame;
     uintptr_t*  new_pgdir_page;  
@@ -1850,6 +2063,10 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process)
     uintptr_t*  new_pgtable_page;
     uintptr_t*  current_pgdir;
     uintptr_t*  current_pgtable;
+    uintptr_t*  new_data_page;
+    uintptr_t*  new_data_frame;
+    uintptr_t   curr_addr;
+    uint16_t    pgtable_entry;
     uint32_t    i;
     uint32_t    j;
 
@@ -1858,22 +2075,28 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process)
         return OS_ERR_NULL_POINTER;
     }
 
+    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, "[MEMMGT] Copying process image");
+
     /* Create a new page directory and map for kernel */
     new_pgdir_frame = (uintptr_t*)memory_alloc_frames(1);
-    new_pgdir_page = (uintptr_t*)memory_alloc_pages(1, MEM_ALLOC_BEGINING);
+    new_pgdir_page = (uintptr_t*)memory_alloc_kernel_pages(1, 
+                                                            MEM_ALLOC_BEGINING);
 
     memory_mmap_direct(new_pgdir_page, 
-                        new_pgdir_frame, 
-                        KERNEL_PAGE_SIZE, 
-                        0, 
-                        0, 
-                        0);
+                       new_pgdir_frame, 
+                       KERNEL_PAGE_SIZE, 
+                       0, 
+                       0, 
+                       1,
+                       0);
+    memory_acquire_ref((uintptr_t)new_pgdir_frame);
 
     /* Create temporary pages */
-    new_pgtable_page = memory_alloc_pages(1, MEM_ALLOC_BEGINING);
+    new_pgtable_page = memory_alloc_kernel_pages(1, MEM_ALLOC_BEGINING);
+    new_data_page    = memory_alloc_kernel_pages(1, MEM_ALLOC_BEGINING);
 
     /* The current page directory is always recursively mapped */
-    current_pgdir = (uintptr_t*)PAGING_RECUR_PG_DIR;
+    current_pgdir = (uintptr_t*)&_KERNEL_RECUR_PG_DIR_BASE;
 
     /* Copy the page directory kernel entries, minus the recursive entry */    
     for(i = KERNEL_FIRST_PGDIR_ENTRY; i < KERNEL_PGDIR_SIZE - 1; ++i)
@@ -1881,13 +2104,13 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process)
         new_pgdir_page[i] = current_pgdir[i];
     }
 
-    /* Set the recursive entry on the new parge directory */
+    /* Set the recursive entry on the new page directory */
     new_pgdir_page[KERNEL_PGDIR_SIZE - 1] = (uintptr_t)new_pgdir_frame    |
                                             PG_DIR_FLAG_PAGE_SIZE_4KB     |
                                             PG_DIR_FLAG_PAGE_SUPER_ACCESS |
                                             PG_DIR_FLAG_PAGE_READ_WRITE   |
                                             PG_DIR_FLAG_PAGE_PRESENT;
-    memory_acquire_ref((uintptr_t)new_pgdir_frame);
+    
 
     /* Copy the rest of the page table and set copy on write */
     for(i = 0; i < KERNEL_FIRST_PGDIR_ENTRY; ++i)
@@ -1895,7 +2118,7 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process)
         if((current_pgdir[i] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
         {
             /* Get recursive virtual address */
-            current_pgtable = (uintptr_t*)(PAGING_RECUR_PG_TABLE + 
+            current_pgtable = (uintptr_t*)(&_KERNEL_RECUR_PG_TABLE_BASE + 
                                            KERNEL_PAGE_SIZE * 
                                            i);
 
@@ -1903,13 +2126,14 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process)
             new_pgtable_frame = memory_alloc_frames(1);     
             
             memory_mmap_direct(new_pgtable_page, 
-                                new_pgtable_frame, 
-                                KERNEL_PAGE_SIZE, 
-                                0, 
-                                0,
-                                0);
+                               new_pgtable_frame, 
+                               KERNEL_PAGE_SIZE, 
+                               0, 
+                               0,
+                               1,
+                               0);
 
-            new_pgdir_page[i] = (current_pgtable[i] & ~PG_ENTRY_MASK) | 
+            new_pgdir_page[i] = (current_pgdir[i] & ~PG_ENTRY_MASK) | 
                                 (uintptr_t)new_pgtable_frame;
             memory_acquire_ref((uintptr_t)new_pgtable_frame);
 
@@ -1922,16 +2146,29 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process)
                      * is.
                      */
                     if((current_pgtable[j] & PAGE_FLAG_READ_WRITE) != 0 &&
-                       (current_pgtable[j] & PAGE_FLAG_HARDWARE) == 0)
+                       (current_pgtable[j] & PAGE_FLAG_OS_CUSTOM_MASK) == 
+                        PAGE_FLAG_REGULAR)
                     {
+
                         current_pgtable[j] = (current_pgtable[j] & 
-                                              ~PAGE_FLAG_READ_WRITE) | 
-                                             PAGE_FLAG_READ_ONLY     |
-                                             PAGE_FLAG_COPY_ON_WRITE; 
+                                            ~PAGE_FLAG_READ_WRITE) | 
+                                            PAGE_FLAG_READ_ONLY    |
+                                            PAGE_FLAG_COPY_ON_WRITE; 
+                        new_pgtable_page[j] = current_pgtable[j];
+                        /* Increment the reference count */
+                        memory_acquire_ref(new_pgtable_page[j] & PG_ENTRY_MASK);
                     }
-                    new_pgtable_page[j] = current_pgtable[j];
-                    /* Increment the reference count */
-                    memory_acquire_ref(new_pgtable_page[j] & PG_ENTRY_MASK);
+                    else if((current_pgtable[j] & PAGE_FLAG_OS_CUSTOM_MASK) != 
+                            PAGE_FLAG_PRIVATE)
+                    {
+                        new_pgtable_page[j] = current_pgtable[j];
+                        /* Increment the reference count */
+                        memory_acquire_ref(new_pgtable_page[j] & PG_ENTRY_MASK);
+                    }
+                    else 
+                    {
+                        new_pgtable_page[j] = 0;
+                    }
                 }
                 else 
                 {
@@ -1944,10 +2181,74 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process)
         
     }
 
+    /* Map and duplicate the kernel stack */
+    curr_addr = kstack_addr;
+    while(curr_addr < kstack_addr + kstack_size)
+    {
+        pgtable_entry = (curr_addr >> PG_TABLE_OFFSET) & 
+                        PG_TABLE_OFFSET_MASK;
+
+        new_pgtable_frame = (uintptr_t*)
+                            new_pgdir_page[curr_addr >> PG_DIR_OFFSET];
+        if(((uintptr_t)new_pgtable_frame & PG_DIR_FLAG_PAGE_PRESENT) == 0)
+        {
+            new_pgtable_frame = memory_alloc_frames(1);
+            memory_acquire_ref((uintptr_t)new_pgtable_frame);
+            new_pgdir_page[pgtable_entry] = 
+                (uintptr_t)new_pgtable_frame  |
+                PG_DIR_FLAG_PAGE_SIZE_4KB     |
+                PG_DIR_FLAG_PAGE_SUPER_ACCESS |
+                PG_DIR_FLAG_PAGE_READ_WRITE   |
+                PG_DIR_FLAG_PAGE_PRESENT;
+        }
+
+        memory_mmap_direct(new_pgtable_page, 
+                           new_pgtable_frame, 
+                           KERNEL_PAGE_SIZE, 
+                           0, 
+                           0,
+                           1,
+                           0);
+
+        /* Allocate the new frame */
+        new_data_frame = memory_alloc_frames(1);
+        memory_acquire_ref((uintptr_t)new_data_frame);
+
+        /* Map the new frame */
+        memory_mmap_direct(new_data_page, 
+                           new_data_frame, 
+                           KERNEL_PAGE_SIZE, 
+                           0, 
+                           0, 
+                           1, 
+                           0);
+
+        /* Copy data */
+        memcpy(new_data_page, (void*)curr_addr, KERNEL_PAGE_SIZE);
+
+        /* Unmap the new frame */
+        memory_munmap(new_data_page, KERNEL_PAGE_SIZE);
+
+        /* Update the mapping */
+        new_pgtable_page[pgtable_entry] =
+            (uintptr_t)new_data_frame |
+            PAGE_FLAG_SUPER_ACCESS    | 
+            PAGE_FLAG_READ_WRITE      |
+            PAGE_FLAG_CACHE_WB        |
+            PAGE_FLAG_PRIVATE         |
+            PAGE_FLAG_PRESENT;
+
+        memory_munmap(new_pgtable_page, KERNEL_PAGE_SIZE);
+
+        curr_addr += KERNEL_PAGE_SIZE;
+    }
+
+
     /* Unmap the new page directory for the kernel */
     memory_munmap(new_pgdir_page, KERNEL_PAGE_SIZE);
-    memory_free_pages(new_pgdir_page, 1);
-    memory_free_pages(new_pgtable_page, 1);
+    memory_free_kernel_pages(new_pgdir_page, 1);     
+    memory_free_kernel_pages(new_pgtable_page, 1);
+    memory_free_kernel_pages(new_data_page, 1);   
 
     /* Set the destination process data */
     dst_process->page_dir = (uintptr_t)new_pgdir_frame;
@@ -1958,8 +2259,8 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process)
 
 uintptr_t memory_get_phys_addr(const uintptr_t virt_addr)
 {
-    size_t    pgdir_entry;
-    size_t    pgtable_entry;
+    uint16_t  pgdir_entry;
+    uint16_t  pgtable_entry;
     uint32_t* pgdir_rec_addr; 
     uint32_t* pgtable;
 
@@ -1968,11 +2269,11 @@ uintptr_t memory_get_phys_addr(const uintptr_t virt_addr)
     pgtable_entry = (virt_addr >> PG_TABLE_OFFSET) & PG_TABLE_OFFSET_MASK;
 
     /* Check page directory presence and allocate if not present */
-    pgdir_rec_addr = (uint32_t*)PAGING_RECUR_PG_DIR;
+    pgdir_rec_addr = (uint32_t*)&_KERNEL_RECUR_PG_DIR_BASE;
     if((pgdir_rec_addr[pgdir_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
     {
             /* Check present in page table */
-        pgtable = (uint32_t*)(PAGING_RECUR_PG_TABLE + 
+        pgtable = (uint32_t*)(&_KERNEL_RECUR_PG_TABLE_BASE + 
                                 KERNEL_PAGE_SIZE * 
                                 pgdir_entry);
         if((pgtable[pgtable_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
