@@ -265,6 +265,7 @@ static void acpi_map_data(const void* start_addr, size_t size)
                                 KERNEL_PAGE_SIZE, 
                                 1, 
                                 0,
+                                0,
                                 1);
             
             add_mapped_page(addr_align);
@@ -550,7 +551,7 @@ static void acpi_parse_dt(acpi_header_t* header)
     if(header == NULL)
     {
         KERNEL_ERROR("Tried to parse a NULL DT\n");
-        KERNEL_PANIC(OS_ERR_NULL_POINTER);
+        return;
     }
 
     acpi_map_data(header, sizeof(acpi_header_t));

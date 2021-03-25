@@ -159,7 +159,7 @@ OS_RETURN_E queue_push(queue_node_t* node, queue_t* queue)
     }
     else
     {
-        /* Just put on the tail */
+        /* Just put on the head */
         node->next = queue->head;
         node->prev = NULL;
         queue->head->prev = node;

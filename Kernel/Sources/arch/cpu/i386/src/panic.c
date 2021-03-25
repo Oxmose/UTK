@@ -340,7 +340,7 @@ void panic(cpu_state_t* cpu_state, uintptr_t int_id, stack_state_t* stack_state)
     }
 
     process = sched_get_current_process();
-    thread = sched_get_self();
+    thread = sched_get_current_thread();
 
     print_panic_header(int_id, stack_state, error_code);
     print_cpu_state(cpu_state, stack_state);

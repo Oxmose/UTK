@@ -860,50 +860,32 @@ void cpu_init_thread_context(void (*entry_point)(void),
 
     /* Set EIP, ESP and EBP */
     thread->cpu_context.eip = (uintptr_t)entry_point;
-    thread->cpu_context.esp = thread->kstack + (stack_index - 17) * 
+    thread->cpu_context.esp = thread->kstack + (stack_index - 18) * 
                               sizeof(uintptr_t);
     thread->cpu_context.ebp = thread->kstack + (stack_index - 1) * 
                                sizeof(uintptr_t);
 
-    /* Init thread stack */
-    if(thread->type == THREAD_TYPE_KERNEL)
-    {
-        ((uintptr_t*)thread->kstack)[stack_index - 1]  = K_THREAD_INIT_EFLAGS;
-        ((uintptr_t*)thread->kstack)[stack_index - 2]  = K_THREAD_INIT_CS;
-        ((uintptr_t*)thread->kstack)[stack_index - 6]  = K_THREAD_INIT_DS;
-        ((uintptr_t*)thread->kstack)[stack_index - 7]  = K_THREAD_INIT_ES;
-        ((uintptr_t*)thread->kstack)[stack_index - 8]  = K_THREAD_INIT_FS;
-        ((uintptr_t*)thread->kstack)[stack_index - 9]  = K_THREAD_INIT_GS;
-        ((uintptr_t*)thread->kstack)[stack_index - 10] = K_THREAD_INIT_SS;
-        ((uintptr_t*)thread->kstack)[stack_index - 11] = K_THREAD_INIT_EAX;
-        ((uintptr_t*)thread->kstack)[stack_index - 12] = K_THREAD_INIT_EBX;
-        ((uintptr_t*)thread->kstack)[stack_index - 13] = K_THREAD_INIT_ECX;
-        ((uintptr_t*)thread->kstack)[stack_index - 14] = K_THREAD_INIT_EDX;
-        ((uintptr_t*)thread->kstack)[stack_index - 15] = K_THREAD_INIT_ESI;
-        ((uintptr_t*)thread->kstack)[stack_index - 16] = K_THREAD_INIT_EDI;
-    }
-    else 
-    {
-        ((uintptr_t*)thread->kstack)[stack_index - 1]  = U_THREAD_INIT_EFLAGS;
-        ((uintptr_t*)thread->kstack)[stack_index - 2]  = U_THREAD_INIT_CS;
-        ((uintptr_t*)thread->kstack)[stack_index - 6]  = U_THREAD_INIT_DS;
-        ((uintptr_t*)thread->kstack)[stack_index - 7]  = U_THREAD_INIT_ES;
-        ((uintptr_t*)thread->kstack)[stack_index - 8]  = U_THREAD_INIT_FS;
-        ((uintptr_t*)thread->kstack)[stack_index - 9]  = U_THREAD_INIT_GS;
-        ((uintptr_t*)thread->kstack)[stack_index - 10] = U_THREAD_INIT_SS;
-        ((uintptr_t*)thread->kstack)[stack_index - 11] = U_THREAD_INIT_EAX;
-        ((uintptr_t*)thread->kstack)[stack_index - 12] = U_THREAD_INIT_EBX;
-        ((uintptr_t*)thread->kstack)[stack_index - 13] = U_THREAD_INIT_ECX;
-        ((uintptr_t*)thread->kstack)[stack_index - 14] = U_THREAD_INIT_EDX;
-        ((uintptr_t*)thread->kstack)[stack_index - 15] = U_THREAD_INIT_ESI;
-        ((uintptr_t*)thread->kstack)[stack_index - 16] = U_THREAD_INIT_EDI;
-    }
-    
+    /* Init thread kernel stack */
+    ((uintptr_t*)thread->kstack)[stack_index - 1]  = K_THREAD_INIT_EFLAGS;
+    ((uintptr_t*)thread->kstack)[stack_index - 2]  = K_THREAD_INIT_CS;
     ((uintptr_t*)thread->kstack)[stack_index - 3]  = thread->cpu_context.eip;
     ((uintptr_t*)thread->kstack)[stack_index - 4]  = 0; /* UNUSED (error) */
     ((uintptr_t*)thread->kstack)[stack_index - 5]  = 0; /* UNUSED (int id) */
+    ((uintptr_t*)thread->kstack)[stack_index - 6]  = K_THREAD_INIT_DS;
+    ((uintptr_t*)thread->kstack)[stack_index - 7]  = K_THREAD_INIT_ES;
+    ((uintptr_t*)thread->kstack)[stack_index - 8]  = K_THREAD_INIT_FS;
+    ((uintptr_t*)thread->kstack)[stack_index - 9]  = K_THREAD_INIT_GS;
+    ((uintptr_t*)thread->kstack)[stack_index - 10] = K_THREAD_INIT_SS;
+    ((uintptr_t*)thread->kstack)[stack_index - 11] = K_THREAD_INIT_EAX;
+    ((uintptr_t*)thread->kstack)[stack_index - 12] = K_THREAD_INIT_EBX;
+    ((uintptr_t*)thread->kstack)[stack_index - 13] = K_THREAD_INIT_ECX;
+    ((uintptr_t*)thread->kstack)[stack_index - 14] = K_THREAD_INIT_EDX;
+    ((uintptr_t*)thread->kstack)[stack_index - 15] = K_THREAD_INIT_ESI;
+    ((uintptr_t*)thread->kstack)[stack_index - 16] = K_THREAD_INIT_EDI;
     ((uintptr_t*)thread->kstack)[stack_index - 17] = thread->cpu_context.ebp;
-    ((uintptr_t*)thread->kstack)[stack_index - 18] = thread->cpu_context.esp;
+    ((uintptr_t*)thread->kstack)[stack_index - 18] = 
+                                        thread->kstack + (stack_index - 17) * 
+                                        sizeof(uintptr_t);
 }
 
 uintptr_t cpu_get_current_pgdir(void)
@@ -922,19 +904,12 @@ uintptr_t cpu_get_current_pgdir(void)
     return current_pgdir;
 }
 
-void cpu_save_context(const uint32_t first_sched,
-                      const cpu_state_t* cpu_state, 
+void cpu_save_context(const cpu_state_t* cpu_state, 
                       const stack_state_t* stack_state, 
                       kernel_thread_t* thread)
 {
     (void)stack_state;
-    /* Save the actual ESP (not the fist time since the first schedule should
-     * dissociate the boot sequence (pointed by the current esp) and the IDLE
-     * thread.*/
-    if(first_sched == 1)
-    {
-        thread->cpu_context.esp = cpu_state->esp;
-    }
+    thread->cpu_context.esp = (uintptr_t)&cpu_state->esp;
 }
 
 void cpu_restore_context(cpu_state_t* cpu_state, 
@@ -942,9 +917,7 @@ void cpu_restore_context(cpu_state_t* cpu_state,
                          const kernel_thread_t* thread)
 {
     (void)stack_state;
-
-    /* Update esp */
-    cpu_state->esp = thread->cpu_context.esp;
+    (void)cpu_state;
 
     /* On context restore, the CR0.TS bit is set to catch FPU/SSE use */
     __asm__ __volatile__(
@@ -952,12 +925,30 @@ void cpu_restore_context(cpu_state_t* cpu_state,
         "or  $0x00000008, %%eax\n\t"
         "mov %%eax, %%cr0\n\t"
     :::"eax");
-}
 
-void cpu_update_pgdir(const uintptr_t new_pgdir)
-{
-    /* Update CR3 */
-    __asm__ __volatile__("mov %%eax, %%cr3": :"a"(new_pgdir));
+    __asm__ __volatile__(
+        "mov  %%eax, %%cr3\n\t"
+        "mov  %%ebx, %%esp\n\t"
+        "pop  %%esp\n\t"
+        "pop  %%ebp\n\t"
+        "pop  %%edi\n\t"
+        "pop  %%esi\n\t"
+        "pop  %%edx\n\t"
+        "pop  %%ecx\n\t"
+        "pop  %%ebx\n\t"
+        "pop  %%eax\n\t"
+        "pop  %%ss\n\t"
+        "pop  %%gs\n\t"
+        "pop  %%fs\n\t"
+        "pop  %%es\n\t"
+        "pop  %%ds\n\t"
+        "add  $8, %%esp\n\t"
+        "iret\n\t"        
+        : :"a"(thread->process->page_dir), "b"(thread->cpu_context.esp));
+
+
+    KERNEL_ERROR("Returned from context restore\n");
+    KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
 }
 
 void cpu_set_next_thread_instruction(const cpu_state_t* cpu_state,

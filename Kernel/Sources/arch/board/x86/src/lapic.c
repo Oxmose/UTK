@@ -177,7 +177,7 @@ OS_RETURN_E lapic_init(void)
         KERNEL_ERROR("Could not declare IO-APIC region\n");
         return err;
     }
-    memory_mmap_direct(lapic_base_addr, lapic_base_addr, 0x1000, 0, 0, 1);
+    memory_mmap_direct(lapic_base_addr, lapic_base_addr, 0x1000, 0, 0, 0, 1);
 
     /* Enable all interrupts */
     lapic_write(LAPIC_TPR, 0);

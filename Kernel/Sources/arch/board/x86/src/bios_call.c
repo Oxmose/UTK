@@ -53,17 +53,18 @@ void bios_call(uint32_t intnum, bios_int_regs_t* regs)
 	ENTER_CRITICAL(int_state);
 	/* Map the RM core */
 	memory_mmap_direct((void*)&_KERNEL_BIOS_MEMORY_BASE, 
-						(void*)&_KERNEL_BIOS_MEMORY_BASE, 
-						(size_t)&_KERNEL_BIOS_MEMORY_SIZE, 
-						0, 
-						1,
-						1);
+					   (void*)&_KERNEL_BIOS_MEMORY_BASE, 
+					   (size_t)&_KERNEL_BIOS_MEMORY_SIZE, 
+					   0, 
+					   1,
+					   1,
+					   1);
 
 	__bios_call(intnum, regs);
 
 	/* Unmap RM core */
 	memory_munmap((void*)&_KERNEL_BIOS_MEMORY_BASE, 
-	               (size_t)&_KERNEL_BIOS_MEMORY_SIZE);
+	              (size_t)&_KERNEL_BIOS_MEMORY_SIZE);
 
 	EXIT_CRITICAL(int_state);
 }

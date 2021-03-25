@@ -151,6 +151,7 @@ OS_RETURN_E io_apic_init(void)
                             0x1000, 
                             0, 
                             0,
+                            0,
                             1);
 
         KERNEL_DEBUG(IOAPIC_DEBUG_ENABLED, 

@@ -23,6 +23,7 @@
 #include <stddef.h>     /* Standard definitions */
 #include <stdint.h>     /* Generic int types */
 #include <ctrl_block.h> /* Threads and processes control block */
+#include <syscall.h>    /* System call manager */
 
 /*******************************************************************************
  * CONSTANTS
@@ -143,7 +144,7 @@ int32_t sched_get_tid(void);
  *
  * @returns The thread structure of the current executing thread.
  */
-kernel_thread_t* sched_get_self(void);
+kernel_thread_t* sched_get_current_thread(void);
 
 /**
  * @brief Returns the process ID of the current executing thread.
@@ -310,16 +311,17 @@ uint64_t sched_get_schedule_count(void);
 uint64_t sched_get_idle_schedule_count(void);
 
 /**
- * @brief Forks the current process.
+ * @brief Syscall handler to forks the current process.
  * 
  * @details Forks the current process. A complete copy of the current process
  * will be done and memory will be marked as COW for both new and current 
  * process. Only the calling thread will be copied to the new process.
  * 
- * @return -1 is retuned on error. 0 is returned for the new process and the PID
- * of the new process is returned for the current calling process.
+ * @param[in] func The system call function id used to fork the current process.
+ * @param[out] new_pid This buffer is used to is used to retune the new process 
+ * and the PID. -1 is returned on error.
  */
-int32_t sched_fork_process(void);
+void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid);
 
 /**
  * @brief Creates a new kernel thread in the thread table.
