@@ -15,10 +15,13 @@
  ******************************************************************************/
 
 
-#ifndef __STDINT_H_
-#define __STDINT_H_
+#ifndef __LIB_STDINT_H_
+#define __LIB_STDINT_H_
 
-/* Exact-width integer types */
+/*******************************************************************************
+ * CONSTANTS
+ ******************************************************************************/
+
 /** 
  * @brief Defines int8_t type as an exact width 8 bits integer.
  */
@@ -52,6 +55,19 @@ typedef signed long long   int64_t;
  */
 typedef unsigned long long uint64_t;
 
+/** @brief Defines the boot_t type. */
+typedef uint8_t bool_t;
+
+/*******************************************************************************
+ * STRUCTURES 
+ ******************************************************************************/
+
+/** @brief Defines the TRUE value. */
+#define TRUE 1
+
+/** @brief Defines the FALSE value. */
+#define FALSE 0
+
 /* Limits of exact-width integer types */
 /** @brief int8_t minimal value. */
 #define INT8_MIN (-128)
@@ -80,4 +96,10 @@ typedef unsigned long long uint64_t;
 /** @brief uint64_t maximal value. */
 #define UINT64_MAX 0xffffffffffffffffULL
 
-#endif /* __STDINT_H_ */
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
+
+/* None */
+
+#endif /* __LIB_STDINT_H_ */

@@ -23,13 +23,15 @@
 #ifndef __TIME_TIME_MANAGEMENT_H_
 #define __TIME_TIME_MANAGEMENT_H_
 
-#include <stdint.h>      /* Generic int types */
-#include <stddef.h>      /* Standard definitions */
-#include <cpu_structs.h> /* CPU structures */
+#include <stdint.h>       /* Generic int types */
+#include <stddef.h>       /* Standard definitions */
+#include <cpu_settings.h> /* CPU structures */
 
 /*******************************************************************************
  * CONSTANTS
  ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * STRUCTURES
@@ -129,9 +131,6 @@ struct kernel_timer
  */
 typedef struct kernel_timer kernel_timer_t;
 
-/** @brief NULL timer driver. */
-extern kernel_timer_t null_timer;
-
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
@@ -165,9 +164,9 @@ OS_RETURN_E time_init(const kernel_timer_t* main_timer,
 /** 
  * @brief Returns the current uptime.
  * 
- * @details Return the current uptime of the system in ms.
+ * @details Return the current uptime of the system in ns.
  *
- * @return The current uptime in ms.
+ * @return The current uptime in ns.
  */
 uint64_t time_get_current_uptime(void);
 

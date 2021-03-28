@@ -17,12 +17,13 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#include <cpu.h>           /* CPU manmgement */
-#include <stdint.h>        /* Generic int types */
-#include <stddef.h>        /* Standard definitions */
-#include <kernel_output.h> /* Kernel output methods */
-#include <critical.h>      /* Critical sections */
-#include <panic.h>         /* Kernel panic */
+#include <cpu.h>                /* CPU manamgement */
+#include <stdint.h>             /* Generic int types */
+#include <kernel_output.h>      /* Kernel output methods */
+#include <critical.h>           /* Critical sections */
+#include <panic.h>              /* Kernel panic */
+#include <kernel_error.h>       /* Kernel error codes */
+#include <interrupt_settings.h> /* Interrupt settings */
 
 /* UTK configuration file */
 #include <config.h>
@@ -36,11 +37,74 @@
 #include <pic.h>
 
 /*******************************************************************************
+ * CONSTANTS
+ ******************************************************************************/
+
+/** @brief Master PIC CPU command port. */
+#define PIC_MASTER_COMM_PORT 0x20
+/** @brief Master PIC CPU data port. */
+#define PIC_MASTER_DATA_PORT 0x21
+/** @brief Slave PIC CPU command port. */
+#define PIC_SLAVE_COMM_PORT  0xa0
+/** @brief Slave PIC CPU data port. */
+#define PIC_SLAVE_DATA_PORT  0xa1
+
+/** @brief PIC End of Interrupt command. */
+#define PIC_EOI 0x20
+
+/** @brief PIC ICW4 needed flag. */
+#define PIC_ICW1_ICW4      0x01
+/** @brief PIC single mode flag. */
+#define PIC_ICW1_SINGLE    0x02
+/** @brief PIC call address interval 4 flag. */
+#define PIC_ICW1_INTERVAL4 0x04
+/** @brief PIC trigger level flag. */
+#define PIC_ICW1_LEVEL     0x08
+/** @brief PIC initialization flag. */
+#define PIC_ICW1_INIT      0x10
+
+/** @brief PIC 8086/88 (MCS-80/85) mode flag. */
+#define PIC_ICW4_8086	    0x01
+/** @brief PIC auto (normal) EOI flag. */
+#define PIC_ICW4_AUTO	    0x02
+/** @brief PIC buffered mode/slave flag. */
+#define PIC_ICW4_BUF_SLAVE	0x08
+/** @brief PIC buffered mode/master flag. */
+#define PIC_ICW4_BUF_MASTER	0x0C
+/** @brief PIC special fully nested (not) flag. */
+#define PIC_ICW4_SFNM	    0x10
+
+/** @brief Read ISR command value */
+#define PIC_READ_ISR 0x0B
+
+/** @brief Master PIC Base interrupt line for the lowest IRQ. */
+#define PIC0_BASE_INTERRUPT_LINE INT_PIC_IRQ_OFFSET
+/** @brief Slave PIC Base interrupt line for the lowest IRQ. */
+#define PIC1_BASE_INTERRUPT_LINE (INT_PIC_IRQ_OFFSET + 8)
+
+/** @brief PIC's cascading IRQ number. */
+#define PIC_CASCADING_IRQ 2
+
+/** @brief The PIC spurious irq mask. */
+#define PIC_SPURIOUS_IRQ_MASK 0x80
+
+/** @brief Master PIC spurious IRQ number. */
+#define PIC_SPURIOUS_IRQ_MASTER 0x07
+/** @brief Slave PIC spurious IRQ number. */
+#define PIC_SPURIOUS_IRQ_SLAVE  0x0F
+
+/*******************************************************************************
+ * STRUCTURES
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
 /** @brief PIC driver instance. */
-interrupt_driver_t pic_driver = {
+static interrupt_driver_t pic_driver = {
     .driver_set_irq_mask     = pic_set_irq_mask,
     .driver_set_irq_eoi      = pic_set_irq_eoi,
     .driver_handle_spurious  = pic_handle_spurious_irq,
@@ -48,10 +112,16 @@ interrupt_driver_t pic_driver = {
 };
 
 /*******************************************************************************
+ * STATIC FUNCTIONS DECLARATIONS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
 
-OS_RETURN_E pic_init(void)
+void pic_init(void)
 {
     /* Initialize the master, remap IRQs */
     cpu_outb(PIC_ICW1_ICW4 | PIC_ICW1_INIT, PIC_MASTER_COMM_PORT);
@@ -80,11 +150,9 @@ OS_RETURN_E pic_init(void)
     pic_test2();
     pic_test3();
 #endif
-
-    return OS_NO_ERR;
 }
 
-void pic_set_irq_mask(const uint32_t irq_number, const uint32_t enabled)
+void pic_set_irq_mask(const uint32_t irq_number, const bool_t enabled)
 {
     uint8_t  init_mask;
     uint32_t int_state;
@@ -93,7 +161,7 @@ void pic_set_irq_mask(const uint32_t irq_number, const uint32_t enabled)
     if(irq_number > PIC_MAX_IRQ_LINE)
     {
         KERNEL_ERROR("Could not find PIC IRQ %d", irq_number);
-        KERNEL_PANIC(OS_ERR_NO_SUCH_IRQ_LINE);
+        KERNEL_PANIC(OS_ERR_NO_SUCH_IRQ);
     }
 
     ENTER_CRITICAL(int_state);
@@ -105,7 +173,7 @@ void pic_set_irq_mask(const uint32_t irq_number, const uint32_t enabled)
         init_mask = cpu_inb(PIC_MASTER_DATA_PORT);
 
         /* Set new mask value */
-        if(!enabled)
+        if(enabled == FALSE)
         {
             init_mask |= 1 << irq_number;
         }
@@ -137,7 +205,7 @@ void pic_set_irq_mask(const uint32_t irq_number, const uint32_t enabled)
         init_mask = cpu_inb(PIC_SLAVE_DATA_PORT);
 
         /* Set new mask value */
-        if(!enabled)
+        if(enabled == FALSE)
         {
             init_mask |= 1 << cascading_number;
         }
@@ -176,7 +244,7 @@ void pic_set_irq_eoi(const uint32_t irq_number)
     if(irq_number > PIC_MAX_IRQ_LINE)
     {
         KERNEL_ERROR("Could not find PIC IRQ %d", irq_number);
-        KERNEL_PANIC(OS_ERR_NO_SUCH_IRQ_LINE);
+        KERNEL_PANIC(OS_ERR_NO_SUCH_IRQ);
     }
 
     /* End of interrupt signal */
@@ -192,7 +260,9 @@ void pic_set_irq_eoi(const uint32_t irq_number)
 INTERRUPT_TYPE_E pic_handle_spurious_irq(const uint32_t int_number)
 {
     uint8_t  isr_val;
-    uint32_t irq_number = int_number - INT_PIC_IRQ_OFFSET;
+    uint32_t irq_number;
+    
+    irq_number = int_number - INT_PIC_IRQ_OFFSET;
 
    KERNEL_DEBUG(PIC_DEBUG_ENABLED, "[PIC] Spurious handling %d", irq_number);
 
@@ -270,4 +340,9 @@ int32_t pic_get_irq_int_line(const uint32_t irq_number)
     }
 
     return irq_number + INT_PIC_IRQ_OFFSET;
+}
+
+const interrupt_driver_t* pic_get_driver(void)
+{
+    return &pic_driver;
 }

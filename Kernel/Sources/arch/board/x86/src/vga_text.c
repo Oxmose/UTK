@@ -19,12 +19,13 @@
  ******************************************************************************/
 
 #include <stdint.h>          /* Generic int types */
-#include <stddef.h>          /* Standard definitions */
 #include <string.h>          /* String manipualtion */
 #include <cpu.h>             /* CPU port manipulation */
 #include <uart.h>            /* UART driver */
 #include <kernel_output.h>   /* Kernel output manager */
 #include <memmgt.h>          /* Memory management */
+#include <graphic.h>         /* Graphic driver manager */
+#include <panic.h>           /* Kernel panic */
 
 /* UTK configuration file */
 #include <config.h>
@@ -36,6 +37,36 @@
 
 /* Header file */
 #include <vga_text.h>
+
+/*******************************************************************************
+ * CONSTANTS
+ ******************************************************************************/
+
+/** @brief VGA frame buffer base physical address. */
+#define VGA_TEXT_FRAMEBUFFER 0xB8000
+
+/** @brief VGA frame buffer size */
+#define VGA_TEXT_FRAMEBUFFER_SIZE 0x7D00
+
+/** @brief VGA CPU management data port. */
+#define VGA_TEXT_SCREEN_DATA_PORT 0x3D5
+/** @brief VGA CPU management command port. */
+#define VGA_TEXT_SCREEN_COMM_PORT 0x3D4
+/** @brief VGA screen width. */
+#define VGA_TEXT_SCREEN_COL_SIZE  80
+/** @brief VGA screen height. */
+#define VGA_TEXT_SCREEN_LINE_SIZE 25
+
+/** @brief VGA cursor position command low. */
+#define VGA_TEXT_CURSOR_COMM_LOW  0x0F
+/** @brief VGA cursor position command high. */
+#define VGA_TEXT_CURSOR_COMM_HIGH 0x0E
+
+/*******************************************************************************
+ * STRUCTURES
+ ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * GLOBAL VARIABLES
@@ -69,7 +100,7 @@ static uint16_t* vga_framebuffer = (uint16_t*)VGA_TEXT_FRAMEBUFFER;
 /**
  * @brief VGA text driver instance.
  */
-kernel_graphic_driver_t vga_text_driver = {
+static kernel_graphic_driver_t vga_text_driver = {
     .clear_screen = vga_clear_screen,
     .put_cursor_at = vga_put_cursor_at,
     .save_cursor = vga_save_cursor,
@@ -83,7 +114,7 @@ kernel_graphic_driver_t vga_text_driver = {
 };
 
 /*******************************************************************************
- * FUNCTIONS
+ * STATIC FUNCTIONS DEFINITIONS
  ******************************************************************************/
 
 /**
@@ -96,6 +127,40 @@ kernel_graphic_driver_t vga_text_driver = {
  * @param[in] column The colums index where to write the character.
  * @param[in] character The character to display on the screem.
  */
+inline static void vga_print_char(const uint32_t line, 
+                                  const uint32_t column,
+                                  const char character);
+
+/**
+ * @brief Processes the character in parameters.
+ *
+ * @details Check the character nature and code. Corresponding to the
+ * character's code, an action is taken. A regular character will be printed
+ * whereas \n will create a line feed.
+ *
+ * @param[in] character The character to process.
+ */
+static void vga_process_char(const char character);
+
+/** 
+ * @brief Returns the VGA frame buffer virtual address.
+ * 
+ * @details Returns the VGA frame buffer virtual address correponding to a 
+ * certain region of the buffer given the parameters.
+ * 
+ * @param[in] line The frame buffer line.
+ * @param[in] column The frame buffer column.
+ *
+ * @return The frame buffer virtual address is returned correponding to a 
+ * certain region of the buffer given the parameters is returned.
+ */
+inline static uint16_t* vga_get_framebuffer(const uint32_t line, 
+                                            const uint32_t column);
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
+
 inline static void vga_print_char(const uint32_t line, 
                                   const uint32_t column,
                                   const char character)
@@ -117,15 +182,6 @@ inline static void vga_print_char(const uint32_t line,
                   ((screen_scheme.foreground << 8) & 0x0F00);
 }
 
-/**
- * @brief Processes the character in parameters.
- *
- * @details Check the character nature and code. Corresponding to the
- * character's code, an action is taken. A regular character will be printed
- * whereas \n will create a line feed.
- *
- * @param[in] character The character to process.
- */
 static void vga_process_char(const char character)
 {
 #if KERNEL_LOG_LEVEL >= DEBUG_LOG_LEVEL
@@ -242,7 +298,8 @@ static void vga_process_char(const char character)
     }
 }
 
-inline uint16_t* vga_get_framebuffer(const uint32_t line, const uint32_t column)
+static inline uint16_t* vga_get_framebuffer(const uint32_t line, 
+                                            const uint32_t column)
 {
     /* Avoid overflow on text mode */
     if(line > VGA_TEXT_SCREEN_LINE_SIZE - 1 ||
@@ -256,7 +313,7 @@ inline uint16_t* vga_get_framebuffer(const uint32_t line, const uint32_t column)
            (column + line * VGA_TEXT_SCREEN_COL_SIZE);
 }
 
-OS_RETURN_E vga_init(void)
+void vga_init(void)
 {
     OS_RETURN_E err;
 
@@ -270,19 +327,19 @@ OS_RETURN_E vga_init(void)
                              VGA_TEXT_FRAMEBUFFER_SIZE);
     if(err != OS_NO_ERR)
     {
-        return err;
+        KERNEL_ERROR("Could not initialize VGA kernel driver\n");
+        KERNEL_PANIC(err);
     }
 
     /* Map the driver's memory */
     memory_mmap_direct(vga_framebuffer, 
-                        vga_framebuffer,
-                        VGA_TEXT_FRAMEBUFFER_SIZE,
-                        0,
-                        0,
-                        0,
-                        1);
-
-    return err;
+                       vga_framebuffer,
+                       VGA_TEXT_FRAMEBUFFER_SIZE,
+                       0,
+                       0,
+                       0,
+                       1,
+                       NULL);
 }
 
 void vga_clear_screen(void)
@@ -450,4 +507,9 @@ void vga_console_write_keyboard(const char* string, const size_t size)
     {
         vga_process_char(string[i]);
     }
+}
+
+const kernel_graphic_driver_t* vga_text_get_driver(void)
+{
+    return &vga_text_driver;
 }

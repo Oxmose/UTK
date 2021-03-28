@@ -24,15 +24,19 @@
 
 #include <stdint.h>         /* Generic int types */
 #include <stddef.h>         /* Standard definitions */
-#include <cpu_structs.h>        /* CPU structures */
+#include <cpu_settings.h>   /* CPU structures */
 
 /*******************************************************************************
  * CONSTANTS
  ******************************************************************************/
 
+/* None */
+
 /*******************************************************************************
  * STRUCTURES
  ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * FUNCTIONS
@@ -42,12 +46,9 @@
  * @brief Initializes the exception manager.
  * 
  * @details Blanks the handlers memory and initialize the first 32 exceptions to
- * catch intel exceptions.
- * 
- * @return The success state or the error code. 
- * - OS_NO_ERR is returned if no error is encountered. 
+ * catch exceptions. 
  */
-OS_RETURN_E kernel_exception_init(void);
+void kernel_exception_init(void);
 
 /**
  * @brief Registers a new exception handler for the desired exception line.

@@ -27,11 +27,30 @@
 #include <string.h>               /* Memset */
 #include <rt_clock.h>             /* RTC driver */
 #include <scheduler.h>            /* Scheduler */
+
 /* UTK configuration file */
 #include <config.h>
 
 /* Header file */
 #include <panic.h>
+
+/*******************************************************************************
+ * GCONSTANTS
+ ******************************************************************************/
+
+/**
+ * @brief Defines the NMI Panic code.
+ */
+#define PANIC_NMI_CODE 0xFFFFFFFF
+
+/** @brief Defines the maximal file name lenght for the panic */
+#define PANIC_MAX_FILE_NAME_LENGTH 256
+
+/*******************************************************************************
+ * STRUCTURES
+ ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * GLOBAL VARIABLES
@@ -380,26 +399,14 @@ void kernel_panic(const uint32_t error_code,
                   const char* file, 
                   const uint32_t line)
 {
-    cpu_state_t cpu_state;
-    uintptr_t int_id;
-    stack_state_t stack_state;
-
     /* Save the error code to memory */
     panic_code = error_code;
     strncpy(panic_file, file, PANIC_MAX_FILE_NAME_LENGTH);
     panic_line = line;
 
-    if(cpu_get_interrupt_state() == 1)
-    {
-        /* Raise INT */
-        __asm__ __volatile__("int %0" :: "i" (PANIC_INT_LINE));
-    }
-    else 
-    {
-        /* Dummy values */
-        int_id = PANIC_INT_LINE;
-        memset(&cpu_state, 0, sizeof(cpu_state_t));
-        memset(&stack_state, 0, sizeof(cpu_state_t));
-        panic(&cpu_state, int_id, &stack_state);
-    }
+    /* Raise INT, sti ensure 1 cycle of execution where no interrupt occur, 
+     * thus, letting int execute
+     */
+    __asm__ __volatile__("sti\n\t"
+                         "int %0" :: "i" (PANIC_INT_LINE));
 }

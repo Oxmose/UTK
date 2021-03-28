@@ -42,6 +42,18 @@
 #include <exceptions.h>
 
 /*******************************************************************************
+ * CONSTANTS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * STRUCTURES
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
@@ -49,7 +61,7 @@
 extern custom_handler_t kernel_interrupt_handlers[INT_ENTRY_COUNT];
 
 /*******************************************************************************
- * FUNCTIONS
+ * STATIC FUNCTIONS DECLARATION
  ******************************************************************************/
 
 /**
@@ -64,6 +76,14 @@ extern custom_handler_t kernel_interrupt_handlers[INT_ENTRY_COUNT];
  * error code and the eflags register value.
  */
 static void div_by_zero_handler(cpu_state_t* cpu_state, uintptr_t int_id,
+                                stack_state_t* stack_state);
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
+
+static void div_by_zero_handler(cpu_state_t* cpu_state, 
+                                uintptr_t int_id,
                                 stack_state_t* stack_state)
 {
     (void)cpu_state;
@@ -75,11 +95,13 @@ static void div_by_zero_handler(cpu_state_t* cpu_state, uintptr_t int_id,
         panic(cpu_state, int_id, stack_state);
     }   
 
+    /* TODO: If we have a current process, kill the process */
+
     KERNEL_ERROR("Divide by zero.\n");
     panic(cpu_state, int_id, stack_state); 
 }
 
-OS_RETURN_E kernel_exception_init(void)
+void kernel_exception_init(void)
 {
     OS_RETURN_E err;
 
@@ -90,14 +112,14 @@ OS_RETURN_E kernel_exception_init(void)
                                             div_by_zero_handler);
     if(err != OS_NO_ERR)
     {
-        return err;
+        KERNEL_ERROR("Could not initialize exception manager.\n");
+        KERNEL_PANIC(err);
     }
 
 #ifdef TEST_MODE_ENABLED 
     exception_test();
 #endif
 
-    return OS_NO_ERR;
 }
 
 OS_RETURN_E kernel_exception_register_handler(const uint32_t exception_line,

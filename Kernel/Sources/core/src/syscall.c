@@ -18,11 +18,12 @@
  ******************************************************************************/
 
 #include <stdint.h>             /* Generic int types */
-#include <stddef.h>             /* Standard definitions */
 #include <interrupt_settings.h> /* Interrupt settings */
 #include <cpu_api.h>            /* CPU API */
 #include <kernel_output.h>      /* Kernel output */
 #include <scheduler.h>          /* Scheduler */
+#include <kernel_error.h>       /* Kernel error codes */
+#include <panic.h>              /* Kernel panic */
 
 /* UTK configuration file */
 #include <config.h>
@@ -36,16 +37,29 @@
 #include <syscall.h>
 
 /*******************************************************************************
+ * CONSTANTS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * STRUCTURES
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
 /** @brief Stores the handlers for each system call. */
 static syscall_handler_t kernel_interrupt_handlers[SYSCALL_MAX_ID] = {
-    {sched_fork_process}
+    {sched_fork_process},
+    {sched_wait_process_pid},
 };
 
 /*******************************************************************************
- * FUNCTIONS
+ * STATIC FUNCTIONS DECLARATION
  ******************************************************************************/
 
 /**
@@ -59,6 +73,14 @@ static syscall_handler_t kernel_interrupt_handlers[SYSCALL_MAX_ID] = {
  * @param[in] int_id The interrupt number.
  * @param[in, out] stack_state The stack state before the interrupt.
  */
+static void syscall_handler(cpu_state_t *cpu_state,
+                            uintptr_t int_id,
+                            stack_state_t *stack_state);
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
+
 static void syscall_handler(cpu_state_t *cpu_state,
                             uintptr_t int_id,
                             stack_state_t *stack_state)
@@ -86,11 +108,17 @@ static void syscall_handler(cpu_state_t *cpu_state,
     }    
 }
 
-OS_RETURN_E syscall_init(void)
+void syscall_init(void)
 {
+    OS_RETURN_E err;
     /* Init the system call handler */
-    return kernel_interrupt_register_int_handler(SYSCALL_INT_LINE, 
-                                                 syscall_handler);
+    err = kernel_interrupt_register_int_handler(SYSCALL_INT_LINE, 
+                                                syscall_handler);
+    if(err != OS_NO_ERR)
+    {
+        KERNEL_ERROR("Could not initialize system call manager\n");
+        KERNEL_PANIC(err);
+    }
 }
 
 OS_RETURN_E syscall_do(const SYSCALL_FUNCTION_E func, void* params)

@@ -38,10 +38,72 @@
 #include <kheap.h>
 
 /*******************************************************************************
- * GLOBAL VARIABLES
+ * CONSTANTS
  ******************************************************************************/
 
+/* None */
 
+/*******************************************************************************
+ * STRUCTURES
+ ******************************************************************************/
+
+/** @brief Kernel's heap allocator list node. */
+struct list
+{
+    /** @brief Next node of the list. */
+    struct list* next;
+    /** @brief Previous node of the list. */
+    struct list* prev;
+};
+
+/** 
+ * @brief Defines list_t type as a shorcut for struct list.
+ */
+typedef struct list list_t;
+
+/** @brief Kernel's heap allocator memory chunk representation. */
+struct mem_chunk
+{
+    /** @brief Memory chunk list. */
+    list_t all;
+
+    /** @brief Used flag. */
+    int8_t used;
+    union
+
+    /** @brief If used, the union contains the chunk's data, else a list of free
+     * mem.
+     */
+    {
+	       uint8_t* data;
+	       list_t   free;
+    };
+};
+
+/** 
+ * @brief Defines mem_chunk_t type as a shorcut for struct mem_chunk.
+ */
+typedef struct mem_chunk mem_chunk_t;
+
+/** @brief Kernel's heap allocator settings. */
+enum heap_enum
+{
+    /** @brief Num size. */
+    NUM_SIZES   = 32,
+
+    /** @brief Memory chunk alignement. */
+    ALIGN       = 4,
+
+    /** @brief Chink minimal size. */
+    MIN_SIZE    = sizeof(list_t),
+
+    /** @brief Header size. */
+    HEADER_SIZE = __builtin_offsetof(mem_chunk_t, data),
+};
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
 
 /* Heap position in memory */
 /** @brief Start address of the kernel's heap. */
@@ -63,9 +125,60 @@ static mem_chunk_t* last_chunk;
 /** @brief Quantity of free memory in the kernel's heap. */
 static uint32_t mem_free;
 /** @brief Quantity of used memory in the kernel's heap. */
-uint32_t kheap_mem_used;
+static uint32_t kheap_mem_used;
 /** @brief Quantity of memory used to store meta data in the kernel's heap. */
 static uint32_t mem_meta;
+
+/*******************************************************************************
+ * STATIC FUNCTIONS DECLARATION
+ ******************************************************************************/
+
+inline static void list_init(list_t* node);
+
+inline static void insert_before(list_t* current, list_t* new);
+
+inline static void insert_after(list_t* current, list_t* new);
+
+inline static void remove(list_t* node);
+
+inline static void push(list_t** list, list_t* node);
+
+inline static list_t* pop(list_t** list);
+
+inline static void remove_from(list_t** list, list_t* node);
+
+inline static void memory_chunk_init(mem_chunk_t* chunk);
+
+inline static uint32_t memory_chunk_size(const mem_chunk_t* chunk);
+
+/**
+ * @brief Returns the slot of a memory chunk for the desired size.
+ *
+ * @details Returns the slot of a memory chunk for the desired size.
+ *
+ * @param[in] size The size of the chunk to get the slot of.
+ *
+ * @return The slot of a memory chunk for the desired size.
+ */
+inline static int32_t memory_chunk_slot(uint32_t size);
+
+/**
+ * @brief Removes a memory chunk in the free memory chunks list.
+ *
+ * @details Removes a memory chunk in the free memory chunks list.
+ *
+ * @param[in, out] chunk The chunk to be removed from the list.
+ */
+inline static void remove_free(mem_chunk_t* chunk);
+
+/**
+ * @brief Pushes a memory chunk in the free memory chunks list.
+ *
+ * @details Pushes a memory chunk in the free memory chunks list.
+ *
+ * @param[in, out] chunk The chunk to be placed in the list.
+ */
+inline static void push_free(mem_chunk_t *chunk);
 
 /*******************************************************************************
  * FUNCTIONS
@@ -141,13 +254,13 @@ __extension__                                      \
 
 #define LIST_ITERATOR_REMOVE_FROM(h, it, l) LIST_REMOVE_FROM(h, iter_##it, l)
 
-__inline__ static void list_init(list_t* node)
+inline static void list_init(list_t* node)
 {
     node->next = node;
     node->prev = node;
 }
 
-__inline__ static void insert_before(list_t* current, list_t* new)
+inline static void insert_before(list_t* current, list_t* new)
 {
     list_t* current_prev = current->prev;
     list_t* new_prev = new->prev;
@@ -158,7 +271,7 @@ __inline__ static void insert_before(list_t* current, list_t* new)
     current->prev = new_prev;
 }
 
-__inline__ static void insert_after(list_t* current, list_t* new)
+inline static void insert_after(list_t* current, list_t* new)
 {
     list_t *current_next = current->next;
     list_t *new_prev = new->prev;
@@ -169,7 +282,7 @@ __inline__ static void insert_after(list_t* current, list_t* new)
     current_next->prev = new_prev;
 }
 
-__inline__ static void remove(list_t* node)
+inline static void remove(list_t* node)
 {
     node->prev->next = node->next;
     node->next->prev = node->prev;
@@ -177,7 +290,7 @@ __inline__ static void remove(list_t* node)
     node->prev = node;
 }
 
-__inline__ static void push(list_t** list, list_t* node)
+inline static void push(list_t** list, list_t* node)
 {
 
     if (*list != NULL)
@@ -188,7 +301,7 @@ __inline__ static void push(list_t** list, list_t* node)
     *list = node;
 }
 
-__inline__ static list_t* pop(list_t** list)
+inline static list_t* pop(list_t** list)
 {
 
     list_t* top = *list;
@@ -208,7 +321,7 @@ __inline__ static list_t* pop(list_t** list)
     return top;
 }
 
-__inline__ static void remove_from(list_t** list, list_t* node)
+inline static void remove_from(list_t** list, list_t* node)
 {
     if (*list == node)
     {
@@ -220,14 +333,14 @@ __inline__ static void remove_from(list_t** list, list_t* node)
     }
 }
 
-static void memory_chunk_init(mem_chunk_t* chunk)
+inline static void memory_chunk_init(mem_chunk_t* chunk)
 {
     LIST_INIT(chunk, all);
     chunk->used = 0;
     LIST_INIT(chunk, free);
 }
 
-static uint32_t memory_chunk_size(const mem_chunk_t* chunk)
+inline static uint32_t memory_chunk_size(const mem_chunk_t* chunk)
 {
 
     int8_t* end = (int8_t*)(chunk->all.next);
@@ -244,7 +357,7 @@ static uint32_t memory_chunk_size(const mem_chunk_t* chunk)
  *
  * @return The slot of a memory chunk for the desired size.
  */
-static int32_t memory_chunk_slot(uint32_t size)
+inline static int32_t memory_chunk_slot(uint32_t size)
 {
     int32_t n = -1;
     while(size > 0)
@@ -262,7 +375,7 @@ static int32_t memory_chunk_slot(uint32_t size)
  *
  * @param[in, out] chunk The chunk to be removed from the list.
  */
-static void remove_free(mem_chunk_t* chunk)
+inline static void remove_free(mem_chunk_t* chunk)
 {
     uint32_t len = memory_chunk_size(chunk);
     int n = memory_chunk_slot(len);
@@ -278,7 +391,7 @@ static void remove_free(mem_chunk_t* chunk)
  *
  * @param[in, out] chunk The chunk to be placed in the list.
  */
-static void push_free(mem_chunk_t *chunk)
+inline static void push_free(mem_chunk_t *chunk)
 {
     uint32_t len = memory_chunk_size(chunk);
     int n = memory_chunk_slot(len);
@@ -287,7 +400,7 @@ static void push_free(mem_chunk_t *chunk)
     mem_free += len - HEADER_SIZE;
 }
 
-OS_RETURN_E kheap_init(void)
+void kheap_init(void)
 {
     mem_chunk_t* second;
     uint32_t len;
@@ -335,8 +448,6 @@ OS_RETURN_E kheap_init(void)
 #ifdef TEST_MODE_ENABLED
     kheap_test();
 #endif
-
-    return OS_NO_ERR;
 }
 
 void* kmalloc(size_t size)

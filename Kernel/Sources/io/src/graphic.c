@@ -18,8 +18,8 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#include <stdint.h>  /* Generic int types */
-#include <stddef.h>  /* Standard definitions */
+#include <stdint.h>       /* Generic int types */
+#include <kernel_error.h> /* Kernel error codes */
 
 /* UTK configuration file */
 #include <config.h>
@@ -28,11 +28,29 @@
 #include <graphic.h>
 
 /*******************************************************************************
+ * CONSTANTS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * STRUCTURES
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
 /** @brief Stores the currently selected driver */
 static kernel_graphic_driver_t graphic_driver = {NULL};
+
+/*******************************************************************************
+ * STATIC FUNCTIONS DECLARATION
+ ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * FUNCTIONS
@@ -55,11 +73,6 @@ OS_RETURN_E graphic_set_selected_driver(const kernel_graphic_driver_t* driver)
     graphic_clear_screen();
 
     return OS_NO_ERR;
-}
-
-const kernel_graphic_driver_t* graphic_get_selected_driver(void)
-{
-    return &graphic_driver;
 }
 
 void graphic_clear_screen(void)

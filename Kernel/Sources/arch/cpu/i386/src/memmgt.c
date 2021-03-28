@@ -44,6 +44,70 @@
 #include <memmgt.h>
 
 /*******************************************************************************
+ * CONSTANTS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * STRUCTURES
+ ******************************************************************************/
+
+/**
+ * @brief Page fault handler structure. Gathers the pafe fault addresses
+ * associated with a corresponding handler.
+ */
+struct mem_handler
+{
+    /** @brief Start address of the range that is covered by the handler. */
+    uintptr_t start;
+
+    /** @brief End address of the range that is covered by the handler. */
+    uintptr_t end;
+
+    /** @brief Pointer to the handler function. */
+    void (*handler)(uintptr_t fault_address);
+};
+
+/** @brief Shortcut for the struct mem_handler type. */
+typedef struct mem_handler mem_handler_t;
+
+/** @brief Defines a memory range with its type as defined by the multiboot 
+ * standard.
+ */
+struct mem_range
+{
+    /** @brief Range's base address. */
+    uintptr_t base;
+
+    /** @brief Range's limit. */
+    uintptr_t limit;
+
+    /** @brief Range's memory type. */
+    uint32_t type;
+};
+
+/** 
+ * @brief Defines mem_range_t type as a shorcut for struct mem_range.
+ */
+typedef struct mem_range mem_range_t;
+
+/** @brief Defines the memory allocation starting point (begining or end of the
+ * memory space).
+ */
+enum MEM_ALLOC_START
+{
+    MEM_ALLOC_BEGINING,
+    MEM_ALLOC_END
+};
+
+/** 
+ * @brief Defines MEM_ALLOCATION_START_E type as a shorcut for 
+ * enum MEM_ALLOCATION_START.
+ */
+typedef enum MEM_ALLOC_START MEM_ALLOC_START_E;
+
+/*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
@@ -108,14 +172,277 @@ static uintptr_t kernel_pgdir[KERNEL_PGDIR_SIZE] __attribute__((aligned(4096)));
 static uintptr_t min_pgtable[KERNEL_RESERVED_PAGING][KERNEL_PGDIR_SIZE]
                                                 __attribute__((aligned(4096)));
 
-/** @brief Tells if paging is initialized. */
-static uint8_t init = 0;
-
-/** @brief Tells if paging is enabled. */
-static uint8_t enabled = 0;
-
 /** @brief Stores the frame reference table directory */
 static uintptr_t frame_ref_dir[FRAME_REF_DIR_SIZE];
+
+
+/*******************************************************************************
+ * STATIC FUNCTIONS DECLARATIONS
+ ******************************************************************************/
+/**
+ * @brief Kernel memory frame allocation.
+ * 
+ * @details Kernel memory frame allocation. This method gets the desired number
+ * of contiguous frames from the kernel frame pool and allocate them.
+ * 
+ * @param[in] frame_count The number of desired frames to allocate.
+ * @param[out] err The error buffer to store the operation's result. If NULL, 
+ * the function will raise a kernel panic in case of error.
+ * 
+ * @return The address of the first frame of the contiguous block is 
+ * returned.
+ */
+static void* memory_alloc_frames(const size_t frame_count, OS_RETURN_E* err);
+
+/**
+ * @brief Kernel memory frame release.
+ * 
+ * @details Kernel memory frame release. This method releases the desired number
+ * of contiguous frames to the kernel frame pool.
+ * 
+ * @param[in] frame_addr The address of the first frame to release.
+ * @param[in] frame_count The number of desired frames to release.
+ * @param[out] err The error buffer to store the operation's result. If NULL, 
+ * the function will raise a kernel panic in case of error.
+ */
+static void memory_free_frames(void* frame_addr, 
+                               const size_t frame_count, 
+                               OS_RETURN_E* err);
+
+/**
+ * @brief Kernel memory page allocation.
+ * 
+ * @details Kernel memory page allocation. This method gets the desired number
+ * of contiguous pages from the current process page pool and allocate them.
+ * 
+ * @param[in, out] page_table The free page table to allocate pages from.
+ * @param[in] page_count The number of desired pages to allocate.
+ * @param[in] start_pt The starting point to allocated memory in the space.
+ * @param[out] err The error buffer to store the operation's result. If NULL, 
+ * the function will raise a kernel panic in case of error.
+ * 
+ * @return The address of the first page of the contiguous block is 
+ * returned.
+ */
+static void* memory_alloc_pages_from(queue_t* page_table, 
+                                     const size_t page_count,
+                                     const MEM_ALLOC_START_E start_pt,
+                                     OS_RETURN_E* err);
+
+/**
+ * @brief Kernel memory page release.
+ * 
+ * @details Kernel memory page release. This method releases the desired number
+ * of contiguous pages to the current process page pool.
+ * 
+ * @param[in, out] page_table The free page table to free pages to.
+ * @param[in] page_addr The address of the first page to release.
+ * @param[in] page_count The number of desired pages to release.
+ * @param[out] err The error buffer to store the operation's result. If NULL, 
+ * the function will raise a kernel panic in case of error.
+ */
+static void memory_free_pages_to(queue_t* page_table, 
+                                 const uintptr_t* page_addr, 
+                                 const size_t page_count,
+                                 OS_RETURN_E* err);
+
+static void memory_acquire_ref(uintptr_t phys_addr);
+
+static void memory_release_ref(uintptr_t phys_addr);
+
+static uint32_t memory_get_ref_count(const uintptr_t phys_addr);
+
+static void init_frame_ref_table(uintptr_t next_free_mem);
+
+/**
+ * @brief Retrieves the start and end address of the kernel high startup 
+ * section.
+ * 
+ * @details Retrieves the start and end address of the kernel high startup 
+ * section. The addresses are stored in the buffer given as parameter. The 
+ * function has no effect if the buffer are NULL.
+ * 
+ * @param[out] start The start address of the section.
+ * @param[out] end The end address of the section.
+ */
+static void memory_get_khighstartup_range(uintptr_t* start, uintptr_t* end);
+
+/**
+ * @brief Retrieves the start and end address of the kernel text section.
+ * 
+ * @details Retrieves the start and end address of the kernel text section.
+ * The addresses are stored in the buffer given as parameter. The function has
+ * no effect if the buffer are NULL.
+ * 
+ * @param[out] start The start address of the section.
+ * @param[out] end The end address of the section.
+ */
+static void memory_get_ktext_range(uintptr_t* start, uintptr_t* end);
+
+/**
+ * @brief Retrieves the start and end address of the kernel read only data
+ * section.
+ * 
+ * @details Retrieves the start and end address of the kernel read only data
+ * section. The addresses are stored in the buffer given as parameter. The 
+ * function has no effect if the buffer are NULL.
+ * 
+ * @param[out] start The start address of the section.
+ * @param[out] end The end address of the section.
+ */
+static void memory_get_krodata_range(uintptr_t* start, uintptr_t* end);
+
+/**
+ * @brief Retrieves the start and end address of the kernel data section.
+ * 
+ * @details Retrieves the start and end address of the kernel data section.
+ * The addresses are stored in the buffer given as parameter. The function has
+ * no effect if the buffer are NULL.
+ * 
+ * @param[out] start The start address of the section.
+ * @param[out] end The end address of the section.
+ */
+static void memory_get_kdata_range(uintptr_t* start, uintptr_t* end);
+
+/**
+ * @brief Retrieves the start and end address of the kernel bss section.
+ * 
+ * @details Retrieves the start and end address of the kernel bss section.
+ * The addresses are stored in the buffer given as parameter. The function has
+ * no effect if the buffer are NULL.
+ * 
+ * @param[out] start The start address of the section.
+ * @param[out] end The end address of the section.
+ */
+static void memory_get_kbss_range(uintptr_t* start, uintptr_t* end);
+
+/**
+ * @brief Retrieves the start and end address of the kernel stacks section.
+ * 
+ * @details Retrieves the start and end address of the kernel stacks section.
+ * The addresses are stored in the buffer given as parameter. The function has
+ * no effect if the buffer are NULL.
+ * 
+ * @param[out] start The start address of the section.
+ * @param[out] end The end address of the section.
+ */
+static void memory_get_kstacks_range(uintptr_t* start, uintptr_t* end);
+
+/**
+ * @brief Retrieves the start and end address of the kernel heap section.
+ * 
+ * @details Retrieves the start and end address of the kernel heap section.
+ * The addresses are stored in the buffer given as parameter. The function has
+ * no effect if the buffer are NULL.
+ * 
+ * @param[out] start The start address of the section.
+ * @param[out] end The end address of the section.
+ */
+static void memory_get_kheap_range(uintptr_t* start, uintptr_t* end);
+
+static void print_kernel_map(void);
+
+static void detect_memory(void);
+
+static void setup_mem_table(void);
+
+static void* get_block(queue_t* list, 
+                       const size_t length, 
+                       const MEM_ALLOC_START_E start_pt,
+                       OS_RETURN_E* err);
+
+static void add_block(queue_t* list, 
+                      uintptr_t first_frame, 
+                      const size_t length,
+                      OS_RETURN_E* err);
+
+/** 
+ * @brief Maps a kernel section to the memory.
+ * 
+ * @details Maps a kernel section to the memory. No frame are allocated as the 
+ * memory should already be populated.
+ * 
+ * @param[in] start_addr The start address of the section.
+ * @param[in] end_addr The end address of the section.
+ * @param[in] read_only Set to TRUE if the section is read only.
+ */
+static void map_kernel_section(uintptr_t start_addr, 
+                               uintptr_t end_addr,
+                               const bool_t read_only);
+
+static OS_RETURN_E memory_invocate_cow(const uintptr_t addr);
+
+/**
+ * @brief Handle a page fault exception.
+ *
+ * @details Handle a page fault exception raised by the cpu. The corresponding
+ * registered handler will be called. If no handler is available, a panic is
+ * raised.
+ *
+ * @param[in] cpu_state The cpu registers structure.
+ * @param[in] int_id The exception number.
+ * @param[in] stack_state The stack state before the exception that contain cs, 
+ * eip, error code and the eflags register value.
+ */
+static void paging_fault_general_handler(cpu_state_t* cpu_state, 
+                                         uintptr_t int_id,
+                                         stack_state_t* stack_state);
+
+/**
+ * @brief Tells if a memory region is already mapped in the current page tables.
+ * 
+ * @details Tells if a memory region is already mapped in the current page 
+ * tables. Returns 0 if the region is not mapped, 1 otherwise.
+ * 
+ * @return Returns 0 if the region is not mapped, 1 otherwise.
+ */
+static bool_t is_mapped(const uintptr_t start_addr, const size_t size);
+
+/**
+ * @brief Copies the free page table of the current process and return the copy.
+ * 
+ * @details Copies the free page table of the current process and return the 
+ * copy. This function performs a deep copy of the table. Meaning that the two 
+ * instance to the table are totally independant.
+ * 
+ * @param[out] err The error buffer to store the operation's result. If NULL, 
+ * the function will raise a kernel panic in case of error.
+ * 
+ * @return A deep copy of the currentp process free page table is returned.
+ */
+static queue_t* paging_copy_free_page_table(OS_RETURN_E* err);
+
+/** 
+ * @brief Maps a virtual address to the corresponding physical address.
+ * 
+ * @details Maps a virtual address to the corresponding physical address.
+ * The allocation should be done prior to using this function as all it 
+ * does is mapping the addresses together.
+ * 
+ * @param[in] virt_addr The virtual start address of the region to map.
+ * @param[in] phys_addr The physical start address of the region to map.
+ * @param[in] mapping_size The size of the region to map.
+ * @param[in] flags The flags used for mapping (eg hw, cow, etc).
+ * @param[out] err The error buffer to store the operation's result. If NULL, 
+ * the function will raise a kernel panic in case of error.
+ */
+static void kernel_mmap_internal(const void* virt_addr,
+                                 const void* phys_addr,
+                                 const size_t mapping_size,
+                                 const uintptr_t flags,
+                                 OS_RETURN_E* err);
+
+/**
+ * @brief Initializes paging structures for the kernel.
+ *
+ * @details Initializes paging structures for the kernel. This function will
+ * select an available memory region to allocate the memory required for the
+ * kernel. Then the kernel will be mapped to memory and paging is enabled for
+ * the kernel.
+ */
+static void paging_init(void);
+
+static void memory_paging_enable(void);
 
 /*******************************************************************************
  * FUNCTIONS
@@ -133,6 +460,207 @@ static uintptr_t frame_ref_dir[FRAME_REF_DIR_SIZE];
     __asm__ __volatile__(                                   \
         "mov %%cr3, %%eax\n\tmov %%eax, %%cr3": : : "eax"   \
     );                                                      \
+}
+
+static void* memory_alloc_frames(const size_t frame_count, OS_RETURN_E* err)
+{
+    uint32_t    int_state;
+    void*       address;
+    OS_RETURN_E internal_err;
+
+    ENTER_CRITICAL(int_state);
+
+    address = get_block(free_memory_map, 
+                        frame_count, 
+                        MEM_ALLOC_BEGINING, 
+                        &internal_err);
+    if(internal_err != OS_NO_ERR)
+    {
+        KERNEL_ERROR("Could not allocate new frame\n");
+        if(err == NULL)
+        {
+            KERNEL_PANIC(internal_err);
+        }
+        else 
+        {
+            *err = internal_err;
+            EXIT_CRITICAL(int_state);
+            return NULL;
+        }
+    }
+
+    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
+                 "[MEMMGT] Allocated %u frames, at 0x%p", 
+                 frame_count, address);
+
+    available_memory -= KERNEL_FRAME_SIZE * frame_count;
+
+    EXIT_CRITICAL(int_state);
+
+    if(err != NULL)
+    {
+        *err = OS_NO_ERR;
+    }
+
+    return address;
+}
+
+static void memory_free_frames(void* frame_addr, 
+                               const size_t frame_count,
+                               OS_RETURN_E* err)
+{
+    uint32_t      int_state;
+    queue_node_t* cursor;
+    mem_range_t*  mem_range;
+    OS_RETURN_E internal_err;
+
+    ENTER_CRITICAL(int_state);
+
+    /* Check if the frame actually exists in free memory */
+    cursor = hw_memory_map->head;
+    while(cursor != NULL)
+    {
+        mem_range = (mem_range_t*)cursor->data;
+        if(mem_range->type == MULTIBOOT_MEMORY_AVAILABLE &&
+           mem_range->base <= (uintptr_t)frame_addr && 
+           mem_range->limit >= (uintptr_t)frame_addr + 
+                                frame_count * KERNEL_FRAME_SIZE)
+        {
+            break;
+        }
+        cursor = cursor->next;
+    }
+    if(cursor == NULL)
+    {
+        KERNEL_ERROR("Tried to free non existent frame\n");
+
+        if(err == NULL)
+        {
+            KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        }
+        else 
+        {
+            *err = OS_ERR_UNAUTHORIZED_ACTION;
+            EXIT_CRITICAL(int_state);
+            return;
+        }        
+    }
+
+    add_block(free_memory_map, 
+              (uintptr_t)frame_addr, 
+              frame_count, 
+              &internal_err);
+
+    if(internal_err != OS_NO_ERR)
+    {
+        KERNEL_ERROR("Could not free frame\n");
+        if(err == NULL)
+        {
+            KERNEL_PANIC(internal_err);
+        }
+        else 
+        {
+            *err = internal_err;
+            EXIT_CRITICAL(int_state);
+            return;
+        }
+    }
+
+    /* TODO: Set ref count to 0 */
+
+    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
+                 "[MEMMGT] Deallocated %u frames, at 0x%p", 
+                 frame_count, frame_addr);
+
+    available_memory += KERNEL_FRAME_SIZE * frame_count;
+
+    if(err != NULL)
+    {
+        *err = OS_NO_ERR;
+    }
+
+    EXIT_CRITICAL(int_state);
+}
+
+static void* memory_alloc_pages_from(queue_t* page_table, 
+                                     const size_t page_count,
+                                     const MEM_ALLOC_START_E start_pt,
+                                     OS_RETURN_E* err)
+{
+    void*             address;
+    uint32_t          int_state;
+    OS_RETURN_E       internal_err;    
+
+    ENTER_CRITICAL(int_state);
+
+    address = get_block(page_table, page_count, start_pt, &internal_err);
+    if(internal_err != OS_NO_ERR)
+    {
+        KERNEL_ERROR("Could not allocate new page\n");
+        if(err == NULL)
+        {
+            KERNEL_PANIC(internal_err);
+        }
+        else 
+        {
+            *err = internal_err;
+            EXIT_CRITICAL(int_state);
+            return NULL;
+        }
+    }
+    
+    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
+                 "[MEMMGT] Allocated %u pages, at 0x%p", 
+                 page_count, 
+                 address);
+
+    EXIT_CRITICAL(int_state);
+
+    if(err != NULL)
+    {
+        *err = OS_NO_ERR;
+    }
+    return address;
+}
+
+static void memory_free_pages_to(queue_t* page_table, 
+                                 const uintptr_t* page_addr, 
+                                 const size_t page_count,
+                                 OS_RETURN_E* err)
+{
+    uint32_t    int_state;
+    OS_RETURN_E internal_err;
+
+    ENTER_CRITICAL(int_state);
+
+    add_block(page_table, (uintptr_t)page_addr, page_count, &internal_err);
+
+     if(internal_err != OS_NO_ERR)
+    {
+        KERNEL_ERROR("Could not free page\n");
+        if(err == NULL)
+        {
+            KERNEL_PANIC(internal_err);
+        }
+        else 
+        {
+            *err = internal_err;
+            EXIT_CRITICAL(int_state);
+            return;
+        }
+    }
+
+    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
+                 "[MEMMGT] Deallocated %u pages, at 0x%p", 
+                 page_count, 
+                 page_addr);
+
+    if(err != NULL)
+    {
+        *err = OS_NO_ERR;
+    }
+
+    EXIT_CRITICAL(int_state);
 }
 
 static void memory_acquire_ref(uintptr_t phys_addr)
@@ -187,11 +715,13 @@ static void memory_release_ref(uintptr_t phys_addr)
     uint32_t   int_state;
     uintptr_t* current_table;
 
-    ENTER_CRITICAL(int_state);
+    
 
     dir_entry   = phys_addr >> FRAME_REF_DIR_ENTRY_OFFSET;
     table_entry = (phys_addr >> FRAME_REF_TABLE_ENTRY_OFFSET) &
                   FRAME_REF_TABLE_ENTRY_OFFSET_MASK;
+
+    ENTER_CRITICAL(int_state);
 
     current_table = (uintptr_t*)frame_ref_dir[dir_entry];
 
@@ -227,13 +757,13 @@ static void memory_release_ref(uintptr_t phys_addr)
     if((current_table[table_entry] & FRAME_REF_COUNT_MASK) == 0 &&
        (current_table[table_entry] & FRAME_REF_IS_HW) == 0)
     {
-        memory_free_frames((void*)phys_addr, 1);
+        memory_free_frames((void*)phys_addr, 1, NULL);
     }
 
     EXIT_CRITICAL(int_state);
 }
 
-uint32_t memory_get_ref_count(const uintptr_t phys_addr)
+static uint32_t memory_get_ref_count(const uintptr_t phys_addr)
 {
     uint16_t   dir_entry;
     uint16_t   table_entry;
@@ -241,11 +771,11 @@ uint32_t memory_get_ref_count(const uintptr_t phys_addr)
     uintptr_t* current_table;
     uint32_t   ref_count;
 
-    ENTER_CRITICAL(int_state);
-
     dir_entry   = phys_addr >> FRAME_REF_DIR_ENTRY_OFFSET;
     table_entry = (phys_addr >> FRAME_REF_TABLE_ENTRY_OFFSET) &
                   FRAME_REF_TABLE_ENTRY_OFFSET_MASK;
+
+    ENTER_CRITICAL(int_state);
 
     current_table = (uintptr_t*)frame_ref_dir[dir_entry];
 
@@ -285,7 +815,7 @@ static void init_frame_ref_table(uintptr_t next_free_mem)
     next_free_mem += KERNEL_FRAME_SIZE - 
                      (next_free_mem & (KERNEL_FRAME_SIZE - 1));
 
-    memset(frame_ref_dir, 0, FRAME_REF_DIR_SIZE);
+    memset(frame_ref_dir, 0, FRAME_REF_DIR_SIZE * sizeof(uintptr_t));
     
     /* Walk the detected memory and create the reference directory */
     cursor = hw_memory_map->head;
@@ -346,16 +876,19 @@ static void init_frame_ref_table(uintptr_t next_free_mem)
 
             if(frame_ref_dir[dir_entry] == (uintptr_t)NULL)
             {
-                frame_ref_dir[dir_entry] = 
-                    (uintptr_t)kmalloc(FRAME_REF_TABLE_SIZE);
+                frame_ref_dir[dir_entry] = (uintptr_t)kmalloc(
+                                                    FRAME_REF_TABLE_SIZE * 
+                                                    sizeof(uintptr_t));
                 if(frame_ref_dir[dir_entry] == (uintptr_t)NULL)
                 {
-                    KERNEL_ERROR("Could not allocate frame reference table\n");
+                    KERNEL_ERROR("Cannot allocated reference page table\n",
+                                 current_addr);
                     KERNEL_PANIC(OS_ERR_MALLOC);
                 }
+                
                 memset((void*)frame_ref_dir[dir_entry], 
                        0, 
-                       FRAME_REF_TABLE_SIZE);
+                       FRAME_REF_TABLE_SIZE * sizeof(uintptr_t));
             }
             current_table = (uintptr_t*)frame_ref_dir[dir_entry];
 
@@ -374,17 +907,6 @@ static void init_frame_ref_table(uintptr_t next_free_mem)
     }
 }
 
-/**
- * @brief Retrieves the start and end address of the kernel high startup 
- * section.
- * 
- * @details Retrieves the start and end address of the kernel high startup 
- * section. The addresses are stored in the buffer given as parameter. The 
- * function has no effect if the buffer are NULL.
- * 
- * @param[out] start The start address of the section.
- * @param[out] end The end address of the section.
- */
 static void memory_get_khighstartup_range(uintptr_t* start, uintptr_t* end)
 {
     if(start != NULL)
@@ -397,16 +919,6 @@ static void memory_get_khighstartup_range(uintptr_t* start, uintptr_t* end)
     }
 }
 
-/**
- * @brief Retrieves the start and end address of the kernel text section.
- * 
- * @details Retrieves the start and end address of the kernel text section.
- * The addresses are stored in the buffer given as parameter. The function has
- * no effect if the buffer are NULL.
- * 
- * @param[out] start The start address of the section.
- * @param[out] end The end address of the section.
- */
 static void memory_get_ktext_range(uintptr_t* start, uintptr_t* end)
 {
     if(start != NULL)
@@ -419,17 +931,6 @@ static void memory_get_ktext_range(uintptr_t* start, uintptr_t* end)
     }
 }
 
-/**
- * @brief Retrieves the start and end address of the kernel read only data
- * section.
- * 
- * @details Retrieves the start and end address of the kernel read only data
- * section. The addresses are stored in the buffer given as parameter. The 
- * function has no effect if the buffer are NULL.
- * 
- * @param[out] start The start address of the section.
- * @param[out] end The end address of the section.
- */
 static void memory_get_krodata_range(uintptr_t* start, uintptr_t* end)
 {
     if(start != NULL)
@@ -442,16 +943,6 @@ static void memory_get_krodata_range(uintptr_t* start, uintptr_t* end)
     }
 }
 
-/**
- * @brief Retrieves the start and end address of the kernel data section.
- * 
- * @details Retrieves the start and end address of the kernel data section.
- * The addresses are stored in the buffer given as parameter. The function has
- * no effect if the buffer are NULL.
- * 
- * @param[out] start The start address of the section.
- * @param[out] end The end address of the section.
- */
 static void memory_get_kdata_range(uintptr_t* start, uintptr_t* end)
 {
     if(start != NULL)
@@ -464,16 +955,6 @@ static void memory_get_kdata_range(uintptr_t* start, uintptr_t* end)
     }
 }
 
-/**
- * @brief Retrieves the start and end address of the kernel bss section.
- * 
- * @details Retrieves the start and end address of the kernel bss section.
- * The addresses are stored in the buffer given as parameter. The function has
- * no effect if the buffer are NULL.
- * 
- * @param[out] start The start address of the section.
- * @param[out] end The end address of the section.
- */
 static void memory_get_kbss_range(uintptr_t* start, uintptr_t* end)
 {
     if(start != NULL)
@@ -486,16 +967,6 @@ static void memory_get_kbss_range(uintptr_t* start, uintptr_t* end)
     }
 }
 
-/**
- * @brief Retrieves the start and end address of the kernel stacks section.
- * 
- * @details Retrieves the start and end address of the kernel stacks section.
- * The addresses are stored in the buffer given as parameter. The function has
- * no effect if the buffer are NULL.
- * 
- * @param[out] start The start address of the section.
- * @param[out] end The end address of the section.
- */
 static void memory_get_kstacks_range(uintptr_t* start, uintptr_t* end)
 {
     if(start != NULL)
@@ -509,16 +980,6 @@ static void memory_get_kstacks_range(uintptr_t* start, uintptr_t* end)
     }
 }
 
-/**
- * @brief Retrieves the start and end address of the kernel heap section.
- * 
- * @details Retrieves the start and end address of the kernel heap section.
- * The addresses are stored in the buffer given as parameter. The function has
- * no effect if the buffer are NULL.
- * 
- * @param[out] start The start address of the section.
- * @param[out] end The end address of the section.
- */
 static void memory_get_kheap_range(uintptr_t* start, uintptr_t* end)
 {
     if(start != NULL)
@@ -788,8 +1249,8 @@ static void* get_block(queue_t* list,
     queue_node_t* cursor;
     queue_node_t* selected;
     mem_range_t*  range;
-
-    uintptr_t   address;
+    uintptr_t     address;
+    OS_RETURN_E   internal_err;
 
     if(start_pt == MEM_ALLOC_BEGINING)
     {
@@ -825,9 +1286,15 @@ static void* get_block(queue_t* list,
     }
     if(selected == NULL)
     {
+        KERNEL_ERROR("No mode free memory\n");
         if(err != NULL)
         {
             *err = OS_ERR_NO_MORE_FREE_MEM;
+            return NULL;
+        }
+        else
+        {
+            KERNEL_PANIC(OS_ERR_NO_MORE_FREE_MEM);
         }
         return NULL;
     }
@@ -854,8 +1321,14 @@ static void* get_block(queue_t* list,
     {
         /* Free node's data and delete node */
         kfree(selected->data);
-        queue_remove(list, selected);
-        queue_delete_node(&selected);
+        internal_err = queue_remove(list, selected);
+        internal_err |= queue_delete_node(&selected);
+
+        if(internal_err != OS_NO_ERR)
+        {
+            KERNEL_ERROR("Could not get memory block\n");
+            KERNEL_PANIC(internal_err);
+        }
     }
 
     if(err != NULL)
@@ -865,7 +1338,10 @@ static void* get_block(queue_t* list,
     return (void*)address;
 }
 
-static void add_block(queue_t* list, uintptr_t first_frame, const size_t length)
+static void add_block(queue_t* list, 
+                      uintptr_t first_frame, 
+                      const size_t length,
+                      OS_RETURN_E* err)
 {
     queue_node_t* cursor;
     queue_node_t* new_node;
@@ -873,16 +1349,23 @@ static void add_block(queue_t* list, uintptr_t first_frame, const size_t length)
     queue_node_t* save_cursor;
     mem_range_t*  range;
     uintptr_t     limit;
-    OS_RETURN_E   err;
+    OS_RETURN_E   internal_err;
 
     if(list == NULL)
     {
         KERNEL_ERROR("Tried to add a memory block to a NULL list\n");
-        KERNEL_PANIC(OS_ERR_NULL_POINTER);
+        if(err != NULL)
+        {
+            *err = OS_ERR_NULL_POINTER;
+            return;
+        }
+        else
+        {
+            KERNEL_PANIC(OS_ERR_NULL_POINTER);
+        }
     }
 
     limit = first_frame + length * KERNEL_FRAME_SIZE;
-
 
     cursor = list->head;
     last_cursor = NULL;
@@ -902,8 +1385,14 @@ static void add_block(queue_t* list, uintptr_t first_frame, const size_t length)
                 {
                     range->base = ((mem_range_t*)save_cursor->data)->base;
                     kfree(save_cursor->data);
-                    queue_remove(list, save_cursor);
-                    queue_delete_node(&save_cursor);
+                    internal_err = queue_remove(list, save_cursor);
+                    internal_err |= queue_delete_node(&save_cursor);
+
+                    if(internal_err != OS_NO_ERR)
+                    {
+                        KERNEL_ERROR("Could not add memory block\n");
+                        KERNEL_PANIC(internal_err);
+                    }
                 }
             }
 
@@ -920,8 +1409,14 @@ static void add_block(queue_t* list, uintptr_t first_frame, const size_t length)
                 {
                     range->limit = ((mem_range_t*)last_cursor->data)->limit;
                     kfree(last_cursor->data);
-                    queue_remove(list, last_cursor);
-                    queue_delete_node(&last_cursor);
+                    internal_err = queue_remove(list, last_cursor);
+                    internal_err |= queue_delete_node(&last_cursor);
+
+                    if(internal_err != OS_NO_ERR)
+                    {
+                        KERNEL_ERROR("Could not add memory block\n");
+                        KERNEL_PANIC(internal_err);
+                    }
                 }
             }
 
@@ -960,30 +1455,28 @@ static void add_block(queue_t* list, uintptr_t first_frame, const size_t length)
 
         new_node = queue_create_node(range, 
                                      QUEUE_ALLOCATOR(kmalloc, kfree), 
-                                     &err);
-        if(err != OS_NO_ERR)
+                                     &internal_err);
+        if(internal_err != OS_NO_ERR)
         {
-            KERNEL_ERROR("Could not crate queue node in memory manager\n");
-            KERNEL_PANIC(err);
+            KERNEL_ERROR("Could not create queue node in memory manager\n");
+            KERNEL_PANIC(internal_err);
         }
 
-        queue_push_prio(new_node, list, first_frame);        
+        internal_err = queue_push_prio(new_node, list, first_frame); 
+        if(internal_err != OS_NO_ERR)
+        {
+            KERNEL_ERROR("Could not add memory block\n");
+            KERNEL_PANIC(internal_err);
+        }       
+    }
+    if(err != NULL)
+    {
+        *err = OS_NO_ERR;
     }
 }
 
-/** 
- * @brief Maps a kernel section to the memory.
- * 
- * @details Maps a kernel section to the memory. No frame are allocated as the 
- * memory should already be populated.
- * 
- * @param[in] start_addr The start address of the section.
- * @param[in] end_addr The end address of the section.
- * @param[in] read_only Set to 1 if the section is read only.
- * @param[in] exec Set to 1 if the section is executable.
- */
 static void map_kernel_section(uintptr_t start_addr, uintptr_t end_addr,
-                               const uint8_t read_only)
+                               const bool_t read_only)
 {
     uint16_t pg_dir_entry;
     uint16_t pg_table_entry;
@@ -999,11 +1492,11 @@ static void map_kernel_section(uintptr_t start_addr, uintptr_t end_addr,
     while(start_addr < end_addr)
     {
         /* Get entry indexes */
-        pg_dir_entry      = (uintptr_t)start_addr >> PG_DIR_OFFSET;
-        pg_table_entry    = ((uintptr_t)start_addr >> PG_TABLE_OFFSET) & 
-                             PG_TABLE_OFFSET_MASK;
+        pg_dir_entry      = (uintptr_t)start_addr >> PG_DIR_ENTRY_OFFSET;
+        pg_table_entry    = ((uintptr_t)start_addr >> PG_TABLE_ENTRY_OFFSET) & 
+                             PG_TABLE_ENTRY_OFFSET_MASK;
         min_pgtable_entry = (((uintptr_t)start_addr - KERNEL_MEM_OFFSET) >> 
-                            PG_DIR_OFFSET) & PG_TABLE_OFFSET_MASK;
+                            PG_DIR_ENTRY_OFFSET) & PG_TABLE_ENTRY_OFFSET_MASK;
         /* Create the page table */
         min_pgtable[min_pgtable_entry][pg_table_entry] = 
             (start_addr - KERNEL_MEM_OFFSET) |
@@ -1025,17 +1518,19 @@ static void map_kernel_section(uintptr_t start_addr, uintptr_t end_addr,
     }
 }
 
-OS_RETURN_E memory_invocate_cow(const uintptr_t addr)
+static OS_RETURN_E memory_invocate_cow(const uintptr_t addr)
 {
-    uintptr_t   start_align;
-    uintptr_t   old_frame;
-    uint16_t    pgdir_entry;
-    uint16_t    pgtable_entry;
-    uint32_t*   pgdir_rec_addr; 
-    uint32_t*   pgtable;
-    uintptr_t*  new_frame;
-    uintptr_t*  tmp_page;
-    OS_RETURN_E err;
+    uintptr_t         start_align;
+    uintptr_t         old_frame;
+    uint16_t          pgdir_entry;
+    uint16_t          pgtable_entry;
+    uint32_t*         pgdir_rec_addr; 
+    uint32_t*         pgtable;
+    uintptr_t*        new_frame;
+    uintptr_t*        tmp_page;
+    OS_RETURN_E       err;
+    uint32_t          int_state;
+    kernel_process_t* curr_process;
 
     err = OS_ERR_MEMORY_NOT_MAPPED;
 
@@ -1043,11 +1538,23 @@ OS_RETURN_E memory_invocate_cow(const uintptr_t addr)
     start_align = addr & PAGE_ALIGN_MASK;
 
     /* Get entries */
-    pgdir_entry   = (start_align >> PG_DIR_OFFSET);
-    pgtable_entry = (start_align >> PG_TABLE_OFFSET) & PG_TABLE_OFFSET_MASK;
+    pgdir_entry   = (start_align >> PG_DIR_ENTRY_OFFSET);
+    pgtable_entry = (start_align >> PG_TABLE_ENTRY_OFFSET) & 
+                    PG_TABLE_ENTRY_OFFSET_MASK;
 
     /* Check page directory presence and allocate if not present */
     pgdir_rec_addr = (uintptr_t*)&_KERNEL_RECUR_PG_DIR_BASE;
+
+    curr_process = sched_get_current_process();
+
+    if(curr_process == NULL)
+    {
+        KERNEL_ERROR("COW called when no process is running\n");
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+    }
+
+    ENTER_CRITICAL(int_state);
+
     if((pgdir_rec_addr[pgdir_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
     {
         /* Check present in page table */
@@ -1059,33 +1566,60 @@ OS_RETURN_E memory_invocate_cow(const uintptr_t addr)
             PAGE_FLAG_COPY_ON_WRITE)
         {
             /* Check reference count */
-            old_frame = pgtable[pgtable_entry] & PG_ENTRY_MASK;
+            old_frame = pgtable[pgtable_entry] & PG_ENTRY_ADDR_MASK;
             if(memory_get_ref_count(old_frame) > 1)
             {
                 /* Allocate new frame */
-                new_frame = memory_alloc_frames(1);
+                new_frame = memory_alloc_frames(1, &err);
+                if(err != OS_NO_ERR)
+                {
+                    return err;
+                }
                 memory_acquire_ref((uintptr_t)new_frame);
 
                 /* Temporary map new frame */
-                tmp_page = memory_alloc_pages(1, MEM_ALLOC_BEGINING);
+                tmp_page = 
+                    memory_alloc_pages_from(curr_process->free_page_table, 
+                                            1, 
+                                            MEM_ALLOC_BEGINING,
+                                            &err);
+                if(err != OS_NO_ERR)
+                {
+                    memory_free_frames(new_frame, KERNEL_PAGE_SIZE, NULL);
+                    return err;
+                }
                 memory_mmap_direct(tmp_page, 
                                    new_frame, 
                                    KERNEL_PAGE_SIZE, 
                                    0,
                                    0, 
                                    1, 
-                                   0);
+                                   0,
+                                   &err);
+                if(err != OS_NO_ERR)
+                {
+                    memory_free_frames(new_frame, KERNEL_PAGE_SIZE, NULL);
+                    return err;
+                }
 
                 /* Copy to new frame */
                 memcpy(tmp_page, (void*)start_align, KERNEL_PAGE_SIZE);
 
                 /* Unmap temporary mapping */
-                memory_munmap(tmp_page, KERNEL_PAGE_SIZE);
-                memory_free_pages(tmp_page, 1);
+                memory_munmap(tmp_page, KERNEL_PAGE_SIZE, &err);
+                if(err != OS_NO_ERR)
+                {
+                    KERNEL_ERROR("COW could not unmap temporary page\n");
+                    KERNEL_PANIC(err);
+                }
+                memory_free_pages_to(curr_process->free_page_table, 
+                                     tmp_page, 
+                                     1, 
+                                     NULL);
 
                 /* Update pg dir */
                 pgtable[pgtable_entry] = 
-                    (pgtable[pgtable_entry] & ~PG_ENTRY_MASK) |
+                    (pgtable[pgtable_entry] & ~PG_ENTRY_ADDR_MASK) |
                     (uintptr_t)new_frame;
 
                 /* Decrement reference count */
@@ -1109,22 +1643,13 @@ OS_RETURN_E memory_invocate_cow(const uintptr_t addr)
         }
     }
 
+    EXIT_CRITICAL(int_state);
+
     return err;
 }
 
- /**
- * @brief Handle a page fault exception.
- *
- * @details Handle a page fault exception raised by the cpu. The corresponding
- * registered handler will be called. If no handler is available, a panic is
- * raised.
- *
- * @param[in] cpu_state The cpu registers structure.
- * @param[in] int_id The exception number.
- * @param[in] stack_state The stack state before the exception that contain cs, eip,
- * error code and the eflags register value.
- */
-static void paging_fault_general_handler(cpu_state_t* cpu_state, uintptr_t int_id,
+static void paging_fault_general_handler(cpu_state_t* cpu_state, 
+                                         uintptr_t int_id,
                                          stack_state_t* stack_state)
 {
     uintptr_t fault_address;
@@ -1163,15 +1688,7 @@ static void paging_fault_general_handler(cpu_state_t* cpu_state, uintptr_t int_i
     panic(cpu_state, int_id, stack_state);
 }
 
-/**
- * @brief Tells if a memory region is already mapped in the current page tables.
- * 
- * @details Tells if a memory region is already mapped in the current page 
- * tables. Returns 0 if the region is not mapped, 1 otherwise.
- * 
- * @return Returns 0 if the region is not mapped, 1 otherwise.
- */
-static uint8_t is_mapped(const uintptr_t start_addr, const size_t size)
+static bool_t is_mapped(const uintptr_t start_addr, const size_t size)
 {
     uintptr_t start_align;
     uintptr_t to_check;
@@ -1180,6 +1697,7 @@ static uint8_t is_mapped(const uintptr_t start_addr, const size_t size)
     uint16_t  pgtable_entry;
     uint32_t* pgdir_rec_addr; 
     uint32_t* pgtable;
+    uint32_t  int_state;
 
      /* Align addresses */
     start_align = start_addr & PAGE_ALIGN_MASK;
@@ -1187,12 +1705,14 @@ static uint8_t is_mapped(const uintptr_t start_addr, const size_t size)
     /* Get mapping size */
     to_check = size + (start_addr - start_align);
 
-    found = 0;
+    found = FALSE;
+
+    ENTER_CRITICAL(int_state);
     while(to_check)
     {
         /* Get entries */
-        pgdir_entry   = (start_align >> PG_DIR_OFFSET);
-        pgtable_entry = (start_align >> PG_TABLE_OFFSET) & PG_TABLE_OFFSET_MASK;
+        pgdir_entry   = (start_align >> PG_DIR_ENTRY_OFFSET);
+        pgtable_entry = (start_align >> PG_TABLE_ENTRY_OFFSET) & PG_TABLE_ENTRY_OFFSET_MASK;
 
         /* Check page directory presence and allocate if not present */
         pgdir_rec_addr = (uintptr_t*)&_KERNEL_RECUR_PG_DIR_BASE;
@@ -1204,7 +1724,7 @@ static uint8_t is_mapped(const uintptr_t start_addr, const size_t size)
                                    pgdir_entry);
             if((pgtable[pgtable_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
             {
-                found = 1;
+                found = TRUE;
                 break;
             }
         }
@@ -1220,21 +1740,15 @@ static uint8_t is_mapped(const uintptr_t start_addr, const size_t size)
         }
     }
 
+    EXIT_CRITICAL(int_state);
+
     return found;
 }
 
-/**
- * @brief Copies the free page table of the current process and return the copy.
- * 
- * @details Copies the free page table of the current process and return the 
- * copy. This function performs a deep copy of the table. Meaning that the two 
- * instance to the table are totally independant.
- * 
- * @return A deep copy of the currentp process free page table is returned.
- */
-static queue_t* paging_copy_free_page_table(void)
+static queue_t* paging_copy_free_page_table(OS_RETURN_E* err)
 {
-    OS_RETURN_E   err;
+    OS_RETURN_E   internal_err;
+    OS_RETURN_E   internal_err2;
     queue_t*      new_table;
     queue_t*      current_table;
     queue_node_t* cursor;
@@ -1242,11 +1756,21 @@ static queue_t* paging_copy_free_page_table(void)
     mem_range_t*  range;
 
     /* Create the new table */
-    new_table = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree), &err);
-    if(err != OS_NO_ERR)
+    new_table = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree), 
+                                   &internal_err);
+    if(internal_err != OS_NO_ERR)
     {
-        KERNEL_ERROR("Could not create new free page table list[%d]\n", err);
-        KERNEL_PANIC(err);
+        KERNEL_ERROR("Could not create new free page table list[%d]\n", 
+                     internal_err);
+        if(err != NULL)
+        {
+            *err = internal_err;
+            return NULL;
+        }
+        else 
+        {
+            KERNEL_PANIC(internal_err);
+        }
     }
 
     current_table = sched_get_current_process()->free_page_table;
@@ -1258,53 +1782,108 @@ static queue_t* paging_copy_free_page_table(void)
         if(range == NULL)
         {
             KERNEL_ERROR("Could not allocate new free page table range\n");
-            KERNEL_PANIC(OS_ERR_MALLOC);
+            internal_err = OS_ERR_MALLOC;
+            if(err != NULL)
+            {
+                *err = internal_err;
+                break;
+            }
+            else 
+            {
+                KERNEL_PANIC(internal_err);
+            }
         }
         memcpy(range, cursor->data, sizeof(mem_range_t));
         new_node = queue_create_node(range, 
                                      QUEUE_ALLOCATOR(kmalloc, kfree), 
-                                     &err);
-        if(err != OS_NO_ERR)
+                                     &internal_err);
+        if(internal_err != OS_NO_ERR)
         {
-            KERNEL_ERROR("Could not create free page table node[%d]\n", err);
-            KERNEL_PANIC(err);
+            KERNEL_ERROR("Could not create free page table node[%d]\n", 
+                         internal_err);
+            kfree(range);
+            if(err != NULL)
+            {
+                *err = internal_err;
+                break;
+            }
+            else 
+            {
+                KERNEL_PANIC(internal_err);
+            }
         }
 
         /* Add range to list */
-        err = queue_push(new_node, new_table);
-        if(err != OS_NO_ERR)
+        internal_err = queue_push(new_node, new_table);
+        if(internal_err != OS_NO_ERR)
         {
-            KERNEL_ERROR("Could not push free page table node[%d]\n", err);
-            KERNEL_PANIC(err);
+            KERNEL_ERROR("Could not push free page table node[%d]\n", 
+                         internal_err);
+
+            internal_err2 = queue_delete_node(&new_node);
+            if(internal_err2 != OS_NO_ERR)
+            {
+                KERNEL_ERROR("Free page internal error\n");
+                KERNEL_PANIC(internal_err2);
+            }
+            kfree(range);
+            if(err != NULL)
+            {
+                *err = internal_err;
+                break;
+            }
+            else 
+            {
+                KERNEL_PANIC(internal_err);
+            }
         }
 
         /* Next entry */
         cursor = cursor->next;
     }
 
+    /* Revert changes */
+    if(internal_err != OS_NO_ERR)
+    {
+        cursor = queue_pop(new_table, &internal_err2);
+        if(internal_err2 != OS_NO_ERR)
+        {
+            KERNEL_ERROR("Free page internal error\n");
+            KERNEL_PANIC(internal_err2);
+        }
+        while (cursor != NULL)
+        {
+            kfree(cursor->data);
+            internal_err2 = queue_delete_node(&cursor);
+            if(internal_err2 != OS_NO_ERR)
+            {
+                KERNEL_ERROR("Free page internal error\n");
+                KERNEL_PANIC(internal_err2);
+            }
+        }
+        internal_err2 = queue_delete_queue(&new_table);
+        if(internal_err2 != OS_NO_ERR)
+        {
+            KERNEL_ERROR("Free page internal error\n");
+            KERNEL_PANIC(internal_err2);
+        }
+
+        return NULL;
+    }
+
+    if(err != NULL)
+    {
+        *err = OS_NO_ERR;
+    }
+
     return new_table;
 }
 
-/** 
- * @brief Maps a virtual address to the corresponding physical address.
- * 
- * @details Maps a virtual address to the corresponding physical address.
- * The allocation should be done prior to using this function as all it 
- * does is mapping the addresses together.
- * 
- * @param[in] virt_addr The virtual start address of the region to map.
- * @param[in] phys_addr The physical start address of the region to map.
- * @param[in] mapping_size The size of the region to map.
- * @param[in] read_only Set to 1 if the region should be read only.
- * @param[in] exec Set to 1 if the region contains executable code.
- * @param[in] cache_enabled Set to 1 if the cache should be enabled for this 
- * region.
- * @param[in] flags The flags used for mapping (eg hw, cow, etc).
- */
 static void kernel_mmap_internal(const void* virt_addr,
                                  const void* phys_addr,
                                  const size_t mapping_size,
-                                 const uintptr_t flags)
+                                 const uintptr_t flags,
+                                 OS_RETURN_E* err)
 {
 
     uintptr_t   virt_align;
@@ -1312,8 +1891,9 @@ static void kernel_mmap_internal(const void* virt_addr,
     uint16_t    pgdir_entry;
     uint16_t    pgtable_entry;
     size_t      to_map;
-    uint32_t*   pgdir_rec_addr; 
-    uint32_t*   pgtable;
+    size_t      reverse_to_map;
+    uintptr_t*  pgdir_rec_addr; 
+    uintptr_t*  pgtable;
     uint32_t    i;
 
     /* Align addresses */
@@ -1322,25 +1902,43 @@ static void kernel_mmap_internal(const void* virt_addr,
 
     /* Get mapping size */
     to_map = mapping_size + ((uintptr_t)virt_addr - virt_align);
+    reverse_to_map = to_map;
 
     /* Check for existing mapping */
     if(is_mapped(virt_align, to_map))
     {
         KERNEL_ERROR("Trying to remap memory\n");
-        KERNEL_PANIC(OS_ERR_MAPPING_ALREADY_EXISTS);
+        if(err != NULL)
+        {
+            *err = OS_ERR_MAPPING_ALREADY_EXISTS;
+            return;
+        }
+        else 
+        {
+            KERNEL_PANIC(OS_ERR_MAPPING_ALREADY_EXISTS);
+        }
     }
 
-    while(to_map)
+    while(to_map != 0)
     {
+        KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
+                     "[MEMMGT] Mapping page at 0x%p -> 0x%p", 
+                     virt_align, 
+                     phys_align);
         /* Get entries */
-        pgdir_entry   = (virt_align >> PG_DIR_OFFSET);
-        pgtable_entry = (virt_align >> PG_TABLE_OFFSET) & PG_TABLE_OFFSET_MASK;
+        pgdir_entry   = (virt_align >> PG_DIR_ENTRY_OFFSET);
+        pgtable_entry = (virt_align >> PG_TABLE_ENTRY_OFFSET) & 
+                        PG_TABLE_ENTRY_OFFSET_MASK;
 
         /* Check page directory presence and allocate if not present */
         pgdir_rec_addr = (uint32_t*)&_KERNEL_RECUR_PG_DIR_BASE;
         if((pgdir_rec_addr[pgdir_entry] & PG_DIR_FLAG_PAGE_PRESENT) == 0)
         {
-            pgtable = memory_alloc_frames(1);
+            pgtable = memory_alloc_frames(1, err);
+            if(err != NULL && *err != OS_NO_ERR)
+            {
+                break;
+            }
 
             /* Map page */
             pgdir_rec_addr[pgdir_entry] = 
@@ -1393,69 +1991,73 @@ static void kernel_mmap_internal(const void* virt_addr,
         else 
         {
             to_map = 0;
-        }
-        
+        }        
     }
-}
 
-void* memory_alloc_kernel_pages(const size_t page_count, 
-                                const MEM_ALLOC_START_E start_pt)
-{
-    void*             address;
-    uint32_t          int_state;
-    OS_RETURN_E       err;    
-
-    ENTER_CRITICAL(int_state);
-
-
-    address = get_block(free_kernel_pages, page_count, start_pt, &err);
-    if(err != OS_NO_ERR)
+    /* Clean in case of error */
+    if(err != NULL && *err != OS_NO_ERR)
     {
-        KERNEL_ERROR("Could not allocate new page\n");
-        KERNEL_PANIC(err);
+        virt_align = (uintptr_t)virt_addr & PAGE_ALIGN_MASK;
+
+        while(reverse_to_map > to_map)
+        {
+            /* Get entries */
+            pgdir_entry   = (virt_align >> PG_DIR_ENTRY_OFFSET);
+            pgtable_entry = (virt_align >> PG_TABLE_ENTRY_OFFSET) & 
+                            PG_TABLE_ENTRY_OFFSET_MASK;
+
+            /* Check page directory presence and allocate if not present */
+            pgdir_rec_addr = (uint32_t*)&_KERNEL_RECUR_PG_DIR_BASE;
+            pgtable = (uint32_t*)(&_KERNEL_RECUR_PG_TABLE_BASE + 
+                                    KERNEL_PAGE_SIZE * 
+                                    pgdir_entry);
+            phys_align = pgtable[pgtable_entry] &  PG_ENTRY_ADDR_MASK;
+            /* Unmap the entry */
+            pgtable[pgtable_entry] = 0;
+            for(i = 0; i < KERNEL_PGDIR_SIZE; ++i)
+            {
+                if((pgtable[i] & PAGE_FLAG_PRESENT) != 0)
+                {
+                    break;
+                }
+            }
+            /* If the page table is empty */
+            if(i == KERNEL_PAGE_SIZE)
+            {
+                memory_free_frames((void*)(pgdir_rec_addr[pgdir_entry] & 
+                                    PG_ENTRY_ADDR_MASK), 
+                                   1, 
+                                   NULL);
+                pgdir_rec_addr[pgdir_entry] = 0;
+            }
+
+            memory_release_ref((uintptr_t)phys_align);
+
+            KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
+                        "[MEMMGT] Unmapped page at 0x%p -> 0x%p", 
+                        virt_align, 
+                        phys_align);
+
+            /* Update addresses and size */
+            virt_align += KERNEL_PAGE_SIZE;
+            if(reverse_to_map >= KERNEL_PAGE_SIZE)
+            {
+                reverse_to_map -= KERNEL_PAGE_SIZE;
+            }
+            else 
+            {
+                reverse_to_map = 0;
+            }
+        }
     }
-    
-    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
-                 "[MEMMGT] Allocated %u pages, at 0x%p", 
-                 page_count, 
-                 address);
 
-    EXIT_CRITICAL(int_state);
-    return (void*)address;
+    if(err != NULL)
+    {
+        *err = OS_NO_ERR;
+    }
 }
 
-void memory_free_kernel_pages(void* page_addr, const size_t page_count)
-{
-    uint32_t          int_state;
-
-    ENTER_CRITICAL(int_state);
-
-    add_block(free_kernel_pages, (uintptr_t)page_addr, page_count);
-
-    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
-                 "[MEMMGT] Deallocated %u pages, at 0x%p", 
-                 page_count, 
-                 page_addr);
-
-    EXIT_CRITICAL(int_state);
-}
-
-/**
- * @brief Initializes paging structures for the kernel.
- *
- * @details Initializes paging structures for the kernel. This function will
- * select an available memory region to allocate the memory required for the
- * kernel. Then the kernel will be mapped to memory and paging is enabled for
- * the kernel.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - OS_ERR_NO_MORE_FREE_MEM is returned if there is not enough memory available
- *   to map the kernel.
- * 
- * @warning This function assumes the kernel is setup with basic paging.
- */
-static OS_RETURN_E paging_init(void)
+static void paging_init(void)
 {
     uint32_t    i;
     uintptr_t   start_addr;
@@ -1501,6 +2103,11 @@ static OS_RETURN_E paging_init(void)
     /* Add page fault exception */
     err = kernel_exception_register_handler(PAGE_FAULT_LINE,
                                             paging_fault_general_handler);
+    if(err != OS_NO_ERR)
+    {
+        KERNEL_ERROR("Could not set page fault handler\n");
+        KERNEL_PANIC(err);
+    }
                                             
     /* Set CR3 register */
     __asm__ __volatile__("mov %%eax, %%cr3": :"a"((uintptr_t)kernel_pgdir -
@@ -1509,17 +2116,31 @@ static OS_RETURN_E paging_init(void)
     KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, "[MEMMGT] Set new page directory and"
                                        " page fault handler");
 
-    init    = 1;
     memory_paging_enable();
 
 #ifdef TEST_MODE_ENABLED
     paging_test();
 #endif
-
-    return err;
 }
 
-OS_RETURN_E memory_manager_init(void)
+static void memory_paging_enable(void)
+{
+    uint32_t int_state;
+
+    ENTER_CRITICAL(int_state);
+
+    /* Enable paging, write protect */
+    __asm__ __volatile__("mov %%cr0, %%eax\n\t"
+                         "or $0x80010000, %%eax\n\t"
+                         "mov %%eax, %%cr0\n\t"
+                         : : : "eax");
+
+    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, "[MEMMGT] Paging enabled");    
+
+    EXIT_CRITICAL(int_state);
+}
+
+void memory_manager_init(void)
 {
     queue_node_t* cursor;
     mem_range_t*  mem_range;
@@ -1574,137 +2195,7 @@ OS_RETURN_E memory_manager_init(void)
     memmgr_test4();
 #endif
 
-    return paging_init();
-}
-
-void* memory_alloc_frames(const size_t frame_count)
-{
-    uint32_t    int_state;
-    void*       address;
-    OS_RETURN_E err;
-
-    ENTER_CRITICAL(int_state);
-
-    address = get_block(free_memory_map, frame_count, MEM_ALLOC_BEGINING, &err);
-    if(err != OS_NO_ERR)
-    {
-        KERNEL_ERROR("Could not allocate new frame\n");
-        KERNEL_PANIC(err);
-    }
-
-
-    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
-                 "[MEMMGT] Allocated %u frames, at 0x%p", 
-                 frame_count, address);
-
-    available_memory -= KERNEL_FRAME_SIZE * frame_count;
-
-    EXIT_CRITICAL(int_state);
-    return (void*)address;
-}
-
-void memory_free_frames(void* frame_addr, const size_t frame_count)
-{
-    uint32_t      int_state;
-    queue_node_t* cursor;
-    mem_range_t*  mem_range;
-
-    ENTER_CRITICAL(int_state);
-
-    /* Check if the frame actually exists in free memory */
-    cursor = hw_memory_map->head;
-    while(cursor != NULL)
-    {
-        mem_range = (mem_range_t*)cursor->data;
-        if(mem_range->type == MULTIBOOT_MEMORY_AVAILABLE &&
-           mem_range->base <= (uintptr_t)frame_addr && 
-           mem_range->limit >= (uintptr_t)frame_addr + 
-                                frame_count * KERNEL_FRAME_SIZE)
-        {
-            break;
-        }
-        cursor = cursor->next;
-    }
-    if(cursor == NULL)
-    {
-        KERNEL_ERROR("Tried to free non existent frame\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);        
-    }
-
-    add_block(free_memory_map, (uintptr_t)frame_addr, frame_count);
-
-    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
-                 "[MEMMGT] Deallocated %u frames, at 0x%p", 
-                 frame_count, frame_addr);
-
-    EXIT_CRITICAL(int_state);
-}
-
-void* memory_alloc_pages(const size_t page_count, 
-                         const MEM_ALLOC_START_E start_pt)
-{
-    void*             address;
-    uint32_t          int_state;
-    OS_RETURN_E       err;    
-    kernel_process_t* current_proc;
-    queue_t*          table;
-
-    ENTER_CRITICAL(int_state);
-
-    current_proc = sched_get_current_process();
-    if(current_proc == NULL)
-    {
-        /* No current process, use kernel page table */
-        table = free_kernel_pages;
-    }
-    else 
-    {
-        table = current_proc->free_page_table;
-    }
-
-    address = get_block(table, page_count, start_pt, &err);
-    if(err != OS_NO_ERR)
-    {
-        KERNEL_ERROR("Could not allocate new page\n");
-        KERNEL_PANIC(err);
-    }
-    
-    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
-                 "[MEMMGT] Allocated %u pages, at 0x%p", 
-                 page_count, 
-                 address);
-
-    EXIT_CRITICAL(int_state);
-    return (void*)address;
-}
-
-void memory_free_pages(void* page_addr, const size_t page_count)
-{
-    uint32_t          int_state;
-    queue_t*          table;
-    kernel_process_t* current_proc;
-
-    ENTER_CRITICAL(int_state);
-
-    current_proc = sched_get_current_process();
-    if(current_proc == NULL)
-    {
-        /* No current process, use kernel page table */
-        table = free_kernel_pages;
-    }
-    else 
-    {
-        table = current_proc->free_page_table;
-    }
-
-    add_block(table, (uintptr_t)page_addr, page_count);
-
-    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
-                 "[MEMMGT] Deallocated %u pages, at 0x%p", 
-                 page_count, 
-                 page_addr);
-
-    EXIT_CRITICAL(int_state);
+    paging_init();
 }
 
 queue_t* memory_create_free_page_table(OS_RETURN_E* err)
@@ -1712,6 +2203,7 @@ queue_t* memory_create_free_page_table(OS_RETURN_E* err)
     queue_t*      new_queue;
     queue_node_t* node;
     mem_range_t*  mem_range;
+    OS_RETURN_E   internal_error;
 
     if(err == NULL)
     {
@@ -1729,7 +2221,12 @@ queue_t* memory_create_free_page_table(OS_RETURN_E* err)
     mem_range = kmalloc(sizeof(mem_range_t));
     if(mem_range == NULL)
     {
-        queue_delete_queue(&new_queue);
+        internal_error = queue_delete_queue(&new_queue);
+        if(internal_error != OS_NO_ERR)
+        {
+            KERNEL_ERROR("Internal error while creating new page table\n");
+            KERNEL_PANIC(internal_error);
+        }
         KERNEL_ERROR("Could not allocate page range structure\n");
         *err = OS_ERR_MALLOC;
         return NULL;
@@ -1739,7 +2236,12 @@ queue_t* memory_create_free_page_table(OS_RETURN_E* err)
                              err);
     if(*err != OS_NO_ERR)
     {
-        queue_delete_queue(&new_queue);
+        internal_error = queue_delete_queue(&new_queue);
+        if(internal_error != OS_NO_ERR)
+        {
+            KERNEL_ERROR("Internal error while creating new page table\n");
+            KERNEL_PANIC(internal_error);
+        }
         kfree(mem_range);
         KERNEL_ERROR("Could not initialize free pages node\n");
         return NULL;
@@ -1751,8 +2253,13 @@ queue_t* memory_create_free_page_table(OS_RETURN_E* err)
     *err = queue_push_prio(node, new_queue, PROCESS_START_VIRT_SPACE);
     if(*err != OS_NO_ERR)
     {
-        queue_delete_node(&node);
-        queue_delete_queue(&new_queue);
+        internal_error = queue_delete_node(&node);
+        internal_error |= queue_delete_queue(&new_queue);
+        if(internal_error != OS_NO_ERR)
+        {
+            KERNEL_ERROR("Internal error while creating new page table\n");
+            KERNEL_PANIC(internal_error);
+        }
         kfree(mem_range);
         KERNEL_ERROR("Could not enqueue free pages node\n");
         return NULL;
@@ -1761,156 +2268,105 @@ queue_t* memory_create_free_page_table(OS_RETURN_E* err)
     return new_queue;
 }
 
-uintptr_t memory_alloc_stack(const size_t stack_size)
-{
-    uintptr_t pages;
-    uint32_t  int_state;
-
-    if((stack_size & (KERNEL_PAGE_SIZE - 1)) != 0)
-    {
-        KERNEL_ERROR("Tried to allocated non aligned stack\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
-    }
-
-    ENTER_CRITICAL(int_state);
-
-    /* Allocated frames and pages */
-    pages  = (uintptr_t)memory_alloc_pages(stack_size / KERNEL_PAGE_SIZE, 
-                                           MEM_ALLOC_END);
-
-    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
-                 "[MEMMGT] Allocated stack at 0x%p", 
-                 pages);
-
-    /* Add mapping */
-    memory_mmap((void*)pages, stack_size, 0, 0);
-
-    EXIT_CRITICAL(int_state);
-
-    return pages;
-}
-
-void memory_free_stack(uintptr_t virt_addr, const size_t stack_size)
-{
-    uint32_t  int_state;
-
-    ENTER_CRITICAL(int_state);
-    
-    memory_free_pages((void*)virt_addr, stack_size / KERNEL_PAGE_SIZE);
-
-    memory_munmap((void*)virt_addr, stack_size);
-
-    EXIT_CRITICAL(int_state);
-}
-
-uintptr_t memory_alloc_kstack(const size_t kstack_size)
+void* memory_alloc_stack(const size_t stack_size, 
+                         const bool_t is_kernel,
+                         OS_RETURN_E* err)
 {
     uint32_t  int_state;
     uint32_t  frame_count;
-    uintptr_t stack_frames;
-    uintptr_t stack_pages;    
+    void*     stack_frames;
+    void*     stack_pages;    
 
-    ENTER_CRITICAL(int_state);
+    kernel_process_t* curr_proc;
 
-    frame_count = kstack_size / KERNEL_FRAME_SIZE;
-    if(KERNEL_STACK_SIZE % KERNEL_FRAME_SIZE != 0)
+    curr_proc = sched_get_current_process();
+
+    if(curr_proc == NULL)
+    {
+        KERNEL_ERROR("Cannot allocate stack when no process is running\n");
+        if(err != NULL)
+        {
+            *err = OS_ERR_UNAUTHORIZED_ACTION;
+            return NULL;
+        }
+        else 
+        {
+            KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        }
+    }
+
+    frame_count = stack_size / KERNEL_FRAME_SIZE;
+    if(stack_size % KERNEL_FRAME_SIZE != 0)
     {
         ++frame_count;
     }
 
+    ENTER_CRITICAL(int_state);    
+
     /* Allocate frames and page */
-    stack_frames = (uintptr_t)memory_alloc_frames(frame_count);
-    stack_pages  = (uintptr_t)memory_alloc_pages(frame_count, MEM_ALLOC_END);
+    stack_frames = memory_alloc_frames(frame_count, err);
+    if(err != NULL && *err != OS_NO_ERR)
+    {
+        KERNEL_ERROR("Error while allocating stack\n");
+        return NULL;
+    }
+    stack_pages  = memory_alloc_pages_from(curr_proc->free_page_table,
+                                           frame_count, 
+                                           MEM_ALLOC_END, 
+                                           err);
+    if(err != NULL && *err != OS_NO_ERR)
+    {
+        memory_free_frames(stack_frames, frame_count, NULL);
+        
+        KERNEL_ERROR("Error while allocating stack\n");
+        return NULL;
+    }
     
     /* Add mapping */
-    kernel_mmap_internal((void*)stack_pages, 
-                         (void*)stack_frames, 
-                         KERNEL_STACK_SIZE, 
+    kernel_mmap_internal(stack_pages, 
+                         stack_frames, 
+                         stack_size, 
                          PAGE_FLAG_READ_WRITE |
                          PAGE_FLAG_CACHE_WB   |
-                         PAGE_FLAG_PRIVATE);
+                         (is_kernel ? PAGE_FLAG_PRIVATE : PAGE_FLAG_REGULAR),
+                         err);
+
+    if(err != NULL && *err != OS_NO_ERR)
+    {
+        memory_free_frames(stack_frames, frame_count, NULL);
+        memory_free_pages_to(curr_proc->free_page_table,
+                             stack_pages, 
+                             frame_count, 
+                             NULL);
+        
+        KERNEL_ERROR("Error while allocating stack\n");
+        return NULL;
+    }
 
     EXIT_CRITICAL(int_state);
 
     return stack_pages;
 }
 
-void memory_free_kstack(const uintptr_t kstack, const size_t kstack_size)
+OS_RETURN_E memory_free_stack(void* stack, const size_t stack_size)
 {
-    uint32_t  int_state;
+    uint32_t    int_state;
+    OS_RETURN_E err;
 
     ENTER_CRITICAL(int_state);
 
-    memory_munmap((void*)kstack, kstack_size);
-
-    EXIT_CRITICAL(int_state);
-}
-
-OS_RETURN_E memory_paging_enable(void)
-{
-    uint32_t int_state;
-
-    if(init == 0)
-    {
-        return OS_ERR_PAGING_NOT_INIT;
-    }
-
-    if(enabled == 1)
-    {
-        return OS_NO_ERR;
-    }
-
-    ENTER_CRITICAL(int_state);
-
-    /* Enable paging, write protect */
-    __asm__ __volatile__("mov %%cr0, %%eax\n\t"
-                         "or $0x80010000, %%eax\n\t"
-                         "mov %%eax, %%cr0\n\t"
-                         : : : "eax");
-
-    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, "[MEMMGT] Paging enabled");    
-
-    enabled = 1;
+    memory_munmap(stack, stack_size, &err);
 
     EXIT_CRITICAL(int_state);
 
-    return OS_NO_ERR;
-}
-
-OS_RETURN_E memory_paging_disable(void)
-{
-    uint32_t int_state;
-
-    if(init == 0)
-    {
-        return OS_ERR_PAGING_NOT_INIT;
-    }
-
-    if(enabled == 0)
-    {
-        return OS_NO_ERR;
-    }
-
-    ENTER_CRITICAL(int_state);
-
-    /* Disable paging and write protect */
-    __asm__ __volatile__("mov %%cr0, %%eax\n\t"
-                         "and $0x7FF7FFFF, %%eax\n\t"
-                         "mov %%eax, %%cr0" : : : "eax");
-
-    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, "[MEMMGT] Paging disabled");
-
-    enabled = 0;
-
-    EXIT_CRITICAL(int_state);
-
-    return OS_NO_ERR;
+    return err;
 }
 
 void memory_mmap(const void* virt_addr,
                   const size_t mapping_size,
-                  const uint8_t read_only,
-                  const uint8_t exec)
+                  const bool_t read_only,
+                  const bool_t exec,
+                  OS_RETURN_E* err)
 {
     uint32_t    int_state;
     void*       phys_addr;
@@ -1926,7 +2382,7 @@ void memory_mmap(const void* virt_addr,
     ENTER_CRITICAL(int_state);
 
     /* Allocate a new frame */
-    phys_addr = memory_alloc_frames(to_map / KERNEL_FRAME_SIZE);
+    phys_addr = memory_alloc_frames(to_map / KERNEL_FRAME_SIZE, err);
 
     kernel_mmap_internal(virt_addr, 
                          phys_addr, 
@@ -1934,20 +2390,27 @@ void memory_mmap(const void* virt_addr,
             (read_only ? PAGE_FLAG_READ_ONLY : PAGE_FLAG_READ_WRITE) |
             PAGE_FLAG_CACHE_WB |
             PAGE_FLAG_REGULAR  | 
-            (exec ? 0 : 0));
+            (exec ? 0 : 0),
+            err);
+    
+    if(err != NULL && *err != OS_NO_ERR)
+    {
+        memory_free_frames(phys_addr, to_map / KERNEL_FRAME_SIZE, NULL);
+    }
 
     EXIT_CRITICAL(int_state);
 }
 
 void memory_mmap_direct(const void* virt_addr,
-                         const void* phys_addr,
-                         const size_t mapping_size,
-                         const uint8_t read_only,
-                         const uint8_t exec,
-                         const uint8_t cache_enabled,
-                         const uint8_t is_hw)
+                        const void* phys_addr,
+                        const size_t mapping_size,
+                        const bool_t read_only,
+                        const bool_t exec,
+                        const bool_t cache_enabled,
+                        const bool_t is_hw,
+                        OS_RETURN_E* err)
 {
-    uint32_t    int_state;
+    uint32_t int_state;
 
     ENTER_CRITICAL(int_state);
 
@@ -1957,12 +2420,15 @@ void memory_mmap_direct(const void* virt_addr,
             (read_only ? PAGE_FLAG_READ_ONLY : PAGE_FLAG_READ_WRITE) |
             (cache_enabled ? PAGE_FLAG_CACHE_WB : PAGE_FLAG_CACHE_DISABLED) |
             (is_hw ? PAGE_FLAG_HARDWARE : PAGE_FLAG_REGULAR) | 
-            (exec ? 0 : 0));
+            (exec ? 0 : 0),
+            err);
 
     EXIT_CRITICAL(int_state);
 }
 
-void memory_munmap(const void* virt_addr, const size_t mapping_size)
+void memory_munmap(void* virt_addr, 
+                   const size_t mapping_size,
+                   OS_RETURN_E* err)
 {
     uintptr_t   end_map;
     uintptr_t   start_map;
@@ -1996,8 +2462,9 @@ void memory_munmap(const void* virt_addr, const size_t mapping_size)
     while(to_unmap)
     {
         /* Get entries */
-        pgdir_entry   = (start_map >> PG_DIR_OFFSET);
-        pgtable_entry = (start_map >> PG_TABLE_OFFSET) & PG_TABLE_OFFSET_MASK;
+        pgdir_entry   = (start_map >> PG_DIR_ENTRY_OFFSET);
+        pgtable_entry = (start_map >> PG_TABLE_ENTRY_OFFSET) & 
+                         PG_TABLE_ENTRY_OFFSET_MASK;
 
         /* Check page directory presence and allocate if not present */
         pgdir_rec_addr = (uint32_t*)&_KERNEL_RECUR_PG_DIR_BASE;
@@ -2016,7 +2483,7 @@ void memory_munmap(const void* virt_addr, const size_t mapping_size)
                              start_map);
                              
                 /* Decrement the ref count and potentialy free frame */
-                memory_release_ref(pgtable[pgtable_entry] & PG_ENTRY_MASK);
+                memory_release_ref(pgtable[pgtable_entry] & PG_ENTRY_ADDR_MASK);
                 pgtable[pgtable_entry] = 0;
                 INVAL_PAGE(start_map);
             }
@@ -2034,7 +2501,9 @@ void memory_munmap(const void* virt_addr, const size_t mapping_size)
             if(acc == 0)
             {
                 memory_free_frames(
-                    (void*)(pgdir_rec_addr[pgdir_entry] & PG_ENTRY_MASK), 1);
+                    (void*)(pgdir_rec_addr[pgdir_entry] & PG_ENTRY_ADDR_MASK), 
+                    1, 
+                    NULL);
                 pgdir_rec_addr[pgdir_entry] = 0;
             }
         }
@@ -2051,10 +2520,15 @@ void memory_munmap(const void* virt_addr, const size_t mapping_size)
     }
 
     EXIT_CRITICAL(int_state);
+
+    if(err != NULL)
+    {
+        *err = OS_NO_ERR;
+    }
 }
 
 OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process,
-                                     const uintptr_t kstack_addr,
+                                     const void* kstack_addr,
                                      const size_t kstack_size)
 {
     uintptr_t*  new_pgdir_frame;
@@ -2069,6 +2543,7 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process,
     uint16_t    pgtable_entry;
     uint32_t    i;
     uint32_t    j;
+    OS_RETURN_E err;
 
     if(dst_process == NULL)
     {
@@ -2078,9 +2553,23 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process,
     KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, "[MEMMGT] Copying process image");
 
     /* Create a new page directory and map for kernel */
-    new_pgdir_frame = (uintptr_t*)memory_alloc_frames(1);
-    new_pgdir_page = (uintptr_t*)memory_alloc_kernel_pages(1, 
-                                                            MEM_ALLOC_BEGINING);
+    new_pgdir_frame = (uintptr_t*)memory_alloc_frames(1, &err);
+    if(err != OS_NO_ERR)
+    {
+        KERNEL_ERROR("Could not copy process mapping\n");
+        return err;
+    }
+
+    new_pgdir_page = (uintptr_t*)memory_alloc_pages_from(free_kernel_pages,
+                                                         1, 
+                                                         MEM_ALLOC_BEGINING,
+                                                         &err);
+    if(err != OS_NO_ERR)
+    {
+        memory_free_frames(new_pgdir_frame, 1, NULL);
+        KERNEL_ERROR("Could not copy process mapping\n");
+        return err;
+    }
 
     memory_mmap_direct(new_pgdir_page, 
                        new_pgdir_frame, 
@@ -2088,12 +2577,46 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process,
                        0, 
                        0, 
                        1,
-                       0);
+                       0,
+                       &err);
+    if(err != OS_NO_ERR)
+    {
+        memory_free_pages_to(free_kernel_pages, new_pgdir_frame, 1, NULL);
+        memory_free_frames(new_pgdir_frame, 1, NULL);
+        KERNEL_ERROR("Could not copy process mapping\n");
+        return err;
+    }
+
     memory_acquire_ref((uintptr_t)new_pgdir_frame);
 
     /* Create temporary pages */
-    new_pgtable_page = memory_alloc_kernel_pages(1, MEM_ALLOC_BEGINING);
-    new_data_page    = memory_alloc_kernel_pages(1, MEM_ALLOC_BEGINING);
+    new_pgtable_page = memory_alloc_pages_from(free_kernel_pages,
+                                               1, 
+                                               MEM_ALLOC_BEGINING,
+                                               &err);
+    if(err != OS_NO_ERR)
+    {
+        memory_munmap(new_pgdir_page, KERNEL_PAGE_SIZE, NULL);
+        memory_free_frames(new_pgdir_frame, 1, NULL);
+        memory_free_pages_to(free_kernel_pages, new_pgdir_frame, 1, NULL);
+        KERNEL_ERROR("Could not copy process mapping\n");
+        return err;
+    }
+
+    new_data_page    = memory_alloc_pages_from(free_kernel_pages, 
+                                               1, 
+                                               MEM_ALLOC_BEGINING,
+                                               &err);
+
+    if(err != OS_NO_ERR)
+    {
+        memory_free_pages_to(free_kernel_pages, new_pgtable_page, 1, NULL);
+        memory_munmap(new_pgdir_page, KERNEL_PAGE_SIZE, NULL);
+        memory_free_frames(new_pgdir_frame, 1, NULL);
+        memory_free_pages_to(free_kernel_pages, new_pgdir_frame, 1, NULL);
+        KERNEL_ERROR("Could not copy process mapping\n");
+        return err;
+    }
 
     /* The current page directory is always recursively mapped */
     current_pgdir = (uintptr_t*)&_KERNEL_RECUR_PG_DIR_BASE;
@@ -2123,7 +2646,11 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process,
                                            i);
 
             /* Create new page table */
-            new_pgtable_frame = memory_alloc_frames(1);     
+            new_pgtable_frame = memory_alloc_frames(1, &err);
+            if(err != OS_NO_ERR)
+            {
+                break;
+            }     
             
             memory_mmap_direct(new_pgtable_page, 
                                new_pgtable_frame, 
@@ -2131,9 +2658,15 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process,
                                0, 
                                0,
                                1,
-                               0);
+                               0,
+                               &err);
+            if(err != OS_NO_ERR)
+            {
+                memory_free_frames(new_pgtable_frame, 1, NULL);
+                break;
+            }
 
-            new_pgdir_page[i] = (current_pgdir[i] & ~PG_ENTRY_MASK) | 
+            new_pgdir_page[i] = (current_pgdir[i] & ~PG_ENTRY_ADDR_MASK) | 
                                 (uintptr_t)new_pgtable_frame;
             memory_acquire_ref((uintptr_t)new_pgtable_frame);
 
@@ -2156,14 +2689,16 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process,
                                             PAGE_FLAG_COPY_ON_WRITE; 
                         new_pgtable_page[j] = current_pgtable[j];
                         /* Increment the reference count */
-                        memory_acquire_ref(new_pgtable_page[j] & PG_ENTRY_MASK);
+                        memory_acquire_ref(new_pgtable_page[j] & 
+                                           PG_ENTRY_ADDR_MASK);
                     }
                     else if((current_pgtable[j] & PAGE_FLAG_OS_CUSTOM_MASK) != 
                             PAGE_FLAG_PRIVATE)
                     {
                         new_pgtable_page[j] = current_pgtable[j];
                         /* Increment the reference count */
-                        memory_acquire_ref(new_pgtable_page[j] & PG_ENTRY_MASK);
+                        memory_acquire_ref(new_pgtable_page[j] & 
+                                           PG_ENTRY_ADDR_MASK);
                     }
                     else 
                     {
@@ -2176,25 +2711,98 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process,
                 }
             }
 
-            memory_munmap(new_pgtable_page, KERNEL_PAGE_SIZE);
+            memory_munmap(new_pgtable_page, KERNEL_PAGE_SIZE, NULL);
         }
         
     }
 
-    /* Map and duplicate the kernel stack */
-    curr_addr = kstack_addr;
-    while(curr_addr < kstack_addr + kstack_size)
+    /* TODO: put this in function: clean copy */
+    /* If we stopped because of an error */
+    if(i != KERNEL_FIRST_PGDIR_ENTRY)
     {
-        pgtable_entry = (curr_addr >> PG_TABLE_OFFSET) & 
-                        PG_TABLE_OFFSET_MASK;
+        /* Skip the last that is already cleaned */
+        --i;
+        /* Free what we created */
+        for(; (int32_t)i >= 0; --i)
+        {
+            if((current_pgdir[i] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
+            {
+                /* Get recursive virtual address */
+                current_pgtable = (uintptr_t*)(&_KERNEL_RECUR_PG_TABLE_BASE + 
+                                            KERNEL_PAGE_SIZE * 
+                                            i);
+
+                new_pgtable_frame = (uintptr_t*)
+                                    (new_pgdir_page[i] & PG_ENTRY_ADDR_MASK);
+
+                memory_mmap_direct(new_pgtable_page, 
+                                   new_pgtable_frame, 
+                                   KERNEL_PAGE_SIZE, 
+                                   0, 
+                                   0,
+                                   1,
+                                   0,
+                                   NULL);
+
+                for(j = 0; j < KERNEL_PGDIR_SIZE; ++j)
+                {
+                    if((current_pgtable[j] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
+                    {
+                        if((current_pgtable[j] & PAGE_FLAG_READ_WRITE) != 0 &&
+                           (current_pgtable[j] & PAGE_FLAG_OS_CUSTOM_MASK) == 
+                            PAGE_FLAG_REGULAR)
+                        {
+                            /* Reset current page values */
+                            current_pgtable[j] &= ~PAGE_FLAG_COPY_ON_WRITE;
+                            current_pgtable[j] |= PAGE_FLAG_READ_WRITE; 
+
+                            /* Decrement the reference count */
+                            memory_release_ref(new_pgtable_page[j] & 
+                                               PG_ENTRY_ADDR_MASK);
+                        }
+                        else if((current_pgtable[j] & 
+                                 PAGE_FLAG_OS_CUSTOM_MASK) != 
+                                PAGE_FLAG_PRIVATE)
+                        {
+                            /* Decrement the reference count */
+                            memory_release_ref(new_pgtable_page[j] & 
+                                               PG_ENTRY_ADDR_MASK);
+                        }
+                    }
+                }
+                memory_munmap(new_pgtable_page, KERNEL_PAGE_SIZE, NULL);
+                memory_free_frames(new_pgtable_frame, 1, NULL);    
+            }
+        }
+
+        memory_free_pages_to(free_kernel_pages, new_pgtable_page, 1, NULL);
+        memory_munmap(new_pgdir_page, KERNEL_PAGE_SIZE, NULL);
+        memory_free_frames(new_pgdir_frame, 1, NULL);
+        memory_free_pages_to(free_kernel_pages, new_pgdir_frame, 1, NULL);
+        KERNEL_ERROR("Could not copy process mapping\n");
+        return err;
+    }
+
+    /* TODO: put this in function */
+    /* Map and duplicate the kernel stack */
+    curr_addr = (uintptr_t)kstack_addr;
+    while(curr_addr < (uintptr_t)kstack_addr + kstack_size)
+    {
+        pgtable_entry = (curr_addr >> PG_TABLE_ENTRY_OFFSET) & 
+                        PG_TABLE_ENTRY_OFFSET_MASK;
 
         new_pgtable_frame = (uintptr_t*)
-                            new_pgdir_page[curr_addr >> PG_DIR_OFFSET];
+                            new_pgdir_page[curr_addr >> PG_DIR_ENTRY_OFFSET];
         if(((uintptr_t)new_pgtable_frame & PG_DIR_FLAG_PAGE_PRESENT) == 0)
         {
-            new_pgtable_frame = memory_alloc_frames(1);
+            new_pgtable_frame = memory_alloc_frames(1, &err);
+            if(err != OS_NO_ERR)
+            {
+                KERNEL_ERROR("Could not create new kstack page frame\n");
+                break;
+            }
             memory_acquire_ref((uintptr_t)new_pgtable_frame);
-            new_pgdir_page[pgtable_entry] = 
+            new_pgdir_page[curr_addr >> PG_DIR_ENTRY_OFFSET] = 
                 (uintptr_t)new_pgtable_frame  |
                 PG_DIR_FLAG_PAGE_SIZE_4KB     |
                 PG_DIR_FLAG_PAGE_SUPER_ACCESS |
@@ -2208,10 +2816,24 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process,
                            0, 
                            0,
                            1,
-                           0);
+                           0,
+                           &err);
+        if(err != OS_NO_ERR)
+        {
+            KERNEL_ERROR("Could not create new kstack page frame\n");
+            memory_free_frames(new_pgtable_frame, 1, NULL);
+            break;
+        }
 
         /* Allocate the new frame */
-        new_data_frame = memory_alloc_frames(1);
+        new_data_frame = memory_alloc_frames(1, &err);
+        if(err != OS_NO_ERR)
+        {
+            KERNEL_ERROR("Could not create new kstack page frame\n");
+            memory_munmap(new_pgtable_page, KERNEL_PAGE_SIZE, NULL);
+            memory_free_frames(new_pgtable_frame, 1, NULL);
+            break;
+        }
         memory_acquire_ref((uintptr_t)new_data_frame);
 
         /* Map the new frame */
@@ -2221,13 +2843,22 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process,
                            0, 
                            0, 
                            1, 
-                           0);
+                           0,
+                           &err);
+        if(err != OS_NO_ERR)
+        {
+            KERNEL_ERROR("Could not create new kstack page frame\n");
+            memory_munmap(new_pgtable_page, KERNEL_PAGE_SIZE, NULL);
+            memory_free_frames(new_pgtable_frame, 1, NULL);
+            memory_free_frames(new_data_frame, 1, NULL);
+            break;
+        }
 
         /* Copy data */
         memcpy(new_data_page, (void*)curr_addr, KERNEL_PAGE_SIZE);
 
         /* Unmap the new frame */
-        memory_munmap(new_data_page, KERNEL_PAGE_SIZE);
+        memory_munmap(new_data_page, KERNEL_PAGE_SIZE, NULL);
 
         /* Update the mapping */
         new_pgtable_page[pgtable_entry] =
@@ -2238,21 +2869,68 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process,
             PAGE_FLAG_PRIVATE         |
             PAGE_FLAG_PRESENT;
 
-        memory_munmap(new_pgtable_page, KERNEL_PAGE_SIZE);
+        memory_munmap(new_pgtable_page, KERNEL_PAGE_SIZE, NULL);
 
         curr_addr += KERNEL_PAGE_SIZE;
     }
 
+    /* TODO: put this in function: clean stack */
+    /* If an error occured, free the resources */
+    if(curr_addr < (uintptr_t)kstack_addr + kstack_size)
+    {
+        /* Skip frst that is already cleaned */
+        curr_addr -= KERNEL_PAGE_SIZE;
+        while(curr_addr > (uintptr_t)kstack_addr)
+        {
+            pgtable_entry = (curr_addr >> PG_TABLE_ENTRY_OFFSET) & 
+                            PG_TABLE_ENTRY_OFFSET_MASK;
+
+            new_pgtable_frame = (uintptr_t*)
+                            new_pgdir_page[curr_addr >> PG_DIR_ENTRY_OFFSET];
+
+            memory_mmap_direct(new_pgtable_page, 
+                               new_pgtable_frame, 
+                               KERNEL_PAGE_SIZE, 
+                               0, 
+                               0,
+                               1,
+                               0,
+                               NULL);
+
+            /* Allocate the new frame */
+            new_data_frame = (uintptr_t*)(new_pgtable_page[pgtable_entry] & 
+                                         PG_ENTRY_ADDR_MASK);
+            memory_free_frames(new_data_frame, 1, NULL);
+
+            /* Update the mapping */
+            new_pgtable_page[pgtable_entry] = 0;
+            new_pgdir_page[curr_addr >> PG_DIR_ENTRY_OFFSET] = 0;
+
+            memory_munmap(new_pgtable_page, KERNEL_PAGE_SIZE, NULL);
+            /* We don't free the pagtable frame, the clean copy will do it for 
+             * us 
+             */
+
+            curr_addr -= KERNEL_PAGE_SIZE;
+        }
+
+        /* TODO: add call to clean copy */
+    }
+
 
     /* Unmap the new page directory for the kernel */
-    memory_munmap(new_pgdir_page, KERNEL_PAGE_SIZE);
-    memory_free_kernel_pages(new_pgdir_page, 1);     
-    memory_free_kernel_pages(new_pgtable_page, 1);
-    memory_free_kernel_pages(new_data_page, 1);   
+    memory_munmap(new_pgdir_page, KERNEL_PAGE_SIZE, NULL);
+    memory_free_pages_to(free_kernel_pages, new_pgdir_page, 1, NULL);     
+    memory_free_pages_to(free_kernel_pages, new_pgtable_page, 1, NULL);
+    memory_free_pages_to(free_kernel_pages, new_data_page, 1, NULL);   
 
     /* Set the destination process data */
     dst_process->page_dir = (uintptr_t)new_pgdir_frame;
-    dst_process->free_page_table = paging_copy_free_page_table();
+    dst_process->free_page_table = paging_copy_free_page_table(&err);
+    if(err != OS_NO_ERR)
+    {
+        /* TODO call clean stack */
+    }
 
     return OS_NO_ERR;
 }
@@ -2265,8 +2943,8 @@ uintptr_t memory_get_phys_addr(const uintptr_t virt_addr)
     uint32_t* pgtable;
 
     /* Get entries */
-    pgdir_entry   = (virt_addr >> PG_DIR_OFFSET);
-    pgtable_entry = (virt_addr >> PG_TABLE_OFFSET) & PG_TABLE_OFFSET_MASK;
+    pgdir_entry   = (virt_addr >> PG_DIR_ENTRY_OFFSET);
+    pgtable_entry = (virt_addr >> PG_TABLE_ENTRY_OFFSET) & PG_TABLE_ENTRY_OFFSET_MASK;
 
     /* Check page directory presence and allocate if not present */
     pgdir_rec_addr = (uint32_t*)&_KERNEL_RECUR_PG_DIR_BASE;
@@ -2278,7 +2956,7 @@ uintptr_t memory_get_phys_addr(const uintptr_t virt_addr)
                                 pgdir_entry);
         if((pgtable[pgtable_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
         {
-            return (pgtable[pgtable_entry] & PG_ENTRY_MASK);
+            return (pgtable[pgtable_entry] & PG_ENTRY_ADDR_MASK);
         }
     }
 
@@ -2305,7 +2983,7 @@ OS_RETURN_E memory_declare_hw(const uintptr_t phys_addr, const size_t size)
     ENTER_CRITICAL(int_state);
 
     KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
-                 "[MEMMGT] Adding region 0x%p -> 0x%p to reference table", 
+                 "[MEMMGT] Adding HW region 0x%p -> 0x%p to reference table", 
                 current_addr, current_addr + size);
 
     while(current_addr < phys_addr + size)
@@ -2320,25 +2998,25 @@ OS_RETURN_E memory_declare_hw(const uintptr_t phys_addr, const size_t size)
 
         if(frame_ref_dir[dir_entry] == (uintptr_t)NULL)
         {
-            frame_ref_dir[dir_entry] = 
-                (uintptr_t)kmalloc(FRAME_REF_TABLE_SIZE);
-            if(frame_ref_dir[dir_entry] == (uintptr_t)NULL)
+            frame_ref_dir[dir_entry] = (uintptr_t)kmalloc(FRAME_REF_TABLE_SIZE * 
+                                                          sizeof(uintptr_t));
+            memset((void*)frame_ref_dir[dir_entry], 
+                   0, 
+                   FRAME_REF_TABLE_SIZE * sizeof(uintptr_t));
+            current_table = (uintptr_t*)frame_ref_dir[dir_entry];
+        }
+        else 
+        {
+            current_table = (uintptr_t*)frame_ref_dir[dir_entry];
+            if(current_table[table_entry] != (uintptr_t)NULL)
             {
-                KERNEL_ERROR("Could not allocate frame reference table\n");
-                err = OS_ERR_MALLOC;
+                    
+                KERNEL_ERROR("Reference table cannot have multiple ref 0x%p\n",
+                                current_addr);
+                err = OS_ERR_UNAUTHORIZED_ACTION;
+                current_addr -= KERNEL_FRAME_SIZE;
                 break;
             }
-            memset((void*)frame_ref_dir[dir_entry], 0, FRAME_REF_TABLE_SIZE);
-        }
-        current_table = (uintptr_t*)frame_ref_dir[dir_entry];
-
-        if(current_table[table_entry] != (uintptr_t)NULL)
-        {
-            KERNEL_ERROR("Reference table cannot have multiple ref 0x%p\n",
-                            current_addr);
-            err = OS_ERR_UNAUTHORIZED_ACTION;
-            current_addr -= KERNEL_FRAME_SIZE;
-            break;
         }
 
         current_table[table_entry] = flags;
@@ -2368,7 +3046,8 @@ OS_RETURN_E memory_declare_hw(const uintptr_t phys_addr, const size_t size)
             }
             if(i == FRAME_REF_TABLE_SIZE)
             {
-                kfree((void*)frame_ref_dir[dir_entry]);
+                /* It should release the frame too */
+                kfree((void*)frame_ref_dir[dir_entry]);            
                 frame_ref_dir[dir_entry] = (uintptr_t)NULL;
             }
             current_addr -= KERNEL_FRAME_SIZE;
@@ -2376,40 +3055,206 @@ OS_RETURN_E memory_declare_hw(const uintptr_t phys_addr, const size_t size)
     }
     EXIT_CRITICAL(int_state);
 
+    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
+                 "[MEMMGT] Added HW region 0x%p -> 0x%p to reference table", 
+                phys_addr, phys_addr + size);
+
     return err;
 }
 
-/* Test Mode */
-#ifdef TEST_MODE_ENABLED
-queue_t* paging_get_free_frames(void)
+void memory_delete_free_page_table(queue_t* page_table)
 {
-    return free_memory_map;
-}
+    queue_node_t* mem_range;
+    OS_RETURN_E   err;
 
-queue_t* paging_get_free_pages(void)
-{
-    return free_kernel_pages;
-}
-
-queue_t* test_page = NULL;
-void testmode_paging_add_page(uintptr_t start, size_t size)
-{
-    OS_RETURN_E error;
-    if(test_page == NULL)
+    if(page_table == NULL)
     {
-        test_page = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree), 
-                                           &error);
-        if(error != OS_NO_ERR)
+        return;
+    }
+    mem_range = queue_pop(page_table, &err);
+    if(err != OS_NO_ERR)
+    {
+        KERNEL_ERROR("Error while cleaning page table\n");
+        KERNEL_PANIC(err);
+    }
+    while(mem_range != NULL)
+    {
+        kfree(mem_range->data);
+        err = queue_delete_node(&mem_range);
+        if(err != OS_NO_ERR)
         {
-            KERNEL_ERROR("Could not initialize free kernel pages queue\n");
-            KERNEL_PANIC(error);
+            KERNEL_ERROR("Error while cleaning page table\n");
+            KERNEL_PANIC(err);
+        }
+        
+        mem_range = queue_pop(page_table, &err);
+        if(err != OS_NO_ERR)
+        {
+            KERNEL_ERROR("Error while cleaning page table\n");
+            KERNEL_PANIC(err);
         }
     }
-    add_block(test_page, start, size);
+
+    err = queue_delete_queue(&page_table);
+    if(err != OS_NO_ERR)
+    {
+        KERNEL_ERROR("Error while cleaning page table\n");
+        KERNEL_PANIC(err);
+    }
 }
 
-queue_t* testmode_paging_get_area(void)
+void memory_clean_process_memory(uintptr_t pg_dir)
 {
-    return test_page;
+    uint16_t pgdir_entry;
+    uint16_t pgtable_entry;
+
+    uintptr_t* pgdir_page;
+    uintptr_t* pgtable_page;
+
+    /* Allocate temporary tables */
+    pgdir_page   = memory_alloc_pages_from(free_kernel_pages,
+                                           1, 
+                                           MEM_ALLOC_BEGINING,
+                                           NULL);
+    pgtable_page = memory_alloc_pages_from(free_kernel_pages,
+                                           1, 
+                                           MEM_ALLOC_BEGINING,
+                                           NULL);
+
+    memory_mmap_direct(pgdir_page, 
+                       (void*)pg_dir, 
+                       KERNEL_PAGE_SIZE, 
+                       0, 
+                       0, 
+                       1, 
+                       0, 
+                       NULL);
+
+    for(pgdir_entry = 0; pgdir_entry < KERNEL_FIRST_PGDIR_ENTRY; ++pgdir_entry)
+    {
+        if((pgdir_page[pgdir_entry] & PG_DIR_FLAG_PAGE_PRESENT) == 0)
+        {
+            continue;
+        }
+
+        memory_mmap_direct(pgtable_page, 
+                           (void*)(pgdir_page[pgdir_entry] & PG_ENTRY_ADDR_MASK), 
+                           KERNEL_PAGE_SIZE, 
+                           0, 
+                           0, 
+                           1, 
+                           0,
+                           NULL);
+
+        for(pgtable_entry = 0; 
+            pgtable_entry < KERNEL_PGDIR_SIZE; 
+            ++pgtable_entry)
+        {
+            if((pgtable_page[pgtable_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
+            {
+                /* This will free the frame is the reference count is 0 */
+                memory_release_ref(pgtable_page[pgtable_entry] & 
+                                   PG_ENTRY_ADDR_MASK);
+            }
+        }
+
+        memory_munmap(pgtable_page, KERNEL_PAGE_SIZE, NULL);
+    }
+
+    memory_munmap(pgdir_page, KERNEL_PAGE_SIZE, NULL);
+
+    memory_free_pages_to(free_kernel_pages, pgdir_page, 1, NULL);
+    memory_free_pages_to(free_kernel_pages, pgtable_page, 1, NULL);
 }
-#endif
+
+void memory_free_process_data(const void* virt_addr, 
+                              const size_t size,
+                              kernel_process_t* process)
+{
+    uintptr_t  current_addr;
+    size_t     to_unmap;
+    uint16_t   pgdir_entry;
+    uint16_t   pgtable_entry;
+    uintptr_t* pgdir_page;
+    uintptr_t* pgtable_page;
+
+    if(process == NULL)
+    {
+        KERNEL_ERROR("Cannot free process data of NULL process\n");
+        KERNEL_PANIC(OS_ERR_NULL_POINTER);
+    }
+    if(process == sched_get_current_process())
+    {
+        KERNEL_ERROR("Cannot free process data of active process\n");
+        KERNEL_PANIC(OS_ERR_NULL_POINTER);
+    }
+
+    /* Allocate temporary tables */
+    pgdir_page   = memory_alloc_pages_from(free_kernel_pages,
+                                           1, 
+                                           MEM_ALLOC_BEGINING,
+                                           NULL);
+    pgtable_page = memory_alloc_pages_from(free_kernel_pages,
+                                           1, 
+                                           MEM_ALLOC_BEGINING,
+                                           NULL);
+
+    memory_mmap_direct(pgdir_page, 
+                       (void*)process->page_dir, 
+                       KERNEL_PAGE_SIZE, 
+                       0, 
+                       0, 
+                       1, 
+                       0,
+                       NULL);
+
+    current_addr = (uintptr_t)virt_addr & ~(KERNEL_PAGE_SIZE - 1);
+    to_unmap = size + (uintptr_t)virt_addr - current_addr;
+
+    while(current_addr < (uintptr_t)virt_addr + to_unmap)
+    {
+        pgdir_entry   = current_addr >> PG_DIR_ENTRY_OFFSET;
+        pgtable_entry = (current_addr >> PG_TABLE_ENTRY_OFFSET) & 
+                        PG_TABLE_ENTRY_OFFSET_MASK;
+
+        if((pgdir_page[pgdir_entry] & PG_DIR_FLAG_PAGE_PRESENT) == 0)
+        {
+            KERNEL_ERROR("Trying to free already unmapped data for process\n");
+            KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        }
+
+        memory_mmap_direct(pgtable_page, 
+                           (void*)(pgdir_page[pgdir_entry] & PG_ENTRY_ADDR_MASK), 
+                           KERNEL_PAGE_SIZE, 
+                           0, 
+                           0, 
+                           1, 
+                           0,
+                           NULL);
+
+        if((pgtable_page[pgtable_entry] & PG_DIR_FLAG_PAGE_PRESENT) == 0)
+        {
+            KERNEL_ERROR("Trying to free already unmapped data for process\n");
+            KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        }
+
+        /* This will free the frame is the reference count is 0 */
+        memory_release_ref(pgtable_page[pgtable_entry] & PG_ENTRY_ADDR_MASK);
+        pgtable_page[pgtable_entry] = 0;
+
+        /* Free in page table */
+        memory_free_pages_to(process->free_page_table, 
+                             (uintptr_t*)current_addr, 
+                             1,
+                             NULL);
+
+        memory_munmap(pgtable_page, KERNEL_PAGE_SIZE, NULL);
+
+        current_addr += KERNEL_PAGE_SIZE;
+    }
+
+    memory_munmap(pgdir_page, KERNEL_PAGE_SIZE, NULL);
+
+    memory_free_pages_to(free_kernel_pages, pgdir_page, 1, NULL);
+    memory_free_pages_to(free_kernel_pages, pgtable_page, 1, NULL);
+}

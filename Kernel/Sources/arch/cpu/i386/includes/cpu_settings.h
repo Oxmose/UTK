@@ -21,16 +21,11 @@
 #ifndef __I386_CPU_SETTINGS_H_
 #define __I386_CPU_SETTINGS_H_
 
-#include <stdint.h>      /* Generic int types */
-#include <cpu_structs.h> /* CPU structures */
+#include <stdint.h> /* Generic int types */
 
 /*******************************************************************************
  * CONSTANTS
  ******************************************************************************/
-
-/***************************
- * GDT Settings
- **************************/
 
 /** @brief Kernel's 32 bits code segment descriptor. */
 #define KERNEL_CS_32 0x08
@@ -46,108 +41,86 @@
 /** @brief Select the thread code segment. */
 #define THREAD_KERNEL_DS KERNEL_DS_32
 
-/** @brief Kernel's 32 bits code segment base address. */
-#define KERNEL_CODE_SEGMENT_BASE_32  0x00000000
-/** @brief Kernel's 32 bits code segment limit address. */
-#define KERNEL_CODE_SEGMENT_LIMIT_32 0x000FFFFF
-/** @brief Kernel's 32 bits data segment base address. */
-#define KERNEL_DATA_SEGMENT_BASE_32  0x00000000
-/** @brief Kernel's 32 bits data segment limit address. */
-#define KERNEL_DATA_SEGMENT_LIMIT_32 0x000FFFFF
-
-/** @brief Kernel's 16 bits code segment base address. */
-#define KERNEL_CODE_SEGMENT_BASE_16  0x00000000
-/** @brief Kernel's 16 bits code segment limit address. */
-#define KERNEL_CODE_SEGMENT_LIMIT_16 0x000FFFFF
-/** @brief Kernel's 16 bits data segment base address. */
-#define KERNEL_DATA_SEGMENT_BASE_16  0x00000000
-/** @brief Kernel's 16 bits data segment limit address. */
-#define KERNEL_DATA_SEGMENT_LIMIT_16 0x000FFFFF
-
-/** @brief Kernel's TSS segment descriptor. */
-#define TSS_SEGMENT 0x28
-
-/***************************
- * GDT Flags
- **************************/
-
-/** @brief GDT granularity flag: 4K block. */
-#define GDT_FLAG_GRANULARITY_4K   0x800000
-/** @brief GDT granularity flag: 1B block. */
-#define GDT_FLAG_GRANULARITY_BYTE 0x000000
-/** @brief GDT size flag: 16b protected mode. */
-#define GDT_FLAG_16_BIT_SEGMENT   0x000000
-/** @brief GDT size flag: 32b protected mode. */
-#define GDT_FLAG_32_BIT_SEGMENT   0x400000
-/** @brief GDT size flag: 64b protected mode. */
-#define GDT_FLAG_64_BIT_SEGMENT   0x200000
-/** @brief GDT AVL flag. */
-#define GDT_FLAG_AVL              0x100000
-/** @brief GDT segment present flag. */
-#define GDT_FLAG_SEGMENT_PRESENT  0x008000
-/** @brief GDT privilege level flag: Ring 0 (kernel). */
-#define GDT_FLAG_PL0              0x000000
-/** @brief GDT privilege level flag: Ring 1 (kernel-). */
-#define GDT_FLAG_PL1              0x002000
-/** @brief GDT privilege level flag: Ring 2 (kernel--). */
-#define GDT_FLAG_PL2              0x004000
-/** @brief GDT privilege level flag: Ring 3 (user). */
-#define GDT_FLAG_PL3              0x006000
-/** @brief GDT data type flag: code. */
-#define GDT_FLAG_CODE_TYPE        0x001000
-/** @brief GDT data type flag: data. */
-#define GDT_FLAG_DATA_TYPE        0x001000
-/** @brief GDT data type flag: system. */
-#define GDT_FLAG_SYSTEM_TYPE      0x000000
-/** @brief GDT TSS flag. */
-#define GDT_FLAG_TSS              0x09
-
-/** @brief GDT access byte flag: executable. */
-#define GDT_TYPE_EXECUTABLE       0x8
-/** @brief GDT access byte flag: growth direction up. */
-#define GDT_TYPE_GROW_UP          0x4
-/** @brief GDT access byte flag: growth direction down. */
-#define GDT_TYPE_GROW_DOWN        0x0
-/** @brief GDT access byte flag: conforming code. */
-#define GDT_TYPE_CONFORMING       0x4
-/** @brief GDT access byte flag: protected. */
-#define GDT_TYPE_PROTECTED        0x0
-/** @brief GDT access byte flag: readable. */
-#define GDT_TYPE_READABLE         0x2
-/** @brief GDT access byte flag: writable. */
-#define GDT_TYPE_WRITABLE         0x2
-/** @brief GDT access byte flag: accessed byte. */
-#define GDT_TYPE_ACCESSED         0x1
-
-
-/***************************
- * IDT Flags
- **************************/
-
-/** @brief IDT flag: storage segment. */
-#define IDT_FLAG_STORAGE_SEG 0x10
-/** @brief IDT flag: privilege level, ring 0. */
-#define IDT_FLAG_PL0         0x00
-/** @brief IDT flag: privilege level, ring 1. */
-#define IDT_FLAG_PL1         0x20
-/** @brief IDT flag: privilege level, ring 2. */
-#define IDT_FLAG_PL2         0x40
-/** @brief IDT flag: privilege level, ring 3. */
-#define IDT_FLAG_PL3         0x60
-/** @brief IDT flag: interrupt present. */
-#define IDT_FLAG_PRESENT     0x80
-
-/** @brief IDT flag: interrupt type task gate. */
-#define IDT_TYPE_TASK_GATE 0x05
-/** @brief IDT flag: interrupt type interrupt gate. */
-#define IDT_TYPE_INT_GATE  0x0E
-/** @brief IDT flag: interrupt type trap gate. */
-#define IDT_TYPE_TRAP_GATE 0x0F
-
+/** @brief Number of entries in the kernel's IDT. */
+#define IDT_ENTRY_COUNT 256
 
 /*******************************************************************************
  * STRUCTURES
  ******************************************************************************/
+
+/** @brief Holds the CPU register values */
+struct cpu_state
+{
+    /** @brief CPU's esp register. */
+    uint32_t esp;
+    /** @brief CPU's ebp register. */
+    uint32_t ebp;
+    /** @brief CPU's edi register. */
+    uint32_t edi;
+    /** @brief CPU's esi register. */
+    uint32_t esi;
+    /** @brief CPU's edx register. */
+    uint32_t edx;
+    /** @brief CPU's ecx register. */
+    uint32_t ecx;
+    /** @brief CPU's ebx register. */
+    uint32_t ebx;
+    /** @brief CPU's eax register. */
+    uint32_t eax;
+    
+    /** @brief CPU's ss register. */
+    uint32_t ss;
+    /** @brief CPU's gs register. */
+    uint32_t gs;
+    /** @brief CPU's fs register. */
+    uint32_t fs;
+    /** @brief CPU's es register. */
+    uint32_t es;
+    /** @brief CPU's ds register. */
+    uint32_t ds;
+} __attribute__((packed));
+
+/** 
+ * @brief Defines cpu_state_t type as a shorcut for struct cpu_state.
+ */
+typedef struct cpu_state cpu_state_t;
+
+/** @brief Hold the stack state before the interrupt */
+struct stack_state
+{
+    /** @brief Interrupt's error code. */
+    uint32_t error_code;
+    /** @brief EIP of the faulting instruction. */
+    uint32_t eip;
+    /** @brief CS before the interrupt. */
+    uint32_t cs;
+    /** @brief EFLAGS before the interrupt. */
+    uint32_t eflags;
+} __attribute__((packed));
+
+/** 
+ * @brief Defines stack_state_t type as a shorcut for struct stack_state.
+ */
+typedef struct stack_state stack_state_t;
+
+/**
+ * @brief Defines he virtual CPU context for the i386 CPU.
+ */
+struct virtual_cpu_context
+{
+    /** @brief Thread's specific ESP registers. */
+    uint32_t esp;
+    /** @brief Thread's specific EBP registers. */
+    uint32_t ebp;
+    /** @brief Thread's specific EIP registers. */
+    uint32_t eip;  
+
+    /** @brief Last interrupt ESP */
+    uint32_t last_int_esp;
+};
+
+/** @brief Shortcut name for the struct virtual_cpu_context structure. */
+typedef struct virtual_cpu_context virtual_cpu_context_t;
 
 /*******************************************************************************
  * FUNCTIONS

@@ -16,19 +16,24 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#ifndef __UART_H_
-#define __UART_H_
+#ifndef __BOARD_UART_H_
+#define __BOARD_UART_H_
 
-#include <stdint.h> /* Generic int types */
-#include <stddef.h> /* Standard definitions */
-#include <graphic.h> /* Graphic definitions */
+#include <stdint.h>       /* Generic int types */
+#include <kernel_error.h> /* Kernel error codes */
+#include <graphic.h>      /* Graphic driver manager */
 
 /*******************************************************************************
- * DEFINITIONS
+ * CONSTANTS
  ******************************************************************************/
 
-/** @brief UART driver structure. */
-extern kernel_graphic_driver_t uart_text_driver;
+/* None */
+
+/*******************************************************************************
+ * STRUCTURES
+ ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * FUNCTIONS
@@ -45,18 +50,6 @@ extern kernel_graphic_driver_t uart_text_driver;
  * - There is not other possible return value.
  */
 OS_RETURN_E uart_init(void);
-
-/**
- * @brief Writes the data given as patameter on the desired port.
- * 
- * @details The function will output the data given as parameter on the selected
- * port. This call is blocking until the data has been sent to the uart port
- * controler.
- *
- * @param[in] port The desired port to write the data to.
- * @param[in] data The byte to write to the uart port.
- */
-void uart_write(const uint32_t port, const uint8_t data);
 
 /**
  * @brief Write the string given as patameter on the debug port.
@@ -90,10 +83,10 @@ void uart_put_char(const char character);
  *
  * @param[in] port The uart port on which the test should be executed.
  * 
- * @return 1 is returned if data can be read from the port. 0 is returned
+ * @return TRUE is returned if data can be read from the port. FALSE is returned
  * otherwise.
  */
-uint8_t uart_received(const uint32_t port);
+bool_t uart_received(const uint32_t port);
 
 /** 
  * @brief Reads a byte from the uart port given as parameter.
@@ -142,4 +135,13 @@ void uart_scroll(const SCROLL_DIRECTION_E direction,
  */
 void uart_console_write_keyboard(const char* str, const size_t len);
 
-#endif /* #ifndef __UART_H_ */
+/**
+ * @brief Returns the UART graphic driver.
+ * 
+ * @details Returns a constant handle to the UART graphic driver.
+ * 
+ * @return A constant handle to the UART graphic driver is returned.
+ */
+const kernel_graphic_driver_t* uart_get_driver(void);
+
+#endif /* #ifndef __BOARD_UART_H_ */

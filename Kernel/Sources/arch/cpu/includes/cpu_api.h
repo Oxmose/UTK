@@ -34,9 +34,13 @@
  * CONSTANTS
  ******************************************************************************/
 
+/* None */
+
 /*******************************************************************************
  * STRUCTURES
  ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * FUNCTIONS
@@ -71,8 +75,6 @@ uintptr_t cpu_get_current_pgdir(void);
  * @return OS_NO_ERR shoudl be return in case of success.
  * - OS_ERR_UNAUTHORIZED_ACTION Is returned if the interrupt line is not
  * correct.
- * - Other errors value may be returned depending on the underlying function
- * calls made by this function.
  */
 OS_RETURN_E cpu_raise_interrupt(const uint32_t interrupt_line);
 
@@ -97,13 +99,6 @@ uint32_t cpu_get_interrupt_state(void);
  */
 uint32_t cpu_get_saved_interrupt_state(const cpu_state_t* cpu_state,
                                        const stack_state_t* stack_state);
-
-/**
- * @brief Returns the number of booted CPU.
- *
- * @return uint32_t The number of booted CPU.
- */
-uint32_t cpu_get_booted_cpu_count(void);
 
 /**
  * @brief Initializes the thread's context.

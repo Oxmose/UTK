@@ -21,11 +21,12 @@
 #define __X86_BIOS_CALL_H_
 
 #include <stdint.h> /* Generic int types */
-#include <stddef.h> /* Standard definitions */
 
 /*******************************************************************************
  * CONSTANTS
  ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * STRUCTURES
@@ -66,7 +67,6 @@ struct bios_int_regs
  * @brief Defines bios_int_regs_t type as a shorcut for struct bios_int_regs.
  */
 typedef struct bios_int_regs bios_int_regs_t;
-
 
 /*******************************************************************************
  * FUNCTIONS

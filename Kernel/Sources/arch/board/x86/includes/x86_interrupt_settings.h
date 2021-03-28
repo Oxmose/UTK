@@ -1,5 +1,5 @@
 /*******************************************************************************
- * @file interrupt_settings.h
+ * @file x86_interrupt_settings.h
  *
  * @author Alexy Torres Aurora Dugo
  *
@@ -7,9 +7,9 @@
  *
  * @version 2.0
  *
- * @brief i386 interrupt settings.
+ * @brief X86 interrupt settings.
  * 
- * @details i386 interrupt settings. Stores the interrupt settings such as the
+ * @details X86 interrupt settings. Stores the interrupt settings such as the
  * interrupt lines.
  * 
  * @copyright Alexy Torres Aurora Dugo
@@ -18,10 +18,10 @@
 #ifndef __X86_INTERRUPT_SETTINGS_
 #define __X86_INTERRUPT_SETTINGS_
 
-#include <cpu_structs.h> /* CPU structures */
+#include <cpu_settings.h> /* CPU structures */
 
 /*******************************************************************************
- * DEFINITIONS
+ * CONSTANTS
  ******************************************************************************/
 
 /** @brief Minimal customizable accepted interrupt line. */
@@ -46,6 +46,11 @@
 #define INT_PIC_IRQ_OFFSET     0x30
 /** @brief Offset of the first line of an IRQ interrupt from IO-APIC. */
 #define INT_IOAPIC_IRQ_OFFSET  0x40
+
+/** @brief PIC's minimal IRQ number. */
+#define PIC_MIN_IRQ_LINE 0
+/** @brief PIC's maximal IRQ number. */
+#define PIC_MAX_IRQ_LINE 15
 
 /** @brief PIT IRQ number. */
 #define PIT_IRQ_LINE              0

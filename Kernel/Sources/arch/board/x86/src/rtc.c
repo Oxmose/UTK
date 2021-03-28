@@ -26,6 +26,8 @@
 #include <time_management.h>    /* Timer factory */
 #include <critical.h>           /* Critical sections */
 #include <panic.h>              /* Kernel panic */
+#include <kernel_error.h>       /* Kernel error codes */
+#include <rt_clock.h>           /* BSP RTC declarations */
 
 /* UTK configuration file */
 #include <config.h>
@@ -37,6 +39,62 @@
 
 /* Header include */
 #include <rtc.h>
+
+/*******************************************************************************
+ * CONSTANTS
+ ******************************************************************************/
+
+/* RTC settings */
+/** @brief Initial RTC tick rate. */
+#define RTC_INIT_RATE 10
+/** @brief RTC minimal frequency. */
+#define RTC_MIN_FREQ 2
+/** @brief RTC maximal frequency. */
+#define RTC_MAX_FREQ 8192
+
+/** @brief RTC quartz frequency. */
+#define RTC_QUARTZ_FREQ 32768
+
+/* CMOS registers  */
+/** @brief CMOS seconds register id. */
+#define CMOS_SECONDS_REGISTER 0x00
+/** @brief CMOS minutes register id. */
+#define CMOS_MINUTES_REGISTER 0x02
+/** @brief CMOS hours register id. */
+#define CMOS_HOURS_REGISTER   0x04
+/** @brief CMOS day of the week register id. */
+#define CMOS_WEEKDAY_REGISTER 0x06
+/** @brief CMOS day register id. */
+#define CMOS_DAY_REGISTER     0x07
+/** @brief CMOS month register id. */
+#define CMOS_MONTH_REGISTER   0x08
+/** @brief CMOS year register id. */
+#define CMOS_YEAR_REGISTER    0x09
+/** @brief CMOS century register id. */
+#define CMOS_CENTURY_REGISTER 0x00
+
+/* CMOS setings */
+/** @brief CMOS NMI disabler bit. */
+#define CMOS_NMI_DISABLE_BIT 0x01
+/** @brief CMOS RTC enabler bit. */
+#define CMOS_ENABLE_RTC      0x40
+/** @brief CMOS A register id. */
+#define CMOS_REG_A           0x0A
+/** @brief CMOS B register id. */
+#define CMOS_REG_B           0x0B
+/** @brief CMOS C register id. */
+#define CMOS_REG_C           0x0C
+
+/** @brief CMOS CPU command port id. */
+#define CMOS_COMM_PORT 0x70
+/** @brief CMOS CPU data port id. */
+#define CMOS_DATA_PORT 0x71
+
+/*******************************************************************************
+ * STRUCTURES
+ ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * GLOBAL VARIABLES
@@ -55,7 +113,7 @@ static uint32_t disabled_nesting;
 static uint32_t rtc_frequency;
 
 /** @brief RTC driver instance. */
-kernel_timer_t rtc_driver = {
+static kernel_timer_t rtc_driver = {
     .get_frequency  = rtc_get_frequency,
     .set_frequency  = rtc_set_frequency,
     .enable         = rtc_enable,
@@ -67,7 +125,7 @@ kernel_timer_t rtc_driver = {
 };
 
 /*******************************************************************************
- * FUNCTIONS
+ * STATIC FUNCTIONS DEFINITIONS
  ******************************************************************************/
 
 /**
@@ -80,7 +138,17 @@ kernel_timer_t rtc_driver = {
  * @param[in] int_id The interrupt line that called the handler.
  * @param[in, out] stack_state The stack state before the interrupt.
  */
-static void dummy_handler(cpu_state_t* cpu_state, uintptr_t int_id,
+static void dummy_handler(cpu_state_t* cpu_state, 
+                          uintptr_t int_id,
+                          stack_state_t* stack_state);
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
+
+
+static void dummy_handler(cpu_state_t* cpu_state, 
+                          uintptr_t int_id,
                           stack_state_t* stack_state)
 {
     (void)cpu_state;
@@ -93,7 +161,7 @@ static void dummy_handler(cpu_state_t* cpu_state, uintptr_t int_id,
     kernel_interrupt_set_irq_eoi(RTC_IRQ_LINE);
 }
 
-OS_RETURN_E rtc_init(void)
+void rtc_init(void)
 {
 
     OS_RETURN_E err;
@@ -124,7 +192,8 @@ OS_RETURN_E rtc_init(void)
     err = kernel_interrupt_register_irq_handler(RTC_IRQ_LINE, dummy_handler);
     if(err != OS_NO_ERR)
     {
-        return err;
+        KERNEL_ERROR("Could not register RTC handler\n");
+        KERNEL_PANIC(err);
     }
 
     /* Set mask before setting IRQ */
@@ -151,8 +220,6 @@ OS_RETURN_E rtc_init(void)
 #endif
 
     KERNEL_DEBUG(RTC_DEBUG_ENABLED, "[RTC] Initialized");
-
-    return err;
 }
 
 void rtc_enable(void)
@@ -452,4 +519,9 @@ void rtc_update_time(void)
 uint32_t rtc_get_irq(void)
 {
     return RTC_IRQ_LINE;
+}
+
+const kernel_timer_t* rtc_get_driver(void)
+{
+    return &rtc_driver;
 }

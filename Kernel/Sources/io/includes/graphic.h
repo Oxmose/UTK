@@ -21,9 +21,9 @@
 #ifndef __IO_GRAPHIC_H_
 #define __IO_GRAPHIC_H_
 
-#include <stdint.h> /* Generic int types */
-#include <stddef.h> /* Standard definition */
-
+#include <stdint.h>       /* Generic int types */
+#include <stddef.h>       /* Standard definition */
+#include <kernel_error.h> /* Kernel error codes */
 /*******************************************************************************
  * DEFINITIONS
  ******************************************************************************/
@@ -296,15 +296,6 @@ typedef struct kernel_graphic_driver kernel_graphic_driver_t;
  * pointers. 
  */
 OS_RETURN_E graphic_set_selected_driver(const kernel_graphic_driver_t* driver);
-
-/**
- * @brief Returns the current graphic driver used in the kernel.
- *
- * @details Returns the current graphic driver used in the kernel.
- * 
- * @return The current graphic driver used in the kernel.
- */
-const kernel_graphic_driver_t* graphic_get_selected_driver(void);
 
 /**
  * @brief Clears the screen, the background color is set to black.

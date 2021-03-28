@@ -21,76 +21,32 @@
 #ifndef __X86_VGA_TEXT_H_
 #define __X86_VGA_TEXT_H_
 
-#include <stdint.h> /* Generic int types */
-#include <stddef.h> /* Standard definitions */
-#include <graphic.h> /* Graphic API */
-
+#include <stdint.h>       /* Generic int types */
+#include <kernel_error.h> /* Kernel error codes */
+#include <graphic.h>      /* Graphic driver manager */
 /*******************************************************************************
  * CONSTANTS
  ******************************************************************************/
 
-/* SCREEN SETTINGS */
-
-/** @brief VGA frame buffer base physical address. */
-#define VGA_TEXT_FRAMEBUFFER 0xB8000
-
-/** @brief VGA frame buffer size */
-#define VGA_TEXT_FRAMEBUFFER_SIZE 0x7D00
-
-/** @brief VGA CPU management data port. */
-#define VGA_TEXT_SCREEN_DATA_PORT 0x3D5
-/** @brief VGA CPU management command port. */
-#define VGA_TEXT_SCREEN_COMM_PORT 0x3D4
-/** @brief VGA screen width. */
-#define VGA_TEXT_SCREEN_COL_SIZE  80
-/** @brief VGA screen height. */
-#define VGA_TEXT_SCREEN_LINE_SIZE 25
-
-/* CURSOR SETTINGS */
-
-/** @brief VGA cursor position command low. */
-#define VGA_TEXT_CURSOR_COMM_LOW  0x0F
-/** @brief VGA cursor position command high. */
-#define VGA_TEXT_CURSOR_COMM_HIGH 0x0E
+/* None */
 
 /*******************************************************************************
  * STRUCTURES
  ******************************************************************************/
 
-/**
- * @brief VGA text driver instance.
- */
-extern kernel_graphic_driver_t vga_text_driver;
+/* None */
 
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
 
 /**
- * @brief Returns the memory address of the screen framebuffer depending on the
- * parameters.
- *
- * @details Return the memory address of the screen framebuffer position at the
- * coordinates given as arguments.
- *
- * @returns The address at which the driver has to write the bytes to display.
- *
- * @param[in] line The line index of the coordinates.
- * @param[in] column The column index of the coordinates.
- */
-uint16_t* vga_get_framebuffer(const uint32_t line, const uint32_t column);
-
-/**
  * @brief Initializes the VGA driver.
  * 
  * @details Initializes the VGA driver by enabling VGA related exceptions
  * and memory management.
- * 
- * @returns @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - An error is returned otherwise, refer to the error list.
  */
-OS_RETURN_E vga_init(void);
+void vga_init(void);
 
 /**
  * @brief Clears the screen by printing space character on black background.
@@ -196,5 +152,14 @@ void vga_put_char(const char character);
  * @param[in] len The length of the string to display.
  */
 void vga_console_write_keyboard(const char* str, const size_t len);
+
+/**
+ * @brief Returns the VGA graphic driver.
+ * 
+ * @details Returns a constant handle to the VGA graphic driver.
+ * 
+ * @return A constant handle to the VGA graphic driver is returned.
+ */
+const kernel_graphic_driver_t* vga_text_get_driver(void);
 
 #endif /* #ifndef __X86_VGA_TEXT_H_ */

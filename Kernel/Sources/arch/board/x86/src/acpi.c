@@ -17,14 +17,14 @@
  ******************************************************************************/
 
 #include <stdint.h>        /* Generic int types */
-#include <stddef.h>        /* Standard definitions */
 #include <string.h>        /* String manipualtion */
 #include <kernel_output.h> /* Kernel output methods */
 #include <memmgt.h>        /* Memory management */
-#include <arch_memmgt.h>   /* Memory information */
 #include <panic.h>         /* Kernel panic */
 #include <queue.h>         /* Queue library */
 #include <kheap.h>         /* Kernel heap */
+#include <kernel_error.h>  /* Kernel error codes */
+#include <arch_memmgt.h>   /* Atcihtecture memory management */
 #include <lapic.h>         /* LAPIC driver */
 
 /* UTK configuration file */
@@ -37,6 +37,264 @@
 
 /* Header file */
 #include <acpi.h>
+
+/*******************************************************************************
+ * CONSTANTS
+ ******************************************************************************/
+
+/* APIC structure types */
+/** @brief APIC type: local APIC. */
+#define APIC_TYPE_LOCAL_APIC         0x0
+/** @brief APIC type: IO APIC. */
+#define APIC_TYPE_IO_APIC            0x1
+/** @brief APIC type: interrupt override. */
+#define APIC_TYPE_INTERRUPT_OVERRIDE 0x2
+/** @brief APIC type: NMI. */
+#define APIC_TYPE_NMI                0x4
+
+/* ACPI SIGNATURE */
+/** @brief ACPI memory signature: RSDP. */
+#define ACPI_RSDP_SIG 0x2052545020445352
+/** @brief ACPI memory signature: RSDT. */
+#define ACPI_RSDT_SIG 0x54445352
+/** @brief ACPI memory signature: XSDT. */
+#define ACPI_XSDT_SIG 0x54445358
+/** @brief ACPI memory signature: FACP. */
+#define ACPI_FACP_SIG 0x50434146
+/** @brief ACPI memory signature: FACS. */
+#define ACPI_FACS_SIG 0x53434146
+/** @brief ACPI memory signature: APIC. */
+#define ACPI_APIC_SIG 0x43495041
+/** @brief ACPI memory signature: DSDT. */
+#define ACPI_DSDT_SIG 0x54445344
+
+/** @brief Maximal number od IO-APICs supported by the kernel. */
+#define MAX_IO_APIC_COUNT 1
+
+/*******************************************************************************
+ * STRUCTURES
+ ******************************************************************************/
+
+/** @brief ACPI structure header.
+ * Please check the ACPI standard for more information.
+ */
+typedef struct acpi_header
+{
+    char        signature[4];
+    uint32_t    length;
+    uint8_t     revision;
+    uint8_t     checksum;
+
+    char        oem[6];
+    char        oem_table_id[8];
+    uint32_t    oem_revision;
+
+    uint32_t    creator_id;
+    uint32_t    creator_revision;
+} __attribute__((__packed__)) acpi_header_t;
+
+/** @brief ACPI RSDP descriptor.
+ * Please check the ACPI standard for more information.
+ */
+typedef struct rsdp_descriptor
+{
+    char            signature[8];
+    uint8_t         checksum;
+    char            oemid[6];
+    uint8_t         revision;
+    uint32_t        rsdt_address;
+} __attribute__ ((packed)) rsdp_descriptor_t;
+
+/** @brief ACPI extended RSDP descriptor.
+ * Please check the ACPI standard for more information.
+ */
+typedef struct rsdp_descriptor_2
+{
+    rsdp_descriptor_t first_part;
+
+    uint32_t length;
+    uint64_t xsdt_address;
+    uint8_t  extended_checksum;
+    uint8_t  reserved[3];
+} __attribute__ ((packed)) rsdp_descriptor_2_t;
+
+/** @brief ACPI RSDT descriptor.
+ * Please check the ACPI standard for more information.
+ */
+typedef struct rsdt_descriptor
+{
+    acpi_header_t header;
+    uint32_t      *dt_pointers;
+} __attribute__ ((packed)) rsdt_descriptor_t;
+
+/** @brief ACPI XSDT descriptor.
+ * Please check the ACPI standard for more information.
+ */
+typedef struct xsdt_descriptor
+{
+    acpi_header_t header;
+    uint64_t      *dt_pointers;
+} __attribute__ ((packed)) xsdt_descriptor_t;
+
+/** @brief ACPI address descriptor.
+ * Please check the ACPI standard for more information.
+ */
+typedef struct generic_address
+{
+    uint8_t   address_space;
+
+    uint8_t   bit_width;
+    uint8_t   bit_offset;
+
+    uint8_t   access_size;
+
+    uint64_t  address;
+} __attribute__((__packed__)) generic_address_t;
+
+/** @brief ACPI FADT descriptor.
+ * Please check the ACPI standard for more information.
+ */
+typedef struct acpi_fadt
+{
+    acpi_header_t      header;
+
+    uint32_t            firmware_control;
+    uint32_t            dsdt;
+
+    uint8_t             reserved0;
+
+    uint8_t             preferred_pm_profile;
+    uint16_t            sci_interrupt;
+    uint32_t            smi_command_port;
+
+    uint8_t             acpi_enable;
+    uint8_t             acpi_disable;
+
+    uint8_t             S4BIOS_req;
+    uint8_t             PSTATE_control;
+
+    uint32_t            PM1_a_event_block;
+    uint32_t            PM1_b_event_block;
+
+    uint32_t            PM1_a_control_block;
+    uint32_t            PM1_b_control_block;
+
+    uint32_t            PM2_control_block;
+
+    uint32_t            PM_timer_block;
+
+    uint32_t            GPE0_block;
+    uint32_t            GPE1_block;
+
+    uint8_t             PM1_event_length;
+
+    uint8_t             PM1_control_length;
+    uint8_t             PM2_control_length;
+
+    uint8_t             PM_timer_length;
+
+    uint8_t             GPE0_length;
+    uint8_t             GPE1_length;
+
+    uint8_t             GPE1_base;
+
+    uint8_t             C_state_control;
+
+    uint16_t            worst_C2_latency;
+    uint16_t            worst_C3_latency;
+
+    uint16_t            flush_size;
+    uint16_t            flush_stride;
+
+    uint8_t             duty_offset;
+    uint8_t             duty_width;
+
+    uint8_t             day_alarm;
+    uint8_t             month_alarm;
+
+    uint8_t             century;
+
+    uint16_t            boot_architecture_flags;
+
+    uint8_t             reserved1;
+
+    uint32_t            flags;
+
+    generic_address_t   reset_reg;
+
+    uint8_t             reset_value;
+
+    uint8_t             reserved2[3];
+
+    uint64_t            X_firmware_control;
+    uint64_t            X_dsdt;
+
+    generic_address_t   X_PM1_a_event_block;
+    generic_address_t   X_PM1_b_event_block;
+
+    generic_address_t   X_PM1_a_control_block;
+    generic_address_t   X_PM1_b_control_block;
+
+    generic_address_t   X_PM2_control_block;
+
+    generic_address_t   X_PM_timer_block;
+
+    generic_address_t   X_GPE0_block;
+    generic_address_t   X_GPE1_block;
+
+} __attribute__((__packed__)) acpi_fadt_t;
+
+/** @brief ACPI FACS descriptor.
+ * Please check the ACPI standard for more information.
+ */
+typedef struct acpi_facs
+{
+    acpi_header_t      header;
+
+}  __attribute__((__packed__)) acpi_facs_t;
+
+/** @brief ACPI DSDT descriptor.
+ * Please check the ACPI standard for more information.
+ */
+typedef struct acpi_dsdt
+{
+    acpi_header_t      header;
+
+}  __attribute__((__packed__)) acpi_dsdt_t;
+
+/** @brief ACPI MADT descriptor.
+ * Please check the ACPI standard for more information.
+ */
+typedef struct acpi_madt
+{
+    acpi_header_t   header;
+
+    uint32_t            local_apic_addr;
+    uint32_t            flags;
+} __attribute__((__packed__)) acpi_madt_t;
+
+/** @brief ACPI Interrupt override descriptor.
+ * Please check the ACPI standard for more information.
+ */
+typedef struct apic_interrupt_override
+{
+    apic_header_t   header;
+
+    uint8_t         bus;
+    uint8_t         source;
+    uint32_t        interrupt;
+    uint16_t        flags;
+} __attribute__((__packed__)) apic_interrupt_override_t;
+
+/** @brief ACPI NMI descriptor.
+ * Please check the ACPI standard for more information.
+ */
+typedef struct local_apic_nmi
+{
+    uint8_t         processors;
+    uint16_t        flags;
+    uint8_t         lint_id;
+} __attribute__((__packed__)) local_apic_nmi_t;
 
 /** @brief ACPI mapping tree node. */
 struct acpi_page_tree
@@ -77,13 +335,13 @@ static acpi_madt_t* madt;
 static acpi_dsdt_t* dsdt;
 
 /** @brief Stores the ACPI initialization state. */
-static uint8_t acpi_initialized = 0;
+static bool_t acpi_initialized = FALSE;
 
 /** @brief The ACPI mapping tree. */
 static acpi_page_tree_t* acpi_mapping;
 
 /*******************************************************************************
- * FUNCTIONS
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
 /**
@@ -95,18 +353,150 @@ static acpi_page_tree_t* acpi_mapping;
  * @param[in] addr The address of the mapped page to search.
  * @param[in] node The starting point node to walk the tree.
  * 
- * @return The function return 0 if the page was not found, otherwise 1 is 
- * returned.
+ * @return The function return FALSE if the page was not found, otherwise TRUE 
+ * is returned.
  */
-static uint8_t walk_acpi_tree(acpi_page_tree_t* node, const uintptr_t addr)
+static bool_t walk_acpi_tree(acpi_page_tree_t* node, const uintptr_t addr);
+
+/**
+ * @brief Search a page in the ACPI mapped tree.
+ * 
+ * @details Search a page in the ACPI mapped tree. The function return 0 if the
+ * page was not found, otherwise 1 is returned.
+ * 
+ * @param[in] addr The address of the mapped page to search.
+ * 
+ * @return The function return FALSE if the page was not found, otherwise TRUE
+ * is returned.
+ */
+static bool_t is_page_mapped(const uintptr_t addr);
+
+/**
+ * @brief Adds a mapped page node to the ACPI page tree.
+ * 
+ * @details Adds a mapped page node to the ACPI page tree.
+ * 
+ * @param[in] node The starting point node to walk the tree.
+ * @param[in] addr The address of the mapped page to add.
+ */
+static void add_acpi_tree(acpi_page_tree_t* node, const uintptr_t addr);
+
+/**
+ * @brief Adds a mapped page to the ACPI page tree.
+ * 
+ * @details Adds a mapped page to the ACPI page tree.
+ * 
+ * @param[in] addr The address of the mapped page to add.
+ */
+static void add_mapped_page(uintptr_t addr);
+
+/**
+ * @brief Adds a mapped page to the ACPI page tree.
+ * 
+ * @details Adds a mapped page to the ACPI page tree.
+ * 
+ * @param[in] addr The address of the mapped page to add.
+ */
+static void add_mapped_page(uintptr_t addr);
+
+/**
+ * @brief Map ACPI memory.
+ *
+ * @details Map ACPI memory.
+ *
+ * @param[in] start_addr The address of the MADT entry to parse.
+ * @param[in] size The size to map.
+ *
+ */
+static void acpi_map_data(const void* start_addr, size_t size);
+
+/**
+ * @brief Parses the APIC entries of the MADT table.
+ *
+ * @details Parse the APIC entries of the MADT table.The function will parse
+ * each entry and detect two of the possible entry kind: the LAPIC entries,
+ * which also determine the cpu count and the IO-APIC entries will detect the
+ * different available IO-APIC of the system.
+ *
+ * @param[in] madt_ptr The address of the MADT entry to parse.
+ */
+static void acpi_parse_apic(acpi_madt_t* madt_ptr);
+
+/**
+ * @brief Parse the APIC DSDT table.
+ * 
+ * @details The function will save the DSDT table address in for further use.
+ *
+ * @param dsdt_ptr[in] The address of the DSDT entry to parse.
+ */
+static void acpi_parse_dsdt(acpi_dsdt_t* dsdt_ptr);
+
+/**
+ * @brief Parse the APIC FADT table.
+ * 
+ * @details Parse the APIC FADT table. The function will save the FADT table 
+ * address in for further use. Then the FACS and DSDT addresses are extracted 
+ * and both tables are parsed.
+ *
+ * @param[in] fadt_ptr The address of the FADT entry to parse.
+ */
+static void acpi_parse_fadt(acpi_fadt_t* fadt_ptr);
+
+/**
+ * @brief Parse the APIC SDT table.
+ * 
+ * @details Parse the APIC SDT table. The function will detect the SDT given as 
+ * parameter thanks to the information contained in the header. Then, if the 
+ * entry is correctly detected and supported, the parsing function corresponding 
+ * will be called.
+ *
+ * @param[in] header The address of the SDT entry to parse..
+ */
+static void acpi_parse_dt(acpi_header_t* header);
+
+/**
+ * @brief Parse the APIC RSDT table.
+ * 
+ * @details Parse the APIC RSDT table. The function will detect the read each 
+ * entries of the RSDT and call the corresponding functions to parse the entries 
+ * correctly.
+ *
+ * @param[in] rsdt_ptr The address of the RSDT entry to parse.
+ */
+static void acpi_parse_rsdt(rsdt_descriptor_t* rsdt_ptr);
+
+/**
+ * @brief Parse the APIC XSDT table.
+ * @details The function will detect the read each entries of the XSDT and call 
+ * the corresponding functions to parse the entries correctly.
+ *
+ * @param xsdt_ptr[in] The address of the XSDT entry to parse.
+ */
+static void acpi_parse_xsdt(xsdt_descriptor_t* xsdt_ptr);
+
+/**
+ * @brief Use the APIC RSDP to parse the ACPI infomation.
+ * 
+ * @details Use the APIC RSDP to parse the ACPI infomation. The function will 
+ * detect the RSDT or XSDT pointed and parse them.
+ *
+ * @param[in] rsdp_desc The RSDP to walk.
+ */
+static void acpi_parse_rsdp(rsdp_descriptor_t* rsdp_desc);
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
+
+static bool_t walk_acpi_tree(acpi_page_tree_t* node, const uintptr_t addr)
 {
     if(node == NULL)
     {
-        return 0;
+        return FALSE;
     }
     else if(node->address == addr)
     {
-        return 1;
+        return TRUE;
     }
     else if(addr > node->address)
     {
@@ -118,30 +508,11 @@ static uint8_t walk_acpi_tree(acpi_page_tree_t* node, const uintptr_t addr)
     }
 }
 
-/**
- * @brief Search a page in the ACPI mapped tree.
- * 
- * @details Search a page in the ACPI mapped tree. The function return 0 if the
- * page was not found, otherwise 1 is returned.
- * 
- * @param[in] addr The address of the mapped page to search.
- * 
- * @return The function return 0 if the page was not found, otherwise 1 is 
- * returned.
- */
-static uint8_t is_page_mapped(const uintptr_t addr)
+static bool_t is_page_mapped(const uintptr_t addr)
 {
     return walk_acpi_tree(acpi_mapping, addr);
 }
 
-/**
- * @brief Adds a mapped page node to the ACPI page tree.
- * 
- * @details Adds a mapped page node to the ACPI page tree.
- * 
- * @param[in] node The starting point node to walk the tree.
- * @param[in] addr The address of the mapped page to add.
- */
 static void add_acpi_tree(acpi_page_tree_t* node, const uintptr_t addr)
 {
     if(node == NULL)
@@ -196,13 +567,6 @@ static void add_acpi_tree(acpi_page_tree_t* node, const uintptr_t addr)
     }
 }
 
-/**
- * @brief Adds a mapped page to the ACPI page tree.
- * 
- * @details Adds a mapped page to the ACPI page tree.
- * 
- * @param[in] addr The address of the mapped page to add.
- */
 static void add_mapped_page(uintptr_t addr)
 {
     if(acpi_mapping == NULL)
@@ -223,15 +587,6 @@ static void add_mapped_page(uintptr_t addr)
     }
 }
 
-/**
- * @brief Map ACPI memory.
- *
- * @details Map ACPI memory.
- *
- * @param[in] start_addr The address of the MADT entry to parse.
- * @param[in] size The size to map.
- *
- */
 static void acpi_map_data(const void* start_addr, size_t size)
 {
     uintptr_t   addr_align;
@@ -266,7 +621,8 @@ static void acpi_map_data(const void* start_addr, size_t size)
                                 1, 
                                 0,
                                 0,
-                                1);
+                                1,
+                                NULL);
             
             add_mapped_page(addr_align);
         }
@@ -284,17 +640,6 @@ static void acpi_map_data(const void* start_addr, size_t size)
     }
 }
 
-
-/**
- * @brief Parses the APIC entries of the MADT table.
- *
- * @details Parse the APIC entries of the MADT table.The function will parse
- * each entry and detect two of the possible entry kind: the LAPIC entries,
- * which also determine the cpu count and the IO-APIC entries will detect the
- * different available IO-APIC of the system.
- *
- * @param[in] madt_ptr The address of the MADT entry to parse.
- */
 static void acpi_parse_apic(acpi_madt_t* madt_ptr)
 {
     uint8_t        type;
@@ -429,7 +774,7 @@ static void acpi_parse_apic(acpi_madt_t* madt_ptr)
         else
         {
             KERNEL_ERROR("MADT Signature comparison failed\n");
-            KERNEL_PANIC(OS_ERR_CHECKSUM_FAILED);
+            KERNEL_PANIC(OS_ERR_WRONG_SIGNATURE);
         }
     }
     else
@@ -439,13 +784,6 @@ static void acpi_parse_apic(acpi_madt_t* madt_ptr)
     }
 }
 
-/**
- * @brief Parse the APIC DSDT table.
- * 
- * @details The function will save the DSDT table address in for further use.
- *
- * @param dsdt_ptr[in] The address of the DSDT entry to parse.
- */
 static void acpi_parse_dsdt(acpi_dsdt_t* dsdt_ptr)
 {
     int32_t  sum;
@@ -479,19 +817,10 @@ static void acpi_parse_dsdt(acpi_dsdt_t* dsdt_ptr)
     if(*((uint32_t*)dsdt_ptr->header.signature) != ACPI_DSDT_SIG)
     {
         KERNEL_ERROR("DSDT Signature comparison failed\n");
-        KERNEL_PANIC(OS_ERR_CHECKSUM_FAILED);
+        KERNEL_PANIC(OS_ERR_WRONG_SIGNATURE);
     }
 }
 
-/**
- * @brief Parse the APIC FADT table.
- * 
- * @details Parse the APIC FADT table. The function will save the FADT table 
- * address in for further use. Then the FACS and DSDT addresses are extracted 
- * and both tables are parsed.
- *
- * @param[in] fadt_ptr The address of the FADT entry to parse.
- */
 static void acpi_parse_fadt(acpi_fadt_t* fadt_ptr)
 {
     int32_t  sum;
@@ -524,7 +853,7 @@ static void acpi_parse_fadt(acpi_fadt_t* fadt_ptr)
         else
         {
             KERNEL_ERROR("FADT Signature comparison failed\n");
-            KERNEL_PANIC(OS_ERR_CHECKSUM_FAILED);
+            KERNEL_PANIC(OS_ERR_WRONG_SIGNATURE);
         }
     }
     else 
@@ -534,16 +863,6 @@ static void acpi_parse_fadt(acpi_fadt_t* fadt_ptr)
     }
 }
 
-/**
- * @brief Parse the APIC SDT table.
- * 
- * @details Parse the APIC SDT table. The function will detect the SDT given as 
- * parameter thanks to the information contained in the header. Then, if the 
- * entry is correctly detected and supported, the parsing function corresponding 
- * will be called.
- *
- * @param[in] header The address of the SDT entry to parse..
- */
 static void acpi_parse_dt(acpi_header_t* header)
 {
     char sig_str[5];
@@ -578,15 +897,6 @@ static void acpi_parse_dt(acpi_header_t* header)
     }
 }
 
-/**
- * @brief Parse the APIC RSDT table.
- * 
- * @details Parse the APIC RSDT table. The function will detect the read each 
- * entries of the RSDT and call the corresponding functions to parse the entries 
- * correctly.
- *
- * @param[in] rsdt_ptr The address of the RSDT entry to parse.
- */
 static void acpi_parse_rsdt(rsdt_descriptor_t* rsdt_ptr)
 {
     uintptr_t      range_begin;
@@ -632,7 +942,7 @@ static void acpi_parse_rsdt(rsdt_descriptor_t* rsdt_ptr)
         else 
         {
             KERNEL_ERROR("RSDT Signature comparison failed\n");
-            KERNEL_PANIC(OS_ERR_CHECKSUM_FAILED);
+            KERNEL_PANIC(OS_ERR_WRONG_SIGNATURE);
         }
     }
     else
@@ -642,13 +952,6 @@ static void acpi_parse_rsdt(rsdt_descriptor_t* rsdt_ptr)
     }
 }
 
-/**
- * @brief Parse the APIC XSDT table.
- * @details The function will detect the read each entries of the XSDT and call 
- * the corresponding functions to parse the entries correctly.
- *
- * @param xsdt_ptr[in] The address of the XSDT entry to parse.
- */
 static void acpi_parse_xsdt(xsdt_descriptor_t* xsdt_ptr)
 {
     uintptr_t      range_begin;
@@ -694,7 +997,7 @@ static void acpi_parse_xsdt(xsdt_descriptor_t* xsdt_ptr)
         else 
         {
             KERNEL_ERROR("XSDT Signature comparison failed\n");
-            KERNEL_PANIC(OS_ERR_CHECKSUM_FAILED);
+            KERNEL_PANIC(OS_ERR_WRONG_SIGNATURE);
         }
     }
     else
@@ -704,14 +1007,6 @@ static void acpi_parse_xsdt(xsdt_descriptor_t* xsdt_ptr)
     }
 }
 
-/**
- * @brief Use the APIC RSDP to parse the ACPI infomation.
- * 
- * @details Use the APIC RSDP to parse the ACPI infomation. The function will 
- * detect the RSDT or XSDT pointed and parse them.
- *
- * @param[in] rsdp_desc The RSDP to walk.
- */
 static void acpi_parse_rsdp(rsdp_descriptor_t* rsdp_desc)
 {
     uint8_t              sum;
@@ -780,7 +1075,7 @@ static void acpi_parse_rsdp(rsdp_descriptor_t* rsdp_desc)
         else
         {
             KERNEL_ERROR("Unsupported ACPI version %d\n", rsdp_desc->revision);
-            KERNEL_PANIC(OS_ERR_ACPI_UNSUPPORTED);
+            KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
         }
     }
     else
@@ -790,7 +1085,7 @@ static void acpi_parse_rsdp(rsdp_descriptor_t* rsdp_desc)
     }
 }
 
-OS_RETURN_E acpi_init(void)
+void acpi_init(void)
 {
     uint8_t*    range_begin;
     uint8_t*    range_end;
@@ -808,12 +1103,14 @@ OS_RETURN_E acpi_init(void)
     cpu_lapics = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree), &err);
     if(err != OS_NO_ERR)
     {
-        return err;
+        KERNEL_ERROR("Could not create LAPIC queue\n");
+        KERNEL_PANIC(err);
     }
     io_apics = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree), &err);
     if(err != OS_NO_ERR)
     {
-        return err;
+        KERNEL_ERROR("Could not create IO-APIC queue\n");
+        KERNEL_PANIC(err);
     }
 
     cpu_count     = 0;
@@ -850,14 +1147,12 @@ OS_RETURN_E acpi_init(void)
     acpi_test();
 #endif
 
-    acpi_initialized = 1;
-    
-    return err;
+    acpi_initialized = TRUE;
 }
 
 int32_t acpi_get_io_apic_count(void)
 {
-    if(acpi_initialized != 1)
+    if(acpi_initialized != TRUE)
     {
         return -1;
     }
@@ -867,7 +1162,7 @@ int32_t acpi_get_io_apic_count(void)
 
 int32_t acpi_get_lapic_count(void)
 {
-    if(acpi_initialized != 1)
+    if(acpi_initialized != TRUE)
     {
         return -1;
     }
@@ -881,7 +1176,7 @@ int32_t acpi_get_remaped_irq(const uint32_t irq_number)
     uint8_t* limit;
     apic_interrupt_override_t* int_override;
 
-    if(acpi_initialized != 1)
+    if(acpi_initialized != TRUE)
     {
         return -1;
     }
@@ -927,7 +1222,7 @@ const void* acpi_get_io_apic_address(const uint32_t io_apic_id)
     io_apic_t*    io_apic;
     queue_node_t* node;
 
-    if(acpi_initialized != 1 || madt == NULL || io_apic_id >= io_apic_count)
+    if(acpi_initialized != TRUE || madt == NULL || io_apic_id >= io_apic_count)
     {
         return NULL;
     }
@@ -948,7 +1243,7 @@ const void* acpi_get_io_apic_address(const uint32_t io_apic_id)
 
 void* acpi_get_lapic_addr(void)
 {
-    if(acpi_initialized != 1 || madt == NULL)
+    if(acpi_initialized != TRUE || madt == NULL)
     {
         return NULL;
     }
@@ -962,11 +1257,11 @@ OS_RETURN_E acpi_check_lapic_id(const uint32_t lapic_id)
     queue_node_t* node;
     OS_RETURN_E   err;
 
-    err = OS_ERR_NO_SUCH_LAPIC_ID;
+    err = OS_ERR_NO_SUCH_ID;
 
-    if(acpi_initialized != 1)
+    if(acpi_initialized != TRUE)
     {
-        return OS_ACPI_NOT_INITIALIZED;
+        return OS_ERR_NOT_INITIALIZED;
     }
 
     node = cpu_lapics->head;
@@ -991,7 +1286,7 @@ const queue_t* acpi_get_io_apics(void)
 
 int32_t get_cpu_count(void)
 {
-    if(cpu_count == 0 || acpi_initialized == 0)
+    if(cpu_count == 0 || acpi_initialized == FALSE)
     {
         return 1;
     }
@@ -1006,7 +1301,7 @@ int32_t cpu_get_id(void)
     local_apic_t* lapic;
 
     /* If lapic is not activated but we only use one CPU */
-    if(cpu_count == 0 || acpi_initialized == 0)
+    if(cpu_count == 0 || acpi_initialized == FALSE)
     {
         return 0;
     }    

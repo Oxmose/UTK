@@ -22,9 +22,9 @@
 #ifndef __CPU_MEMMGT_H_
 #define __CPU_MEMMGT_H_
 
-#include <stddef.h>         /* Standard definitions */
-#include <stdint.h>         /* Generic int types */
-#include <ctrl_block.h>     /* Kernel process structure */
+#include <kernel_error.h> /* Kernel error codes */
+#include <stdint.h>       /* Generic int types */
+#include <ctrl_block.h>   /* Kernel process structure */
 
 /*******************************************************************************
  * CONSTANTS
@@ -36,59 +36,7 @@
  * STRUCTURES
  ******************************************************************************/
 
-/**
- * @brief Page fault handler structure. Gathers the pafe fault addresses
- * associated with a corresponding handler.
- */
-struct mem_handler
-{
-    /** @brief Start address of the range that is covered by the handler. */
-    uintptr_t start;
-
-    /** @brief End address of the range that is covered by the handler. */
-    uintptr_t end;
-
-    /** @brief Pointer to the handler function. */
-    void (*handler)(uintptr_t fault_address);
-};
-
-/** @brief Shortcut for the struct mem_handler type. */
-typedef struct mem_handler mem_handler_t;
-
-/** @brief Defines a memory range with its type as defined by the multiboot 
- * standard.
- */
-struct mem_range
-{
-    /** @brief Range's base address. */
-    uintptr_t base;
-
-    /** @brief Range's limit. */
-    uintptr_t limit;
-
-    /** @brief Range's memory type. */
-    uint32_t type;
-};
-
-/** 
- * @brief Defines mem_range_t type as a shorcut for struct mem_range.
- */
-typedef struct mem_range mem_range_t;
-
-/** @brief Defines the memory allocation starting point (begining or end of the
- * memory space).
- */
-enum MEM_ALLOC_START
-{
-    MEM_ALLOC_BEGINING,
-    MEM_ALLOC_END
-};
-
-/** 
- * @brief Defines MEM_ALLOCATION_START_E type as a shorcut for 
- * enum MEM_ALLOCATION_START.
- */
-typedef enum MEM_ALLOC_START MEM_ALLOC_START_E;
+/* None */
 
 /*******************************************************************************
  * FUNCTIONS
@@ -99,67 +47,13 @@ typedef enum MEM_ALLOC_START MEM_ALLOC_START_E;
  * 
  * @brief Initializes the kernel's memory manager while detecting the system's
  * memory organization.
- * 
- * @return The success state or the error code. 
- * - OS_NO_ERR is returned if no error is encountered. 
- * - No other return value is possible.
  */
-OS_RETURN_E memory_manager_init(void);
+void memory_manager_init(void);
 
 /**
- * @brief Kernel memory frame allocation.
+ * @brief Returns a newly created free page table.
  * 
- * @details Kernel memory frame allocation. This method gets the desired number
- * of contiguous frames from the kernel frame pool and allocate them.
- * 
- * @param[in] frame_count The number of desired frames to allocate.
- * 
- * @return The address of the first frame of the contiguous block is 
- * returned.
- */
-void* memory_alloc_frames(const size_t frame_count);
-
-/**
- * @brief Kernel memory frame release.
- * 
- * @details Kernel memory frame release. This method releases the desired number
- * of contiguous frames to the kernel frame pool.
- * 
- * @param[in] frame_addr The address of the first frame to release.
- * @param[in] frame_count The number of desired frames to release.
- */
-void memory_free_frames(void* frame_addr, const size_t frame_count);
-
-/**
- * @brief Kernel memory page allocation.
- * 
- * @details Kernel memory page allocation. This method gets the desired number
- * of contiguous pages from the current process page pool and allocate them.
- * 
- * @param[in] page_count The number of desired pages to allocate.
- * @param[in] start_pt The starting point to allocated memory in the space.
- * 
- * @return The address of the first page of the contiguous block is 
- * returned.
- */
-void* memory_alloc_pages(const size_t page_count, 
-                         const MEM_ALLOC_START_E start_pt);
-
-/**
- * @brief Kernel memory page release.
- * 
- * @details Kernel memory page release. This method releases the desired number
- * of contiguous pages to the current process page pool.
- * 
- * @param[in] page_addr The address of the first page to release.
- * @param[in] page_count The number of desired pages to release.
- */
-void memory_free_pages(void* page_addr, const size_t page_count);
-
-/**
- * @brief Returns a newly create free page table.
- * 
- * @details Returns a newly create free page table.
+ * @details Returns a newly created free page table.
  * 
  * @param[out] err The error buffer to store the operation's result.
  * 
@@ -175,11 +69,15 @@ queue_t* memory_create_free_page_table(OS_RETURN_E* err);
  * 
  * @param[in] stack_size The size of the stack to allocate. Must be a multiple 
  * of the system's page size.
+ * @param[in] is_kernel Tells if the stack is a kernel stack or not.
+ * @param[out] err The error buffer to store the operation's result.
  * 
  * @return The address of the stack (low address) is returned on success. 
  * Otherwise NULL is returned.
  */
-uintptr_t memory_alloc_stack(const size_t stack_size);
+void* memory_alloc_stack(const size_t stack_size, 
+                         const bool_t is_kernel,
+                         OS_RETURN_E* err);
 
 /**
  * @brief Release the memory used by a stack.
@@ -188,55 +86,10 @@ uintptr_t memory_alloc_stack(const size_t stack_size);
  * 
  * @param[in] virt_addr The address of the stack to free.
  * @param[in] stack_size The size of the stack.
- */
-void memory_free_stack(uintptr_t virt_addr, const size_t stack_size);
-
-/**
- * @brief Allocate a new kernel stack in the free memory.
  * 
- * @details Allocate a new stack in the free memory. The address returned is the
- * begining of the stack (low address). The stack is also mapped in the memory.
- * 
- * @param[in] kstack_size The kernel stack size.
- * 
- * @return The address of the stack (low address) is returned on success. 
- * Otherwise NULL is returned.
+ * @return Returns the success or error state.
  */
-uintptr_t memory_alloc_kstack(const size_t kstack_size);
-
-/**
- * @brief Release the memory used by a kernel stack.
- * 
- * @details Release the memory used by a kernel stack. 
- * 
- * @param[in] kstack The kernel stack virtual address.
- * @param[in] kstack_size The kernel stack size.
- */
-void memory_free_kstack(const uintptr_t kstack, const size_t kstack_size);
-
-/**
- * @brief Enables paging.
- *
- * @details Enables paging. The CR0 register is modified to enable paging.
- *
- * @warning CR3 register must be set before calling this function.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - OS_ERR_PAGING_NOT_INIT is returned if paging has not been initialized.
- */
-OS_RETURN_E memory_paging_enable(void);
-
-/**
- * @brief Disables paging.
- *
- * @details Disables paging. The CR0 register is modified to disable paging.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - OS_ERR_PAGING_NOT_INIT is returned if paging has not been initialized.
- */
-OS_RETURN_E memory_paging_disable(void);
+OS_RETURN_E memory_free_stack(void* virt_addr, const size_t stack_size);
 
 /**
  * @brief Maps a virtual memory region to a memory frame.
@@ -249,11 +102,14 @@ OS_RETURN_E memory_paging_disable(void);
  * @param[in] mapping_size The size of the region to map.
  * @param[in] read_only Sets the read only flag.
  * @param[in] exec Sets the executable flag.
+ * @param[out] err The error buffer to store the operation's result. If NULL, 
+ * the function will raise a kernel panic in case of error.
  */
 void memory_mmap(const void* virt_addr, 
                   const size_t mapping_size,
-                  const uint8_t read_only,
-                  const uint8_t exec);
+                  const bool_t read_only,
+                  const bool_t exec,
+                  OS_RETURN_E* err);
 
 /**
  * @brief Maps a virtual memory region to a memory regions.
@@ -269,14 +125,17 @@ void memory_mmap(const void* virt_addr,
  * @param[in] exec Sets the executable flag.
  * @param[in] cache_enable Tells if cache is enabled for this page.
  * @param[in] is_hw Tells if the mapping is a memory mapped hardware.
+ * @param[out] err The error buffer to store the operation's result. If NULL, 
+ * the function will raise a kernel panic in case of error.
  */
 void memory_mmap_direct(const void* virt_addr,
                          const void* phys_addr,
                          const size_t mapping_size,
-                         const uint8_t read_only,
-                         const uint8_t exec,
-                         const uint8_t cache_enable,
-                         const uint8_t is_hw);
+                         const bool_t read_only,
+                         const bool_t exec,
+                         const bool_t cache_enable,
+                         const bool_t is_hw,
+                         OS_RETURN_E* err);
 
 /**
  * @brief Un-maps a kernel virtual memory region from a corresponding physical
@@ -285,10 +144,14 @@ void memory_mmap_direct(const void* virt_addr,
  * @details Un-maps a kernel virtual memory region from a corresponding physical
  * region.
  *
- * @param[in] virt_addr The virtual address to map.
+ * @param[in, out] virt_addr The virtual address to map.
  * @param[in] mapping_size The size of the region to map.
+ * @param[out] err The error buffer to store the operation's result. If NULL, 
+ * the function will raise a kernel panic in case of error.
  */
-void memory_munmap(const void* virt_addr, const size_t mapping_size);
+void memory_munmap(void* virt_addr, 
+                   const size_t mapping_size, 
+                   OS_RETURN_E* err);
 
 /** 
  * @brief Copies the current process memory image mapping.
@@ -310,7 +173,7 @@ void memory_munmap(const void* virt_addr, const size_t mapping_size);
  * returned.
  */
 OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process,
-                                     const uintptr_t kstack,
+                                     const void* kstack,
                                      const size_t kstack_size);
 
 /**
@@ -341,5 +204,42 @@ uintptr_t memory_get_phys_addr(const uintptr_t virt_addr);
  */
 OS_RETURN_E memory_declare_hw(const uintptr_t phys_addr, const size_t size);
 
+/**
+ * @brief Release the free page table memory.
+ * 
+ * @details Release the page table memory. Clear all internal structure of the 
+ * free page table queue and delete the queue.
+ * 
+ * @param[out] page_table The free page table to release.
+ */
+void memory_delete_free_page_table(queue_t* page_table);
+
+/**
+ * @brief Release all the physical memory owned by a page directory. 
+ * 
+ * @details Release all the physical memory used by a process. This function 
+ * walks the page directory and release memory frames and hardware. The page
+ *  directory itself is removed from memory.
+ * 
+ * @param[in] pd_dir The page directory to clean.
+ */
+void memory_clean_process_memory(uintptr_t pg_dir);
+
+/**
+ * @brief Releases a process memory region.
+ * 
+ * @details Releases a process memory region. The function directly modifies
+ * the process page tables and the process free page table.
+ * 
+ * @param[in] virt_addr The start address of the memory to release.
+ * @param[in] size The size of the region to release.
+ * @param[in] process The process for which we want to release the memory.
+ * 
+ * @warning This function should not be used to release memory of the current
+ * process.
+ */
+void memory_free_process_data(const void* virt_addr, 
+                              const size_t size,
+                              kernel_process_t* process);
 
 #endif /* #ifndef __CPU_MEMMGT_H_ */
