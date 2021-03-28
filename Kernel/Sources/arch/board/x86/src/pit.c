@@ -39,6 +39,32 @@
 #include <pit.h>
 
 /*******************************************************************************
+ * CONSTANTS
+ ******************************************************************************/
+
+/** @brief PIT CPU command port. */
+#define PIT_COMM_PORT     0x34
+/** @brief PIT CPU data port. */
+#define PIT_DATA_PORT     0x40
+/** @brief PIT set tick frequency divider command. */
+#define PIT_COMM_SET_FREQ 0x43
+
+/** @brief Base PIT's quartz frequency. */
+#define PIT_QUARTZ_FREQ 0x1234DD
+/** @brief Kernel's PIT base tick frequency. */
+#define PIT_INIT_FREQ   100
+/** @brief PIT minimal tick frequency. */
+#define PIT_MIN_FREQ    20
+/** @brief PIT maximal tick frequency. */
+#define PIT_MAX_FREQ    8000
+
+/*******************************************************************************
+ * STRUCTURES
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
@@ -49,7 +75,7 @@ static uint32_t disabled_nesting;
 static uint32_t tick_freq;
 
 /** @brief PIT driver instance. */
-kernel_timer_t pit_driver = {
+static kernel_timer_t pit_driver = {
     .get_frequency  = pit_get_frequency,
     .set_frequency  = pit_set_frequency,
     .enable         = pit_enable,
@@ -59,8 +85,9 @@ kernel_timer_t pit_driver = {
     .get_irq        = pit_get_irq
 };
 
+
 /*******************************************************************************
- * FUNCTIONS
+ * STATIC FUNCTIONS DEFINITIONS
  ******************************************************************************/
 
 /**
@@ -73,7 +100,16 @@ kernel_timer_t pit_driver = {
  * @param[in] int_id The interrupt line that called the handler.
  * @param[in, out] stack_state The stack state before the interrupt.
  */
-static void dummy_handler(cpu_state_t* cpu_state, uintptr_t int_id,
+static void dummy_handler(cpu_state_t* cpu_state, 
+                          uintptr_t int_id,
+                          stack_state_t* stack_state);
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
+
+static void dummy_handler(cpu_state_t* cpu_state, 
+                          uintptr_t int_id,
                           stack_state_t* stack_state)
 {
     (void)cpu_state;
@@ -84,7 +120,7 @@ static void dummy_handler(cpu_state_t* cpu_state, uintptr_t int_id,
     kernel_interrupt_set_irq_eoi(PIT_IRQ_LINE);
 }
 
-OS_RETURN_E pit_init(void)
+void pit_init(void)
 {
     OS_RETURN_E err;
 
@@ -98,7 +134,8 @@ OS_RETURN_E pit_init(void)
     err = kernel_interrupt_register_irq_handler(PIT_IRQ_LINE, dummy_handler);
     if(err != OS_NO_ERR)
     {
-        return err;
+        KERNEL_ERROR("Could not set PIT handler\n");
+        KERNEL_PANIC(err);
     }
 
     KERNEL_DEBUG(PIT_DEBUG_ENABLED, "[PIT] Initialization end");
@@ -111,8 +148,6 @@ OS_RETURN_E pit_init(void)
 
     /* Enable PIT IRQ */
     pit_enable();
-
-    return err;
 }
 
 void pit_enable(void)
@@ -164,7 +199,7 @@ void pit_set_frequency(const uint32_t freq)
     if(freq < PIT_MIN_FREQ || freq > PIT_MAX_FREQ)
     {
         KERNEL_ERROR("Set PIT timer frequency out of bound: %d\n", freq);
-        KERNEL_PANIC(OS_ERR_OUT_OF_BOUND);
+        KERNEL_PANIC(OS_ERR_INCORRECT_VALUE);
     }
 
     ENTER_CRITICAL(int_state);
@@ -252,4 +287,9 @@ OS_RETURN_E pit_remove_handler(void)
 uint32_t pit_get_irq(void)
 {
     return PIT_IRQ_LINE;
+}
+
+const kernel_timer_t* pit_get_driver(void)
+{
+    return &pit_driver;
 }

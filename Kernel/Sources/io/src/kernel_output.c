@@ -31,11 +31,105 @@
 #include <kernel_output.h>
 
 /*******************************************************************************
+ * CONSTANTS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * STRUCTURES
+ ******************************************************************************/
+
+/** @brief Output descriptor, used to define the handlers that manage outputs */
+struct output
+{
+	/** @brief The handler used to print character. */
+	void (*putc)(const char);  
+	/** @brief The handler used to print string. */
+	void (*puts)(const char*); 
+};
+
+/** 
+ * @brief Defines output_t type as a shorcut for struct output.
+ */
+typedef struct output output_t;
+
+/*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
 /** @brief Stores the current output type. */
 static output_t current_output;
+
+/*******************************************************************************
+ * STATIC FUNCTIONS DECLARATION
+ ******************************************************************************/
+
+/**
+ * @brief Converts a string to upper case characters.
+ * 
+ * @details Transforms all lowercase character of a NULL terminated string to 
+ * uppercase characters.
+ * 
+ * @param[in,out] string The string to tranform.
+ */
+static void toupper(char* string);
+
+/**
+ * @brief Converts a string to upper case characters.
+ * 
+ * @details Transforms all uppercase character of a NULL terminated string to 
+ * lowercase characters.
+ * 
+ * @param[in,out] string The string to tranform.
+ */
+static void tolower(char* string);
+
+/**
+ * @brief Prints a formated string.
+ * 
+ * @details Prints a formated string to the output and managing the formated 
+ * string arguments.
+ * 
+ * @param[in] str The formated string to output.
+ * @param[in] args The arguments to use with the formated string.
+ * @param[in] used_output The output to use.
+ */
+static void formater(const char* str, 
+                     __builtin_va_list args, 
+                     output_t used_output);
+
+/**
+ * @brief Prints a formated string.
+ * 
+ * @details Prints a formated string to the output and managing the formated 
+ * string arguments.
+ * 
+ * @param[in] str The formated string to output.
+ * @param[in] args The arguments to use with the formated string.
+ */
+static void kprint_fmt(const char* str, __builtin_va_list args);
+
+/**
+ * @brief Prints a formated string to UART output.
+ * 
+ * @details Prints a formated string to the UART output and managing the 
+ * formated string arguments.
+ * 
+ * @param[in] str The formated string to output.
+ * @param[in] args The arguments to use with the formated string.
+ */
+static void kprint_fmt_uart(const char* str, __builtin_va_list args);
+
+/**
+ * @brief Prints the tag for kernel output functions.
+ * 
+ * @details Prints the tag for kernel output functions.
+ * 
+ * @param[in] fmt The formated string to print.
+ * @param[in] ... The associated arguments to the formated string.
+ */
+static void tag_printf(const char* fmt, ...);
 
 /*******************************************************************************
  * FUNCTIONS
@@ -50,50 +144,6 @@ static output_t current_output;
         used_output.putc(pad_char_mod); \
         --padding_mod;                  \
     }                                   \
-}
-
-/**
- * @brief Converts a string to upper case characters.
- * 
- * @details Transforms all lowercase character of a NULL terminated string to 
- * uppercase characters.
- * 
- * @param[in,out] string The string to tranform.
- */
-static void toupper(char* string)
-{
-    /* For each character of the string */
-    while(*string != 0)
-    {
-        /* If the character is lowercase, makes it uppercase */
-        if(*string > 96 && *string < 123)
-        {
-            *string = *string - 32;
-        }
-        ++string;
-    }
-}
-
-/**
- * @brief Converts a string to upper case characters.
- * 
- * @details Transforms all uppercase character of a NULL terminated string to 
- * lowercase characters.
- * 
- * @param[in,out] string The string to tranform.
- */
-static void tolower(char* string)
-{
-    /* For each character of the string */
-    while(*string != 0)
-    {
-        /* If the character is uppercase, makes it lowercase */
-        if(*string > 64 && *string < 91)
-        {
-            *string = *string + 32;
-        }
-        ++string;
-    }
 }
 
 #define GET_SEQ_VAL(val, args, length_mod)                     \
@@ -125,18 +175,36 @@ static void tolower(char* string)
                                                                \
 }
 
+static void toupper(char* string)
+{
+    /* For each character of the string */
+    while(*string != 0)
+    {
+        /* If the character is lowercase, makes it uppercase */
+        if(*string > 96 && *string < 123)
+        {
+            *string = *string - 32;
+        }
+        ++string;
+    }
+}
 
-/**
- * @brief Prints a formated string.
- * 
- * @details Prints a formated string to the output and managing the formated 
- * string arguments.
- * 
- * @param[in] str The formated string to output.
- * @param[in] args The arguments to use with the formated string.
- * @param[in] used_output The output to use.
- */
-static void formater(const char* str, __builtin_va_list args, 
+static void tolower(char* string)
+{
+    /* For each character of the string */
+    while(*string != 0)
+    {
+        /* If the character is uppercase, makes it lowercase */
+        if(*string > 64 && *string < 91)
+        {
+            *string = *string + 32;
+        }
+        ++string;
+    }
+}
+
+static void formater(const char* str, 
+                     __builtin_va_list args, 
                      output_t used_output)
 {
     size_t   pos;
@@ -314,29 +382,11 @@ static void formater(const char* str, __builtin_va_list args,
     }
 }
 
-/**
- * @brief Prints a formated string.
- * 
- * @details Prints a formated string to the output and managing the formated 
- * string arguments.
- * 
- * @param[in] str The formated string to output.
- * @param[in] args The arguments to use with the formated string.
- */
 static void kprint_fmt(const char* str, __builtin_va_list args)
 {
     formater(str, args, current_output);
 }
 
-/**
- * @brief Prints a formated string to UART output.
- * 
- * @details Prints a formated string to the UART output and managing the 
- * formated string arguments.
- * 
- * @param[in] str The formated string to output.
- * @param[in] args The arguments to use with the formated string.
- */
 static void kprint_fmt_uart(const char* str, __builtin_va_list args)
 {
     output_t ser_out = {
@@ -347,14 +397,6 @@ static void kprint_fmt_uart(const char* str, __builtin_va_list args)
     formater(str, args, ser_out);
 }
 
-/**
- * @brief Prints the tag for kernel output functions.
- * 
- * @details Prints the tag for kernel output functions.
- * 
- * @param[in] fmt The formated string to print.
- * @param[in] ... The associated arguments to the formated string.
- */
 static void tag_printf(const char* fmt, ...)
 {
     __builtin_va_list args;

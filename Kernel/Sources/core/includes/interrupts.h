@@ -21,9 +21,10 @@
 #ifndef __CORE_INTERRUPTS_H_
 #define __CORE_INTERRUPTS_H_
 
-#include <stdint.h>      /* Generic int types */
-#include <stddef.h>      /* Standard definitions */
-#include <cpu_structs.h> /* CPU specific structures */
+#include <stdint.h>       /* Generic int types */
+#include <stddef.h>       /* Standard definitions */
+#include <cpu_settings.h> /* CPU structures and settings */
+#include <kernel_error.h> /* Kernel error codes */
 
 /*******************************************************************************
  * CONSTANTS
@@ -77,11 +78,11 @@ struct interrupt_driver
      * used as parameter.
      * 
      * @param[in] irq_number The number of the IRQ to enable/disable.
-     * @param[in] enabled Must be set to 1 to enable the IRQ and 0 to disable
-     * the IRQ.
+     * @param[in] enabled Must be set to TRUE to enable the IRQ and FALSE to 
+     * disable the IRQ.
      */
     void (*driver_set_irq_mask)(const uint32_t irq_number, 
-                                const uint32_t enabled);
+                                const bool_t enabled);
 
     /**
      * @brief The function should acknowleges an IRQ.
@@ -133,12 +134,9 @@ typedef struct interrupt_driver interrupt_driver_t;
  * @brief Initializes the kernel's interrupt manager.
  * 
  * @details Blanks the handlers memory, initializes panic and spurious interrupt 
- * lines handlers.
- * 
- * @return The success state or the error code. 
- * - OS_NO_ERR is returned if no error is encountered. 
+ * lines handlers. 
  */
-OS_RETURN_E kernel_interrupt_init(void);
+void kernel_interrupt_init(void);
 
 /** 
  * @brief Set the driver to be used by the kernel to manage interrupts.
@@ -256,14 +254,6 @@ OS_RETURN_E kernel_interrupt_remove_int_handler(const uint32_t interrupt_line);
  */
 void kernel_interrupt_restore(const uint32_t prev_state);
 
-/* Disable CPU interrupt (SW/HW)
- * We keep track of the interrupt state nesting and disable interrupts in all
- * cases.
- *
- * @returns  The interupt state prior to disabling interrupts, to be used with
- * kernel_interrupt_restore
- */
-
 /**
  * @brief Disables the CPU interrupts.
  * 
@@ -273,16 +263,6 @@ void kernel_interrupt_restore(const uint32_t prev_state);
  * execution of the kernel.
  */
 uint32_t kernel_interrupt_disable(void);
-
-/** 
- * @brief Tells if the interrupts are enabled for the current CPU.
- * 
- * @details Tells if the interrupts are enabled for the current CPU.
- *
- * @return The functions returns 1 if the interrupts are enabled, every other
- * values are considered as false.
- */
-uint32_t kernel_interrupt_get_state(void);
 
 /**
  * @brief Sets the IRQ mask for the IRQ number given as parameter.

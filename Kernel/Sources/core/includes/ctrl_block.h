@@ -19,10 +19,10 @@
 #ifndef __CORE_CTRL_BLOCK_H_
 #define __CORE_CTRL_BLOCK_H_
 
-#include <stdint.h>      /* Generic int types */
-#include <queue.h>       /* Queues lib */
-#include <cpu_structs.h> /* CPU structures */
-#include <critical.h>    /* Critical sections */
+#include <stdint.h>       /* Generic int types */
+#include <queue.h>        /* Queues lib */
+#include <cpu_settings.h> /* CPU structures */
+#include <critical.h>     /* Critical sections */
 
 /* UTK configuration file */
 #include <config.h>
@@ -46,16 +46,12 @@ enum THREAD_STATE
     THREAD_STATE_READY,
     /** @brief Thread's scheduling state: sleeping. */
     THREAD_STATE_SLEEPING,
-    /** @brief Thread's scheduling state: dead. */
-    THREAD_STATE_DEAD,
-    /** @brief Thread's scheduling state: waiting to be joined. */
+    /** @brief Thread's scheduling state: zombie. */
     THREAD_STATE_ZOMBIE,
-    /** @brief Thread's scheduling state: joining a thread. */
+    /** @brief Thread's scheduling state: joining. */
     THREAD_STATE_JOINING,
-    /** @brief Thread's scheduling state: waiting on an condition. */
-    THREAD_STATE_WAITING,
-    /** @brief The thread is being copied. */
-    THREAD_STATE_COPYING
+    /** @brief Thread's scheduling state: being copied. */
+    THREAD_STATE_COPYING,
 };
 
 /**
@@ -66,10 +62,8 @@ typedef enum THREAD_STATE THREAD_STATE_E;
 /** @brief Thread waiting types. */
 enum THREAD_WAIT_TYPE
 {
-    /** @brief The thread is waiting to acquire a semaphore. */
-    THREAD_WAIT_TYPE_SEM,
-    /** @brief The thread is waiting to acquire a mutex. */
-    THREAD_WAIT_TYPE_MUTEX,
+    /** @brief The thread is waiting to acquire a resource (e.g mutex, sem). */
+    THREAD_WAIT_TYPE_RESOURCE,
     /** @brief The thread is waiting to acquire an IO entry. */
     THREAD_WAIT_TYPE_IO
 };
@@ -130,13 +124,16 @@ struct kernel_process
     /** @brief Process identifier. */
     int32_t pid;
 
-    /** @brief Process parent identifier. */
-    int32_t ppid;
+    /** @brief Parent process pointer. */
+    struct kernel_process* parent_process;
+
+    /** @brief Process main thread. */
+    queue_node_t* main_thread;
 
     /** @brief List of the process threads. */
     queue_t* threads;   
 
-        /** @brief Process children list. */
+    /** @brief Process children list. */
     queue_t* children;
 
     /** @brief Process free page table quque. */

@@ -23,7 +23,7 @@
 #include <kernel_output.h>      /* Kernel output methods */
 #include <interrupt_settings.h> /* Interrupt settings */
 #include <panic.h>              /* Kernel panic */
-#include <cpu_structs.h>        /* CPU structures */
+#include <cpu_settings.h>       /* CPU structures */
 #include <interrupts.h>         /* INterrupt manager */
 #include <thread.h>             /* CPU thread structures */
 
@@ -39,12 +39,366 @@
 #include <cpu.h>
 
 /*******************************************************************************
+ * CONSTANTS
+ ******************************************************************************/
+
+/** @brief CPU flags interrupt enabled flag. */
+#define CPU_EFLAGS_IF 0x000000200
+/** @brief CPU flags interrupt enabled bit shift. */
+#define CPU_EFLAGS_IF_SHIFT 9
+
+/** @brief CPUID capable flags. */
+#define CPU_FLAG_CPU_CPUID_CAPABLE 0x00200000
+
+/** @brief Request vendor string. */
+#define CPUID_GETVENDORSTRING          0x00000000
+/** @brief Request capabled CPUID features. */
+#define CPUID_GETFEATURES              0x00000001
+/** @brief Request TLB. */
+#define CPUID_GETTLB                   0x00000002
+/** @brief Request serial. */
+#define CPUID_GETSERIAL                0x00000003
+/** @brief Request extended CPUID features. */
+#define CPUID_INTELEXTENDED_AVAILABLE  0x80000000
+/** @brief Request Intel CPUID features. */
+#define CPUID_INTELFEATURES            0x80000001
+/** @brief Request Intel brand string. */
+#define CPUID_INTELBRANDSTRING         0x80000002
+/** @brief Request Intel brand string extended. */
+#define CPUID_INTELBRANDSTRINGMORE     0x80000003
+/** @brief Request Intel brand string end. */
+#define CPUID_INTELBRANDSTRINGEND      0x80000004
+
+/****************************
+ * General Features
+ ***************************/
+
+/** @brief CPUID Streaming SIMD Extensions 3 flag. */
+#define ECX_SSE3      (1 << 0)
+/** @brief CPUID PCLMULQDQ Instruction flag. */
+#define ECX_PCLMULQDQ (1 << 1)
+/** @brief CPUID 64-Bit Debug Store Area flag. */
+#define ECX_DTES64    (1 << 2)
+/** @brief CPUID MONITOR/MWAIT flag. */
+#define ECX_MONITOR   (1 << 3)
+/** @brief CPUID CPL Qualified Debug Store flag. */
+#define ECX_DS_CPL    (1 << 4)
+/** @brief CPUID Virtual Machine Extensions flag. */
+#define ECX_VMX       (1 << 5)
+/** @brief CPUID Safer Mode Extensions flag. */
+#define ECX_SMX       (1 << 6)
+/** @brief CPUID Enhanced SpeedStep Technology flag. */
+#define ECX_EST       (1 << 7)
+/** @brief CPUID Thermal Monitor 2 flag. */
+#define ECX_TM2       (1 << 8)
+/** @brief CPUID Supplemental Streaming SIMD Extensions 3 flag. */
+#define ECX_SSSE3     (1 << 9)
+/** @brief CPUID L1 Context ID flag. */
+#define ECX_CNXT_ID   (1 << 10)
+/** @brief CPUID Fused Multiply Add flag. */
+#define ECX_FMA       (1 << 12)
+/** @brief CPUID CMPXCHG16B Instruction flag. */
+#define ECX_CX16      (1 << 13)
+/** @brief CPUID xTPR Update Control flag. */
+#define ECX_XTPR      (1 << 14)
+/** @brief CPUID Perf/Debug Capability MSR flag. */
+#define ECX_PDCM      (1 << 15)
+/** @brief CPUID Process-context Identifiers flag. */
+#define ECX_PCID      (1 << 17)
+/** @brief CPUID Direct Cache Access flag. */
+#define ECX_DCA       (1 << 18)
+/** @brief CPUID Streaming SIMD Extensions 4.1 flag. */
+#define ECX_SSE41     (1 << 19)
+/** @brief CPUID Streaming SIMD Extensions 4.2 flag. */
+#define ECX_SSE42     (1 << 20)
+/** @brief CPUID Extended xAPIC Support flag. */
+#define ECX_X2APIC    (1 << 21)
+/** @brief CPUID MOVBE Instruction flag. */
+#define ECX_MOVBE     (1 << 22)
+/** @brief CPUID POPCNT Instruction flag. */
+#define ECX_POPCNT    (1 << 23)
+/** @brief CPUID Local APIC supports TSC Deadline flag. */
+#define ECX_TSC       (1 << 24)
+/** @brief CPUID AESNI Instruction flag. */
+#define ECX_AESNI     (1 << 25)
+/** @brief CPUID XSAVE/XSTOR States flag. */
+#define ECX_XSAVE     (1 << 26)
+/** @brief CPUID OS Enabled Extended State Management flag. */
+#define ECX_OSXSAVE   (1 << 27)
+/** @brief CPUID AVX Instructions flag. */
+#define ECX_AVX       (1 << 28)
+/** @brief CPUID 16-bit Floating Point Instructions flag. */
+#define ECX_F16C      (1 << 29)
+/** @brief CPUID RDRAND Instruction flag. */
+#define ECX_RDRAND    (1 << 30)
+/** @brief CPUID Floating-Point Unit On-Chip flag. */
+#define EDX_FPU       (1 << 0)
+/** @brief CPUID Virtual 8086 Mode Extensions flag. */
+#define EDX_VME       (1 << 1)
+/** @brief CPUID Debugging Extensions flag. */
+#define EDX_DE        (1 << 2)
+/** @brief CPUID Page Size Extension flag. */
+#define EDX_PSE       (1 << 3)
+/** @brief CPUID Time Stamp Counter flag. */
+#define EDX_TSC       (1 << 4)
+/** @brief CPUID Model Specific Registers flag. */
+#define EDX_MSR       (1 << 5)
+/** @brief CPUID Physical Address Extension flag. */
+#define EDX_PAE       (1 << 6)
+/** @brief CPUID Machine-Check Exception flag. */
+#define EDX_MCE       (1 << 7)
+/** @brief CPUID CMPXCHG8 Instruction flag. */
+#define EDX_CX8       (1 << 8)
+/** @brief CPUID APIC On-Chip flag. */
+#define EDX_APIC      (1 << 9)
+/** @brief CPUID SYSENTER/SYSEXIT instructions flag. */
+#define EDX_SEP       (1 << 11)
+/** @brief CPUID Memory Type Range Registers flag. */
+#define EDX_MTRR      (1 << 12)
+/** @brief CPUID Page Global Bit flag. */
+#define EDX_PGE       (1 << 13)
+/** @brief CPUID Machine-Check Architecture flag. */
+#define EDX_MCA       (1 << 14)
+/** @brief CPUID Conditional Move Instruction flag. */
+#define EDX_CMOV      (1 << 15)
+/** @brief CPUID Page Attribute Table flag. */
+#define EDX_PAT       (1 << 16)
+/** @brief CPUID 36-bit Page Size Extension flag. */
+#define EDX_PSE36     (1 << 17)
+/** @brief CPUID Processor Serial Number flag. */
+#define EDX_PSN       (1 << 18)
+/** @brief CPUID CLFLUSH Instruction flag. */
+#define EDX_CLFLUSH   (1 << 19)
+/** @brief CPUID Debug Store flag. */
+#define EDX_DS        (1 << 21)
+/** @brief CPUID Thermal Monitor and Clock Facilities flag. */
+#define EDX_ACPI      (1 << 22)
+/** @brief CPUID MMX Technology flag. */
+#define EDX_MMX       (1 << 23)
+/** @brief CPUID FXSAVE and FXSTOR Instructions flag. */
+#define EDX_FXSR      (1 << 24)
+/** @brief CPUID Streaming SIMD Extensions flag. */
+#define EDX_SSE       (1 << 25)
+/** @brief CPUID Streaming SIMD Extensions 2 flag. */
+#define EDX_SSE2      (1 << 26)
+/** @brief CPUID Self Snoop flag. */
+#define EDX_SS        (1 << 27)
+/** @brief CPUID Multi-Threading flag. */
+#define EDX_HTT       (1 << 28)
+/** @brief CPUID Thermal Monitor flag. */
+#define EDX_TM        (1 << 29)
+/** @brief CPUID Pending Break Enable flag. */
+#define EDX_PBE       (1 << 31)
+
+/****************************
+ * Extended Features
+ ***************************/
+/** @brief CPUID SYSCALL/SYSRET flag. */
+#define EDX_SYSCALL   (1 << 11)
+/** @brief CPUID Multiprocessor flag. */
+#define EDX_MP        (1 << 19)
+/** @brief CPUID Execute Disable Bit flag. */
+#define EDX_XD        (1 << 20)
+/** @brief CPUID MMX etended flag. */
+#define EDX_MMX_EX    (1 << 22)
+/** @brief CPUID FXSAVE/STOR available flag. */
+#define EDX_FXSR     (1 << 24)
+/** @brief CPUID FXSAVE/STOR optimized flag. */
+#define EDX_FXSR_OPT  (1 << 25)
+/** @brief CPUID 1 GB Pages flag. */
+#define EDX_1GB_PAGE  (1 << 26)
+/** @brief CPUID RDTSCP and IA32_TSC_AUX flag. */
+#define EDX_RDTSCP    (1 << 27)
+/** @brief CPUID 64-bit Architecture flag. */
+#define EDX_64_BIT    (1 << 29)
+/** @brief CPUID 3D Now etended flag. */
+#define EDX_3DNOW_EX  (1 << 30)
+/** @brief CPUID 3D Now flag. */
+#define EDX_3DNOW     (1 << 31)
+/** @brief CPUID LAHF Available in long mode flag */
+#define ECX_LAHF_LM   (1 << 0)
+/** @brief CPUID Hyperthreading not valid flag */
+#define ECX_CMP_LEG   (1 << 1)
+/** @brief CPUID Secure Virtual Machine flag */
+#define ECX_SVM       (1 << 2)
+/** @brief CPUID Extended API space flag */
+#define ECX_EXTAPIC   (1 << 3)
+/** @brief CPUID CR8 in protected mode flag */
+#define ECX_CR8_LEG   (1 << 4)
+/** @brief CPUID ABM available flag */
+#define ECX_ABM       (1 << 5)
+/** @brief CPUID SSE4A flag */
+#define ECX_SSE4A     (1 << 6)
+/** @brief CPUID Misaligne SSE mode flag */
+#define ECX_MISASSE   (1 << 7)
+/** @brief CPUID Prefetch flag */
+#define ECX_PREFETCH  (1 << 8)
+/** @brief CPUID OS Visible workaround flag */
+#define ECX_OSVW      (1 << 9)
+/** @brief CPUID Instruction based sampling flag */
+#define ECX_IBS       (1 << 10)
+/** @brief CPUID XIO intruction set flag */
+#define ECX_XOP       (1 << 11)
+/** @brief CPUID SKINIT instructions flag */
+#define ECX_SKINIT    (1 << 12)
+/** @brief CPUID watchdog timer flag */
+#define ECX_WDT       (1 << 13)
+/** @brief CPUID Light weight profiling flag */
+#define ECX_LWP       (1 << 15)
+/** @brief CPUID 4 operand fuxed multiply add flag */
+#define ECX_FMA4      (1 << 16)
+/** @brief CPUID Translation cache extension flag */
+#define ECX_TCE       (1 << 17)
+/** @brief CPUID NODE_ID MSR flag */
+#define ECX_NODEIDMSR (1 << 19)
+/** @brief CPUID Trailing bit manipulation flag */
+#define ECX_TBM       (1 << 21)
+/** @brief CPUID Topology extension flag */
+#define ECX_TOPOEX    (1 << 22)
+/** @brief CPUID Core performance counter extensions flag */
+#define ECX_PERF_CORE (1 << 23)
+/** @brief CPUID NB performance counter extensions flag */
+#define ECX_PERF_NB   (1 << 24)
+/** @brief CPUID Data breakpoint extensions flag */
+#define ECX_DBX       (1 << 26)
+/** @brief CPUID Performance TSC flag */
+#define ECX_PERF_TSC  (1 << 27)
+/** @brief CPUID L2I perf counter extensions flag */
+#define ECX_PCX_L2I   (1 << 28)
+
+/****************************
+ * CPU Vendor signatures
+ ***************************/
+
+/** @brief CPUID Vendor signature AMD EBX. */
+#define SIG_AMD_EBX 0x68747541
+/** @brief CPUID Vendor signature AMD ECX. */
+#define SIG_AMD_ECX 0x444d4163
+/** @brief CPUID Vendor signature AMD EDX. */
+#define SIG_AMD_EDX 0x69746e65
+
+/** @brief CPUID Vendor signature Centaur EBX. */
+#define SIG_CENTAUR_EBX   0x746e6543
+/** @brief CPUID Vendor signature Centaur ECX. */
+#define SIG_CENTAUR_ECX   0x736c7561
+/** @brief CPUID Vendor signature Centaur EDX. */
+#define SIG_CENTAUR_EDX   0x48727561
+
+/** @brief CPUID Vendor signature Cyrix EBX. */
+#define SIG_CYRIX_EBX 0x69727943
+/** @brief CPUID Vendor signature Cyrix ECX. */
+#define SIG_CYRIX_ECX 0x64616574
+/** @brief CPUID Vendor signature Cyrix EDX. */
+#define SIG_CYRIX_EDX 0x736e4978
+
+/** @brief CPUID Vendor signature Intel EBX. */
+#define SIG_INTEL_EBX 0x756e6547
+/** @brief CPUID Vendor signature Intel ECX. */
+#define SIG_INTEL_ECX 0x6c65746e
+/** @brief CPUID Vendor signature Intel EDX. */
+#define SIG_INTEL_EDX 0x49656e69
+
+/** @brief CPUID Vendor signature TM1 EBX. */
+#define SIG_TM1_EBX   0x6e617254
+/** @brief CPUID Vendor signature TM1 ECX. */
+#define SIG_TM1_ECX   0x55504361
+/** @brief CPUID Vendor signature TM1 EDX. */
+#define SIG_TM1_EDX   0x74656d73
+
+/** @brief CPUID Vendor signature TM2 EBX. */
+#define SIG_TM2_EBX   0x756e6547
+/** @brief CPUID Vendor signature TM2 ECX. */
+#define SIG_TM2_ECX   0x3638784d
+/** @brief CPUID Vendor signature TM2 EDX. */
+#define SIG_TM2_EDX   0x54656e69
+
+/** @brief CPUID Vendor signature NSC EBX. */
+#define SIG_NSC_EBX   0x646f6547
+/** @brief CPUID Vendor signature NSC ECX. */
+#define SIG_NSC_ECX   0x43534e20
+/** @brief CPUID Vendor signature NSC EDX. */
+#define SIG_NSC_EDX   0x79622065
+
+/** @brief CPUID Vendor signature NextGen EBX. */
+#define SIG_NEXGEN_EBX    0x4778654e
+/** @brief CPUID Vendor signature NextGen ECX. */
+#define SIG_NEXGEN_ECX    0x6e657669
+/** @brief CPUID Vendor signature NextGen EDX. */
+#define SIG_NEXGEN_EDX    0x72446e65
+
+/** @brief CPUID Vendor signature Rise EBX. */
+#define SIG_RISE_EBX  0x65736952
+/** @brief CPUID Vendor signature Rise ECX. */
+#define SIG_RISE_ECX  0x65736952
+/** @brief CPUID Vendor signature Rise EDX. */
+#define SIG_RISE_EDX  0x65736952
+
+/** @brief CPUID Vendor signature SIS EBX. */
+#define SIG_SIS_EBX   0x20536953
+/** @brief CPUID Vendor signature SIS ECX. */
+#define SIG_SIS_ECX   0x20536953
+/** @brief CPUID Vendor signature SIS EDX. */
+#define SIG_SIS_EDX   0x20536953
+
+/** @brief CPUID Vendor signature UMC EBX. */
+#define SIG_UMC_EBX   0x20434d55
+/** @brief CPUID Vendor signature UMC ECX. */
+#define SIG_UMC_ECX   0x20434d55
+/** @brief CPUID Vendor signature UMC EDX. */
+#define SIG_UMC_EDX   0x20434d55
+
+/** @brief CPUID Vendor signature VIA EBX. */
+#define SIG_VIA_EBX   0x20414956
+/** @brief CPUID Vendor signature VIA ECX. */
+#define SIG_VIA_ECX   0x20414956
+/** @brief CPUID Vendor signature VIA EDX. */
+#define SIG_VIA_EDX   0x20414956
+
+/** @brief CPUID Vendor signature Vortex EBX. */
+#define SIG_VORTEX_EBX    0x74726f56
+/** @brief CPUID Vendor signature Vortex ECX. */
+#define SIG_VORTEX_ECX    0x436f5320
+/** @brief CPUID Vendor signature Vortex EDX. */
+#define SIG_VORTEX_EDX    0x36387865
+
+/*******************************************************************************
+ * STRUCTURES
+ ******************************************************************************/
+
+/**
+ * @brief CPUID Information data structure. Stores the data returned by a CPUID
+ * instrucion.
+ */
+struct cpu_info
+{
+    /** @brief 32 Bits cpu flags. */
+    uint32_t cpu_flags;
+
+    /**
+     * @brief Returned CPUID data, [0] contains ECX value and [1] contains EDX
+     * value.
+     */
+    uint32_t cpuid_data[2];
+};
+
+/** @brief Defines cpu_info_t type as a shorcut for struct cpu_info. */
+typedef struct cpu_info cpu_info_t;
+
+/*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
+
+#define CONCAT_STR(buff, idx, str) \
+    {                              \
+        strcpy(buff + idx, str);   \
+        idx += strlen(str);        \
+    }
 
 OS_RETURN_E cpu_raise_interrupt(const uint32_t interrupt_line)
 {
@@ -842,15 +1196,6 @@ uint32_t cpu_get_saved_interrupt_state(const cpu_state_t* cpu_state,
     return stack_state->eflags & CPU_EFLAGS_IF;
 }
 
-uint8_t cpu_is_pcid_capable(void)
-{
-    volatile int32_t  regs[4] = {0};
-    cpu_cpuid(CPUID_GETFEATURES, (uint32_t*)regs);
-
-    return ((regs[2] & ECX_PCID) != 0 ? 1 : 0);
-}
-
-
 void cpu_init_thread_context(void (*entry_point)(void), 
                              kernel_thread_t* thread)
 {
@@ -928,7 +1273,7 @@ void cpu_restore_context(cpu_state_t* cpu_state,
 
     __asm__ __volatile__(
         "mov  %%eax, %%cr3\n\t"
-        "mov  %%ebx, %%esp\n\t"
+        "mov  %%edx, %%esp\n\t"
         "pop  %%esp\n\t"
         "pop  %%ebp\n\t"
         "pop  %%edi\n\t"
@@ -944,7 +1289,7 @@ void cpu_restore_context(cpu_state_t* cpu_state,
         "pop  %%ds\n\t"
         "add  $8, %%esp\n\t"
         "iret\n\t"        
-        : :"a"(thread->process->page_dir), "b"(thread->cpu_context.esp));
+        : :"a"(thread->process->page_dir), "d"(thread->cpu_context.esp));
 
 
     KERNEL_ERROR("Returned from context restore\n");
@@ -963,12 +1308,12 @@ void cpu_set_next_thread_instruction(const cpu_state_t* cpu_state,
 void cpu_syscall(uint32_t syscall_id, void* params)
 {
     __asm__ __volatile__(
-        "mov %0, %%eax\n\t"
-        "mov %1, %%ebx\n\t"
+        "mov %0, %%ecx\n\t"
+        "mov %1, %%edx\n\t"
         "int %2\n\t" 
         :
         : "r" (syscall_id), "r" (params), "i" (SYSCALL_INT_LINE) 
-        : "%eax", "%ebx");
+        : "ecx", "edx");
 }
 
 void cpu_get_syscall_data(const cpu_state_t* cpu_state, 
@@ -978,13 +1323,312 @@ void cpu_get_syscall_data(const cpu_state_t* cpu_state,
 {
     (void)stack_state;
 
-    /* On the i386, the function ID is in EAX and the prameters in EBX */
+    /* On the i386, the function ID is in ECX and the prameters in EDX */
     if(syscall_id != NULL)
     {
-        *syscall_id = cpu_state->eax;
+        *syscall_id = cpu_state->ecx;
     }
     if(params != NULL)
     {
-        *params = (void*)cpu_state->ebx;
+        *params = (void*)cpu_state->edx;
     }
+}
+
+void validate_architecture(void)
+{
+    /* eax, ebx, ecx, edx */
+    volatile int32_t  regs[4];
+    volatile int32_t  regs_ext[4];
+    uint32_t          ret;
+
+#if KERNEL_LOG_LEVEL >= INFO_LOG_LEVEL
+    uint32_t output_buff_index;
+    char     output_buff[512];
+    char     vendor_str[26] = "CPU Vendor:             \n\0";
+
+    output_buff_index = 0;
+#endif 
+
+    KERNEL_DEBUG(KICKSTART_DEBUG_ENABLED, "[KICKSTART] Detecting cpu"); 
+
+    ret = cpu_cpuid(CPUID_GETVENDORSTRING, (uint32_t*)regs);
+
+    /* Check if CPUID return more that one available function */
+    if(ret != 0)
+    {
+#if KERNEL_LOG_LEVEL >= INFO_LOG_LEVEL
+        for(int8_t j = 0; j < 4; ++j)
+        {
+            vendor_str[12 + j] = (char)((regs[1] >> (j * 8)) & 0xFF);
+        }
+        for(int8_t j = 0; j < 4; ++j)
+        {
+            vendor_str[16 + j] = (char)((regs[3] >> (j * 8)) & 0xFF);
+        }
+        for(int8_t j = 0; j < 4; ++j)
+        {
+            vendor_str[20 + j] = (char)((regs[2] >> (j * 8)) & 0xFF);
+        }
+
+        KERNEL_INFO(vendor_str);
+#endif
+    }
+    else
+    {
+        KERNEL_ERROR("Architecture does not support CPUID\n");
+        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
+    }
+
+    /* Get CPUID features */
+    cpu_cpuid(CPUID_GETFEATURES, (uint32_t*)regs);
+
+#if KERNEL_LOG_LEVEL >= INFO_LOG_LEVEL
+    memset(output_buff, 0, 512 * sizeof(char));
+    strncpy(output_buff, "CPU Features: ", 14);
+    output_buff_index = 14;
+
+    if((regs[2] & ECX_SSE3) == ECX_SSE3)
+    { CONCAT_STR(output_buff, output_buff_index, "SSE3 - "); }
+    if((regs[2] & ECX_PCLMULQDQ) == ECX_PCLMULQDQ)
+    { CONCAT_STR(output_buff, output_buff_index, "PCLMULQDQ - "); }
+    if((regs[2] & ECX_DTES64) == ECX_DTES64)
+    { CONCAT_STR(output_buff, output_buff_index, "DTES64 - "); }
+    if((regs[2] & ECX_MONITOR) == ECX_MONITOR)
+    { CONCAT_STR(output_buff, output_buff_index, "MONITOR - "); }
+    if((regs[2] & ECX_DS_CPL) == ECX_DS_CPL)
+    { CONCAT_STR(output_buff, output_buff_index, "DS_CPL - "); }
+    if((regs[2] & ECX_VMX) == ECX_VMX)
+    { CONCAT_STR(output_buff, output_buff_index, "VMX - "); }
+    if((regs[2] & ECX_SMX) == ECX_SMX)
+    { CONCAT_STR(output_buff, output_buff_index, "SMX - "); }
+    if((regs[2] & ECX_EST) == ECX_EST)
+    { CONCAT_STR(output_buff, output_buff_index, "EST - "); }
+    if((regs[2] & ECX_TM2) == ECX_TM2)
+    { CONCAT_STR(output_buff, output_buff_index, "TM2 - "); }
+    if((regs[2] & ECX_SSSE3) == ECX_SSSE3)
+    { CONCAT_STR(output_buff, output_buff_index, "SSSE3 - "); }
+    if((regs[2] & ECX_CNXT_ID) == ECX_CNXT_ID)
+    { CONCAT_STR(output_buff, output_buff_index, "CNXT_ID - "); }
+    if((regs[2] & ECX_FMA) == ECX_FMA)
+    { CONCAT_STR(output_buff, output_buff_index, "FMA - "); }
+    if((regs[2] & ECX_CX16) == ECX_CX16)
+    { CONCAT_STR(output_buff, output_buff_index, "CX16 - "); }
+    if((regs[2] & ECX_XTPR) == ECX_XTPR)
+    { CONCAT_STR(output_buff, output_buff_index, "XTPR - "); }
+    if((regs[2] & ECX_PDCM) == ECX_PDCM)
+    { CONCAT_STR(output_buff, output_buff_index, "PDCM - "); }
+    if((regs[2] & ECX_PCID) == ECX_PCID)
+    { CONCAT_STR(output_buff, output_buff_index, "PCID - "); }
+    if((regs[2] & ECX_DCA) == ECX_DCA)
+    { CONCAT_STR(output_buff, output_buff_index, "DCA - "); }
+    if((regs[2] & ECX_SSE41) == ECX_SSE41)
+    { CONCAT_STR(output_buff, output_buff_index, "SSE41 - "); }
+    if((regs[2] & ECX_SSE42) == ECX_SSE42)
+    { CONCAT_STR(output_buff, output_buff_index, "SSE42 - "); }
+    if((regs[2] & ECX_X2APIC) == ECX_X2APIC)
+    { CONCAT_STR(output_buff, output_buff_index, "X2APIC - "); }
+    if((regs[2] & ECX_MOVBE) == ECX_MOVBE)
+    { CONCAT_STR(output_buff, output_buff_index, "MOVBE - "); }
+    if((regs[2] & ECX_POPCNT) == ECX_POPCNT)
+    { CONCAT_STR(output_buff, output_buff_index, "POPCNT - "); }
+    if((regs[2] & ECX_TSC) == ECX_TSC)
+    { CONCAT_STR(output_buff, output_buff_index, "TSC - "); }
+    if((regs[2] & ECX_AESNI) == ECX_AESNI)
+    { CONCAT_STR(output_buff, output_buff_index, "AESNI - "); }
+    if((regs[2] & ECX_XSAVE) == ECX_XSAVE)
+    { CONCAT_STR(output_buff, output_buff_index, "XSAVE - "); }
+    if((regs[2] & ECX_OSXSAVE) == ECX_OSXSAVE)
+    { CONCAT_STR(output_buff, output_buff_index, "OSXSAVE - "); }
+    if((regs[2] & ECX_AVX) == ECX_AVX)
+    { CONCAT_STR(output_buff, output_buff_index, "AVX - "); }
+    if((regs[2] & ECX_F16C) == ECX_F16C)
+    { CONCAT_STR(output_buff, output_buff_index, "F16C - "); }
+    if((regs[2] & ECX_RDRAND) == ECX_RDRAND)
+    { CONCAT_STR(output_buff, output_buff_index, "RDRAND - "); }
+    if((regs[3] & EDX_FPU) == EDX_FPU)
+    { CONCAT_STR(output_buff, output_buff_index, "FPU - "); }
+    if((regs[3] & EDX_VME) == EDX_VME)
+    { CONCAT_STR(output_buff, output_buff_index, "VME - "); }
+    if((regs[3] & EDX_DE) == EDX_DE)
+    { CONCAT_STR(output_buff, output_buff_index, "DE - "); }
+    if((regs[3] & EDX_PSE) == EDX_PSE)
+    { CONCAT_STR(output_buff, output_buff_index, "PSE - "); }
+    if((regs[3] & EDX_TSC) == EDX_TSC)
+    { CONCAT_STR(output_buff, output_buff_index, "TSC - "); }
+    if((regs[3] & EDX_MSR) == EDX_MSR)
+    { CONCAT_STR(output_buff, output_buff_index, "MSR - "); }
+    if((regs[3] & EDX_PAE) == EDX_PAE)
+    { CONCAT_STR(output_buff, output_buff_index, "PAE - "); }
+    if((regs[3] & EDX_MCE) == EDX_MCE)
+    { CONCAT_STR(output_buff, output_buff_index, "MCE - "); }
+    if((regs[3] & EDX_CX8) == EDX_CX8)
+    { CONCAT_STR(output_buff, output_buff_index, "CX8 - "); }
+    if((regs[3] & EDX_APIC) == EDX_APIC)
+    { CONCAT_STR(output_buff, output_buff_index, "APIC - "); }
+    if((regs[3] & EDX_SEP) == EDX_SEP)
+    { CONCAT_STR(output_buff, output_buff_index, "SEP - "); }
+    if((regs[3] & EDX_MTRR) == EDX_MTRR)
+    { CONCAT_STR(output_buff, output_buff_index, "MTRR - "); }
+    if((regs[3] & EDX_PGE) == EDX_PGE)
+    { CONCAT_STR(output_buff, output_buff_index, "PGE - "); }
+    if((regs[3] & EDX_MCA) == EDX_MCA)
+    { CONCAT_STR(output_buff, output_buff_index, "MCA - "); }
+    if((regs[3] & EDX_CMOV) == EDX_CMOV)
+    { CONCAT_STR(output_buff, output_buff_index, "CMOV - "); }
+    if((regs[3] & EDX_PAT) == EDX_PAT)
+    { CONCAT_STR(output_buff, output_buff_index, "PAT - "); }
+    if((regs[3] & EDX_PSE36) == EDX_PSE36)
+    { CONCAT_STR(output_buff, output_buff_index, "PSE36 - "); }
+    if((regs[3] & EDX_PSN) == EDX_PSN)
+    { CONCAT_STR(output_buff, output_buff_index, "PSN - "); }
+    if((regs[3] & EDX_CLFLUSH) == EDX_CLFLUSH)
+    { CONCAT_STR(output_buff, output_buff_index, "CLFLUSH - "); }
+    if((regs[3] & EDX_DS) == EDX_DS)
+    { CONCAT_STR(output_buff, output_buff_index, "DS - "); }
+    if((regs[3] & EDX_ACPI) == EDX_ACPI)
+    { CONCAT_STR(output_buff, output_buff_index, "ACPI - "); }
+    if((regs[3] & EDX_MMX) == EDX_MMX)
+    { CONCAT_STR(output_buff, output_buff_index, "MMX - "); }
+    if((regs[3] & EDX_FXSR) == EDX_FXSR)
+    { CONCAT_STR(output_buff, output_buff_index, "FXSR - "); }
+    if((regs[3] & EDX_SSE) == EDX_SSE)
+    { CONCAT_STR(output_buff, output_buff_index, "SSE - "); }
+    if((regs[3] & EDX_SSE2) == EDX_SSE2)
+    { CONCAT_STR(output_buff, output_buff_index, "SSE2 - "); }
+    if((regs[3] & EDX_SS) == EDX_SS)
+    { CONCAT_STR(output_buff, output_buff_index, "SS - "); }
+    if((regs[3] & EDX_HTT) == EDX_HTT)
+    { CONCAT_STR(output_buff, output_buff_index, "HTT - "); }
+    if((regs[3] & EDX_TM) == EDX_TM)
+    { CONCAT_STR(output_buff, output_buff_index, "TM - "); }
+    if((regs[3] & EDX_PBE) == EDX_PBE)
+    { CONCAT_STR(output_buff, output_buff_index, "PBE - "); }
+
+    /* Check for extended features */
+    cpu_cpuid(CPUID_INTELEXTENDED_AVAILABLE, (uint32_t*)regs_ext);
+    if((uint32_t)regs_ext[0] >= (uint32_t)CPUID_INTELFEATURES)
+    {
+        cpu_cpuid(CPUID_INTELFEATURES, (uint32_t*)regs_ext);
+
+        if((regs_ext[3] & EDX_SYSCALL) == EDX_SYSCALL)
+        { CONCAT_STR(output_buff, output_buff_index, "SYSCALL - "); }
+        if((regs_ext[3] & EDX_MP) == EDX_MP)
+        { CONCAT_STR(output_buff, output_buff_index, "MP - "); }
+        if((regs_ext[3] & EDX_XD) == EDX_XD)
+        { CONCAT_STR(output_buff, output_buff_index, "XD - "); }
+        if((regs_ext[3] & EDX_MMX_EX) == EDX_MMX_EX)
+        { CONCAT_STR(output_buff, output_buff_index, "MMX_EX - "); }
+        if((regs_ext[3] & EDX_FXSR) == EDX_FXSR)
+        { CONCAT_STR(output_buff, output_buff_index, "FXSR - "); }
+        if((regs_ext[3] & EDX_FXSR_OPT) == EDX_FXSR_OPT)
+        { CONCAT_STR(output_buff, output_buff_index, "FXSR_OPT - "); }
+        if((regs_ext[3] & EDX_1GB_PAGE) == EDX_1GB_PAGE)
+        { CONCAT_STR(output_buff, output_buff_index, "1GB_PAGE - "); }
+        if((regs_ext[3] & EDX_RDTSCP) == EDX_RDTSCP)
+        { CONCAT_STR(output_buff, output_buff_index, "RDTSCP - "); }
+        if((regs_ext[3] & EDX_64_BIT) == EDX_64_BIT)
+        { CONCAT_STR(output_buff, output_buff_index, "X64 - "); }
+        if((regs_ext[3] & EDX_3DNOW_EX) == EDX_3DNOW_EX)
+        { CONCAT_STR(output_buff, output_buff_index, "3DNOW_EX - "); }
+        if((regs_ext[3] & EDX_3DNOW) == EDX_3DNOW)
+        { CONCAT_STR(output_buff, output_buff_index, "3DNOW - "); }
+        if((regs_ext[2] & ECX_LAHF_LM) == ECX_LAHF_LM)
+        { CONCAT_STR(output_buff, output_buff_index, "LAHF_LM - "); }
+        if((regs_ext[2] & ECX_CMP_LEG) == ECX_CMP_LEG)
+        { CONCAT_STR(output_buff, output_buff_index, "CMP_LEG - "); }
+        if((regs_ext[2] & ECX_SVM) == ECX_SVM)
+        { CONCAT_STR(output_buff, output_buff_index, "SVM - "); }
+        if((regs_ext[2] & ECX_EXTAPIC) == ECX_EXTAPIC)
+        { CONCAT_STR(output_buff, output_buff_index, "EXTAPIC - "); }
+        if((regs_ext[2] & ECX_CR8_LEG) == ECX_CR8_LEG)
+        { CONCAT_STR(output_buff, output_buff_index, "CR8_LEG - "); }
+        if((regs_ext[2] & ECX_ABM) == ECX_ABM)
+        { CONCAT_STR(output_buff, output_buff_index, "ABM - "); }
+        if((regs_ext[2] & ECX_SSE4A) == ECX_SSE4A)
+        { CONCAT_STR(output_buff, output_buff_index, "SSE4A - "); }
+        if((regs_ext[2] & ECX_MISASSE) == ECX_MISASSE)
+        { CONCAT_STR(output_buff, output_buff_index, "MISALIGNED_SSE - "); }
+        if((regs_ext[2] & ECX_PREFETCH) == ECX_PREFETCH)
+        { CONCAT_STR(output_buff, output_buff_index, "PREFETCH - "); }
+        if((regs_ext[2] & ECX_OSVW) == ECX_OSVW)
+        { CONCAT_STR(output_buff, output_buff_index, "OSVW - "); }
+        if((regs_ext[2] & ECX_IBS) == ECX_IBS)
+        { CONCAT_STR(output_buff, output_buff_index, "IBS - "); }
+        if((regs_ext[2] & ECX_XOP) == ECX_XOP)
+        { CONCAT_STR(output_buff, output_buff_index, "XOP - "); }
+        if((regs_ext[2] & ECX_SKINIT) == ECX_SKINIT)
+        { CONCAT_STR(output_buff, output_buff_index, "SKINIT - "); }
+        if((regs_ext[2] & ECX_WDT) == ECX_WDT)
+        { CONCAT_STR(output_buff, output_buff_index, "WDT - "); }
+        if((regs_ext[2] & ECX_LWP) == ECX_LWP)
+        { CONCAT_STR(output_buff, output_buff_index, "LWP - "); }
+        if((regs_ext[2] & ECX_FMA4) == ECX_FMA4)
+        { CONCAT_STR(output_buff, output_buff_index, "FMA4 - "); }
+        if((regs_ext[2] & ECX_TCE) == ECX_TCE)
+        { CONCAT_STR(output_buff, output_buff_index, "TCE - "); }
+        if((regs_ext[2] & ECX_NODEIDMSR) == ECX_NODEIDMSR)
+        { CONCAT_STR(output_buff, output_buff_index, "NODE_ID_MSR - "); }
+        if((regs_ext[2] & ECX_TBM) == ECX_TBM)
+        { CONCAT_STR(output_buff, output_buff_index, "TMB - "); }
+        if((regs_ext[2] & ECX_TOPOEX) == ECX_TOPOEX)
+        { CONCAT_STR(output_buff, output_buff_index, "TOPOEX - "); }
+        if((regs_ext[2] & ECX_PERF_CORE) == ECX_PERF_CORE)
+        { CONCAT_STR(output_buff, output_buff_index, "PERF_CORE - "); }
+        if((regs_ext[2] & ECX_PERF_NB) == ECX_PERF_NB)
+        { CONCAT_STR(output_buff, output_buff_index, "PERF_NB - "); }
+        if((regs_ext[2] & ECX_DBX) == ECX_DBX)
+        { CONCAT_STR(output_buff, output_buff_index, "DBX - "); }
+        if((regs_ext[2] & ECX_PERF_TSC) == ECX_PERF_TSC)
+        { CONCAT_STR(output_buff, output_buff_index, "TSC - "); }
+        if((regs_ext[2] & ECX_PCX_L2I) == ECX_PCX_L2I)
+        { CONCAT_STR(output_buff, output_buff_index, "PCX_L2I - "); }
+    }
+
+    output_buff[output_buff_index - 2] = '\n';
+    output_buff[output_buff_index - 1] = 0;
+    KERNEL_INFO(output_buff);
+#endif 
+
+    /* Validate features */
+    if((regs[3] & EDX_SEP) != EDX_SEP)
+    {
+        KERNEL_ERROR("Architecture does not support SYSENTER\n");
+        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
+    }
+    if((regs[3] & EDX_FPU) != EDX_FPU)
+    {
+        KERNEL_ERROR("Architecture does not support FPU\n");
+        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
+    }
+    if((regs[3] & EDX_TSC) != EDX_TSC)
+    {
+        KERNEL_ERROR("Architecture does not support TSC\n");
+        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
+    }
+    if((regs[3] & EDX_APIC) != EDX_APIC)
+    {
+        KERNEL_ERROR("Architecture does not support APIC\n");
+        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
+    }
+    if((regs[3] & EDX_FXSR) != EDX_FXSR)
+    {
+        KERNEL_ERROR("Architecture does not support FX instructions\n");
+        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
+    }
+    if((regs[3] & EDX_SSE) != EDX_SSE)
+    {
+        KERNEL_ERROR("Architecture does not support SSE\n");
+        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
+    }
+    if((regs[3] & EDX_SSE2) != EDX_SSE2)
+    {
+        KERNEL_ERROR("Architecture does not support SSE2\n");
+        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
+    }
+
+    /* Might be used in future to check extended features */
+    (void)regs_ext;
+
+    KERNEL_DEBUG(KICKSTART_DEBUG_ENABLED, 
+                 "[KICKSTART] Validating architecture end");
 }

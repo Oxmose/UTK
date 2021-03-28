@@ -23,7 +23,7 @@
 #include <stdint.h>        /* Generic int types */
 #include <stddef.h>        /* Standard definitions */
 #include <string.h>        /* String manipulation */
-#include <cpu_structs.h>   /* CPU structures */
+#include <cpu_settings.h>  /* CPU structures */
 #include <cpu_api.h>       /* CPU management */
 #include <kheap.h>         /* Kernel heap */
 #include <bsp_api.h>       /* BSP API */
@@ -40,6 +40,18 @@
 
 /* Header file */
 #include <time_management.h>
+
+/*******************************************************************************
+ * CONSTANTS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * STRUCTURES
+ ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * GLOBAL VARIABLES
@@ -70,12 +82,16 @@ static volatile int64_t* active_wait;
 /** @brief Stores the routine to call the scheduler. */
 void (*schedule_routine)(cpu_state_t*, uintptr_t, stack_state_t*) = NULL;
 
+/** @brief RTC interrupt managet */
 void (*rtc_int_manager)(void) = NULL;
 
-/*******************************************************************************
- * FUNCTIONS
- ******************************************************************************/
+/** @brief NULL timer driver. */
+extern kernel_timer_t null_timer;
 
+
+/*******************************************************************************
+ * STATIC FUNCTIONS DECLARATION
+ ******************************************************************************/
 /**
  * @brief The kernel's main timer interrupt handler.
  * 
@@ -86,7 +102,30 @@ void (*rtc_int_manager)(void) = NULL;
  * @param[in] int_id The interrupt line that called the handler.
  * @param[in, out] stack The stack state before the interrupt.
  */
-static void time_main_timer_handler(cpu_state_t* cpu_state, uintptr_t int_id,
+static void time_main_timer_handler(cpu_state_t* cpu_state, 
+                                    uintptr_t int_id,
+                                    stack_state_t* stack);
+
+/**
+ * @brief The kernel's RTC timer interrupt handler.
+ * 
+ * @details The kernel's RTC timer interrupt handler. This must be connected to
+ * the RTC timer of the system.
+ * 
+ * @param[in, out] cpu_state The cpu registers before the interrupt.
+ * @param[in] int_id The interrupt line that called the handler.
+ * @param[in, out] stack The stack state before the interrupt.
+ */
+static void time_rtc_timer_handler(cpu_state_t* cpu_state, 
+                                   uintptr_t int_id,
+                                   stack_state_t* stack);
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
+
+static void time_main_timer_handler(cpu_state_t* cpu_state, 
+                                    uintptr_t int_id,
                                     stack_state_t* stack)
 {
     int32_t cpu_id;
@@ -131,17 +170,8 @@ static void time_main_timer_handler(cpu_state_t* cpu_state, uintptr_t int_id,
     KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED, "[TIME] Time manager main handler");
 }
 
-/**
- * @brief The kernel's RTC timer interrupt handler.
- * 
- * @details The kernel's RTC timer interrupt handler. This must be connected to
- * the RTC timer of the system.
- * 
- * @param[in, out] cpu_state The cpu registers before the interrupt.
- * @param[in] int_id The interrupt line that called the handler.
- * @param[in, out] stack The stack state before the interrupt.
- */
-static void time_rtc_timer_handler(cpu_state_t* cpu_state, uintptr_t int_id,
+static void time_rtc_timer_handler(cpu_state_t* cpu_state, 
+                                   uintptr_t int_id,
                                    stack_state_t* stack)
 {
     (void)cpu_state;
@@ -158,7 +188,6 @@ static void time_rtc_timer_handler(cpu_state_t* cpu_state, uintptr_t int_id,
     /* EOI */
     kernel_interrupt_set_irq_eoi(sys_rtc_timer.get_irq());
 }
-
 
 OS_RETURN_E time_init(const kernel_timer_t* main_timer,
                       const kernel_timer_t* rtc_timer)
@@ -275,7 +304,7 @@ uint64_t time_get_current_uptime(void)
         return 0;
     }
 
-    time_slice = 1000 / sys_main_timer.get_frequency();
+    time_slice = 1000000000ULL / (uint64_t)sys_main_timer.get_frequency();
     return time_slice * sys_tick_count[cpu_id];
 }
 

@@ -26,23 +26,13 @@
  * CONSTANTS
  ******************************************************************************/
 
+/* None */
+
 /*******************************************************************************
  * STRUCTURES
  ******************************************************************************/
 
-/** @brief Output descriptor, used to define the handlers that manage outputs */
-struct output
-{
-	/** @brief The handler used to print character. */
-	void (*putc)(const char);  
-	/** @brief The handler used to print string. */
-	void (*puts)(const char*); 
-};
-
-/** 
- * @brief Defines output_t type as a shorcut for struct output.
- */
-typedef struct output output_t;
+/* None */
 
 /*******************************************************************************
  * FUNCTIONS

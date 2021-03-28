@@ -22,35 +22,20 @@
 #define __X86_PIT_H_
 
 #include <stdint.h>          /* Generic int types */
-#include <stddef.h>          /* Standard definitions */
-#include <interrupts.h>      /* Interrupts management */
-#include <time_management.h> /* Timer factory */
+#include <kernel_error.h>    /* Kernel error codes */
+#include <time_management.h> /* Time manager */
 
 /*******************************************************************************
  * CONSTANTS
  ******************************************************************************/
-/** @brief PIT CPU command port. */
-#define PIT_COMM_PORT     0x34
-/** @brief PIT CPU data port. */
-#define PIT_DATA_PORT     0x40
-/** @brief PIT set tick frequency divider command. */
-#define PIT_COMM_SET_FREQ 0x43
 
-/** @brief Base PIT's quartz frequency. */
-#define PIT_QUARTZ_FREQ 0x1234DD
-/** @brief Kernel's PIT base tick frequency. */
-#define PIT_INIT_FREQ   100
-/** @brief PIT minimal tick frequency. */
-#define PIT_MIN_FREQ    20
-/** @brief PIT maximal tick frequency. */
-#define PIT_MAX_FREQ    8000
+/* None */
 
 /*******************************************************************************
  * STRUCTURES
  ******************************************************************************/
 
-/** @brief PIT driver instance. */
-extern kernel_timer_t pit_driver;
+/* None */
 
 /*******************************************************************************
  * FUNCTIONS
@@ -61,13 +46,8 @@ extern kernel_timer_t pit_driver;
  * 
  * @details Initializes PIT settings, sets the PIT interrupt manager and enables 
  * interrupts for the PIT.
- *
- * @return The success state or the error code. 
- * - OS_NO_ERR is returned if no error is encountered. 
- * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the IRQ number of the PIT is not 
- *   supported.
  */
-OS_RETURN_E pit_init(void);
+void pit_init(void);
 
 /**
  * @brief Enables PIT ticks.
@@ -149,5 +129,14 @@ OS_RETURN_E pit_remove_handler(void);
  * @return The PIT IRQ number.
  */
 uint32_t pit_get_irq(void);
+
+/**
+ * @brief Returns the PIT driver.
+ * 
+ * @details Returns a constant handle to the PIT driver.
+ * 
+ * @return A constant handle to the PIT driver is returned.
+ */
+const kernel_timer_t* pit_get_driver(void);
 
 #endif /* #ifndef __X86_PIT_H_ */

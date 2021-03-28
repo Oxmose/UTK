@@ -26,17 +26,17 @@
 /** @brief Kernel's page directory entry count. */
 #define KERNEL_PGDIR_SIZE 1024
 
-/** @brief Kernel page mask. */
-#define PG_ENTRY_MASK 0xFFFFF000
+/** @brief Kernel page address mask. */
+#define PG_ENTRY_ADDR_MASK 0xFFFFF000
 
 /** @brief Kernel page directory entry offset. */
-#define PG_DIR_OFFSET   22
+#define PG_DIR_ENTRY_OFFSET   22
 
 /** @brief Kernel page table offset. */
-#define PG_TABLE_OFFSET 12
+#define PG_TABLE_ENTRY_OFFSET 12
 
 /** @brief Kernel page table mask */
-#define PG_TABLE_OFFSET_MASK 0x3FF
+#define PG_TABLE_ENTRY_OFFSET_MASK 0x3FF
 
 /** @brief Architecture maximal address. */
 #define ARCH_MAX_ADDRESS 0xFFFFFFFF
@@ -63,8 +63,6 @@
 #define PG_DIR_FLAG_PAGE_READ_ONLY      0x00000000
 /** @brief Page directory flag: page table present. */
 #define PG_DIR_FLAG_PAGE_PRESENT        0x00000001
-/** @brief Page directory flag: page table not present. */
-#define PG_DIR_FLAG_PAGE_NOT_PRESENT    0x00000000
 
 /** @brief Page flag: global page. */
 #define PAGE_FLAG_GLOBAL         0x00000100
@@ -88,8 +86,7 @@
 #define PAGE_FLAG_READ_ONLY      0x00000000
 /** @brief Page flag: page present. */
 #define PAGE_FLAG_PRESENT        0x00000001
-/** @brief Page flag: page not present. */
-#define PAGE_FLAG_NOT_PRESENT    0x00000000
+
 /** @brief Custom define flag: regular memory. */
 #define PAGE_FLAG_REGULAR        0x00000000
 /** @brief Custom define flag: hardware mapped. */
@@ -98,24 +95,23 @@
 #define PAGE_FLAG_COPY_ON_WRITE  0x00000400
 /** @brief Custom define flag: private memory. */
 #define PAGE_FLAG_PRIVATE        0x00000600
-
 /** @brief Custome flag mask */
 #define PAGE_FLAG_OS_CUSTOM_MASK 0x00000E00
 
 /** @brief Defines the first kernel page directory entry. */
-#define KERNEL_FIRST_PGDIR_ENTRY (KERNEL_MEM_OFFSET >> PG_DIR_OFFSET)
+#define KERNEL_FIRST_PGDIR_ENTRY (KERNEL_MEM_OFFSET >> PG_DIR_ENTRY_OFFSET)
 
 /** @brief Frame reference directory entry offset */
-#define FRAME_REF_DIR_ENTRY_OFFSET 22
+#define FRAME_REF_DIR_ENTRY_OFFSET        22
 /** @brief Frame reference table entry offset */
-#define FRAME_REF_TABLE_ENTRY_OFFSET 12
+#define FRAME_REF_TABLE_ENTRY_OFFSET      12
 /** @brief Frame reference table entry offset mask */
 #define FRAME_REF_TABLE_ENTRY_OFFSET_MASK 0x3FF
 
 /** @brief Frame reference directory size */
-#define FRAME_REF_DIR_SIZE   0x1000
+#define FRAME_REF_DIR_SIZE   1024
 /** @brief Frame reference table size */
-#define FRAME_REF_TABLE_SIZE 0x1000
+#define FRAME_REF_TABLE_SIZE 1024
 
 /** @brief Frame reference table present flag */
 #define FRAME_REF_PRESENT    0x80000000

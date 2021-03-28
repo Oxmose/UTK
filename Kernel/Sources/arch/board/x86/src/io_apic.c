@@ -23,7 +23,6 @@
 #include <mmio.h>               /* Memory mapped IOs */
 #include <interrupt_settings.h> /* Interrupts settings */
 #include <stdint.h>             /* Generic int types */
-#include <stddef.h>             /* Standard definitions */
 #include <kernel_output.h>      /* Kernel output methods */
 #include <acpi.h>               /* ACPI driver */
 #include <lapic.h>              /* LAPIC driver */
@@ -33,6 +32,7 @@
 #include <kheap.h>              /* Kernel heap */
 #include <queue.h>              /* Queue library */
 #include <panic.h>              /* Kernel panic */
+#include <kernel_error.h>       /* Kernel error codes */
 
 /* UTK configuration file */
 #include <config.h>
@@ -46,11 +46,52 @@
 #include <io_apic.h>
 
 /*******************************************************************************
- * GLOBAL VARIABLES
+ * CONSTANTS
  ******************************************************************************/
 
-/** @brief Stores the IO APIC state. */
-static uint8_t enabled = 0;
+/** @brief IO-APIC register selection. */
+#define IOREGSEL 0x00
+/** @brief IO-APIC Data write register. */
+#define IOWIN    0x10
+
+/** @brief IO-APIC ID register. */
+#define IOAPICID  0x00
+/** @brief IO-APIC version register. */
+#define IOAPICVER 0x01
+/** @brief IO-APIC arbitration id register. */
+#define IOAPICARB 0x02
+/** @brief IO-APIC redirection register. */
+#define IOREDTBL  0x10
+
+/*******************************************************************************
+ * STRUCTURES
+ ******************************************************************************/
+
+/** @brief Stores the OS IO-APIC structure data. */
+struct io_apic_data
+{
+    /** @brief IO APIC identifier */
+    uint32_t id;
+
+    /** @brief IO APIC base address */
+    uintptr_t base_addr;
+
+    /** @brief Maximal number of IRQ handled by the IO APIC */
+    uint8_t max_redirect_count;
+
+    /** @brief First IRQ handled by the IO APIC */
+    uint32_t gsib;
+};
+
+/** 
+ * @brief Defines io_apic_data_t type as a shorcut for struct io_apic_data.
+ */
+typedef struct io_apic_data io_apic_data_t;
+
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
 
 /** @brief Stores the IO APICS structures */
 static io_apic_data_t*  io_apics;
@@ -59,7 +100,7 @@ static io_apic_data_t*  io_apics;
 static uint32_t io_apic_count;
 
 /** @brief IO_PIC driver instance. */
-interrupt_driver_t io_apic_driver = {
+static interrupt_driver_t io_apic_driver = {
     .driver_set_irq_mask     = io_apic_set_irq_mask,
     .driver_set_irq_eoi      = io_apic_set_irq_eoi,
     .driver_handle_spurious  = io_apic_handle_spurious_irq,
@@ -67,7 +108,7 @@ interrupt_driver_t io_apic_driver = {
 };
 
 /*******************************************************************************
- * FUNCTIONS
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
 /**
@@ -79,13 +120,9 @@ interrupt_driver_t io_apic_driver = {
  * @param[in] reg The register to write.
  * @param[in] val The value to write to the register.
  */
-__inline__ static void io_apic_write(const uintptr_t base_addr,
+inline static void io_apic_write(const uintptr_t base_addr,
                                      const uint32_t reg, 
-                                     const uint32_t val)
-{
-    mapped_io_write_32((uint32_t*)(base_addr + IOREGSEL), reg);
-    mapped_io_write_32((uint32_t*)(base_addr + IOWIN), val);
-}
+                                     const uint32_t val);
 
 /**
  * @brief Reads into the IO APIC controller memory.
@@ -97,14 +134,28 @@ __inline__ static void io_apic_write(const uintptr_t base_addr,
  *
  * @return The value contained in the register.
  */
-__inline__ static uint32_t io_apic_read(const uintptr_t base_addr,
-                                        const uint32_t reg)
+inline static uint32_t io_apic_read(const uintptr_t base_addr,
+                                        const uint32_t reg);
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
+
+inline static void io_apic_write(const uintptr_t base_addr,
+                                     const uint32_t reg, 
+                                     const uint32_t val)
+{
+    mapped_io_write_32((uint32_t*)(base_addr + IOREGSEL), reg);
+    mapped_io_write_32((uint32_t*)(base_addr + IOWIN), val);
+}
+
+inline static uint32_t io_apic_read(const uintptr_t base_addr,
+                                    const uint32_t reg)
 {
     mapped_io_write_32((uint32_t*)(base_addr + IOREGSEL), reg);
     return mapped_io_read_32((uint32_t*)(base_addr + IOWIN));
 }
 
-OS_RETURN_E io_apic_init(void)
+void io_apic_init(void)
 {
     uint32_t            i;
     uint32_t            j;
@@ -119,7 +170,8 @@ OS_RETURN_E io_apic_init(void)
     io_apic_count = acpi_get_io_apic_count();
     if(io_apic_count == 0 || acpi_get_lapic_count() == 0)
     {
-        return OS_ERR_NOT_SUPPORTED;
+        KERNEL_ERROR("IO APIC not supported\n");
+        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
     }
 
     /* Initialize all IO-APIC */
@@ -144,15 +196,17 @@ OS_RETURN_E io_apic_init(void)
         if(err != OS_NO_ERR)
         {
             KERNEL_ERROR("Could not declare IO-APIC region\n");
-            return err;
+            KERNEL_PANIC(err);
         }
+
         memory_mmap_direct((void*)io_apics[i].base_addr, 
                             (void*)io_apics[i].base_addr, 
                             0x1000, 
                             0, 
                             0,
                             0,
-                            1);
+                            1,
+                            NULL);
 
         KERNEL_DEBUG(IOAPIC_DEBUG_ENABLED, 
                      "[IO-APIC] Address mapped to 0x%p on IO-APIC",
@@ -174,13 +228,9 @@ OS_RETURN_E io_apic_init(void)
     io_apic_test();
     io_apic_test2();
 #endif
-
-    enabled = 1;
-
-    return OS_NO_ERR;
 }
 
-void io_apic_set_irq_mask(const uint32_t irq_number, const uint32_t enabled)
+void io_apic_set_irq_mask(const uint32_t irq_number, const bool_t enabled)
 {
     uint32_t  entry_lo;
     uint32_t  entry_hi;
@@ -206,12 +256,12 @@ void io_apic_set_irq_mask(const uint32_t irq_number, const uint32_t enabled)
     if(base_addr == 0)
     {
         KERNEL_ERROR("Could not find IO APIC IRQ %d", irq_number);
-        KERNEL_PANIC(OS_ERR_NO_SUCH_IRQ_LINE);
+        KERNEL_PANIC(OS_ERR_NO_SUCH_IRQ);
     }
 
     /* Set the interrupt line */
     entry_lo = irq_number + INT_IOAPIC_IRQ_OFFSET;
-    entry_lo |= (~enabled & 0x1) << 16;
+    entry_lo |= (~(uint32_t)enabled & 0x1) << 16;
     entry_hi = 0;
 
     ENTER_CRITICAL(int_state);
@@ -226,7 +276,7 @@ void io_apic_set_irq_mask(const uint32_t irq_number, const uint32_t enabled)
 
     KERNEL_DEBUG(IOAPIC_DEBUG_ENABLED, 
                  "[IO-APIC] Mask IRQ %d (%d): %d",
-                 irq_number, actual_irq, enabled);
+                 irq_number, actual_irq, (uint32_t)enabled);
 }
 
 void io_apic_set_irq_eoi(const uint32_t irq_number)
@@ -284,7 +334,13 @@ int32_t io_apic_get_irq_int_line(const uint32_t irq_number)
     return -1;
 }
 
-uint8_t io_apic_capable(void)
+bool_t io_apic_capable(void)
 {
-    return (acpi_get_io_apic_count() != 0 && acpi_get_lapic_count() != 0);
+    return (acpi_get_io_apic_count() != 0 && acpi_get_lapic_count() != 0) ? 
+           TRUE : FALSE;
+}
+
+const interrupt_driver_t* io_apic_get_driver(void)
+{
+    return &io_apic_driver;
 }

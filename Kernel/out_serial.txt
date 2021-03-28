@@ -1,3 +1,28 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 [OK] GDT Initialized at 0xe0212800
 [OK] IDT Initialized at 0xe0212000
 [OK] TSS Initialized at 0xe0212860
@@ -9,10 +34,10 @@
 [INFO] === Kernel memory layout
 [INFO] Startup low     0x00100000 -> 0x00100048 | 0KB
 [INFO] Startup high    0xe0101000 -> 0xe010102c | 0KB
-[INFO] Code            0xe0102000 -> 0xe0111dae | 63KB
+[INFO] Code            0xe0102000 -> 0xe011341e | 69KB
 [INFO] RO-Data         0xe0200000 -> 0xe0204000 | 16KB
 [INFO] Data            0xe0210000 -> 0xe0211108 | 4KB
-[INFO] BSS             0xe0212000 -> 0xe021e498 | 49KB
+[INFO] BSS             0xe0212000 -> 0xe021a458 | 33KB
 [INFO] Stacks          0xe0310000 -> 0xe0318000 | 32KB
 [INFO] Heap            0xe0318000 -> 0xe0d18000 | 10240KB
 [ERROR] [MEMMGT] Memory manager cannot manage unaligned memory 0x00000000 -> 0x0009fc00, aligning to frame size
@@ -29,3 +54,112 @@
 [INFO] Area 0x00d18000 -> 0xdffeffff | 3656544KB
 [INFO] Total available memory: 3656544KB
 [OK] Memory manager initialized
+[OK] VGA driver initialized
+[ERROR] Tried to parse a NULL DT
+[ERROR] Tried to parse a NULL DT
+[ERROR] Tried to parse a NULL DT
+[OK] ACPI initialized
+[INFO] Number of detected CPU: 4
+[OK] PIC initialized
+[OK] IO-APIC initialized
+[OK] LAPIC initialized
+[OK] PIT initialized
+[OK] RTC initialized
+[OK] LAPIC timer initialized
+[OK] Timer factory initialized
+[OK] System calls initialized
+[DEBUG] [SCHED] Kernel thread created | src/scheduler.c:1497
+[DEBUG] [SCHED] Kernel thread created | src/scheduler.c:1497
+[DEBUG] [SCHED] Init scheduler | src/scheduler.c:899
+[INFO] INIT Started | PID: 0 | TID: 1
+[DEBUG] [SCHED] Copied thread 1 to 2 | src/scheduler.c:538
+[DEBUG] [SCHED] Forked current process 0 to 1 | src/scheduler.c:1320
+Hello from Init Hello from Init1
+[DEBUG] [SCHED] Thread 2 asleep from 0
+[DEBUG] [SCHED] Process 0 waiting for process 1 | src/scheduler.c:1593
+[DEBUG] [SCHED] Thread 1 waiting for thread 2 | src/scheduler.c:1519
+[INFO] IDLE Started | PID: 0 | TID: 0
+ 5000000 until 5005000000 (5000ms) | src/scheduler.c:920
+END SLEEPForked returns
+[DEBUG] [SCHED] Exit thread 2 | src/scheduler.c:269
+[DEBUG] Woke up joining thread 1 | src/scheduler.c:293
+[DEBUG] Cleaning thread | src/scheduler.c:336
+[DEBUG] Cleaned thread stacks | src/scheduler.c:359
+[DEBUG] Cleaning process | src/scheduler.c:448
+[DEBUG] Cleaned process threads | src/scheduler.c:459
+Process 1 returned 42, 0
+[DEBUG] [SCHED] Thread 1 asleep from 5013000000 until 5513000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 5523000000 until 6023000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 6045000000 until 6545000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 6557000000 until 7057000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 7060000000 until 7560000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 7577000000 until 8077000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 8083000000 until 8583000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 8596000000 until 9096000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 9113000000 until 9613000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 9630000000 until 10130000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 10140000000 until 10640000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 10657000000 until 11157000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 11165000000 until 11665000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 11671000000 until 12171000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 12174000000 until 12674000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 12680000000 until 13180000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 13186000000 until 13686000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 13693000000 until 14193000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 14209000000 until 14709000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 14728000000 until 15228000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 15236000000 until 15736000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 15755000000 until 16255000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 16265000000 until 16765000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 16781000000 until 17281000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 17292000000 until 17792000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 17800000000 until 18300000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 18308000000 until 18808000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 18819000000 until 19319000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 19324000000 until 19824000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 19832000000 until 20332000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 20336000000 until 20836000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 20839000000 until 21339000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 21344000000 until 21844000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 21846000000 until 22346000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 22350000000 until 22850000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 22859000000 until 23359000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 23375000000 until 23875000000 (500ms) | src/scheduler.c:920
+sleep
+[DEBUG] [SCHED] Thread 1 asleep from 23880000000 until 24380000

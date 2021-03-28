@@ -20,8 +20,9 @@
 #ifndef __CORE_SYSCALL_H_
 #define __CORE_SYSCALL_H_
 
-#include <stdint.h>      /* Generic int types */
-#include <stddef.h>      /* Standard definitions */
+#include <stdint.h>       /* Generic int types */
+#include <stddef.h>       /* Standard definitions */
+#include <kernel_error.h> /* Kernel error codes */
 
 /*******************************************************************************
  * CONSTANTS
@@ -36,7 +37,8 @@
 /** @brief Defines the ID for each system call */
 enum SYSCALL_FUNCTION
 {
-    SYSCALL_FORK = 0,
+    SYSCALL_FORK    = 0,
+    SYSCALL_WAITPID = 1,
     SYSCALL_MAX_ID
 };
 
@@ -66,7 +68,7 @@ typedef struct syscall_handler syscall_handler_t;
  * @details Initializes the system call manager. The system call table is 
  * validated and the system call interrupts / raise method are initialized.
  */
-OS_RETURN_E syscall_init(void);
+void syscall_init(void);
 
 /** 
  * @brief Raises a system call.

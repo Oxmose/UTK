@@ -16,15 +16,16 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#ifndef __INTERRUPT_SETTINGS_
-#define __INTERRUPT_SETTINGS_
+#ifndef __BOARD_INTERRUPT_SETTINGS_H_
+#define __BOARD_INTERRUPT_SETTINGS_H_
 
-#include <config.h> /* Configuration file */
+/* UTK configuration file */
+#include <config.h>
 
 #ifdef ARCH_I386
-#include <../x86/includes/interrupt_settings.h>
+#include <../x86/includes/x86_interrupt_settings.h>
 #else 
 #error Unknown CPU architecture
 #endif
 
-#endif /* #ifndef __INTERRUPT_SETTINGS_ */
+#endif /* #ifndef __BOARD_INTERRUPT_SETTINGS_H_ */

@@ -17,17 +17,18 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#ifndef __BSP_RTC_H_
-#define __BSP_RTC_H_
+#ifndef __BOARD_RT_CLOCK_H_
+#define __BOARD_RT_CLOCK_H_
 
 #include <stdint.h>          /* Generic int types */
-#include <stddef.h>          /* Standard definitions */
-#include <interrupts.h>      /* Interrupts management */
-#include <time_management.h> /* Timer factory */
+#include <kernel_error.h>    /* Kernel error codes */
+#include <time_management.h> /* Time manager */
 
 /*******************************************************************************
  * CONSTANTS
  ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * STRUCTURES
@@ -51,9 +52,6 @@ struct date
  */
 typedef struct date date_t;
 
-/** @brief RTC driver instance. */
-extern kernel_timer_t rtc_driver;
-
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
@@ -64,12 +62,8 @@ extern kernel_timer_t rtc_driver;
  * @details Initializes RTC settings, sets the RTC interrupt manager and enables 
  * interrupts for the RTC.
  *
- * @return The success state or the error code. 
- * - OS_NO_ERR is returned if no error is encountered. 
- * - OS_ERR_NO_SUCH_IRQ_LINE is returned if the IRQ number of the RTC is not 
- *   supported.
  */
-OS_RETURN_E rtc_init(void);
+void rtc_init(void);
 
 /**
  * @brief Enables RTC ticks.
@@ -175,4 +169,13 @@ uint32_t rtc_get_current_daytime(void);
  */
 void rtc_update_time(void);
 
-#endif /* #ifndef __X86_RTC_H_ */
+/**
+ * @brief Returns the RTC driver.
+ * 
+ * @details Returns a constant handle to the RTC driver.
+ * 
+ * @return A constant handle to the RTC driver is returned.
+ */
+const kernel_timer_t* rtc_get_driver(void);
+
+#endif /* #ifndef __BOARD_RT_CLOCK_H_ */

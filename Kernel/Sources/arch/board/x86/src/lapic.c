@@ -33,6 +33,7 @@
 #include <time_management.h>      /* Timer factory */
 #include <pit.h>                  /* PIT driver */
 #include <panic.h>                /* Kernel panic */
+#include <kernel_error.h>         /* Kernel error codes */
 
 /* UTK configuration file */
 #include <config.h>
@@ -44,6 +45,124 @@
 
 /* Header file */
 #include <lapic.h>
+
+/*******************************************************************************
+ * CONSTANTS
+ ******************************************************************************/
+
+/** @brief LAPIC ID register's offset. */
+#define LAPIC_ID                        0x0020
+/** @brief LAPIC version register's offset. */
+#define LAPIC_VER                       0x0030
+/** @brief LAPIC trask priority register's offset. */
+#define LAPIC_TPR                       0x0080
+/** @brief LAPIC arbitration policy register's offset. */
+#define LAPIC_APR                       0x0090
+/** @brief LAPIC processor priority register's offset. */
+#define LAPIC_PPR                       0x00A0
+/** @brief LAPIC EOI register's offset. */
+#define LAPIC_EOI                       0x00B0
+/** @brief LAPIC remote read register's offset. */
+#define LAPIC_RRD                       0x00C0
+/** @brief LAPIC logical destination register's offset. */
+#define LAPIC_LDR                       0x00D0
+/** @brief LAPIC destination format register's offset. */
+#define LAPIC_DFR                       0x00E0
+/** @brief LAPIC Spurious interrupt vector register's offset. */
+#define LAPIC_SVR                       0x00F0
+/** @brief LAPIC in service register's offset. */
+#define LAPIC_ISR                       0x0100
+/** @brief LAPIC trigger mode register's offset. */
+#define LAPIC_TMR                       0x0180
+/** @brief LAPIC interrupt request register's offset. */
+#define LAPIC_IRR                       0x0200
+/** @brief LAPIC error status register's offset. */
+#define LAPIC_ESR                       0x0280
+/** @brief LAPIC interrupt command (low) register's offset. */
+#define LAPIC_ICRLO                     0x0300
+/** @brief LAPIC interrupt command (high) register's offset. */
+#define LAPIC_ICRHI                     0x0310
+/** @brief LAPIC local vector table timer register's offset. */
+#define LAPIC_TIMER                     0x0320
+/** @brief LAPIC local vector table thermal sensor register's offset. */
+#define LAPIC_THERMAL                   0x0330
+/** @brief LAPIC local vector table PMC register's offset. */
+#define LAPIC_PERF                      0x0340
+/** @brief LAPIC local vector table lint0 register's offset. */
+#define LAPIC_LINT0                     0x0350
+/** @brief LAPIC local vector table lint1 register's offset. */
+#define LAPIC_LINT1                     0x0360
+/** @brief LAPIC local vector table error register's offset. */
+#define LAPIC_ERROR                     0x0370
+/** @brief LAPIC timer initial count register's offset. */
+#define LAPIC_TICR                      0x0380
+/** @brief LAPIC timer current count register's offset. */
+#define LAPIC_TCCR                      0x0390
+/** @brief LAPIC timer devide configuration register's offset. */
+#define LAPIC_TDCR                      0x03E0
+
+/* Delivery Mode */
+/** @brief LAPIC delivery mode fixed. */
+#define ICR_FIXED                       0x00000000
+/** @brief LAPIC delivery mode lowest priority. */
+#define ICR_LOWEST                      0x00000100
+/** @brief LAPIC delivery mode SMI. */
+#define ICR_SMI                         0x00000200
+/** @brief LAPIC delivery mode NMI. */
+#define ICR_NMI                         0x00000400
+/** @brief LAPIC delivery mode init IPI. */
+#define ICR_INIT                        0x00000500
+/** @brief LAPIC delivery mode startup IPI. */
+#define ICR_STARTUP                     0x00000600
+/** @brief LAPIC delivery mode external. */
+#define ICR_EXTERNAL                    0x00000700
+
+/** @brief LAPIC destination mode physical. */
+#define ICR_PHYSICAL                    0x00000000
+/** @brief LAPIC destination mode logical. */
+#define ICR_LOGICAL                     0x00000800
+
+/** @brief LAPIC Delivery status idle. */
+#define ICR_IDLE                        0x00000000
+/** @brief LAPIC Delivery status pending. */
+#define ICR_SEND_PENDING                0x00001000
+
+/** @brief LAPIC Level deassert enable flag. */
+#define ICR_DEASSERT                    0x00000000
+/** @brief LAPIC Level deassert disable flag. */
+#define ICR_ASSERT                      0x00004000
+
+/** @brief LAPIC trigger mode edge. */
+#define ICR_EDGE                        0x00000000
+/** @brief LAPIC trigger mode level. */
+#define ICR_LEVEL                       0x00008000
+
+/** @brief LAPIC destination shorthand none. */
+#define ICR_NO_SHORTHAND                0x00000000
+/** @brief LAPIC destination shorthand self only. */
+#define ICR_SELF                        0x00040000
+/** @brief LAPIC destination shorthand all and self. */
+#define ICR_ALL_INCLUDING_SELF          0x00080000
+/** @brief LAPIC destination shorthand all but self. */
+#define ICR_ALL_EXCLUDING_SELF          0x000C0000
+
+/** @brief LAPIC destination flag shift. */
+#define ICR_DESTINATION_SHIFT           24
+
+/** @brief LAPIC Timer mode flag: periodic. */
+#define LAPIC_TIMER_MODE_PERIODIC       0x20000
+/** @brief LAPIC Timer divider value. */
+#define LAPIC_DIVIDER_16                0x3
+/** @brief LAPIC Timer initial frequency. */
+#define LAPIC_INIT_FREQ                 100
+/** @brief LAPIC Timer vector interrupt masked. */
+#define LAPIC_LVT_INT_MASKED            0x10000
+
+/*******************************************************************************
+ * STRUCTURES
+ ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * GLOBAL VARIABLES
@@ -65,7 +184,7 @@ static uint32_t          global_lapic_freq;
 static uint32_t          init_lapic_timer_frequency;
 
 /** @brief LAPIC timer driver instance. */
-kernel_timer_t lapic_timer_driver = {
+static kernel_timer_t lapic_timer_driver = {
     .get_frequency  = lapic_timer_get_frequency,
     .set_frequency  = lapic_timer_set_frequency,
     .enable         = lapic_timer_enable,
@@ -76,9 +195,8 @@ kernel_timer_t lapic_timer_driver = {
 };
 
 /*******************************************************************************
- * FUNCTIONS
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
-
 /**
  * @brief Read Local APIC register, the access is a memory mapped IO.
  *
@@ -86,10 +204,7 @@ kernel_timer_t lapic_timer_driver = {
  * 
  * @return The value contained in the Local APIC register.
  */
-__inline__ static uint32_t lapic_read(uint32_t reg)
-{
-    return mapped_io_read_32((void*)((uintptr_t)lapic_base_addr + reg));
-}
+inline static uint32_t lapic_read(uint32_t reg);
 
 /**
  * @brief Write Local APIC register, the acces is a memory mapped IO.
@@ -97,10 +212,7 @@ __inline__ static uint32_t lapic_read(uint32_t reg)
  * @param reg[in] The register of the Local APIC to write.
  * @param data[in] The value to write in the register.
  */
-__inline__ static void lapic_write(uint32_t reg, uint32_t data)
-{
-    mapped_io_write_32((void*)((uintptr_t)lapic_base_addr + reg), data);
-}
+inline static void lapic_write(uint32_t reg, uint32_t data);
 
 /**
  * @brief LAPIC dummy handler.
@@ -112,15 +224,9 @@ __inline__ static void lapic_write(uint32_t reg, uint32_t data)
  * @param stack_state[in] The stack state before the interrupt that contain cs, 
  * eip, error code and the eflags register value.
  */
-static void lapic_dummy_handler(cpu_state_t* cpu_state, uintptr_t int_id,
-                                stack_state_t* stack_state)
-{
-    (void)cpu_state;
-    (void)int_id;
-    (void)stack_state;
-
-    kernel_interrupt_set_irq_eoi(LAPIC_TIMER_INTERRUPT_LINE);
-}
+static void lapic_dummy_handler(cpu_state_t* cpu_state, 
+                                uintptr_t int_id,
+                                stack_state_t* stack_state);
 
 /**
  * @brief PIT interrupt initialisation handler. 
@@ -134,6 +240,34 @@ static void lapic_dummy_handler(cpu_state_t* cpu_state, uintptr_t int_id,
  * @param stack_state[in] The stack state before the interrupt that contain cs, 
  * eip, error code and the eflags register value.
  */
+static void lapic_init_pit_handler(cpu_state_t* cpu_state, 
+                                   uintptr_t int_id,
+                                   stack_state_t* stack_state);
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
+
+inline static uint32_t lapic_read(uint32_t reg)
+{
+    return mapped_io_read_32((void*)((uintptr_t)lapic_base_addr + reg));
+}
+
+inline static void lapic_write(uint32_t reg, uint32_t data)
+{
+    mapped_io_write_32((void*)((uintptr_t)lapic_base_addr + reg), data);
+}
+
+static void lapic_dummy_handler(cpu_state_t* cpu_state, 
+                                uintptr_t int_id,
+                                stack_state_t* stack_state)
+{
+    (void)cpu_state;
+    (void)int_id;
+    (void)stack_state;
+
+    kernel_interrupt_set_irq_eoi(LAPIC_TIMER_INTERRUPT_LINE);
+}
+
 static void lapic_init_pit_handler(cpu_state_t* cpu_state, uintptr_t int_id,
                                    stack_state_t* stack_state)
 {
@@ -157,14 +291,15 @@ static void lapic_init_pit_handler(cpu_state_t* cpu_state, uintptr_t int_id,
     kernel_interrupt_set_irq_eoi(PIT_IRQ_LINE);
 }
 
-OS_RETURN_E lapic_init(void)
+void lapic_init(void)
 {
     OS_RETURN_E err;
 
     /* Check IO-APIC support */
     if(acpi_get_io_apic_count() == 0 || acpi_get_lapic_count() == 0)
     {
-        return OS_ERR_NOT_SUPPORTED;
+        KERNEL_ERROR("LAPIC is not supported\n");
+        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
     }
 
     /* Get Local APIC base address */
@@ -174,10 +309,18 @@ OS_RETURN_E lapic_init(void)
     err = memory_declare_hw((uintptr_t)lapic_base_addr, KERNEL_PAGE_SIZE);
     if(err != OS_NO_ERR)
     {
-        KERNEL_ERROR("Could not declare IO-APIC region\n");
-        return err;
+        KERNEL_ERROR("Could not declare LAPIC region\n");
+        KERNEL_PANIC(err);
     }
-    memory_mmap_direct(lapic_base_addr, lapic_base_addr, 0x1000, 0, 0, 0, 1);
+
+    memory_mmap_direct(lapic_base_addr, 
+                       lapic_base_addr, 
+                       0x1000, 
+                       0, 
+                       0, 
+                       0, 
+                       1, 
+                       NULL);
 
     /* Enable all interrupts */
     lapic_write(LAPIC_TPR, 0);
@@ -197,8 +340,6 @@ OS_RETURN_E lapic_init(void)
 #endif
 
     initialized = 1;
-
-    return OS_NO_ERR;
 }
 
 int32_t lapic_get_id(void)
@@ -275,8 +416,7 @@ OS_RETURN_E lapic_send_ipi_startup(const uint32_t lapic_id,
     lapic_write(LAPIC_ICRLO, (vector & 0xFF) | ICR_STARTUP | ICR_PHYSICAL |
                 ICR_ASSERT | ICR_EDGE | ICR_NO_SHORTHAND);
     /* Wait for pending sends */
-    while ((lapic_read(LAPIC_ICRLO) & ICR_SEND_PENDING) != 0)
-    {}
+    while ((lapic_read(LAPIC_ICRLO) & ICR_SEND_PENDING) != 0);
 
     EXIT_CRITICAL(int_state);
 
@@ -311,8 +451,7 @@ OS_RETURN_E lapic_send_ipi(const uint32_t lapic_id, const uint32_t vector)
                 ICR_ASSERT | ICR_EDGE | ICR_NO_SHORTHAND);
 
     /* Wait for pending sends */
-    while ((lapic_read(LAPIC_ICRLO) & ICR_SEND_PENDING) != 0)
-    {}
+    while ((lapic_read(LAPIC_ICRLO) & ICR_SEND_PENDING) != 0);
 
     EXIT_CRITICAL(int_state);
 
@@ -324,7 +463,7 @@ void lapic_set_int_eoi(const uint32_t interrupt_line)
     if(interrupt_line > MAX_INTERRUPT_LINE)
     {
         KERNEL_ERROR("Could not EOI IRQ %d, IRQ not found\n", interrupt_line);
-        KERNEL_PANIC(OS_ERR_NO_SUCH_IRQ_LINE);
+        KERNEL_PANIC(OS_ERR_NO_SUCH_IRQ);
     }
 
     lapic_write(LAPIC_EOI, 0);
@@ -333,7 +472,7 @@ void lapic_set_int_eoi(const uint32_t interrupt_line)
 }
 
 
-OS_RETURN_E lapic_timer_init(void)
+void lapic_timer_init(void)
 {
     uint32_t    lapic_timer_tick_10ms;
     OS_RETURN_E err;
@@ -343,7 +482,8 @@ OS_RETURN_E lapic_timer_init(void)
     /* Check IO-APIC support */
     if(initialized == 0)
     {
-        return OS_ERR_NOT_SUPPORTED;
+        KERNEL_ERROR("LAPIC not initialized\n");
+        KERNEL_PANIC(OS_ERR_NOT_INITIALIZED);
     }
 
     /* Init LAPIC TIMER */
@@ -356,7 +496,8 @@ OS_RETURN_E lapic_timer_init(void)
     err = pit_set_handler(lapic_init_pit_handler);
     if(err != OS_NO_ERR)
     {
-        return err;
+        KERNEL_ERROR("Could not set PIT handler\n");
+        KERNEL_PANIC(err);
     }
 
     /* Wait for interrupts to gather the timer data */
@@ -371,7 +512,8 @@ OS_RETURN_E lapic_timer_init(void)
     err = pit_remove_handler();
     if(err != OS_NO_ERR)
     {
-        return err;
+        KERNEL_ERROR("Could not remove PIT handler\n");
+        KERNEL_PANIC(err);
     }
 
     /* Get the count of ticks in 10ms */
@@ -388,7 +530,8 @@ OS_RETURN_E lapic_timer_init(void)
                                                 lapic_dummy_handler);
     if(err != OS_NO_ERR)
     {
-        return err;
+        KERNEL_ERROR("Could not set LAPIC TIMER handler\n");
+        KERNEL_PANIC(err);
     }
     /* Init interrupt */
     lapic_write(LAPIC_TIMER, LAPIC_TIMER_INTERRUPT_LINE |
@@ -403,8 +546,6 @@ OS_RETURN_E lapic_timer_init(void)
 #ifdef TEST_MODE_ENABLED
     lapic_timer_test();
 #endif
-
-    return err;
 }
 
 uint32_t lapic_timer_get_frequency(void)
@@ -435,7 +576,7 @@ void lapic_timer_set_frequency(const uint32_t frequency)
     if(frequency < 20 || frequency > 8000)
     {
         KERNEL_ERROR("Set LAPIC timer frequency out of bound: %d\n", frequency);
-        KERNEL_PANIC(OS_ERR_OUT_OF_BOUND);
+        KERNEL_PANIC(OS_ERR_INCORRECT_VALUE);
     }
 
     KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, 
@@ -461,8 +602,8 @@ void lapic_timer_enable(void)
     /* Check support */
     if(initialized == 0)
     {
-        KERNEL_ERROR("Enable LAPIC timer frequency before initialization\n");
-        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
+        KERNEL_ERROR("Enable LAPIC timer before initialization\n");
+        KERNEL_PANIC(OS_ERR_NOT_INITIALIZED);
     }
 
     KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "[LAPIC] Timer enable");
@@ -483,8 +624,8 @@ void lapic_timer_disable(void)
     /* Check support */
     if(initialized == 0)
     {
-        KERNEL_ERROR("Disable LAPIC timer frequency before initialization\n");
-        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
+        KERNEL_ERROR("Disable LAPIC timer before initialization\n");
+        KERNEL_PANIC(OS_ERR_NOT_INITIALIZED);
     }
 
     KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "[LAPIC] Timer disable");
@@ -509,7 +650,7 @@ OS_RETURN_E lapic_timer_set_handler(void(*handler)(
     /* Check support */
     if(initialized == 0)
     {
-        return OS_ERR_NOT_SUPPORTED;
+        return OS_ERR_NOT_INITIALIZED;
     }
 
     if(handler == NULL)
@@ -535,6 +676,7 @@ OS_RETURN_E lapic_timer_set_handler(void(*handler)(
     if(err != OS_NO_ERR)
     {
         EXIT_CRITICAL(int_state);
+        lapic_timer_enable();
         return err;
     }
 
@@ -554,7 +696,7 @@ OS_RETURN_E lapic_timer_remove_handler(void)
     /* Check support */
     if(initialized == 0)
     {
-        return OS_ERR_NOT_SUPPORTED;
+        return OS_ERR_NOT_INITIALIZED;
     }
 
     KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, 
@@ -566,4 +708,9 @@ OS_RETURN_E lapic_timer_remove_handler(void)
 uint32_t lapic_timer_get_irq(void)
 {
     return LAPIC_TIMER_INTERRUPT_LINE;
+}
+
+const kernel_timer_t* lapic_timer_get_driver(void)
+{
+    return &lapic_timer_driver;
 }

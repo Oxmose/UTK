@@ -20,29 +20,30 @@
 #ifndef __CPU_PANIC_H_
 #define __CPU_PANIC_H_
 
-#include <cpu_structs.h> /* CPU structures */
-#include <stdint.h>     /* Generic int types */
+#include <cpu_settings.h> /* CPU structures */
+#include <stdint.h>       /* Generic int types */
 
 /*******************************************************************************
  * CONSTANTS
  ******************************************************************************/
 
-/**
- * @brief Defines the NMI Panic code.
- */
-#define PANIC_NMI_CODE 0xFFFFFFFF
-
-/** @brief Defines the maximal file name lenght for the panic */
-#define PANIC_MAX_FILE_NAME_LENGTH 256
+/* None */
 
 /*******************************************************************************
  * STRUCTURES
  ******************************************************************************/
 
+/* None */
+
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
 
+/** 
+ * @brief Raises a kernel panic with error code and collect other data.
+ *
+ * @param[in] ERROR The error code forthe panic.
+ */
 #define KERNEL_PANIC(ERROR) { 				  \
     kernel_panic(ERROR, __FILE__, __LINE__);  \
 }

@@ -30,63 +30,13 @@
  * CONSTANTS
  ******************************************************************************/
 
+/* None */
+
 /*******************************************************************************
  * STRUCTURES
  ******************************************************************************/
 
-/** @brief Kernel's heap allocator list node. */
-struct list
-{
-    /** @brief Next node of the list. */
-    struct list* next;
-    /** @brief Previous node of the list. */
-    struct list* prev;
-};
-
-/** 
- * @brief Defines list_t type as a shorcut for struct list.
- */
-typedef struct list list_t;
-
-/** @brief Kernel's heap allocator memory chunk representation. */
-struct mem_chunk
-{
-    /** @brief Memory chunk list. */
-    list_t all;
-
-    /** @brief Used flag. */
-    int8_t used;
-    union
-
-    /** @brief If used, the union contains the chunk's data, else a list of free
-     * mem.
-     */
-    {
-	       uint8_t* data;
-	       list_t   free;
-    };
-};
-
-/** 
- * @brief Defines mem_chunk_t type as a shorcut for struct mem_chunk.
- */
-typedef struct mem_chunk mem_chunk_t;
-
-/** @brief Kernel's heap allocator settings. */
-enum heap_enum
-{
-    /** @brief Num size. */
-    NUM_SIZES   = 32,
-
-    /** @brief Memory chunk alignement. */
-    ALIGN       = 4,
-
-    /** @brief Chink minimal size. */
-    MIN_SIZE    = sizeof(list_t),
-
-    /** @brief Header size. */
-    HEADER_SIZE = __builtin_offsetof(mem_chunk_t, data),
-};
+/* None */
 
 /*******************************************************************************
  * FUNCTIONS
@@ -97,11 +47,8 @@ enum heap_enum
  * 
  * @details Setups kernel heap management. It will also allign kernel heap start
  * and initialize the basic heap parameters such as its size.
- * 
- * @return OS_NO_ERR is returned on success, otherwise an error code is 
- * returned.
  */
-OS_RETURN_E kheap_init(void);
+void kheap_init(void);
 
 /**
  * @brief Allocate memory from the kernel heap.

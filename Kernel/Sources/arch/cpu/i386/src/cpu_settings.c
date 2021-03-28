@@ -21,7 +21,7 @@
 #include <string.h>        /* String manipulation */
 #include <stdint.h>        /* Generic int types */
 #include <kernel_output.h> /* Kernel output methods */
-#include <cpu_structs.h>   /* CPU related structures */
+#include <cpu_settings.h>  /* CPU related structures */
 
 /* UTK configuration file */
 #include <config.h>
@@ -35,12 +35,211 @@
 #include <cpu_settings.h>
 
 /*******************************************************************************
- * GLOBAL VARIABLES
+ * CONSTANTS
  ******************************************************************************/
-extern int8_t _KERNEL_STACKS_BASE;
+
+/** @brief Kernel's 32 bits code segment base address. */
+#define KERNEL_CODE_SEGMENT_BASE_32  0x00000000
+/** @brief Kernel's 32 bits code segment limit address. */
+#define KERNEL_CODE_SEGMENT_LIMIT_32 0x000FFFFF
+/** @brief Kernel's 32 bits data segment base address. */
+#define KERNEL_DATA_SEGMENT_BASE_32  0x00000000
+/** @brief Kernel's 32 bits data segment limit address. */
+#define KERNEL_DATA_SEGMENT_LIMIT_32 0x000FFFFF
+
+/** @brief Kernel's 16 bits code segment base address. */
+#define KERNEL_CODE_SEGMENT_BASE_16  0x00000000
+/** @brief Kernel's 16 bits code segment limit address. */
+#define KERNEL_CODE_SEGMENT_LIMIT_16 0x000FFFFF
+/** @brief Kernel's 16 bits data segment base address. */
+#define KERNEL_DATA_SEGMENT_BASE_16  0x00000000
+/** @brief Kernel's 16 bits data segment limit address. */
+#define KERNEL_DATA_SEGMENT_LIMIT_16 0x000FFFFF
+
+/** @brief Kernel's TSS segment descriptor. */
+#define TSS_SEGMENT 0x28
+
+/***************************
+ * GDT Flags
+ **************************/
+
+/** @brief GDT granularity flag: 4K block. */
+#define GDT_FLAG_GRANULARITY_4K   0x800000
+/** @brief GDT granularity flag: 1B block. */
+#define GDT_FLAG_GRANULARITY_BYTE 0x000000
+/** @brief GDT size flag: 16b protected mode. */
+#define GDT_FLAG_16_BIT_SEGMENT   0x000000
+/** @brief GDT size flag: 32b protected mode. */
+#define GDT_FLAG_32_BIT_SEGMENT   0x400000
+/** @brief GDT size flag: 64b protected mode. */
+#define GDT_FLAG_64_BIT_SEGMENT   0x200000
+/** @brief GDT AVL flag. */
+#define GDT_FLAG_AVL              0x100000
+/** @brief GDT segment present flag. */
+#define GDT_FLAG_SEGMENT_PRESENT  0x008000
+/** @brief GDT privilege level flag: Ring 0 (kernel). */
+#define GDT_FLAG_PL0              0x000000
+/** @brief GDT privilege level flag: Ring 1 (kernel-). */
+#define GDT_FLAG_PL1              0x002000
+/** @brief GDT privilege level flag: Ring 2 (kernel--). */
+#define GDT_FLAG_PL2              0x004000
+/** @brief GDT privilege level flag: Ring 3 (user). */
+#define GDT_FLAG_PL3              0x006000
+/** @brief GDT data type flag: code. */
+#define GDT_FLAG_CODE_TYPE        0x001000
+/** @brief GDT data type flag: data. */
+#define GDT_FLAG_DATA_TYPE        0x001000
+/** @brief GDT data type flag: system. */
+#define GDT_FLAG_SYSTEM_TYPE      0x000000
+/** @brief GDT TSS flag. */
+#define GDT_FLAG_TSS              0x09
+
+/** @brief GDT access byte flag: executable. */
+#define GDT_TYPE_EXECUTABLE       0x8
+/** @brief GDT access byte flag: growth direction up. */
+#define GDT_TYPE_GROW_UP          0x4
+/** @brief GDT access byte flag: growth direction down. */
+#define GDT_TYPE_GROW_DOWN        0x0
+/** @brief GDT access byte flag: conforming code. */
+#define GDT_TYPE_CONFORMING       0x4
+/** @brief GDT access byte flag: protected. */
+#define GDT_TYPE_PROTECTED        0x0
+/** @brief GDT access byte flag: readable. */
+#define GDT_TYPE_READABLE         0x2
+/** @brief GDT access byte flag: writable. */
+#define GDT_TYPE_WRITABLE         0x2
+/** @brief GDT access byte flag: accessed byte. */
+#define GDT_TYPE_ACCESSED         0x1
+
+
+/***************************
+ * IDT Flags
+ **************************/
+
+/** @brief IDT flag: storage segment. */
+#define IDT_FLAG_STORAGE_SEG 0x10
+/** @brief IDT flag: privilege level, ring 0. */
+#define IDT_FLAG_PL0         0x00
+/** @brief IDT flag: privilege level, ring 1. */
+#define IDT_FLAG_PL1         0x20
+/** @brief IDT flag: privilege level, ring 2. */
+#define IDT_FLAG_PL2         0x40
+/** @brief IDT flag: privilege level, ring 3. */
+#define IDT_FLAG_PL3         0x60
+/** @brief IDT flag: interrupt present. */
+#define IDT_FLAG_PRESENT     0x80
+
+/** @brief IDT flag: interrupt type task gate. */
+#define IDT_TYPE_TASK_GATE 0x05
+/** @brief IDT flag: interrupt type interrupt gate. */
+#define IDT_TYPE_INT_GATE  0x0E
+/** @brief IDT flag: interrupt type trap gate. */
+#define IDT_TYPE_TRAP_GATE 0x0F
+
+/** @brief Number of entries in the kernel's GDT. */
+#define GDT_ENTRY_COUNT (6 + MAX_CPU_COUNT)
 
 /*******************************************************************************
- * FUNCTIONS
+ * STRUCTURES
+ ******************************************************************************/
+
+/** 
+ * @brief Define the GDT pointer, contains the  address and limit of the GDT.
+ */
+struct gdt_ptr
+{
+    /** @brief The GDT size. */
+    uint16_t size;
+
+    /** @brief The GDT address. */
+    uintptr_t base;
+}__attribute__((packed));
+
+/** 
+ * @brief Defines the gdt_ptr_t type as a shortcut for struct  gdt_ptr. 
+ */
+typedef struct gdt_ptr gdt_ptr_t;
+
+/** 
+ * @brief Define the IDT pointer, contains the  address and limit of the IDT.
+ */
+struct idt_ptr
+{
+    /** @brief The IDT size. */
+    uint16_t size;
+
+    /** @brief The IDT address. */
+    uintptr_t base;
+}__attribute__((packed));
+
+/** 
+ * @brief Defines the idt_ptr_t type as a shortcut for struct idt_ptr. 
+ */
+typedef struct idt_ptr idt_ptr_t;
+
+/**  
+ * @brief CPU TSS abstraction structure. This is the representation the kernel 
+ * has of an intel's TSS entry.
+ */
+struct cpu_tss_entry 
+{
+    uint32_t prev_tss;
+    uint32_t esp0;
+    uint32_t ss0;
+    uint32_t esp1;
+    uint32_t ss1;
+    uint32_t esp2;
+    uint32_t ss2;
+    uint32_t cr3;
+    uint32_t eip;
+    uint32_t eflags;
+    uint32_t eax;
+    uint32_t ecx;
+    uint32_t edx;
+    uint32_t ebx;
+    uint32_t esp;
+    uint32_t ebp;
+    uint32_t esi;
+    uint32_t edi;
+    uint32_t es;
+    uint32_t cs;
+    uint32_t ss;
+    uint32_t ds;
+    uint32_t fs;
+    uint32_t gs;
+    uint32_t ldt;
+    uint16_t trap;
+    uint16_t iomap_base;
+} __attribute__((__packed__));
+
+/** 
+ * @brief Defines the cpu_tss_entry_t type as a shortcut for struct 
+ * cpu_tss_entry. 
+ */
+typedef struct cpu_tss_entry cpu_tss_entry_t;
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/** @brief Kernel stacks base symbol. */
+extern int8_t _KERNEL_STACKS_BASE;
+
+/** @brief CPU GDT space in memory. */
+uint64_t cpu_gdt[GDT_ENTRY_COUNT] __attribute__((aligned(8)));
+/** @brief Kernel GDT structure */
+gdt_ptr_t cpu_gdt_ptr __attribute__((aligned(8)));
+
+/** @brief CPU IDT space in memory. */
+uint64_t cpu_idt[IDT_ENTRY_COUNT] __attribute__((aligned(8)));
+/** @brief Kernel IDT structure */
+idt_ptr_t cpu_idt_ptr __attribute__((aligned(8)));
+
+/** @brief CPU TSS structures */
+cpu_tss_entry_t cpu_tss[MAX_CPU_COUNT] __attribute__((aligned(8)));
+
+/*******************************************************************************
+ * STATIC FUNCTIONS DECLARATION
  ******************************************************************************/
 
 /**
@@ -53,6 +252,43 @@ extern int8_t _KERNEL_STACKS_BASE;
  *
  * @return The address of the interrupt handler.
  */
+static uintptr_t get_handler(const uint32_t int_id);
+
+/**
+ * @brief Formats a GDT entry.
+ *
+ * @details Formats data given as parameter into a standard GDT entry.
+ * The result is directly written in the memory pointed by the entry parameter.
+ *
+ * @param[out] entry The pointer to the entry structure to format.
+ * @param[in] base  The base address of the segment for the GDT entry.
+ * @param[in] limit The limit address of the segment for the GDT entry.
+ * @param[in] type  The type of segment for the GDT entry.
+ * @param[in] flags The flags to be set for the GDT entry.
+ */
+static void format_gdt_entry(uint64_t* entry,
+                             const uint32_t base, const uint32_t limit,
+                             const unsigned char type, const uint32_t flags);
+
+/**
+ * @brief Formats an IDT entry.
+ *
+ * @details Formats data given as parameter into a standard IDT entry.
+ * The result is directly written in the memory pointed by the entry parameter.
+ *
+ * @param[out] entry The pointer to the entry structure to format.
+ * @param[in] handler The handler function for the IDT entry.
+ * @param[in] type  The type of segment for the IDT entry.
+ * @param[in] flags The flags to be set for the IDT entry.
+ */
+static void format_idt_entry(uint64_t* entry,
+                             const uint32_t handler,
+                             const unsigned char type, const uint32_t flags);
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
+
 static uintptr_t get_handler(const uint32_t int_id)
 {
     switch(int_id)
@@ -575,18 +811,6 @@ static uintptr_t get_handler(const uint32_t int_id)
     }
 }
 
-/**
- * @brief Formats a GDT entry.
- *
- * @details Formats data given as parameter into a standard GDT entry.
- * The result is directly written in the memory pointed by the entry parameter.
- *
- * @param[out] entry The pointer to the entry structure to format.
- * @param[in] base  The base address of the segment for the GDT entry.
- * @param[in] limit The limit address of the segment for the GDT entry.
- * @param[in] type  The type of segment for the GDT entry.
- * @param[in] flags The flags to be set for the GDT entry.
- */
 static void format_gdt_entry(uint64_t* entry,
                              const uint32_t base, const uint32_t limit,
                              const unsigned char type, const uint32_t flags)
@@ -626,17 +850,6 @@ static void format_gdt_entry(uint64_t* entry,
     *entry = lo_part | (((uint64_t) hi_part) << 32);
 }
 
-/**
- * @brief Formats an IDT entry.
- *
- * @details Formats data given as parameter into a standard IDT entry.
- * The result is directly written in the memory pointed by the entry parameter.
- *
- * @param[out] entry The pointer to the entry structure to format.
- * @param[in] handler The handler function for the IDT entry.
- * @param[in] type  The type of segment for the IDT entry.
- * @param[in] flags The flags to be set for the IDT entry.
- */
 static void format_idt_entry(uint64_t* entry,
                              const uint32_t handler,
                              const unsigned char type, const uint32_t flags)
