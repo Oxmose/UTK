@@ -53,25 +53,6 @@
  * STRUCTURES
  ******************************************************************************/
 
-/**
- * @brief Page fault handler structure. Gathers the pafe fault addresses
- * associated with a corresponding handler.
- */
-struct mem_handler
-{
-    /** @brief Start address of the range that is covered by the handler. */
-    uintptr_t start;
-
-    /** @brief End address of the range that is covered by the handler. */
-    uintptr_t end;
-
-    /** @brief Pointer to the handler function. */
-    void (*handler)(uintptr_t fault_address);
-};
-
-/** @brief Shortcut for the struct mem_handler type. */
-typedef struct mem_handler mem_handler_t;
-
 /** @brief Defines a memory range with its type as defined by the multiboot 
  * standard.
  */
@@ -143,15 +124,20 @@ extern uint8_t _KERNEL_STACKS_SIZE;
 extern uint8_t _KERNEL_HEAP_BASE;
 /** @brief Kernel symbols mapping: Heap address end. */
 extern uint8_t _KERNEL_HEAP_SIZE;
+/** @brief Kernel multiboot structures memory address. */
+extern uint8_t _KERNEL_MULTIBOOT_MEM_ADDR;
+/** @brief Kernel multiboot structures memory size. */
+extern uint8_t _KERNEL_MULTIBOOT_MEM_SIZE;
+/** @brief Kernel init ram disk memory address. */
+extern uint8_t _KERNEL_INITRD_MEM_ADDR;
+/** @brief Kernel init ram disk memory size. */
+extern uint8_t _KERNEL_INITRD_MEM_SIZE;
 /** @brief Kernel memory end address. */
 extern uint8_t _KERNEL_MEMORY_END;
 /** @brief Kernel recursive mapping address for page tables */
 extern uint8_t _KERNEL_RECUR_PG_TABLE_BASE;
 /** @brief Kernel recursive mapping address for page directory */
 extern uint8_t *_KERNEL_RECUR_PG_DIR_BASE;
-
-/** @brief Multiboot memory pointer, fileld by the bootloader. */
-extern multiboot_info_t* _kernel_multiboot_ptr;
 
 /** @brief Hardware memory map storage linked list. */
 static queue_t* hw_memory_map;
@@ -252,6 +238,9 @@ static void memory_release_ref(uintptr_t phys_addr);
 
 static uint32_t memory_get_ref_count(const uintptr_t phys_addr);
 
+static void memory_set_ref_count(const uintptr_t phys_addr, 
+                                 const uint32_t count);
+
 static void init_frame_ref_table(uintptr_t next_free_mem);
 
 /**
@@ -339,6 +328,30 @@ static void memory_get_kstacks_range(uintptr_t* start, uintptr_t* end);
  * @param[out] end The end address of the section.
  */
 static void memory_get_kheap_range(uintptr_t* start, uintptr_t* end);
+
+/**
+ * @brief Retrieves the start and end address of the kernel multiboot section.
+ * 
+ * @details Retrieves the start and end address of the kernel multiboot section.
+ * The addresses are stored in the buffer given as parameter. The function has
+ * no effect if the buffer are NULL.
+ * 
+ * @param[out] start The start address of the section.
+ * @param[out] end The end address of the section.
+ */
+static void memory_get_multiboot_range(uintptr_t* start, uintptr_t* end);
+
+/**
+ * @brief Retrieves the start and end address of the kernel initrd section.
+ * 
+ * @details Retrieves the start and end address of the kernel initrd section.
+ * The addresses are stored in the buffer given as parameter. The function has
+ * no effect if the buffer are NULL.
+ * 
+ * @param[out] start The start address of the section.
+ * @param[out] end The end address of the section.
+ */
+static void memory_get_initrd_range(uintptr_t* start, uintptr_t* end);
 
 static void print_kernel_map(void);
 
@@ -512,7 +525,8 @@ static void memory_free_frames(void* frame_addr,
     uint32_t      int_state;
     queue_node_t* cursor;
     mem_range_t*  mem_range;
-    OS_RETURN_E internal_err;
+    OS_RETURN_E   internal_err;
+    size_t        i;
 
     ENTER_CRITICAL(int_state);
 
@@ -566,7 +580,11 @@ static void memory_free_frames(void* frame_addr,
         }
     }
 
-    /* TODO: Set ref count to 0 */
+    /* Set ref count to 0 */
+    for(i = 0; i < frame_count; ++i)
+    {
+        memory_set_ref_count((uintptr_t)frame_addr, 0);
+    }
 
     KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
                  "[MEMMGT] Deallocated %u frames, at 0x%p", 
@@ -800,6 +818,43 @@ static uint32_t memory_get_ref_count(const uintptr_t phys_addr)
     return ref_count;
 }
 
+static void memory_set_ref_count(const uintptr_t phys_addr, 
+                                 const uint32_t count)
+{
+    uint16_t   dir_entry;
+    uint16_t   table_entry;
+    uint32_t   int_state;
+    uintptr_t* current_table;
+
+    dir_entry   = phys_addr >> FRAME_REF_DIR_ENTRY_OFFSET;
+    table_entry = (phys_addr >> FRAME_REF_TABLE_ENTRY_OFFSET) &
+                  FRAME_REF_TABLE_ENTRY_OFFSET_MASK;
+
+    ENTER_CRITICAL(int_state);
+
+    current_table = (uintptr_t*)frame_ref_dir[dir_entry];
+
+    if(current_table == NULL)
+    {
+        KERNEL_ERROR("Tried to get reference on non existing memory 0x%p\n", 
+                     phys_addr);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+    }
+
+    if(current_table[table_entry] == (uintptr_t)NULL)
+    {
+        KERNEL_ERROR("Tried to get reference on non existing memory 0x%p\n", 
+                     phys_addr);
+        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+    }
+
+    current_table[table_entry] = (current_table[table_entry] & 
+                                  ~FRAME_REF_COUNT_MASK) | 
+                                  (count & FRAME_REF_COUNT_MASK);
+
+    EXIT_CRITICAL(int_state);
+}
+
 static void init_frame_ref_table(uintptr_t next_free_mem)
 {
     queue_node_t* cursor;
@@ -992,6 +1047,32 @@ static void memory_get_kheap_range(uintptr_t* start, uintptr_t* end)
     }
 }
 
+static void memory_get_multiboot_range(uintptr_t* start, uintptr_t* end)
+{
+    if(start != NULL)
+    {
+        *start = (uintptr_t)&_KERNEL_MULTIBOOT_MEM_ADDR;
+    }
+    if(end != NULL)
+    {
+        *end = (uintptr_t)&_KERNEL_MULTIBOOT_MEM_ADDR + 
+               (uintptr_t)&_KERNEL_MULTIBOOT_MEM_SIZE;
+    }
+}
+
+static void memory_get_initrd_range(uintptr_t* start, uintptr_t* end)
+{
+    if(start != NULL)
+    {
+        *start = (uintptr_t)&_KERNEL_INITRD_MEM_ADDR;
+    }
+    if(end != NULL)
+    {
+        *end = (uintptr_t)&_KERNEL_INITRD_MEM_ADDR + 
+               (uintptr_t)&_KERNEL_INITRD_MEM_SIZE;
+    }
+}
+
 static void print_kernel_map(void)
 {
     KERNEL_INFO("=== Kernel memory layout\n");
@@ -1033,24 +1114,32 @@ static void print_kernel_map(void)
                     &_KERNEL_HEAP_BASE,
                     &_KERNEL_HEAP_BASE + (uintptr_t)&_KERNEL_HEAP_SIZE,
                     ((uintptr_t)&_KERNEL_HEAP_SIZE) >> 10);
+    KERNEL_INFO("Multiboot       0x%p -> 0x%p | "PRIPTR"KB\n",
+                    &_KERNEL_MULTIBOOT_MEM_ADDR,
+                    &_KERNEL_MULTIBOOT_MEM_ADDR + 
+                    (uintptr_t)&_KERNEL_MULTIBOOT_MEM_SIZE,
+                    ((uintptr_t)&_KERNEL_MULTIBOOT_MEM_SIZE) >> 10);
+    KERNEL_INFO("INITRD          0x%p -> 0x%p | "PRIPTR"KB\n",
+                    &_KERNEL_INITRD_MEM_ADDR,
+                    &_KERNEL_INITRD_MEM_ADDR + 
+                    (uintptr_t)&_KERNEL_INITRD_MEM_SIZE,
+                    ((uintptr_t)&_KERNEL_INITRD_MEM_SIZE) >> 10);
 }
 
 static void detect_memory(void)
 {
-    multiboot_memory_map_t* mmap;
-    multiboot_memory_map_t* mmap_end;
+    struct multiboot_tag*   multiboot_tag;
+    uint32_t                multiboot_info_size;
+    multiboot_memory_map_t* curr_entry;
     mem_range_t*            mem_range;
     mem_range_t*            mem_range2;
     OS_RETURN_E             error;
     queue_node_t*           node;
     queue_node_t*           node2;
+    uint32_t                entry_size;
+    uint32_t                i;
 
-    /* Copy multiboot data in upper memory */
-    mmap = (multiboot_memory_map_t*)
-           (uintptr_t)(_kernel_multiboot_ptr->mmap_addr + KERNEL_MEM_OFFSET);
-    mmap_end = (multiboot_memory_map_t*)
-               ((uintptr_t)mmap + _kernel_multiboot_ptr->mmap_length);
-
+    /* Create memory tables */
     hw_memory_map = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree), 
                                        &error);
     if(error != OS_NO_ERR)
@@ -1065,80 +1154,120 @@ static void detect_memory(void)
         KERNEL_ERROR("Could not allocate free memory map queue\n");
         KERNEL_PANIC(error);
     }
-    
+
+    /* Update address to higher half kernel */
+    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
+                 "[MEMMGT] Reading memory configuration from 0x%x", 
+                 (uintptr_t)&_KERNEL_MULTIBOOT_MEM_ADDR);
+
+    /* Get multiboot data */
+    multiboot_info_size = *(uint32_t*)&_KERNEL_MULTIBOOT_MEM_ADDR;
+    multiboot_tag = (struct multiboot_tag*)
+                    ((uintptr_t)&_KERNEL_MULTIBOOT_MEM_ADDR + 8);
+
+    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
+                 "[MEMMGT] Memory configuration size 0x%p", 
+                 multiboot_info_size);
+
+    /* Search for memory information */
     available_memory = 0;
-    while(mmap < mmap_end)
+    while((uintptr_t)multiboot_tag < 
+          (uintptr_t)&_KERNEL_MULTIBOOT_MEM_ADDR + multiboot_info_size)
     {
-        /* Everything over the 4G limit is not registered on 32 bits systems */
-        if(mmap->addr > 0xFFFFFFFFULL)
+        entry_size = ((multiboot_tag->size + 7) & ~7);
+        KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
+                                 "[MEMMGT] Detection entry S 0x%X, T 0x%X", 
+                                 entry_size, multiboot_tag->type);                  
+        if(multiboot_tag->type == MULTIBOOT_TAG_TYPE_MMAP)
         {
-            KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
-                         "[MEMMGT] HM detection, skipped region at 0x%llX", 
-                         mmap->addr);
-            mmap = (multiboot_memory_map_t*)
-                   ((uintptr_t)mmap + mmap->size + sizeof(mmap->size));
-
-            continue;
-        }
-
-        mem_range = kmalloc(sizeof(mem_range_t));
-        if(mem_range == NULL)
-        {
-            KERNEL_ERROR("Could not allocate memory range structure\n");
-            KERNEL_PANIC(OS_ERR_MALLOC);
-        }
-        node = queue_create_node(mem_range, 
-                                 QUEUE_ALLOCATOR(kmalloc, kfree), 
-                                 &error);
-        if(error != OS_NO_ERR)
-        {
-            KERNEL_ERROR("Could not allocate memory range node\n");
-            KERNEL_PANIC(error);
-        }
-        mem_range->base  = (uintptr_t)mmap->addr;
-        mem_range->limit = (uintptr_t)mmap->addr + (uintptr_t)mmap->len;
-        mem_range->type  = mmap->type;
-
-        /* Low memory is treated as HW */
-        if(mmap->type == MULTIBOOT_MEMORY_AVAILABLE && 
-           mmap->addr >= KERNEL_MEM_START)
-        {
-            mem_range2 = kmalloc(sizeof(mem_range_t));
-            if(mem_range2 == NULL)
+            /* We found the entries, now parse them */
+            for(i = 0; 
+                i < (entry_size - 16) / sizeof(multiboot_memory_map_t); 
+                ++i)
             {
-                KERNEL_ERROR("Could not allocate memory range structure\n");
-                KERNEL_PANIC(OS_ERR_MALLOC);
-            }
-            node2 = queue_create_node(mem_range2, 
-                                      QUEUE_ALLOCATOR(kmalloc, kfree), 
-                                      &error);
-            if(error != OS_NO_ERR)
-            {
-                KERNEL_ERROR("Could not allocate memory range node\n");
-                KERNEL_PANIC(error);
-            }
-            mem_range2->base  = (uintptr_t)mmap->addr;
-            mem_range2->limit = (uintptr_t)mmap->addr + (uintptr_t)mmap->len;
-            mem_range2->type  = mmap->type;
+                curr_entry = (multiboot_memory_map_t*)
+                             (((uintptr_t)multiboot_tag + 16) + i * 24);
 
-            error = queue_push_prio(node2, free_memory_map, mem_range2->base);
-            if(error != OS_NO_ERR)
-            {
-                KERNEL_ERROR("Could not enqueue memory range node\n");
-                KERNEL_PANIC(error);
+                /* Everything over the 4G limit is not registered on 32 bits 
+                 * systems 
+                 */
+                if(curr_entry->addr > 0xFFFFFFFFULL)
+                {
+                    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
+                                 "[MEMMGT] Detection, skipped region at 0x%llX", 
+                                 curr_entry->addr);
+                    continue;
+                }
+
+                KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
+                                 "[MEMMGT] Detection, register region 0x%llX", 
+                                 curr_entry->addr);
+
+                mem_range = kmalloc(sizeof(mem_range_t));
+                if(mem_range == NULL)
+                {
+                    KERNEL_ERROR("Could not allocate memory range structure\n");
+                    KERNEL_PANIC(OS_ERR_MALLOC);
+                }
+                node = queue_create_node(mem_range, 
+                                        QUEUE_ALLOCATOR(kmalloc, kfree), 
+                                        &error);
+                if(error != OS_NO_ERR)
+                {
+                    KERNEL_ERROR("Could not allocate memory range node\n");
+                    KERNEL_PANIC(error);
+                }
+                mem_range->base  = (uintptr_t)curr_entry->addr;
+                mem_range->limit = (uintptr_t)curr_entry->addr + 
+                                   (uintptr_t)curr_entry->len;
+                mem_range->type  = curr_entry->type;
+
+                /* Low memory is treated as HW */
+                if(curr_entry->type == MULTIBOOT_MEMORY_AVAILABLE && 
+                   curr_entry->addr >= KERNEL_MEM_START)
+                {
+                    mem_range2 = kmalloc(sizeof(mem_range_t));
+                    if(mem_range2 == NULL)
+                    {
+                        KERNEL_ERROR("Could not allocate memory range"
+                                     " structure\n");
+                        KERNEL_PANIC(OS_ERR_MALLOC);
+                    }
+                    node2 = queue_create_node(mem_range2, 
+                                            QUEUE_ALLOCATOR(kmalloc, kfree), 
+                                            &error);
+                    if(error != OS_NO_ERR)
+                    {
+                        KERNEL_ERROR("Could not allocate memory range node\n");
+                        KERNEL_PANIC(error);
+                    }
+                    mem_range2->base  = (uintptr_t)curr_entry->addr;
+                    mem_range2->limit = (uintptr_t)curr_entry->addr + 
+                                        (uintptr_t)curr_entry->len;
+                    mem_range2->type  = curr_entry->type;
+
+                    error = queue_push_prio(node2, 
+                                            free_memory_map, 
+                                            mem_range2->base);
+                    if(error != OS_NO_ERR)
+                    {
+                        KERNEL_ERROR("Could not enqueue memory range node\n");
+                        KERNEL_PANIC(error);
+                    }
+                    available_memory += (uintptr_t)curr_entry->len;
+                }
+
+                error = queue_push_prio(node, hw_memory_map, mem_range->base);
+                if(error != OS_NO_ERR)
+                {
+                    KERNEL_ERROR("Could not enqueue memory range node\n");
+                    KERNEL_PANIC(error);
+                }
             }
-            available_memory += (uintptr_t)mmap->len;
+
         }
-
-        error = queue_push_prio(node, hw_memory_map, mem_range->base);
-        if(error != OS_NO_ERR)
-        {
-            KERNEL_ERROR("Could not enqueue memory range node\n");
-            KERNEL_PANIC(error);
-        }
-
-        mmap = (multiboot_memory_map_t*)
-               ((uintptr_t)mmap + mmap->size + sizeof(mmap->size));
+        multiboot_tag = (struct multiboot_tag*)
+                        ((uintptr_t)multiboot_tag + entry_size);
     }
 }
 
@@ -1567,6 +1696,11 @@ static OS_RETURN_E memory_invocate_cow(const uintptr_t addr)
         {
             /* Check reference count */
             old_frame = pgtable[pgtable_entry] & PG_ENTRY_ADDR_MASK;
+            if(memory_get_ref_count(old_frame) == 0)
+            {
+                KERNEL_ERROR("Error in reference count management");
+                KERNEL_PANIC(OS_ERR_OUT_OF_BOUND);
+            }
             if(memory_get_ref_count(old_frame) > 1)
             {
                 /* Allocate new frame */
@@ -2097,6 +2231,10 @@ static void paging_init(void)
     map_kernel_section(start_addr, end_addr, 0);
     memory_get_kheap_range(&start_addr, &end_addr);
     map_kernel_section(start_addr, end_addr, 0);
+    memory_get_multiboot_range(&start_addr, &end_addr);
+    map_kernel_section(start_addr, end_addr, 0);
+    memory_get_initrd_range(&start_addr, &end_addr);
+    map_kernel_section(start_addr, end_addr, 0);
 
     KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, "[MEMMGT] Mapped all kernel sections");
 
@@ -2144,16 +2282,9 @@ void memory_manager_init(void)
 {
     queue_node_t* cursor;
     mem_range_t*  mem_range;
+
     /* Print inital memory mapping */
     print_kernel_map();
-
-    /* Update memory position in high memory */
-    _kernel_multiboot_ptr = (multiboot_info_t*)
-                            ((uintptr_t)_kernel_multiboot_ptr + 
-                             KERNEL_MEM_OFFSET);
-    KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
-                 "[MEMMGT] Reading memory configuration from 0x%p", 
-                 _kernel_multiboot_ptr);
 
     /* Detect memory */
     detect_memory();
@@ -3257,4 +3388,19 @@ void memory_free_process_data(const void* virt_addr,
 
     memory_free_pages_to(free_kernel_pages, pgdir_page, 1, NULL);
     memory_free_pages_to(free_kernel_pages, pgtable_page, 1, NULL);
+}
+
+void* memory_alloc_kernel_pages(const size_t page_count, OS_RETURN_E* err)
+{
+    return memory_alloc_pages_from(free_kernel_pages, 
+                                   page_count, 
+                                   MEM_ALLOC_BEGINING, 
+                                   err);
+}
+
+void memory_free_kernel_pages(const void* page_addr, 
+                              const size_t page_count, 
+                              OS_RETURN_E* err)
+{
+    memory_free_pages_to(free_kernel_pages, page_addr, page_count, err);
 }

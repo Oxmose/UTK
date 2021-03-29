@@ -69,6 +69,18 @@ static uint32_t panic_line;
 static char panic_file[PANIC_MAX_FILE_NAME_LENGTH];
 
 /*******************************************************************************
+ * STATIC FUNCTIONS DELCARATIONS
+ ******************************************************************************/
+
+static void print_panic_header(uintptr_t int_id, 
+                               stack_state_t* stack_state, 
+                               uint32_t error_code);
+
+static void print_cpu_state(cpu_state_t* cpu_state, stack_state_t* stack_state);
+
+static void print_cpu_flags(stack_state_t* stack_state);
+
+/*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
 

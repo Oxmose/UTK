@@ -27,7 +27,7 @@
 
 ; Multiboot header values
 FLAGS       equ ((1<<0) | (1<<1))
-MAGIC       equ 0x1BADB002
+MAGIC       equ 0xE85250D6
 CHECKSUM    equ -(MAGIC + FLAGS)
 
 ;-------------------------------------------------------------------------------
@@ -43,12 +43,12 @@ __kinit_low          equ (__kinit - KERNEL_MEM_OFFSET)
 extern _START_BSS_ADDR
 extern _END_BSS_ADDR
 extern _KERNEL_STACKS_BASE
-extern _KERNEL_MULTIBOOT_PTR
 
 ;-------------------------------------------------------------------------------
 ; EXTERN FUNCTIONS
 ;-------------------------------------------------------------------------------
 extern kernel_kickstart
+extern kernel_preboot
 
 ;-------------------------------------------------------------------------------
 ; EXPORTED FUNCTIONS
@@ -69,10 +69,30 @@ global _kernel_init_cpu_count
 ;-------------------------------------------------------------------------------
 ; Multiboot header
 section .multiboot
-align 4
+align 8
+multiboot_header_start:
     dd MAGIC
-    dd FLAGS
-    dd CHECKSUM
+    dd 0x00000000
+    dd multiboot_header_end - multiboot_header_start
+    dd -(MAGIC + (multiboot_header_end - multiboot_header_start))
+align 8
+    ; info request 
+    dw 1
+    dw 0
+    dd 4 * 2 + 8
+    dd 3 
+    dd 6
+align 8
+    ; module align
+    dw 6
+    dw 0
+    dd 8 
+; Multiboot terminate tag
+align 8
+    dw 0                                                 
+    dw 0                                                                            
+    dd 8  
+multiboot_header_end:
 
 section .low_startup_code
 align 4
@@ -81,6 +101,18 @@ align 4
 __kinit:
     ; Make sure interrupts are disabled
     cli
+
+    ; Save Multiboot info to memory
+    mov dword [_kernel_multiboot_ptr], ebx
+
+    ; Init pre-boot stack 
+    mov eax, _kernel_preboot_stack
+    add eax, 0x1FC
+    mov esp, eax 
+    mov ebp, esp
+
+    ; Call pre-boot routines
+    call kernel_preboot
 
     ; Map the higher half addresses
     mov eax, (_kinit_pgdir - KERNEL_MEM_OFFSET)
@@ -109,16 +141,20 @@ __bss_init:
     mov eax, __kinit_high
     jmp eax
 
+_kernel_preboot_stack:
+    resb 0x200
+
+; Multiboot structues pointer
+_kernel_multiboot_ptr:
+    dq 0x0000000000000000
+
 section .high_startup_code
 align 4
 ; High memory loader 
 __kinit_high:
-    ; Save Multiboot info to memory
-    mov [_kernel_multiboot_ptr], ebx
-
     ; Init stack
     mov eax, _KERNEL_STACKS_BASE
-    mov ebx, KERNEL_STACK_SIZE
+    mov ebx, KERNEL_STACK_SIZE - 4
     add eax, ebx
     mov esp, eax 
     mov ebp, esp
@@ -163,11 +199,7 @@ _kinit_pgdir:
     dd 0x00800083
     ; This page directory entry defines a 4MB page containing the kernel.
     dd 0x00C00083
-    times (1024 - KERNEL_START_PAGE_ID - 4) dd 0  ; Pages after the kernel image.
-
-; Multiboot structues pointer
-_kernel_multiboot_ptr:
-    dd 0x00000000
+    times (1024 - KERNEL_START_PAGE_ID - 4) dd 0  ; Pages after the kernel.
 
 ; Number of booted CPUs
 _kernel_init_cpu_count:

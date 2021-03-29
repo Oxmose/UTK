@@ -23,6 +23,7 @@
 #include <panic.h>         /* Kernel panic */
 #include <cpu_api.h>       /* CPU API */
 
+#include <init_rd.h> 
 #include <sys/process.h> 
 #include <rt_clock.h>
 
@@ -81,6 +82,9 @@ void* init_sys(void* args)
     //kernel_thread_t* new_thread;
     int32_t  term_cause;
     OS_RETURN_E err;
+    uint32_t loop_count;
+    initrd_device_t current_dev;
+    char buff[32] = {0};
 
     (void)args;
 
@@ -94,7 +98,6 @@ void* init_sys(void* args)
 
     if(pid != 0)
     {
-        sched_sleep(2000);
         //sched_create_kernel_thread(&new_thread, 32, "test", THREAD_TYPE_KERNEL, 0x1000, thread_func_test, NULL);
         //sched_join_thread(new_thread, NULL, NULL);
         time = rtc_get_current_daytime();
@@ -104,6 +107,10 @@ void* init_sys(void* args)
         kernel_printf("Process %d returned %d, %d\n", pid, status, err);
     }
     
+    loop_count = 0;
+    current_dev.size = 0x600;
+    current_dev.start_addr = 0xE0D19000;
+    current_dev.end_addr = 0xE0D19600;
     while(1)
     {
         if(pid != 0)
@@ -117,6 +124,11 @@ void* init_sys(void* args)
             kernel_printf("Forked returns\n");
             return (void*)42;
         }
+
+        loop_count++;
+        initrd_write_blocks(&current_dev, 4, "Test", 4);
+        initrd_read_blocks(&current_dev, 4, buff, 4);
+        kernel_printf("%s\n", buff);
         sched_sleep(500);
     }
 
