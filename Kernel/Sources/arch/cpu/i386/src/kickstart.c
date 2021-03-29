@@ -41,6 +41,7 @@
 #include <bsp_api.h>               /* BSP API */
 #include <scheduler.h>             /* Kernel scheduler */
 #include <syscall.h>               /* System calls manager */
+#include <init_rd.h>               /* Init ram disk */
 
 /* UTK configuration file */
 #include <config.h>
@@ -54,15 +55,19 @@
  * CONSTANTS
  ******************************************************************************/
 
+/* None */
+
 /*******************************************************************************
  * STRUCTURES
  ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* None. */
+/* None */
 
 /*******************************************************************************
  * STATIC FUNCTIONS DECLARATIONS
@@ -85,7 +90,8 @@
  */
 void kernel_kickstart(void)
 {
-    OS_RETURN_E err;
+    OS_RETURN_E     err;
+    initrd_device_t initrd_device;
 
     /* Init uart for basic log */
     graphic_set_selected_driver(uart_get_driver());
@@ -178,11 +184,7 @@ void kernel_kickstart(void)
         pit_disable();
         
         time_init(lapic_timer_get_driver(), rtc_get_driver());
-        if(err != OS_NO_ERR)
-        {
-            KERNEL_ERROR("Could not initialize timer manager\n");
-            KERNEL_PANIC(err);
-        }
+    
         KERNEL_SUCCESS("Timer factory initialized\n");
     }
     else 
@@ -198,6 +200,14 @@ void kernel_kickstart(void)
     bios_call_test();
     panic_test();
 #endif
+
+    /* Initialize the init ram disk */
+    err = initrd_init_device(&initrd_device);
+    if(err != OS_NO_ERR)
+    {
+        KERNEL_ERROR("Could not initialize init ram disk\n");
+        KERNEL_PANIC(err);
+    }
 
     /* First schedule, we should never return from here */
     sched_init();

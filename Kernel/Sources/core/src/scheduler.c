@@ -1610,11 +1610,9 @@ void sched_wait_process_pid(const SYSCALL_FUNCTION_E func, void* params)
 
     if(child_node == NULL)
     {
-        if(func_params != NULL)
-        {
-            func_params->pid = -1;
-            func_params->error = OS_ERR_NO_SUCH_ID;
-        }
+        
+        func_params->pid = -1;
+        func_params->error = OS_ERR_NO_SUCH_ID;
         return;
     }
     term_cause = THREAD_TERMINATE_CORRECTLY;
@@ -1623,21 +1621,15 @@ void sched_wait_process_pid(const SYSCALL_FUNCTION_E func, void* params)
                             &term_cause);
     if(err != OS_NO_ERR)
     {
-        if(func_params != NULL)
-        {
-            func_params->pid = -1;
-            func_params->status = err;
-            func_params->error = err;
-        }        
+        func_params->pid = -1;
+        func_params->status = err;
+        func_params->error = err;     
     }
     else 
     {
-        if(func_params != NULL)
-        {
-            func_params->status = status;
-            func_params->term_cause = (int32_t)term_cause;
-            func_params->error = OS_NO_ERR;
-        } 
+        func_params->status = status;
+        func_params->term_cause = (int32_t)term_cause;
+        func_params->error = OS_NO_ERR;
     }
 
     sched_clean_process(child);

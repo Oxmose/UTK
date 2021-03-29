@@ -52,14 +52,12 @@ ifeq ($(TESTS), TRUE)
 	@make -C $(SOURCE_DIR)/tests target=$(target)
 endif
 
-# Build the io module 
+# Build general modules
 	@make -C $(SOURCE_DIR)/io
-# Build the core module 
 	@make -C $(SOURCE_DIR)/core
-# Build the lib module 
 	@make -C $(SOURCE_DIR)/lib
-# Build the time module 
 	@make -C $(SOURCE_DIR)/time
+	@make -C $(SOURCE_DIR)/drivers
 
 build_kernel:
 	@echo "\e[1m\e[34m\n#-------------------------------------------------------------------------------\e[22m\e[39m"
@@ -73,6 +71,8 @@ build_kernel:
 	@echo "\e[1m\e[34m#-------------------------------------------------------------------------------\e[22m\e[39m"
 	@echo "\e[1m\e[34m| Generated kernel for target $(target)\e[22m\e[39m"
 	@echo "\e[1m\e[34m#-------------------------------------------------------------------------------\n\e[22m\e[39m"
+
+	$(CONFIG_DIR)/arch/x86_i386/create_initrd.sh $(BUILD_DIR)
 
 clean:
 # Dummy settings 
@@ -91,6 +91,7 @@ endif
 	@make -C $(SOURCE_DIR)/core clean
 	@make -C $(SOURCE_DIR)/global clean
 	@make -C $(SOURCE_DIR)/time clean
+	@make -C $(SOURCE_DIR)/drivers clean
 
 # Clean kernel build directory
 	rm -rf  $(BUILD_DIR) $(BIN_DIR)
@@ -124,15 +125,6 @@ endif
 qemu-test-mode:
 ifeq ($(target), x86_i386)
 	@make qemu-test-mode -f $(CONFIG_DIR)/arch/$(target)/makerun.mk BUILD_DIR=$(BUILD_DIR) KERNEL=$(KERNEL)
-else 
-	@echo "\e[1m\e[31m\n=== ERROR: Unknown target $(target)\e[22m\e[39m"
-	@echo "Available targets: $(TARGET_LIST)\n"
-	@exit 1
-endif
-
-qemu-grub:
-ifeq ($(target), x86_i386)
-	@make qemu-grub -f $(CONFIG_DIR)/arch/$(target)/makerun.mk BUILD_DIR=$(BUILD_DIR) KERNEL=$(KERNEL)
 else 
 	@echo "\e[1m\e[31m\n=== ERROR: Unknown target $(target)\e[22m\e[39m"
 	@echo "Available targets: $(TARGET_LIST)\n"

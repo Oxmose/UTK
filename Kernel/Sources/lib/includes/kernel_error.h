@@ -94,6 +94,8 @@ enum OS_RETURN
     OS_ERR_FORBIDEN_PRIORITY               = 18,
     /** @brief Tried to use an unauthorized interrupt line. */
     OR_ERR_UNAUTHORIZED_INTERRUPT_LINE     = 19,
+    /** @brief Allignement error. */
+    OS_ERR_ALIGN                           = 20
 };
 
 /**

@@ -22,7 +22,7 @@ init:
 	@mkdir -p $(BUILD_DIR)
 
 module: 
-	$(LD) $(LDFLAGS) -o $(BUILD_DIR)/$(KERNEL_NAME).elf $(DEP_MODULES) $(DEP_LIBS) 
+	$(LD) $(LDFLAGS) -o $(BUILD_DIR)/$(KERNEL_NAME).elf $(DEP_MODULES) $(DEP_LIBS) -Map=$(BUILD_DIR)/output.map 
 
 # Clean 
 clean:
