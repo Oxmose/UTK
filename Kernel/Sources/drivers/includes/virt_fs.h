@@ -33,6 +33,20 @@
 #define VFS_FILE_SHORT_NAME_LENGTH 256
 #define VFS_FILE_NAME_LENGTH       256
 #define VFS_PATH_LENGTH            1024
+#define VFS_OWNER_NAME_LENGTH      32
+#define VFS_GROUP_NAME_LENGTH      32
+
+#define VFS_RIGHTS_UREAD  0x100
+#define VFS_RIGHTS_UWRITE 0x800
+#define VFS_RIGHTS_UEXEC  0x400
+
+#define VFS_RIGHTS_GREAD  0x020
+#define VFS_RIGHTS_GWRITE 0x010
+#define VFS_RIGHTS_GEXEC  0x008
+
+#define VFS_RIGHTS_OREAD  0x004
+#define VFS_RIGHTS_OWRITE 0x002
+#define VFS_RIGHTS_OEXEC  0x001
 
 /*******************************************************************************
  * STRUCTURES
@@ -42,7 +56,13 @@ enum VFS_FILE_TYPE
 {
     VFS_FILE_TYPE_FILE,
     VFS_FILE_TYPE_FOLDER,
-    VFS_FILE_TYPE_DELETED
+    VFS_FILE_TYPE_HARD_LINK,
+    VFS_FILE_TYPE_SYM_LINK,
+    VFS_FILE_TYPE_CHAR_DEV,
+    VFS_FILE_TYPE_BLOCK_DEV,
+    VFS_FILE_TYPE_DIR,
+    VFS_FILE_TYPE_NAMED_PIPE,
+    VFS_FILE_TYPE_OTHER
 };
 
 typedef enum VFS_FILE_TYPE VFS_FILE_TYPE_E;
@@ -56,7 +76,22 @@ typedef struct vfs_fs_driver vfs_fs_driver_t;
 
 struct vfs_device
 {
-    uint32_t empty;
+    OS_RETURN_E (*read_blocks)(const void* device, 
+                               const uint32_t block_id,
+	                           void* buffer, 
+                               const size_t size,
+                               const size_t offset);
+    OS_RETURN_E (*write_blocks)(const void* device, 
+                                const uint32_t block_id,
+	                            const void* buffer, 
+                                const size_t size,
+                                const size_t offset);
+    OS_RETURN_E (*flush_blocks)(const void* device, 
+                                const uint32_t block_id,
+                                const size_t size,
+                                const size_t offset);
+    
+    size_t block_size;
 };
 
 typedef struct vfs_device vfs_device_t;
@@ -66,9 +101,9 @@ struct vfs_partition
     char                  name[VFS_PART_NAME_LENGTH];
 
     vfs_device_t*         device;
-    vfs_fs_driver_t*      fs_type;
+    vfs_fs_driver_t*      fs_driver;
 
-    uint64_t              block_start;
+    uint64_t              first_block;
     size_t                size;
 };
 
@@ -83,22 +118,10 @@ struct vfs_mount_point
 
 typedef struct vfs_mount_point vfs_mount_point_t;
 
-struct vfs_timedate
-{
-    uint8_t  day;
-    uint8_t  month;
-    uint16_t year;
 
-    uint8_t hours;
-    uint8_t minutes;
-    uint8_t seconds;
+typedef uint16_t vfs_access_right_t;
 
-    uint8_t timezone_shift;
-};
-
-typedef struct vfs_timedate vfs_timedate_t;
-
-typedef struct vfs_file
+typedef struct vfs_vnode
 {
     VFS_FILE_TYPE_E type;
 
@@ -106,26 +129,67 @@ typedef struct vfs_file
     char name[VFS_FILE_NAME_LENGTH];
     char short_name[VFS_FILE_SHORT_NAME_LENGTH];
 
-    uint32_t access_rights;
+    vfs_access_right_t access_rights;
 
-    uint64_t block_start;
+    uint8_t  owner_id;
+    uint8_t  group_id;
+
+    char     owner_name[VFS_OWNER_NAME_LENGTH];
+    char     group_name[VFS_GROUP_NAME_LENGTH];
+
     size_t   size;
 
-    vfs_timedate_t creation_datetime;
-    vfs_timedate_t last_access_datetime;
-    vfs_timedate_t last_modification_datetime;
+    uint64_t creation_datetime;
+    uint64_t last_access_datetime;
+    uint64_t last_modification_datetime;
 
-    uint64_t children_count;
+    vfs_partition_t* partition;
+    void* fs_inode;
+} vfs_vnode_t;
 
-    struct vfs_file* parent;
-    struct vfs_file* first_child;
-    struct vfs_file* next;
-} vfs_file_t;
+typedef struct vfs_ftable_entry
+{
+    uint32_t reference_count;
+
+    uint64_t cursor;
+
+    uint16_t open_rights;
+
+    vfs_vnode_t* vnode;
+} vfs_ftable_entry_t;
 
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
 
-/* None */
+OS_RETURN_E vfs_mount(const char* part_path,
+                      const char* mount_pt);
+
+OS_RETURN_E vfs_umount(const char* part_path);
+
+OS_RETURN_E vfs_open_file(const char* path,
+                          vfs_ftable_entry_t* file_descriptor);
+
+OS_RETURN_E vfs_close_file(const vfs_ftable_entry_t* file_descriptor);
+
+OS_RETURN_E vfs_read_file(const vfs_ftable_entry_t* file_descriptor,
+                          const size_t size,
+                          void* buffer,
+                          size_t* actual_size);
+
+OS_RETURN_E vfs_write_file(const vfs_ftable_entry_t* file_descriptor,
+                           const size_t size,
+                           const void* buffer,
+                           size_t* actual_size);
+
+OS_RETURN_E vfs_create_file(const char* path);
+
+OS_RETURN_E vfs_remove_file(const char* path);
+
+OS_RETURN_E vfs_rename_file(const char* old_path,
+                            const char* new_name);
+
+OS_RETURN_E vfs_truncate_file(const char* path,
+                              const size_t new_size);
 
 #endif /* #ifndef __DRIVERS_VIRT_FS_H_ */
