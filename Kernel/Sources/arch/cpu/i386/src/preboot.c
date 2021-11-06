@@ -30,6 +30,9 @@
 #include <test_bank.h>
 #endif
 
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
+
 /*******************************************************************************
  * CONSTANTS
  ******************************************************************************/
@@ -52,11 +55,11 @@ static char hex_table[] =
 
 extern uintptr_t _kernel_multiboot_ptr;
 
-extern uint8_t _KERNEL_MULTIBOOT_MEM_ADDR;
+extern uint8_t* _KERNEL_MULTIBOOT_MEM_ADDR;
 
 extern uint8_t _KERNEL_MULTIBOOT_MEM_SIZE;
 
-extern uint8_t _KERNEL_INITRD_MEM_ADDR;
+extern uint8_t* _KERNEL_INITRD_MEM_ADDR;
 
 extern uint8_t _KERNEL_INITRD_MEM_SIZE;
 
@@ -236,14 +239,18 @@ static void copy_multiboot(void)
                     printf_vga("ERROR: Cannot load multiple INITRD", 80);
                 }
                 initrd_src_addr = (uint8_t*)module_tag->mod_start;
-                initrd_dst_addr = &_KERNEL_INITRD_MEM_ADDR - KERNEL_MEM_OFFSET;
+                initrd_dst_addr = (uint8_t*)&_KERNEL_INITRD_MEM_ADDR - 
+                                  KERNEL_MEM_OFFSET;
                 
-                printf_vga("Loading INITRD from 0x", 22);   
+                printf_vga("Copy INITRD 0x", 14);
                 uitoa((uintptr_t)module_tag->mod_start, buff, 16);
                 printf_vga(buff, 8);
-                printf_vga(" at 0x", 6);  
-                uitoa((uintptr_t)initrd_dst_addr, buff, 16);
-                printf_vga(buff, 44); 
+                printf_vga(" -> 0x", 6);
+                uitoa((uintptr_t)module_tag->mod_end, buff, 16);
+                printf_vga(buff, 8);
+                printf_vga(" to 0x", 6);
+                uitoa((uintptr_t)module_start_addr, buff, 16);
+                printf_vga(buff, 38);
 
                 initrd_found = TRUE;
 
@@ -328,3 +335,5 @@ void kernel_preboot(void)
         while(1);
     }
 }
+
+#pragma GCC pop_options

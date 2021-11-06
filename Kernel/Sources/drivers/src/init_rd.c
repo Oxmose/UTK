@@ -121,7 +121,7 @@ OS_RETURN_E initrd_init_device(initrd_device_t* device)
     current_dev.end_addr = device->end_addr;
 
     KERNEL_DEBUG(INITRD_DEBUG_ENABLED, 
-                 "[INITRD] Initialized INITRD at 0x%p->ox%p, size: 0x%X", 
+                 "[INITRD] Initialized INITRD at 0x%p->0x%p, size: 0x%X", 
                  device->start_addr,
                  device->end_addr,
                  device->size);

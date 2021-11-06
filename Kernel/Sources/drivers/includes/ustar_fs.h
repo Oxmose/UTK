@@ -40,47 +40,33 @@
  ******************************************************************************/
 
 OS_RETURN_E ustart_mount(vfs_partition_t* partition,
-                         vfs_mount_point_t* mount_pt);
+                         const char* mount_pt);
 
-OS_RETURN_E ustart_umount(vfs_partition_t* partition,
-                          vfs_mount_point_t* mount_pt);
+OS_RETURN_E ustar_umount(vfs_partition_t* partition);
 
-OS_RETURN_E ustart_open_file(const vfs_partition_t* partition,
-                             vfs_file_t* file_descriptor,
-                             const char* path,
-                             const char* filename);
+OS_RETURN_E ustar_open_file(const char* path, 
+                            vfs_vnode_t* vnode);
 
-OS_RETURN_E ustart_close_file(const vfs_partition_t* partition,
-                              const vfs_file_t* file_descriptor);
+OS_RETURN_E ustar_close_file(const vfs_vnode_t* vnode);
 
-OS_RETURN_E ustart_read_file(const vfs_partition_t* partition,
-                             const vfs_file_t* file_descriptor,
-                             const uint32_t byte_offset,
-                             const uint32_t size,
-                             uint8_t* buffer);
+OS_RETURN_E ustar_read_file(const vfs_vnode_t* vnode,
+                            void* buffer,
+                            size_t size,                            
+                            size_t* actual_size);
 
-OS_RETURN_E ustart_write_file(const vfs_partition_t* partition,
-                              vfs_file_t* file_descriptor,
-                              const uint32_t offset,
-                              const uint32_t size,
-                              const uint8_t* write_buffer);
+OS_RETURN_E ustar_write_file(const vfs_vnode_t* vnode,
+                             const void* buffer,
+                             size_t size,                             
+                             size_t* actual_size);
 
-OS_RETURN_E ustart_create_file(const vfs_partition_t* partition,
-                               vfs_file_t* file_descriptor);
+OS_RETURN_E ustar_remove_file(const vfs_vnode_t* vnode, const char* path);
 
-OS_RETURN_E ustart_remove_file(const vfs_partition_t* partition,
-                               vfs_file_t* file_descriptor);
+OS_RETURN_E ustar_rename_file(const vfs_vnode_t* vnode,
+                              const char* old_path,
+                              const char* new_path);
 
-OS_RETURN_E ustart_rename_file(const vfs_partition_t* partition,
-                               vfs_file_t* file_descriptor,
-                               const char* new_name);
-
-OS_RETURN_E ustart_truncate_file(const vfs_partition_t* partition,
-                                 vfs_file_t* file_descriptor,
-                                 const uint32_t new_size);
-
-OS_RETURN_E ustart_move_file(const vfs_partition_t* partition,
-                             vfs_file_t* file_descriptor,
-                             const char* new_path);
+OS_RETURN_E ustar_truncate_file(const vfs_vnode_t* vnode,
+                                const char* path,
+                                const size_t new_size);
 
 #endif /* #ifndef __DRIVERS_USTAR_FS_H_ */

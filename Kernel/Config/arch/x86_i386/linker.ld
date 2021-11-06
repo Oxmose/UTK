@@ -27,8 +27,8 @@ MEMORY
     KERNEL_RW_DATA          (rw)    :   ORIGIN = 0xE0210000,    LENGTH = 512K
     KERNEL_STACKS           (rw)    :   ORIGIN = 0xE0310000,    LENGTH = 32K
     KERNEL_HEAP             (rw)    :   ORIGIN = 0xE0318000,    LENGTH = 10M    
-    KERNEL_MULTIBOOT_MEM    (rw)    :   ORIGIN = 0xE0D18000,    LENGTH = 4K
-    KERNEL_INITRD_MEM       (rw)    :   ORIGIN = 0xE0D19000,    LENGTH = 4K
+    KERNEL_MULTIBOOT_MEM    (rw)    :   ORIGIN = 0xE0D18000,    LENGTH = 64K
+    KERNEL_INITRD_MEM       (rw)    :   ORIGIN = 0xE0D28000,    LENGTH = 64K
     KERNEL_RECUR_PG_TABLE   (rw)    :   ORIGIN = 0xFFC00000,    LENGTH = 4M 
     KERNEL_RECUR_PG_DIR     (rw)    :   ORIGIN = 0xFFFFF000,    LENGTH = 4K  
 }

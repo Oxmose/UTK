@@ -95,7 +95,11 @@ enum OS_RETURN
     /** @brief Tried to use an unauthorized interrupt line. */
     OR_ERR_UNAUTHORIZED_INTERRUPT_LINE     = 19,
     /** @brief Allignement error. */
-    OS_ERR_ALIGN                           = 20
+    OS_ERR_ALIGN                           = 20,
+    /** @brief Tried to use a wrong partition type. */
+    OS_ERR_WRONG_PARTITION_TYPE            = 21,
+    /** @brief File was not found. */
+    OS_ERR_FILE_NOT_FOUND                  = 22,
 };
 
 /**
