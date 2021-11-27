@@ -23,7 +23,7 @@ char *strcpy(char *dst, const char *src)
 
     do {
         *q++ = ch = *p++;
-    } while (ch);
+    }while (ch);
 
     return dst;
 }

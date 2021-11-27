@@ -312,7 +312,7 @@ void uart_write(const uint32_t port, const uint8_t data)
     uint32_t int_state;
     /* Wait for empty transmit */
     ENTER_CRITICAL(int_state);
-    while((cpu_inb(SERIAL_LINE_STATUS_PORT(port)) & 0x20) == 0);
+    while((cpu_inb(SERIAL_LINE_STATUS_PORT(port)) & 0x20) == 0){}
     if(data == '\n')
     {
         uart_write(port, '\r');
@@ -428,7 +428,7 @@ uint8_t uart_read(const uint32_t port)
 
     /* Wait for data to be received */
     ENTER_CRITICAL(int_state);
-    while (uart_received(port) == 0);
+    while(uart_received(port) == 0){}
     
 
     /* Read available data on port */

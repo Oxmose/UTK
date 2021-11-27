@@ -277,7 +277,7 @@ __qdivrem(uint64_t uq, uint64_t vq, uint64_t *arq)
 			u[j] = (digit)LHALF(u[j] + t);
 		}
 		q[j] = (digit)qhat;
-	} while (++j <= m);		/* D7: loop on j. */
+	}while (++j <= m);		/* D7: loop on j. */
 
 	/*
 	 * If caller wants the remainder, we have to calculate it as

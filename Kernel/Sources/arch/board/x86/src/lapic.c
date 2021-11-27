@@ -381,7 +381,7 @@ OS_RETURN_E lapic_send_ipi_init(const uint32_t lapic_id)
                 ICR_ASSERT | ICR_EDGE | ICR_NO_SHORTHAND);
 
     /* Wait for pending sends */
-    while ((lapic_read(LAPIC_ICRLO) & ICR_SEND_PENDING) != 0);
+    while((lapic_read(LAPIC_ICRLO) & ICR_SEND_PENDING) != 0){}
 
     EXIT_CRITICAL(int_state);
 
@@ -416,7 +416,7 @@ OS_RETURN_E lapic_send_ipi_startup(const uint32_t lapic_id,
     lapic_write(LAPIC_ICRLO, (vector & 0xFF) | ICR_STARTUP | ICR_PHYSICAL |
                 ICR_ASSERT | ICR_EDGE | ICR_NO_SHORTHAND);
     /* Wait for pending sends */
-    while ((lapic_read(LAPIC_ICRLO) & ICR_SEND_PENDING) != 0);
+    while ((lapic_read(LAPIC_ICRLO) & ICR_SEND_PENDING) != 0){}
 
     EXIT_CRITICAL(int_state);
 
@@ -451,7 +451,7 @@ OS_RETURN_E lapic_send_ipi(const uint32_t lapic_id, const uint32_t vector)
                 ICR_ASSERT | ICR_EDGE | ICR_NO_SHORTHAND);
 
     /* Wait for pending sends */
-    while ((lapic_read(LAPIC_ICRLO) & ICR_SEND_PENDING) != 0);
+    while((lapic_read(LAPIC_ICRLO) & ICR_SEND_PENDING) != 0){}
 
     EXIT_CRITICAL(int_state);
 
@@ -504,7 +504,7 @@ void lapic_timer_init(void)
     pit_enable();
 
     kernel_interrupt_restore(1);
-    while(wait_int != 0);
+    while(wait_int != 0){}
     kernel_interrupt_disable();
 
     pit_disable();

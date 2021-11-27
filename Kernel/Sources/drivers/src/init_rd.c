@@ -59,9 +59,9 @@ typedef struct initrd_master_block initrd_master_block_t;
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-extern uint8_t _KERNEL_INITRD_MEM_ADDR;
+extern initrd_master_block_t _KERNEL_INITRD_MEM_ADDR;
 
-extern uint8_t _KERNEL_INITRD_MEM_SIZE;
+extern uint32_t _KERNEL_INITRD_MEM_SIZE;
 
 static initrd_device_t current_dev;
 

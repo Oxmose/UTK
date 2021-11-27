@@ -332,7 +332,7 @@ void time_wait_no_sched(const uint32_t ms)
         return;
     }
     active_wait[cpu_id] = ms;
-    while(active_wait[cpu_id] > 0);
+    while(active_wait[cpu_id] > 0){}
 }
 
 OS_RETURN_E time_register_scheduler(void(*scheduler_call)(
