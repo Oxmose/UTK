@@ -635,7 +635,7 @@ static void create_idle(void)
     }
     
     /* Initializes the scheduler active thread */
-    idle_thread->state = SYSTEM_STATE_RUNNING;
+    idle_thread->state = THREAD_STATE_READY;
     active_thread      = idle_thread;
     active_thread_node = queue_find(
         active_threads_table[idle_thread->priority], 
@@ -757,7 +757,7 @@ static void select_thread(void)
             }
             break;
         }
-    } while(sleeping_node != NULL);
+    }while(sleeping_node != NULL);
 
     /* Get the new thread */
     for(i = 0; i < KERNEL_LOWEST_PRIORITY + 1; ++i)

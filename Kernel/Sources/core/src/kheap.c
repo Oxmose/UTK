@@ -249,7 +249,7 @@ __extension__                                      \
          __typeof__(*h)* it = CONTAINER(__typeof__(*h), l, iter_##it);  \
 
 #define LIST_ITERATOR_END(it)                        \
-    } while((iter_##it = next_##it));                \
+    }while((iter_##it = next_##it));                \
 }
 
 #define LIST_ITERATOR_REMOVE_FROM(h, it, l) LIST_REMOVE_FROM(h, iter_##it, l)

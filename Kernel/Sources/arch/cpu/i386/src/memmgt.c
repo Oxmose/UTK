@@ -125,7 +125,7 @@ extern uint8_t _KERNEL_HEAP_BASE;
 /** @brief Kernel symbols mapping: Heap address end. */
 extern uint8_t _KERNEL_HEAP_SIZE;
 /** @brief Kernel multiboot structures memory address. */
-extern uint8_t _KERNEL_MULTIBOOT_MEM_ADDR;
+extern uint32_t _KERNEL_MULTIBOOT_MEM_ADDR;
 /** @brief Kernel multiboot structures memory size. */
 extern uint8_t _KERNEL_MULTIBOOT_MEM_SIZE;
 /** @brief Kernel init ram disk memory address. */
@@ -135,7 +135,7 @@ extern uint8_t _KERNEL_INITRD_MEM_SIZE;
 /** @brief Kernel memory end address. */
 extern uint8_t _KERNEL_MEMORY_END;
 /** @brief Kernel recursive mapping address for page tables */
-extern uint8_t _KERNEL_RECUR_PG_TABLE_BASE;
+extern uint32_t _KERNEL_RECUR_PG_TABLE_BASE;
 /** @brief Kernel recursive mapping address for page directory */
 extern uint8_t *_KERNEL_RECUR_PG_DIR_BASE;
 
@@ -1055,8 +1055,8 @@ static void memory_get_multiboot_range(uintptr_t* start, uintptr_t* end)
     }
     if(end != NULL)
     {
-        *end = (uintptr_t)&_KERNEL_MULTIBOOT_MEM_ADDR + 
-               (uintptr_t)&_KERNEL_MULTIBOOT_MEM_SIZE;
+        *end = ((uintptr_t)&_KERNEL_MULTIBOOT_MEM_ADDR) + 
+               ((uintptr_t)&_KERNEL_MULTIBOOT_MEM_SIZE);
     }
 }
 
@@ -1115,8 +1115,8 @@ static void print_kernel_map(void)
                     &_KERNEL_HEAP_BASE + (uintptr_t)&_KERNEL_HEAP_SIZE,
                     ((uintptr_t)&_KERNEL_HEAP_SIZE) >> 10);
     KERNEL_INFO("Multiboot       0x%p -> 0x%p | "PRIPTR"KB\n",
-                    &_KERNEL_MULTIBOOT_MEM_ADDR,
-                    &_KERNEL_MULTIBOOT_MEM_ADDR + 
+                    (uintptr_t)&_KERNEL_MULTIBOOT_MEM_ADDR,
+                    ((uintptr_t)&_KERNEL_MULTIBOOT_MEM_ADDR) + 
                     (uintptr_t)&_KERNEL_MULTIBOOT_MEM_SIZE,
                     ((uintptr_t)&_KERNEL_MULTIBOOT_MEM_SIZE) >> 10);
     KERNEL_INFO("INITRD          0x%p -> 0x%p | "PRIPTR"KB\n",
@@ -1163,7 +1163,7 @@ static void detect_memory(void)
     /* Get multiboot data */
     multiboot_info_size = *(uint32_t*)&_KERNEL_MULTIBOOT_MEM_ADDR;
     multiboot_tag = (struct multiboot_tag*)
-                    ((uintptr_t)&_KERNEL_MULTIBOOT_MEM_ADDR + 8);
+                    (((uintptr_t)&_KERNEL_MULTIBOOT_MEM_ADDR) + 8);
 
     KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
                  "[MEMMGT] Memory configuration size 0x%p", 
@@ -1172,7 +1172,7 @@ static void detect_memory(void)
     /* Search for memory information */
     available_memory = 0;
     while((uintptr_t)multiboot_tag < 
-          (uintptr_t)&_KERNEL_MULTIBOOT_MEM_ADDR + multiboot_info_size)
+          ((uintptr_t)&_KERNEL_MULTIBOOT_MEM_ADDR) + multiboot_info_size)
     {
         entry_size = ((multiboot_tag->size + 7) & ~7);
         KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, 
@@ -1687,7 +1687,7 @@ static OS_RETURN_E memory_invocate_cow(const uintptr_t addr)
     if((pgdir_rec_addr[pgdir_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
     {
         /* Check present in page table */
-        pgtable = (uintptr_t*)(&_KERNEL_RECUR_PG_TABLE_BASE + 
+        pgtable = (uintptr_t*)(((uintptr_t)&_KERNEL_RECUR_PG_TABLE_BASE) + 
                                 KERNEL_PAGE_SIZE * 
                                 pgdir_entry);
         if((pgtable[pgtable_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0 &&
@@ -1853,7 +1853,7 @@ static bool_t is_mapped(const uintptr_t start_addr, const size_t size)
         if((pgdir_rec_addr[pgdir_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
         {
              /* Check present in page table */
-            pgtable = (uintptr_t*)(&_KERNEL_RECUR_PG_TABLE_BASE + 
+            pgtable = (uintptr_t*)(((uintptr_t)&_KERNEL_RECUR_PG_TABLE_BASE) + 
                                    KERNEL_PAGE_SIZE * 
                                    pgdir_entry);
             if((pgtable[pgtable_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
@@ -2083,7 +2083,7 @@ static void kernel_mmap_internal(const void* virt_addr,
                 PG_DIR_FLAG_PAGE_PRESENT;
 
             /* Get recursive virtual address */
-            pgtable = (uint32_t*)(&_KERNEL_RECUR_PG_TABLE_BASE + 
+            pgtable = (uint32_t*)(((uintptr_t)&_KERNEL_RECUR_PG_TABLE_BASE) + 
                                   KERNEL_PAGE_SIZE * 
                                   pgdir_entry);
 
@@ -2096,7 +2096,7 @@ static void kernel_mmap_internal(const void* virt_addr,
         else 
         {
             /* Get recursive virtual address */
-            pgtable = (uint32_t*)(&_KERNEL_RECUR_PG_TABLE_BASE + 
+            pgtable = (uint32_t*)(((uintptr_t)&_KERNEL_RECUR_PG_TABLE_BASE) + 
                                   KERNEL_PAGE_SIZE * 
                                   pgdir_entry);
         }
@@ -2142,7 +2142,7 @@ static void kernel_mmap_internal(const void* virt_addr,
 
             /* Check page directory presence and allocate if not present */
             pgdir_rec_addr = (uint32_t*)&_KERNEL_RECUR_PG_DIR_BASE;
-            pgtable = (uint32_t*)(&_KERNEL_RECUR_PG_TABLE_BASE + 
+            pgtable = (uint32_t*)(((uintptr_t)&_KERNEL_RECUR_PG_TABLE_BASE) + 
                                     KERNEL_PAGE_SIZE * 
                                     pgdir_entry);
             phys_align = pgtable[pgtable_entry] &  PG_ENTRY_ADDR_MASK;
@@ -2282,6 +2282,8 @@ void memory_manager_init(void)
 {
     queue_node_t* cursor;
     mem_range_t*  mem_range;
+
+    (void)mem_range;
 
     /* Print inital memory mapping */
     print_kernel_map();
@@ -2602,7 +2604,7 @@ void memory_munmap(void* virt_addr,
         if((pgdir_rec_addr[pgdir_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
         {
             /* Get recursive virtual address */
-            pgtable = (uint32_t*)(&_KERNEL_RECUR_PG_TABLE_BASE + 
+            pgtable = (uint32_t*)(((uintptr_t)&_KERNEL_RECUR_PG_TABLE_BASE) + 
                                   KERNEL_PAGE_SIZE * 
                                   pgdir_entry);
 
@@ -2772,7 +2774,7 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process,
         if((current_pgdir[i] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
         {
             /* Get recursive virtual address */
-            current_pgtable = (uintptr_t*)(&_KERNEL_RECUR_PG_TABLE_BASE + 
+            current_pgtable = (uintptr_t*)(((uintptr_t)&_KERNEL_RECUR_PG_TABLE_BASE) + 
                                            KERNEL_PAGE_SIZE * 
                                            i);
 
@@ -2859,7 +2861,7 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process,
             if((current_pgdir[i] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
             {
                 /* Get recursive virtual address */
-                current_pgtable = (uintptr_t*)(&_KERNEL_RECUR_PG_TABLE_BASE + 
+                current_pgtable = (uintptr_t*)(((uintptr_t)&_KERNEL_RECUR_PG_TABLE_BASE) + 
                                             KERNEL_PAGE_SIZE * 
                                             i);
 
@@ -3082,7 +3084,7 @@ uintptr_t memory_get_phys_addr(const uintptr_t virt_addr)
     if((pgdir_rec_addr[pgdir_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
     {
             /* Check present in page table */
-        pgtable = (uint32_t*)(&_KERNEL_RECUR_PG_TABLE_BASE + 
+        pgtable = (uint32_t*)(((uintptr_t)&_KERNEL_RECUR_PG_TABLE_BASE) + 
                                 KERNEL_PAGE_SIZE * 
                                 pgdir_entry);
         if((pgtable[pgtable_entry] & PG_DIR_FLAG_PAGE_PRESENT) != 0)

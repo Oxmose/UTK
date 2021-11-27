@@ -52,7 +52,7 @@ void *memmem(const void *haystack, size_t n, const void *needle, size_t m)
             if (*y == *x)
                 return (void *)y;
             y++;
-        } while (--n);
+        }while (--n);
 
     return NULL;
 }

@@ -13,20 +13,18 @@
 include dependencies.mk
 include ../../../global/settings.mk
 
+rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
+
 # Variables definitions
 SRC_DIR    = src
 BUILD_DIR  = ../build
 ARCH_BUILD_DIR = ../../build
 GLOBAL_CONFIG_DIR = ../../../global
 
-INC_DIR    = includes
+INC_DIR  = includes
 
-SRC_DEP = $(sort $(dir $(wildcard $(SRC_DIR)/*/)))
-
-SRC_DIRS = $(sort $(dir $(wildcard $(SRC_DIR)/*/)))
-
-C_SRCS = $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)*.c))
-A_SRCS = $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)*.S))
+C_SRCS = $(call rwildcard,$(SRC_DIR),*.c)
+A_SRCS = $(call rwildcard,$(SRC_DIR),*.S)
 C_OBJS = $(C_SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 A_OBJS = $(A_SRCS:$(SRC_DIR)/%.S=$(BUILD_DIR)/%.o)
 

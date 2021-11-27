@@ -259,7 +259,7 @@ static void copy_multiboot(void)
                    module_tag->mod_end - module_tag->mod_start)
                 {
                     printf_vga(" ", 80);
-                    printf_vga("ERROR: Allocated memory is for initrd is too "
+                    printf_vga("ERROR: Allocated memory for initrd is too "
                                "small", 80);
                     while(1);
                 }
