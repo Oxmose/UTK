@@ -12,6 +12,8 @@
 
 static volatile uint32_t counter;
 
+#define PIT_INIT_FREQ   100
+
 static void pit_handler(cpu_state_t* cpu, uint32_t id, stack_state_t* stack)
 {
     (void)cpu;

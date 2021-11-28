@@ -72,6 +72,7 @@ build_kernel:
 	@echo "\e[1m\e[34m| Generated kernel for target $(target)\e[22m\e[39m"
 	@echo "\e[1m\e[34m#-------------------------------------------------------------------------------\n\e[22m\e[39m"
 
+	@chmod +x $(CONFIG_DIR)/arch/x86_i386/create_initrd.sh
 	$(CONFIG_DIR)/arch/x86_i386/create_initrd.sh $(BUILD_DIR)
 
 clean:

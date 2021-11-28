@@ -11,6 +11,13 @@
 #include <panic.h>
 #include <interrupt_settings.h>
 
+/** @brief Initial RTC tick rate. */
+#define RTC_INIT_RATE 10
+/** @brief RTC minimal frequency. */
+#define RTC_MIN_FREQ 2
+/** @brief RTC maximal frequency. */
+#define RTC_MAX_FREQ 8192
+
 void rtc_test3(void)
 {
     rtc_set_frequency(RTC_MAX_FREQ + 1);

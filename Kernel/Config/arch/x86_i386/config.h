@@ -46,7 +46,7 @@
 #define ERROR_LOG_LEVEL   1
 #define NONE_LOG_LEVEL    0
 
-#define KERNEL_LOG_LEVEL NONE_LOG_LEVEL
+#define KERNEL_LOG_LEVEL DEBUG_LOG_LEVEL
 
 /* Defines the kernel frame and page size */ 
 #define KERNEL_FRAME_SIZE 0x1000

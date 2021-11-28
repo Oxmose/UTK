@@ -9,6 +9,8 @@
 #include <kernel_output.h>
 #include <cpu.h>
 #include <lapic.h>
+#include <stdint.h>
+#include <stddef.h>
 
 static volatile uint32_t counter;
 

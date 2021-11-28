@@ -85,9 +85,9 @@ void update_shell(uint32_t freq)
 UTK - Shell v0.1            00:00:00 Wed 01/02/2022                   CPU: 100%
 */
     /* Draw the top line */
-    scheme.background = BG_DARKGREY;
-    scheme.foreground = FG_CYAN;
-    scheme.vga_color  = 1;
+    scheme.background = BG_CYAN;
+    scheme.foreground = FG_BLACK;
+    scheme.vga_color  = 0;
     graphic_set_color_scheme(scheme);
     graphic_put_cursor_at(0, 0);
     kernel_printf(" UTK - Shell v0.1               ");
@@ -108,25 +108,9 @@ UTK - Shell v0.1            00:00:00 Wed 01/02/2022                   CPU: 100%
     last_idle_sched_count = idle_sched_count;
 }
 
-void* thread_func_test(void* args)
-{
-    (void)args;
-    while(1)
-    {
-        for(volatile int i = 0; i < 100000000; ++i)
-        {
-
-        }
-        sched_sleep(500);
-    }
-}
-
 /* Just a schell for fun */
 void init_shell(void)
 {
-    kernel_thread_t* new_thread;
-    sched_create_kernel_thread(&new_thread, 32, "test", THREAD_TYPE_KERNEL, 0x1000, thread_func_test, NULL);
-
     last_idle_sched_count = idle_sched_count;
     /* Clear screen */
     graphic_clear_screen();
@@ -134,8 +118,8 @@ void init_shell(void)
     /* Wait in loop */
     while(1) 
     {
-        update_shell(2);
-        sched_sleep(500);
+        update_shell(5);
+        sched_sleep(200);
     }
 }
 

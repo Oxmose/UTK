@@ -7,6 +7,8 @@
 #include <kernel_output.h>
 #include <cpu.h>
 #include <io_apic.h>
+#include <stdint.h>
+#include <stddef.h>
 
 void io_apic_test(void)
 {
