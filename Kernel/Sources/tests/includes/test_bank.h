@@ -28,10 +28,6 @@ void kill_qemu(void);
 #define BOOT_TEST 0
 #define INTERRUPT_TEST 0
 #define EXCEPTION_TEST 0
-#define MEMMGR_TEST 0
-#define MEMMGR_TEST2 0
-#define MEMMGR_TEST3 0
-#define MEMMGR_TEST4 0
 #define PAGING_TEST 0
 #define BIOS_CALL_TEST 0
 #define ACPI_TEST 0
@@ -57,10 +53,6 @@ void tss_test(void);
 void boot_test(void);
 void interrupt_test(void);
 void exception_test(void);
-void memmgr_test(void);
-void memmgr_test2(void);
-void memmgr_test3(void);
-void memmgr_test4(void);
 void paging_test(void);
 void bios_call_test(void);
 void acpi_test(void);

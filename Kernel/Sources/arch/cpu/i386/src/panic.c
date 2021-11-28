@@ -342,16 +342,6 @@ void panic(cpu_state_t* cpu_state, uintptr_t int_id, stack_state_t* stack_state)
 
     cpu_clear_interrupt();
 
-#ifdef TEST_MODE_ENABLED
-    kernel_printf("\n[TESTMODE] PANIC\n");
-    /* Kill QEMU */
-    cpu_outw(0x2000, 0x604);    
-    while(1)
-    {
-        __asm__ ("hlt");
-    }
-#endif
-
     panic_scheme.background = BG_BLACK;
     panic_scheme.foreground = FG_CYAN;
     panic_scheme.vga_color  = 1;
@@ -369,6 +359,16 @@ void panic(cpu_state_t* cpu_state, uintptr_t int_id, stack_state_t* stack_state)
     {
         error_code = stack_state->error_code;
     }
+
+#ifdef TEST_MODE_ENABLED
+    kernel_printf("\n[TESTMODE] PANIC %d\n", error_code);
+    /* Kill QEMU */
+    cpu_outw(0x2000, 0x604);    
+    while(1)
+    {
+        __asm__ ("hlt");
+    }
+#endif
 
     process = sched_get_current_process();
     thread = sched_get_current_thread();

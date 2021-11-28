@@ -25,6 +25,7 @@
 #include <stdint.h>         /* Generic int types */
 #include <stddef.h>         /* Standard definitions */
 #include <cpu_settings.h>   /* CPU structures */
+#include <kernel_error.h>   /* Kernel errors */
 
 /*******************************************************************************
  * CONSTANTS

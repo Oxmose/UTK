@@ -10,6 +10,8 @@
 #include <panic.h>
 #include <interrupt_settings.h>
 
+#define PIT_MIN_FREQ    20
+
 void pit_test2(void)
 {
 

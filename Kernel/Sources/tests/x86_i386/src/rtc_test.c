@@ -11,6 +11,13 @@
 #include <panic.h>
 #include <interrupt_settings.h>
 
+/** @brief Initial RTC tick rate. */
+#define RTC_INIT_RATE 10
+/** @brief RTC minimal frequency. */
+#define RTC_MIN_FREQ 2
+/** @brief RTC maximal frequency. */
+#define RTC_MAX_FREQ 8192
+
 static volatile uint32_t counter;
 static void rtc_handler(cpu_state_t* cpu, uint32_t id, stack_state_t* stack)
 {

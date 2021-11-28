@@ -211,8 +211,6 @@ void kernel_kickstart(void)
 
     /* First schedule, we should never return from here */
     sched_init();
-    KERNEL_SUCCESS("Scheduler initialized\n");
-
 
     KERNEL_ERROR("Kernel returned to kickstart\n");
     KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);

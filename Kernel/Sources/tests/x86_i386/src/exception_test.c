@@ -9,6 +9,7 @@
 #include <kernel_output.h>
 #include <cpu.h>
 #include <cpu_settings.h>
+#include <kernel_error.h>
 
 void end(void)
 {

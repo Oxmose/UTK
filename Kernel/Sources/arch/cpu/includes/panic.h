@@ -22,6 +22,7 @@
 
 #include <cpu_settings.h> /* CPU structures */
 #include <stdint.h>       /* Generic int types */
+#include <stddef.h>       /* Pointer types */
 
 /*******************************************************************************
  * CONSTANTS

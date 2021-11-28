@@ -10,6 +10,8 @@
 #include <panic.h>
 #include <interrupt_settings.h>
 
+#define PIT_MAX_FREQ    8000
+
 void pit_test3(void)
 {
 

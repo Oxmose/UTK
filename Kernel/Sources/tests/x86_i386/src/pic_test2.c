@@ -27,6 +27,8 @@
 #include <cpu.h>
 #include <pic.h>
 
+#define PIC_MAX_IRQ_LINE 15
+
 void pic_test2(void)
 {
     /* TEST MASK > MAX should panic */

@@ -27,6 +27,27 @@
 #include <cpu.h>
 #include <pic.h>
 
+/** @brief Offset of the first line of an IRQ interrupt from PIC. */
+#define INT_PIC_IRQ_OFFSET     0x30
+/** @brief Offset of the first line of an IRQ interrupt from IO-APIC. */
+#define INT_IOAPIC_IRQ_OFFSET  0x40
+
+/** @brief Master PIC CPU command port. */
+#define PIC_MASTER_COMM_PORT 0x20
+/** @brief Master PIC CPU data port. */
+#define PIC_MASTER_DATA_PORT 0x21
+/** @brief Slave PIC CPU command port. */
+#define PIC_SLAVE_COMM_PORT  0xa0
+/** @brief Slave PIC CPU data port. */
+#define PIC_SLAVE_DATA_PORT  0xa1
+
+#define PIC_MAX_IRQ_LINE 15
+
+/** @brief Master PIC spurious IRQ number. */
+#define PIC_SPURIOUS_IRQ_MASTER 0x07
+/** @brief Slave PIC spurious IRQ number. */
+#define PIC_SPURIOUS_IRQ_SLAVE  0x0F
+
 void pic_test(void)
 {
     uint8_t  pic0_mask;

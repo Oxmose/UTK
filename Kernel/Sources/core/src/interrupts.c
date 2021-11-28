@@ -275,7 +275,7 @@ OS_RETURN_E kernel_interrupt_register_int_handler(const uint32_t interrupt_line,
     if(interrupt_line < MIN_INTERRUPT_LINE ||
        interrupt_line > MAX_INTERRUPT_LINE)
     {
-        return OS_ERR_UNAUTHORIZED_ACTION;
+        return OR_ERR_UNAUTHORIZED_INTERRUPT_LINE;
     }
 
     if(handler == NULL)
@@ -311,7 +311,7 @@ OS_RETURN_E kernel_interrupt_remove_int_handler(const uint32_t interrupt_line)
     if(interrupt_line < MIN_INTERRUPT_LINE ||
        interrupt_line > MAX_INTERRUPT_LINE)
     {
-        return OS_ERR_UNAUTHORIZED_ACTION;
+        return OR_ERR_UNAUTHORIZED_INTERRUPT_LINE;
     }
 
     ENTER_CRITICAL(int_state);

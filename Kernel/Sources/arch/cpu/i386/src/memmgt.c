@@ -893,7 +893,7 @@ static void init_frame_ref_table(uintptr_t next_free_mem)
         if((mem_range->base & (KERNEL_FRAME_SIZE - 1)) != 0 ||
            (mem_range->limit & (KERNEL_FRAME_SIZE - 1)) != 0)
         {
-            KERNEL_ERROR("[MEMMGT] Memory manager cannot manage unaligned "
+            KERNEL_INFO("[MEMMGT] Memory manager cannot manage unaligned "
                          "memory 0x%p -> 0x%p, aligning to frame size\n",
                          mem_range->base,
                          mem_range->limit);
@@ -2320,13 +2320,6 @@ void memory_manager_init(void)
     }
     KERNEL_INFO("Total available memory: " PRIPTR "KB\n",
                  available_memory >> 10);
-
-#ifdef TEST_MODE_ENABLED
-    memmgr_test();
-    memmgr_test2();
-    memmgr_test3();
-    memmgr_test4();
-#endif
 
     paging_init();
 }

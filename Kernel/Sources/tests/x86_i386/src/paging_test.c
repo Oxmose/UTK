@@ -4,7 +4,6 @@
 
 #if PAGING_TEST == 1
 
-#include <paging.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stddef.h>
