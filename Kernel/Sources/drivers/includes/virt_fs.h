@@ -37,8 +37,8 @@
 #define VFS_GROUP_NAME_LENGTH      32
 
 #define VFS_RIGHTS_UREAD  0x100
-#define VFS_RIGHTS_UWRITE 0x800
-#define VFS_RIGHTS_UEXEC  0x400
+#define VFS_RIGHTS_UWRITE 0x080
+#define VFS_RIGHTS_UEXEC  0x040
 
 #define VFS_RIGHTS_GREAD  0x020
 #define VFS_RIGHTS_GWRITE 0x010
@@ -76,22 +76,24 @@ typedef struct vfs_fs_driver vfs_fs_driver_t;
 
 struct vfs_device
 {
-    OS_RETURN_E (*read_blocks)(const void* device, 
+    OS_RETURN_E (*read_blocks)(const struct vfs_device* device, 
                                const uint32_t block_id,
 	                           void* buffer, 
                                const size_t size,
                                const size_t offset);
-    OS_RETURN_E (*write_blocks)(const void* device, 
+    OS_RETURN_E (*write_blocks)(const struct vfs_device* device, 
                                 const uint32_t block_id,
 	                            const void* buffer, 
                                 const size_t size,
                                 const size_t offset);
-    OS_RETURN_E (*flush_blocks)(const void* device, 
+    OS_RETURN_E (*flush_blocks)(const struct vfs_device* device, 
                                 const uint32_t block_id,
                                 const size_t size,
                                 const size_t offset);
     
     size_t block_size;
+
+    void* device_data;
 };
 
 typedef struct vfs_device vfs_device_t;
@@ -143,6 +145,8 @@ typedef struct vfs_vnode
     uint64_t last_access_datetime;
     uint64_t last_modification_datetime;
 
+    size_t   cursor;
+
     vfs_partition_t* partition;
     void* fs_inode;
 } vfs_vnode_t;
@@ -182,7 +186,11 @@ OS_RETURN_E vfs_write_file(const vfs_ftable_entry_t* file_descriptor,
                            const void* buffer,
                            size_t* actual_size);
 
-OS_RETURN_E vfs_create_file(const char* path);
+OS_RETURN_E vfs_create_file(const char* path, 
+                            const VFS_FILE_TYPE_E type,
+                            const vfs_access_right_t access_rights,
+                            const char* owner_name,
+                            const char* group_name);
 
 OS_RETURN_E vfs_remove_file(const char* path);
 
@@ -191,5 +199,7 @@ OS_RETURN_E vfs_rename_file(const char* old_path,
 
 OS_RETURN_E vfs_truncate_file(const char* path,
                               const size_t new_size);
+
+OS_RETURN_E vfs_list_directory(const char* path);
 
 #endif /* #ifndef __DRIVERS_VIRT_FS_H_ */

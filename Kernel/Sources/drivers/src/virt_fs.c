@@ -21,7 +21,7 @@
 #include <stdint.h>        /* Generic int types */
 #include <stddef.h>        /* Standard definitions */
 #include <string.h>        /* Memory manipulation */
-#include <kernel_output.h> /* Kernel output mathods */
+#include <kernel_output.h> /* Kernel output methods */
 
 /* UTK configuration file */
 #include <config.h>

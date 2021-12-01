@@ -129,17 +129,40 @@ OS_RETURN_E initrd_init_device(initrd_device_t* device)
     return OS_NO_ERR;
 }
 
-OS_RETURN_E initrd_read_blocks(const initrd_device_t* device, 
+OS_RETURN_E initrd_get_device(initrd_device_t* device)
+{
+    /* INITRD was not initialized */
+    if(current_dev.size == 0)
+    {
+        return OS_ERR_NOT_INITIALIZED;
+    }
+
+    *device = current_dev;
+
+    return OS_NO_ERR;
+}
+
+OS_RETURN_E initrd_read_blocks(const vfs_device_t* device, 
                                const uint32_t block_id,
 	                           void* buffer, 
-                               const size_t size)
+                               const size_t size,
+                               const size_t offset)
 {
-    uintptr_t block_addr;
-    uintptr_t block_end_addr;
+    initrd_device_t* initrd_dev;
+    uintptr_t        block_addr;
+    uintptr_t        block_end_addr;
 
-    if(device->start_addr != current_dev.start_addr ||
-       device->end_addr != current_dev.end_addr ||
-       device->size != current_dev.size)
+    initrd_dev = (initrd_device_t*)device->device_data;
+
+    KERNEL_DEBUG(INITRD_DEBUG_ENABLED, 
+                 "[INITRD] Reading block 0x%p, size 0x%p, offset: 0x%X", 
+                 block_id,
+                 size,
+                 offset);
+
+    if(initrd_dev->start_addr != current_dev.start_addr ||
+       initrd_dev->end_addr != current_dev.end_addr ||
+       initrd_dev->size != current_dev.size)
     {
         KERNEL_ERROR("Wrong INITRD device\n");
         return OS_ERR_UNAUTHORIZED_ACTION;
@@ -148,7 +171,8 @@ OS_RETURN_E initrd_read_blocks(const initrd_device_t* device,
     /* We always skip the master block */
     block_addr = current_dev.start_addr +
                  block_id + 
-                 sizeof(initrd_master_block_t);
+                 sizeof(initrd_master_block_t) +
+                 offset;
     block_end_addr = block_addr + size;
 
     /* Check bounds */
@@ -163,17 +187,21 @@ OS_RETURN_E initrd_read_blocks(const initrd_device_t* device,
     return OS_NO_ERR;
 }
 
-OS_RETURN_E initrd_write_blocks(const initrd_device_t* device, 
+OS_RETURN_E initrd_write_blocks(const vfs_device_t* device, 
                                 const uint32_t block_id,
 	                            const void* buffer, 
-                                const size_t size)
+                                const size_t size,
+                                const size_t offset)
 {
-    uintptr_t block_addr;
-    uintptr_t block_end_addr;
+    initrd_device_t* initrd_dev;
+    uintptr_t        block_addr;
+    uintptr_t        block_end_addr;
 
-    if(device->start_addr != current_dev.start_addr ||
-       device->end_addr != current_dev.end_addr ||
-       device->size != current_dev.size)
+    initrd_dev = (initrd_device_t*)device->device_data;
+
+    if(initrd_dev->start_addr != current_dev.start_addr ||
+       initrd_dev->end_addr != current_dev.end_addr ||
+       initrd_dev->size != current_dev.size)
     {
         KERNEL_ERROR("Wrong INITRD device\n");
         return OS_ERR_UNAUTHORIZED_ACTION;
@@ -182,7 +210,8 @@ OS_RETURN_E initrd_write_blocks(const initrd_device_t* device,
     /* We always skip the master block */
     block_addr = current_dev.start_addr +
                  block_id + 
-                 sizeof(initrd_master_block_t);
+                 sizeof(initrd_master_block_t) + 
+                 offset;
     block_end_addr = block_addr + size;
 
     /* Check bounds */
@@ -197,9 +226,15 @@ OS_RETURN_E initrd_write_blocks(const initrd_device_t* device,
     return OS_NO_ERR;
 }
 
-OS_RETURN_E initrd_flush(const initrd_device_t* device)
+OS_RETURN_E initrd_flush(const vfs_device_t* device, 
+                         const uint32_t block_id,
+                         const size_t size,
+                         const size_t offset)
 {
     (void)device;
+    (void)block_id;
+    (void)size;
+    (void)offset;
     /* INIT Ram has no flush method */
     return OS_NO_ERR;
 }

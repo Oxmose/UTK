@@ -112,5 +112,6 @@
 #define VGA_DEBUG_ENABLED 0
 #define SYSCALL_DEBUG_ENABLED 0
 #define INITRD_DEBUG_ENABLED 0
+#define USTAR_DEBUG_ENABLED 0
 
 #endif /* #ifndef __GLOBAL_CONFIG_H_ */

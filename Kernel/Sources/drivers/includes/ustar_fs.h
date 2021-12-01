@@ -39,8 +39,8 @@
  * FUNCTIONS
  ******************************************************************************/
 
-OS_RETURN_E ustart_mount(vfs_partition_t* partition,
-                         const char* mount_pt);
+OS_RETURN_E ustar_mount(vfs_partition_t* partition,
+                        const char* mount_pt);
 
 OS_RETURN_E ustar_umount(vfs_partition_t* partition);
 
@@ -59,6 +59,12 @@ OS_RETURN_E ustar_write_file(const vfs_vnode_t* vnode,
                              size_t size,                             
                              size_t* actual_size);
 
+OS_RETURN_E ustar_create_file(const char* path, 
+                              const VFS_FILE_TYPE_E type,
+                              const vfs_access_right_t access_rights,
+                              const char* owner_name,
+                              const char* group_name);
+
 OS_RETURN_E ustar_remove_file(const vfs_vnode_t* vnode, const char* path);
 
 OS_RETURN_E ustar_rename_file(const vfs_vnode_t* vnode,
@@ -68,5 +74,9 @@ OS_RETURN_E ustar_rename_file(const vfs_vnode_t* vnode,
 OS_RETURN_E ustar_truncate_file(const vfs_vnode_t* vnode,
                                 const char* path,
                                 const size_t new_size);
+
+OS_RETURN_E ustar_list_directory(const vfs_vnode_t* vnode,
+                                 char* buffer, 
+                                 const size_t buff_size);
 
 #endif /* #ifndef __DRIVERS_USTAR_FS_H_ */

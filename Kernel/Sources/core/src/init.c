@@ -67,7 +67,7 @@ static volatile uint64_t idle_sched_count = 0;
  * FUNCTIONS
  ******************************************************************************/
 
-#if 1
+#if 0
 
 #include <graphic.h>
 #include <string.h>
@@ -139,6 +139,10 @@ void* init_sys(void* args)
                 sched_get_pid(), 
                 sched_get_tid());
 
+#ifdef TEST_MODE_ENABLED
+    ustar_test();
+#endif
+
     pid = fork();
 
     if(pid != 0)
@@ -149,7 +153,11 @@ void* init_sys(void* args)
     else 
     {
         /* Here we should load an elf and start another program */
-        init_shell();
+        //init_shell();
+        while(1)
+        {
+            sched_sleep(1000);
+        }
         return 0;
     }
 
