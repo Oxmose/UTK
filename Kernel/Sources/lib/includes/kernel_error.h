@@ -79,6 +79,10 @@ enum OS_RETURN
     OS_ERR_WRONG_PARTITION_TYPE            = 21,
     /** @brief File was not found. */
     OS_ERR_FILE_NOT_FOUND                  = 22,
+    /** @brief Directory is not empty. */
+    OS_ERR_DIR_NOT_EMPTY                   = 23,
+    /** @brief Name too long. */
+    OS_ERR_NAME_TOO_LONG                   = 24,
 };
 
 /**

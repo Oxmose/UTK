@@ -147,7 +147,7 @@ typedef struct vfs_vnode
 
     size_t   cursor;
 
-    vfs_partition_t* partition;
+    const vfs_partition_t* partition;
     void* fs_inode;
 } vfs_vnode_t;
 

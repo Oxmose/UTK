@@ -1,0 +1,49 @@
+[TESTMODE] USTAR Test begin
+[TESTMODE] Mounted USTAR partition
+[TESTMODE] Open file 1
+[TESTMODE] Open file 2
+[TESTMODE] Open file 3
+[TESTMODE] Open file 4
+[TESTMODE] Close file 1
+[TESTMODE] Close file 2
+[TESTMODE] folder1/, , folder1/, 0, 6, 511, alexy, alexy
+[TESTMODE] anotherfolder/
+[TESTMODE] myfile.file.txt
+[TESTMODE] newfile3.txt
+[TESTMODE] smallfile.txt
+[TESTMODE] Remove file 2
+[TESTMODE] folder1/, , folder1/, 0, 6, 511, alexy, alexy
+[TESTMODE] anotherfolder/
+[TESTMODE] myfile.file.txt
+[TESTMODE] newfile3.txt
+[TESTMODE] newfile3.txt, folder1/, newfile3.txt, 3080, 0, 511, alexy, alexy
+[TESTMODE] Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi porttitor, neque quis accumsan tincidunt, elit lectus ornare libero, sit amet consectetur magna neque nec leo. Ut ut efficitur enim. Curabitur ac placerat velit, ut consequat nulla. Mauris tincidunt, nisi sed condimentum interdum, sapien mauris facilisis est, a varius nunc velit sit amet odio. Cras semper enim vitae tellus eleifend, at varius magna tincidunt. Sed iaculis elit quis nisl laoreet ultrices. Nullam sed metus a mi luctus auctor convallis nec lectus. Morbi consectetur risus sit amet massa ullamcorper vestibulum. Sed quam neque, lacinia a risus eget, tincidunt ullamcorper magna. Cras venenatis est et est consequat volutpat. Cras vitae sodales ex. Nulla a pulvinar erat. Donec gravida congue enim vehicula pharetra. Donec justo risus, mattis in elementum sit amet, egestas id leo. Nunc lacinia mattis purus ut congue. Quisque lobortis orci purus, nec volutpat augue tempus sit amet.
+[TESTMODE] 
+[TESTMODE] Ut iaculis faucibus arcu, eget luctus velit dictum condimentum. Donec commodo scelerisque felis. Etiam rhoncus posuere pellentesque. Nulla nec ante mauris. Integer sollicitudin semper condimentum. Aliquam vel fringilla est. Phasellus in justo quam. Sed commodo leo metus, sed varius libero pellentesque quis. Sed tortor erat, pretium vitae nunc ac, sollicitudin cursus purus. Duis pulvinar, velit sed mollis mattis, tortor est vestibulum nisl, vitae fringilla velit nunc vel sapien. Ut et velit eget sem placerat pretium id et massa. Praesent at ligula erat. Donec ac luctus felis. Cras quis velit ut purus mattis viverra nec sed nisl.
+[TESTMODE] 
+[TESTMODE] Nullam quis arcu ipsum. Sed vel viverra erat, vel ornare urna. Etiam vitae ligula vitae lacus molestie volutpat in in arcu. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi mollis mi nisi, ac vulputate purus luctus non. Sed eros tortor, molestie elementum aliquet eu, laoreet in tortor. Proin dictum erat dolor, at pellentesque justo pellentesque sed. Phasellus ut turpis at turpis bibendum facilisis. Donec condimentum mauris erat, a congue diam tincidunt vel. Nam accumsan, felis vel pellentesque fringilla, dui nunc luctus metus, ut vulputate nisl lectus quis lacus.
+[TESTMODE] 
+[TESTMODE] Pellentesque dolor eros, ullamcorper vitae pharetra eget, lobortis sit amet nisi. Praesent in est libero. Nunc at elementum orci, at ultricies mauris. Quisque elementum eros ac sapien imperdiet, ac volutpat ex dictum. Vestibulum sit amet ante nisi. Vestibulum metus mauris, molestie ac ipsum nec, tristique elementum felis. Etiam lobortis justo ante, ut eleifend mi varius ut.
+[TESTMODE] 
+[TESTMODE] Phasellus id elementum dui. Vestibulum ut eros ut ligula maximus sollicitudin. Interdum et malesuada fames ac ante ipsum primis in faucibus. Maecenas tristique venenatis felis, id aliquet odio vestibulum et. Proin facilisis ornare leo, ac rhoncus justo tincidunt a. Mauris finibus justo eu finibus eleifend. Sed maximus ligula eu lorem malesuada viverra. Nulla sagittis convallis nibh vel accumsan.
+[TESTMODE] This should replace the old text
+[TESTMODE] This should replace the old text
+[TESTMODE] ttitor, neque quis accumsan tincidunt, elit lectus ornare libero, sit amet consectetur magna neque nec leo. Ut ut efficitur enim. Curabitur ac placerat velit, ut consequat nulla. Mauris tincidunt, nisi sed condimentum interdum, sapien mauris facilisis est, a varius nunc velit sit amet odio. Cras semper enim vitae tellus eleifend, at varius magna tincidunt. Sed iaculis elit quis nisl laoreet ultrices. Nullam sed metus a mi luctus auctor convallis nec lectus. Morbi consectetur risus sit amet massa ullamcorper vestibulum. Sed quam neque, lacinia a risus eget, tincidunt ullamcorper magna. Cras venenatis est et est consequat volutpat. Cras vitae sodales ex. Nulla a pulvinar erat. Donec gravida congue enim vehicula pharetra. Donec justo risus, mattis in elementum sit amet, egestas id leo. Nunc lacinia mattis purus ut congue. Quisque lobortis orci purus, nec volutpat augue tempus sit amet.
+[TESTMODE] 
+[TESTMODE] Ut iaculis faucibus arcu, eget luctus velit dictum condimentuThis should replace the old text
+[TESTMODE] s. Etiam rhoncus posuere pellentesque. Nulla nec ante mauris. Integer sollicitudin semper condimentum. Aliquam vel fringilla est. Phasellus in justo quam. Sed commodo leo metus, sed varius libero pellentesque quis. Sed tortor erat, pretium vitae nunc ac, sollicitudin cursus purus. Duis pulvinar, velit sed mollis mattis, tortor est vestibulum nisl, vitae fringilla velit nunc vel sapien. Ut et velit eget sem placerat pretium id et massa. Praesent at ligula erat. Donec ac luctus felis. Cras quis velit ut purus mattis viverra nec sed nisl.
+[TESTMODE] 
+[TESTMODE] Nullam quis arcu ipsum. Sed vel viverra erat, vel ornare urna. Etiam vitae ligula vitae lacus molestie volutpat in in arcu. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi mollis mi nisi, ac vulputate purus luctus non. Sed eros tortor, molestie elementum aliquet eu, laoreet in tortor. Proin dictum erat dolor, at pellentesque justo pellentesque sed. Phasellus ut turpis at turpis bibendum facilisis. Donec condimentum mauris erat, a congue diam tincidunt vel. Nam accumsan, felis vel pellentesque fringilla, dui nunc luctus metus, ut vulputate nisl lectus quis lacus.
+[TESTMODE] 
+[TESTMODE] Pellentesque dolor eros, ullamcorper vitae pharetra eget, lobortis sit amet nisi. Praesent in est libero. Nunc at elementum orci, at ultricies mauris. Quisque elementum eros ac sapien imperdiet, ac volutpat ex dictum. Vestibulum sit amet ante nisi. Vestibulum metus mauris, molestie ac ipsum nec, tristique elementum felis. Etiam lobortis justo ante, ut eleifend mi varius ut.
+[TESTMODE] 
+[TESTMODE] Phasellus id elementum dui. Vestibulum ut eros ut ligula maximus sollicitudin. Interdum et malesuada fames ac ante ipsum primis in faucibus. Maecenas tristique venenatis felis, id aliquet odio vestibulum et. Proin facilisis ornare leo, ac rhoncus justo tincidunt a. Mauris finibus justo eu finibus eleifend. Sed maximus ligula eu lorem malesuada viverra. Nulla sagittis convallis nibh vel accumsan.
+[TESTMODE] myfileinfolder - Copie.txt
+[TESTMODE] myfileinfolder.txt
+[TESTMODE] myfileinfolder - Copie.txt
+[TESTMODE] newfilenew.txt
+[TESTMODE] 
+[TESTMODE] anotherfolder/
+[TESTMODE] myfile.file.txt
+[TESTMODE] newfile3.txt
+[TESTMODE] Page fault at 0x00000020

@@ -65,17 +65,18 @@ OS_RETURN_E ustar_create_file(const char* path,
                               const char* owner_name,
                               const char* group_name);
 
-OS_RETURN_E ustar_remove_file(const vfs_vnode_t* vnode, const char* path);
+OS_RETURN_E ustar_remove_file(const vfs_partition_t* part, const char* path);
 
-OS_RETURN_E ustar_rename_file(const vfs_vnode_t* vnode,
+OS_RETURN_E ustar_rename_file(const vfs_partition_t* vnode,
                               const char* old_path,
                               const char* new_path);
 
-OS_RETURN_E ustar_truncate_file(const vfs_vnode_t* vnode,
+OS_RETURN_E ustar_truncate_file(const vfs_partition_t* partition,
                                 const char* path,
                                 const size_t new_size);
 
-OS_RETURN_E ustar_list_directory(const vfs_vnode_t* vnode,
+OS_RETURN_E ustar_list_directory(const vfs_vnode_t* vnode, 
+                                 size_t* item_count,
                                  char* buffer, 
                                  const size_t buff_size);
 

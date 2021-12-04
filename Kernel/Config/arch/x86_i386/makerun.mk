@@ -20,20 +20,20 @@ pre-run:
 	@echo "\e[1m\e[34m| Preparing run for target $(target)\e[22m\e[39m"
 	@echo "\e[1m\e[34m#-------------------------------------------------------------------------------\n\e[22m\e[39m"
 	rm -rf ./$(BUILD_DIR)/GRUB
-	$(RM) -f ./$(BUILD_DIR)/bootable.iso
+	$(RM) -f ./$(BUILD_DIR)/utk_boot.iso
 	cp -R Config/arch/x86_i386/GRUB ./$(BUILD_DIR)/
 	cp ./$(BUILD_DIR)/$(KERNEL).elf ./$(BUILD_DIR)/GRUB/boot/
 	cp ./$(BUILD_DIR)/utk.initrd ./$(BUILD_DIR)/GRUB/boot/
-	grub-mkrescue -o ./$(BUILD_DIR)/bootable.iso ./$(BUILD_DIR)/GRUB
+	grub-mkrescue -o ./$(BUILD_DIR)/utk_boot.iso ./$(BUILD_DIR)/GRUB
 
 run: pre-run 	
 	@echo "\e[1m\e[94m=== Running on Qemu\e[22m\e[39m"
-	@$(QEMU) $(QEMUOPTS) -boot d -cdrom ./$(BUILD_DIR)/bootable.iso
+	@$(QEMU) $(QEMUOPTS) -boot d -cdrom ./$(BUILD_DIR)/utk_boot.iso
 
 qemu-test-mode: pre-run
 	@echo "\e[1m\e[94m=== Running on Qemu TEST MODE\e[22m\e[39m"
-	@$(QEMU) $(QEMUOPTS) -boot d -cdrom ./$(BUILD_DIR)/bootable.iso -nographic -monitor none
+	@$(QEMU) $(QEMUOPTS) -boot d -cdrom ./$(BUILD_DIR)/utk_boot.iso -nographic -monitor none
 
 debug: pre-run
 	@echo "\e[1m\e[94m=== Running on Qemu DEBUG MODE\e[22m\e[39m"
-	@$(QEMU) $(QEMUOPTS) -boot d -cdrom ./$(BUILD_DIR)/bootable.iso -S
+	@$(QEMU) $(QEMUOPTS) -boot d -cdrom ./$(BUILD_DIR)/utk_boot.iso -S

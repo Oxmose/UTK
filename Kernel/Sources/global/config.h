@@ -35,7 +35,7 @@
 #define KERNEL_STACK_SIZE 0x1000
 
 /* Thread's kernel stack size in bytes */
-#define THREAD_KERNEL_STACK_SIZE 0x800
+#define THREAD_KERNEL_STACK_SIZE 0x1000
 
 /* Maximal number of CPU supported by the architecture */
 #define MAX_CPU_COUNT 4
@@ -113,5 +113,6 @@
 #define SYSCALL_DEBUG_ENABLED 0
 #define INITRD_DEBUG_ENABLED 0
 #define USTAR_DEBUG_ENABLED 0
+#define TEMP_DEBUG_ENABLED 1
 
 #endif /* #ifndef __GLOBAL_CONFIG_H_ */
