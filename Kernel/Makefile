@@ -57,7 +57,7 @@ endif
 	@make -C $(SOURCE_DIR)/core
 	@make -C $(SOURCE_DIR)/lib
 	@make -C $(SOURCE_DIR)/time
-	@make -C $(SOURCE_DIR)/drivers
+	@make -C $(SOURCE_DIR)/fs
 
 build_kernel:
 	@echo "\e[1m\e[34m\n#-------------------------------------------------------------------------------\e[22m\e[39m"
@@ -92,7 +92,7 @@ endif
 	@make -C $(SOURCE_DIR)/core clean
 	@make -C $(SOURCE_DIR)/global clean
 	@make -C $(SOURCE_DIR)/time clean
-	@make -C $(SOURCE_DIR)/drivers clean
+	@make -C $(SOURCE_DIR)/fs clean
 
 # Clean kernel build directory
 	rm -rf  $(BUILD_DIR) $(BIN_DIR)

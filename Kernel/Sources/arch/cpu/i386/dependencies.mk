@@ -7,7 +7,7 @@ DEP_INCLUDES += -I ../../cpu/includes
 DEP_INCLUDES += -I ../../board/x86/includes
 DEP_INCLUDES += -I ../../../core/includes
 DEP_INCLUDES += -I ../../../time/includes
-DEP_INCLUDES += -I ../../../drivers/includes
+DEP_INCLUDES += -I ../../../fs/includes
 
 ifeq ($(TESTS), TRUE)
 DEP_INCLUDES += -I ../../../tests/includes

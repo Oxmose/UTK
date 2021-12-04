@@ -140,11 +140,10 @@ void ustar_test(void)
         return;
     }
 
-    kernel_printf("[TESTMODE] %s, %s, %s, %d, %d, %d, %s, %s\n", 
+    kernel_printf("[TESTMODE] %s, %s, %s, %d, %d, %d\n", 
                   node.name, node.path, 
                   node.short_name, node.size, 
-                  node.type, node.access_rights,
-                  node.owner_name, node.group_name);
+                  node.type, node.access_rights);
     kernel_printf("[TESTMODE MANUAL] %s, %s, %s, %d, %d, %d, %s, %s, %d\n", 
                   node.name, node.path, 
                   node.short_name, node.size, 
@@ -210,11 +209,10 @@ void ustar_test(void)
         return;
     }
 
-    kernel_printf("[TESTMODE] %s, %s, %s, %d, %d, %d, %s, %s\n", 
+    kernel_printf("[TESTMODE] %s, %s, %s, %d, %d, %d\n", 
                   node.name, node.path, 
                   node.short_name, node.size, 
-                  node.type, node.access_rights,
-                  node.owner_name, node.group_name);
+                  node.type, node.access_rights);
     kernel_printf("[TESTMODE MANUAL] %s, %s, %s, %d, %d, %d, %s, %s, %d\n", 
                   node.name, node.path, 
                   node.short_name, node.size, 
@@ -262,11 +260,10 @@ void ustar_test(void)
         return;
     }
 
-    kernel_printf("[TESTMODE] %s, %s, %s, %d, %d, %d, %s, %s\n", 
+    kernel_printf("[TESTMODE] %s, %s, %s, %d, %d, %d\n", 
                   node.name, node.path, 
                   node.short_name, node.size, 
-                  node.type, node.access_rights,
-                  node.owner_name, node.group_name);
+                  node.type, node.access_rights);
     kernel_printf("[TESTMODE MANUAL] %s, %s, %s, %d, %d, %d, %s, %s, %d\n", 
                   node.name, node.path, 
                   node.short_name, node.size, 

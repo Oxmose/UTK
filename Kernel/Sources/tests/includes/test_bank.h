@@ -78,7 +78,7 @@ void lapic_timer_test(void);
 #define PANIC_TEST 0
 #define QUEUE_TEST 0
 #define TIME_TEST 0
-#define USTAR_TEST 0
+#define USTAR_TEST 1
 
 void output_test(void);
 void kheap_test(void);
