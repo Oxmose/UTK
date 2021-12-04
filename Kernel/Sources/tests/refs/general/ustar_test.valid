@@ -6,17 +6,17 @@
 [TESTMODE] Open file 4
 [TESTMODE] Close file 1
 [TESTMODE] Close file 2
-[TESTMODE] folder1/, , folder1/, 0, 6, 511
+[TESTMODE] folder1/, , folder1/, 0, 6, 438
 [TESTMODE] anotherfolder/
 [TESTMODE] myfile.file.txt
 [TESTMODE] newfile3.txt
 [TESTMODE] smallfile.txt
 [TESTMODE] Remove file 2
-[TESTMODE] folder1/, , folder1/, 0, 6, 511
+[TESTMODE] folder1/, , folder1/, 0, 6, 438
 [TESTMODE] anotherfolder/
 [TESTMODE] myfile.file.txt
 [TESTMODE] newfile3.txt
-[TESTMODE] newfile3.txt, folder1/, newfile3.txt, 3080, 0, 511
+[TESTMODE] newfile3.txt, folder1/, newfile3.txt, 3080, 0, 438
 [TESTMODE] Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi porttitor, neque quis accumsan tincidunt, elit lectus ornare libero, sit amet consectetur magna neque nec leo. Ut ut efficitur enim. Curabitur ac placerat velit, ut consequat nulla. Mauris tincidunt, nisi sed condimentum interdum, sapien mauris facilisis est, a varius nunc velit sit amet odio. Cras semper enim vitae tellus eleifend, at varius magna tincidunt. Sed iaculis elit quis nisl laoreet ultrices. Nullam sed metus a mi luctus auctor convallis nec lectus. Morbi consectetur risus sit amet massa ullamcorper vestibulum. Sed quam neque, lacinia a risus eget, tincidunt ullamcorper magna. Cras venenatis est et est consequat volutpat. Cras vitae sodales ex. Nulla a pulvinar erat. Donec gravida congue enim vehicula pharetra. Donec justo risus, mattis in elementum sit amet, egestas id leo. Nunc lacinia mattis purus ut congue. Quisque lobortis orci purus, nec volutpat augue tempus sit amet.
 [TESTMODE] 
 [TESTMODE] Ut iaculis faucibus arcu, eget luctus velit dictum condimentum. Donec commodo scelerisque felis. Etiam rhoncus posuere pellentesque. Nulla nec ante mauris. Integer sollicitudin semper condimentum. Aliquam vel fringilla est. Phasellus in justo quam. Sed commodo leo metus, sed varius libero pellentesque quis. Sed tortor erat, pretium vitae nunc ac, sollicitudin cursus purus. Duis pulvinar, velit sed mollis mattis, tortor est vestibulum nisl, vitae fringilla velit nunc vel sapien. Ut et velit eget sem placerat pretium id et massa. Praesent at ligula erat. Donec ac luctus felis. Cras quis velit ut purus mattis viverra nec sed nisl.
