@@ -8,7 +8,7 @@ echo -e "\e[1m\e[34m#-----------------------------------------------------------
 echo "Creating TAR with files:" 
 curr_dir=$(pwd)
 cd $1/../Config/arch/x86_i386/initrd/
-chmod -R 0666 *
+chmod -R 0777 *
 tar --sort=name -cvf $curr_dir/$1/initrd.tar *
 cd $curr_dir
 
