@@ -36,21 +36,21 @@ grub-mkrescue -o ./build/utk_boot.iso ./build/GRUB
 
 
 
-[OK] GDT Initialized at 0xe021a188
-[OK] IDT Initialized at 0xe021a1e0
-[OK] TSS Initialized at 0xe021a9e8
+[OK] GDT Initialized at 0xe0219b38
+[OK] IDT Initialized at 0xe0219330
+[OK] TSS Initialized at 0xe0219188
 [INFO] CPU Vendor: GenuineIntel
 [INFO] CPU Features: SSE3 - MONITOR - FPU - DE - PSE - TSC - MSR - PAE - MCE - CX8 - APIC - SEP - MTRR - PGE - MCA - CMOV - PAT - CLFLUSH - ACPI - MMX - FXSR - SSE - SSE2 - SS - XD 
 [OK] Kernel heap initialized
 [OK] Interrupt manager initialized
 [OK] Exception manager initialized
 [INFO] === Kernel memory layout
-[INFO] Startup low     0x00100000 -> 0x00100c10 | 3KB
+[INFO] Startup low     0x00100000 -> 0x00100b64 | 2KB
 [INFO] Startup high    0xe0101000 -> 0xe0101026 | 0KB
-[INFO] Code            0xe0102000 -> 0xe0116cf0 | 83KB
-[INFO] RO-Data         0xe0200000 -> 0xe0207144 | 28KB
-[INFO] Data            0xe0210000 -> 0xe0211130 | 4KB
-[INFO] BSS             0xe0212000 -> 0xe021b664 | 37KB
+[INFO] Code            0xe0102000 -> 0xe011706d | 84KB
+[INFO] RO-Data         0xe0200000 -> 0xe0204044 | 16KB
+[INFO] Data            0xe0210000 -> 0xe02110f8 | 4KB
+[INFO] BSS             0xe0212000 -> 0xe021a664 | 33KB
 [INFO] Stacks          0xe0310000 -> 0xe0318000 | 32KB
 [INFO] Heap            0xe0318000 -> 0xe0d18000 | 10240KB
 [INFO] Multiboot       0xe0d18000 -> 0xe0d28000 | 64KB
@@ -78,7 +78,7 @@ grub-mkrescue -o ./build/utk_boot.iso ./build/GRUB
 [OK] LAPIC timer initialized
 [OK] Timer factory initialized
 [OK] System calls initialized
-[INFO] INIT Started | PID: 0 | TID: 1
+[INFO] [INFO] INIT Started | PID: 0 | TID: 1
 [TESTMODE] USTAR Test begin
 [TESTMODE] Mounted USTAR partition
 [TESTMODE] Open file 1
@@ -87,7 +87,7 @@ grub-mkrescue -o ./build/utk_boot.iso ./build/GRUB
 [TESTMODE] Open file 4
 [TESTMODE] Close file 1
 [TESTMODE] Close file 2
-[TESTMODE] folder1/, , folder1/, 0, 6, 511, alexy, alexy
+[TESTMODE] folder1/, , folder1/, 0, 6, 511
 [TESTMODE MANUAL] folder1/, , folder1/, 0, 6, 511, alexy, alexy, 1638593012
 [TESTMODE] anotherfolder/
 [TESTMODE] myfile.file.txt
@@ -95,13 +95,13 @@ grub-mkrescue -o ./build/utk_boot.iso ./build/GRUB
 [TESTMODE] smallfile.txt
 
 [TESTMODE] Remove file 2
-[TESTMODE] folder1/, , folder1/, 0, 6, 511, alexy, alexy
+[TESTMODE] folder1/, , folder1/, 0, 6, 511
 [TESTMODE MANUAL] folder1/, , folder1/, 0, 6, 511, alexy, alexy, 1638593012
 [TESTMODE] anotherfolder/
 [TESTMODE] myfile.file.txt
 [TESTMODE] newfile3.txt
 
-[TESTMODE] newfile3.txt, folder1/, newfile3.txt, 3080, 0, 511, alexy, alexy
+[TESTMODE] newfile3.txt, folder1/, newfile3.txt, 3080, 0, 511
 [TESTMODE MANUAL] newfile3.txt, folder1/, newfile3.txt, 3080, 0, 511, alexy, alexy, 1638334044
 
 [TESTMODE] Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi porttitor, neque quis accumsan tincidunt, elit lectus ornare libero, sit amet consectetur magna neque nec leo. Ut ut efficitur enim. Curabitur ac placerat velit, ut consequat nulla. Mauris tincidunt, nisi sed condimentum interdum, sapien mauris facilisis est, a varius nunc velit sit amet odio. Cras semper enim vitae tellus eleifend, at varius magna tincidunt. Sed iaculis elit quis nisl laoreet ultrices. Nullam sed metus a mi luctus auctor convallis nec lectus. Morbi consectetur risus sit amet massa ullamcorper vestibulum. Sed quam neque, lacinia a risus eget, tincidunt ullamcorper magna. Cras venenatis est et est consequat volutpat. Cras vitae sodales ex. Nulla a pulvinar erat. Donec gravida congue enim vehicula pharetra. Donec justo risus, mattis in elementum sit amet, egestas id leo. Nunc lacinia mattis purus ut congue. Quisque lobortis orci purus, nec volutpat augue tempus sit amet.

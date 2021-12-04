@@ -8,12 +8,12 @@ echo -e "\e[1m\e[34m#-----------------------------------------------------------
 echo "Creating TAR with files:" 
 curr_dir=$(pwd)
 cd $1/../Config/arch/x86_i386/initrd/
-tar cvf $curr_dir/$1/initrd.tar *
+tar --sort=name -cvf $curr_dir/$1/initrd.tar *
 cd $curr_dir
 
 filesize=$(wc -c < "$1/initrd.tar")
 
-# Add ehader size
+# Add header size
 filesize=$(( $filesize + 512))
 
 echo -e "\nInitrd size: $filesize"
