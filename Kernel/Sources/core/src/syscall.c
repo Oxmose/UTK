@@ -24,6 +24,7 @@
 #include <scheduler.h>          /* Scheduler */
 #include <kernel_error.h>       /* Kernel error codes */
 #include <panic.h>              /* Kernel panic */
+#include <memmgt.h>             /* Memory management API */
 
 /* UTK configuration file */
 #include <config.h>
@@ -54,15 +55,16 @@
 
 /** @brief Stores the handlers for each system call. */
 static syscall_handler_t kernel_interrupt_handlers[SYSCALL_MAX_ID] = {
-    {sched_fork_process},           /* SYSCALL_FORK */
-    {sched_wait_process_pid},       /* SYSCALL_WAITPID */
+    {sched_fork_process},             /* SYSCALL_FORK */
+    {sched_wait_process_pid},         /* SYSCALL_WAITPID */
     {NULL},                           /* SYSCALL_EXIT */         
     {NULL},                           /* SYSCALL_FUTEX_WAIT */      
     {NULL},                           /* SYSCALL_FUTEX_WAKE */       
-    {sched_get_process_params},     /* SYSCALL_SCHED_GET_PARAMS */ 
+    {sched_get_process_params},       /* SYSCALL_SCHED_GET_PARAMS */ 
     {NULL},                           /* SYSCALL_SCHED_SET_PARAMS */ 
     {NULL},                           /* SYSCALL_MUTEX_CREATE */     
     {NULL},                           /* SYSCALL_MUTEX_DESTROY */
+    {memory_alloc_page},              /* SYSCALL_PAGE_ALLOC */
 }; 
 
 /*******************************************************************************

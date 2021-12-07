@@ -37,6 +37,11 @@
 /* Thread's kernel stack size in bytes */
 #define THREAD_KERNEL_STACK_SIZE 0x1000
 
+/* Defines the process heap size, in next version this could be a dynamic value
+ * based on the available memory. But right now we use a very simple heap.
+ */
+#define PROCESS_HEAP_SIZE 0xA00000
+
 /* Maximal number of CPU supported by the architecture */
 #define MAX_CPU_COUNT 4
 
@@ -113,7 +118,8 @@
 #define SYSCALL_DEBUG_ENABLED 0
 #define INITRD_DEBUG_ENABLED 0
 #define USTAR_DEBUG_ENABLED 0
-#define MUTEX_DEBUG_ENABLED 1
-#define TEMP_DEBUG_ENABLED 1
+#define MUTEX_DEBUG_ENABLED 0
+#define TEMP_DEBUG_ENABLED 0
+#define USER_HEAP_DEBUG_ENABLED 1
 
 #endif /* #ifndef __GLOBAL_CONFIG_H_ */

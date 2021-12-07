@@ -18,7 +18,7 @@
 #define __LIB_STDLIB_H_
 
 #include <stdint.h> /* Generic int types */
-
+#include <stddef.h> /* Standard definitions */
 /*******************************************************************************
  * CONSTANTS
  ******************************************************************************/
@@ -58,5 +58,29 @@ void itoa(int64_t value, char* buf, uint32_t base);
  * @param[in] base The base of the unsigned integer to convert.
  */
 void uitoa(uint64_t value, char* buf, uint32_t base);
+
+/**
+ * @brief Allocate memory from the process heap.
+ * 
+ * @details Allocate a chunk of memory form the process heap and returns the 
+ * start address of the chunk.
+ *
+ * ­@param[in] size The number of byte to allocate.
+ * 
+ * @return A pointer to the start address of the allocated memory is returned. 
+ * If the memory cannot be allocated, this pointer will be NULL.
+ */
+void* malloc(const size_t size);
+
+/**
+ * @brief Free allocated memory.
+ * 
+ * @details Releases allocated memory. If the pointer is NULL or has not been 
+ * allocated previously from the heap, nothing is done.
+ *
+ * @param[in, out] ptr The start address of the memory area to free.
+ */
+void free(void* ptr);
+
 
 #endif /* __LIB_STDLIB_H_ */

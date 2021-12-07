@@ -32,6 +32,7 @@
 #include <critical.h>             /* Critical sections */
 #include <cpu.h>                  /* CPU management */
 #include <ctrl_block.h>           /* Kernel process structure */
+#include <sys/syscall_api.h>      /* System call API */
 
 /* UTK configuration file */
 #include <config.h>
@@ -3398,4 +3399,105 @@ void memory_free_kernel_pages(const void* page_addr,
                               OS_RETURN_E* err)
 {
     memory_free_pages_to(free_kernel_pages, page_addr, page_count, err);
+}
+
+void memory_alloc_page(const SYSCALL_FUNCTION_E func, void* params)
+{
+    uint32_t                   int_state;
+    uint32_t                   frame_count;
+    void*                      frames;
+    void*                      pages;   
+    memmgt_page_alloc_param_t* func_params;
+    kernel_process_t*          curr_proc;
+    OS_RETURN_E                err;
+
+    func_params = (memmgt_page_alloc_param_t*)params;
+
+    if(func != SYSCALL_PAGE_ALLOC)
+    {
+        if(func_params != NULL)
+        {
+            func_params->error = OS_ERR_UNAUTHORIZED_ACTION;
+        }
+        return;
+    }
+    if(func_params == NULL)
+    {
+        return;
+    }
+
+    curr_proc = sched_get_current_process();
+
+    if(curr_proc == NULL)
+    {
+        KERNEL_ERROR("Cannot allocate frames when no process is running\n");
+        func_params->error = OS_ERR_UNAUTHORIZED_ACTION;
+        return;
+    }
+
+    frame_count = func_params->page_count;
+
+    ENTER_CRITICAL(int_state);    
+
+    /* Allocate frames and page */
+    frames = memory_alloc_frames(frame_count, &err);
+    if(err != OS_NO_ERR)
+    {
+        func_params->error = err;
+        KERNEL_ERROR("Error while allocating frames\n");
+        EXIT_CRITICAL(int_state);
+        return;
+    }
+    pages  = memory_alloc_pages_from(curr_proc->free_page_table,
+                                     frame_count, 
+                                     MEM_ALLOC_BEGINING, 
+                                    &err);
+    if(err != OS_NO_ERR)
+    {
+        func_params->error = err;
+        memory_free_frames(frames, frame_count, &err);
+        if(err != OS_NO_ERR)
+        {
+            KERNEL_PANIC(err);
+        }
+        EXIT_CRITICAL(int_state);
+        return;
+    }
+    
+    /* Add mapping */
+    kernel_mmap_internal(pages, 
+                         frames, 
+                         frame_count * KERNEL_FRAME_SIZE, 
+                         PAGE_FLAG_READ_WRITE |
+                         PAGE_FLAG_CACHE_WB   |
+                         PAGE_FLAG_REGULAR,
+                         &err);
+
+    if(err != OS_NO_ERR)
+    {
+        func_params->error = err;
+        memory_free_frames(frames, frame_count, &err);
+        if(err != OS_NO_ERR)
+        {
+            KERNEL_PANIC(err);
+        }
+        
+        memory_free_pages_to(curr_proc->free_page_table,
+                             pages, 
+                             frame_count, 
+                             &err);
+        if(err != OS_NO_ERR)
+        {
+            KERNEL_PANIC(err);
+        }
+        
+        EXIT_CRITICAL(int_state);
+        KERNEL_ERROR("Error while allocating frames\n");
+        return;
+    }
+
+    EXIT_CRITICAL(int_state);
+
+    func_params->start_addr = pages;
+    func_params->error      = OS_NO_ERR;
 }

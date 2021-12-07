@@ -621,7 +621,7 @@ static void create_idle(void)
                                      IDLE_THREAD_PRIORITY, 
                                      "IDLE", 
                                      THREAD_TYPE_KERNEL, 
-                                     KERNEL_STACK_SIZE, 
+                                     SCHEDULER_IDLE_STACK_SIZE, 
                                      idle_sys, 
                                      NULL);
     if(err != OS_NO_ERR)
@@ -655,7 +655,7 @@ static void create_init(void)
                                      KERNEL_HIGHEST_PRIORITY, 
                                      "INIT", 
                                      THREAD_TYPE_KERNEL, 
-                                     KERNEL_STACK_SIZE, 
+                                     SCHEDULER_MAIN_STACK_SIZE, 
                                      init_sys, 
                                      NULL);
 
@@ -1396,7 +1396,7 @@ OS_RETURN_E sched_create_kernel_thread(kernel_thread_t** thread,
     new_thread->state        = THREAD_STATE_READY;
     new_thread->args         = args;
     new_thread->function     = function;
-    new_thread->kstack_size  = KERNEL_STACK_SIZE;
+    new_thread->kstack_size  = THREAD_KERNEL_STACK_SIZE;
     new_thread->stack_size   = stack_size;
 
     strncpy(new_thread->name, name, THREAD_NAME_MAX_LENGTH);

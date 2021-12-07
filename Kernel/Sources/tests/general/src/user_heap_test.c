@@ -1,10 +1,10 @@
 #include <test_bank.h>
 
-#if KHEAP_TEST  == 1
+#if USER_HEAP_TEST  == 1
 #include <kernel_output.h>
-#include <kheap.h>
+#include <stdlib.h>
 
-void kheap_test(void)
+void user_heap_test(void)
 {
     uint32_t i;
     void* address[20]   = {NULL};
@@ -14,7 +14,7 @@ void kheap_test(void)
     for(i = 0; i < 20; ++i)
     {
         sizes[i] = sizeof(int32_t) * (i + 1);
-        address[i] = kmalloc(sizes[i]);
+        address[i] = malloc(sizes[i]);
         f_address[i] = address[i];
         
     }
@@ -24,16 +24,16 @@ void kheap_test(void)
         {
             kernel_printf("\n");
         }
-        kernel_printf("[TESTMODE] Kheap alloc %uB\n", sizes[i]);
+        kernel_printf("[TESTMODE] heap alloc %uB at 0x%p\n", sizes[i], address[i]);
     }
     for(i = 0; i < 20; ++i)
     {
-        kfree(address[i]);
+        free(address[i]);
     }
     for(i = 0; i < 20; ++i)
     {
         sizes[i] = sizeof(int32_t) * (i + 1);
-        address[i] = kmalloc(sizes[i]);
+        address[i] = malloc(sizes[i]);
         if(f_address[i] != address[i] || address[i] == 0)
         {
             kernel_error("[TESTMODE] Error on address allocation\n");

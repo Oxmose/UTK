@@ -142,6 +142,7 @@ void* init_sys(void* args)
 #ifdef TEST_MODE_ENABLED
     ustar_test();
     fork_test();
+    user_heap_test();
 #endif
 
     pid = fork();

@@ -315,17 +315,26 @@ inline static void ustar_get_path(const char* path, char* buffer)
 
 inline static bool_t is_root(const char* path, const char* file)
 {
-    char* buffer;
+    char*  buffer;
     size_t len;
+    bool_t ret_val;
 
     buffer = kmalloc(sizeof(char*) * strlen(file));
+    if(buffer == NULL)
+    {
+        return FALSE;
+    }
     memset(buffer, 0, strlen(file));
 
     ustar_get_path(file, buffer);
 
     len = strlen(path);
-    return len == strlen(buffer) &&
-           strncmp(path, buffer, len) == 0;
+
+    ret_val = (len == strlen(buffer) &&
+               strncmp(path, buffer, len) == 0);
+    
+    kfree(buffer);
+    return ret_val;
 }
 
 

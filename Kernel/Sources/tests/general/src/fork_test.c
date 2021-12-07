@@ -4,7 +4,7 @@
 #include <kernel_output.h>
 #include <sys/process.h>
 
-void* fork_test(void)
+void fork_test(void)
 {
     int32_t     pid;
     int32_t     status;
@@ -39,12 +39,9 @@ void* fork_test(void)
     }
 
     kill_qemu();
-
-    return 0;
 }
 #else 
-void* fork_test(void)
+void fork_test(void)
 {
-    return 0;
 }
 #endif

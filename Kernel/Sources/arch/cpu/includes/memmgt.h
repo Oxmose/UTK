@@ -22,9 +22,10 @@
 #ifndef __CPU_MEMMGT_H_
 #define __CPU_MEMMGT_H_
 
-#include <kernel_error.h> /* Kernel error codes */
-#include <stdint.h>       /* Generic int types */
-#include <ctrl_block.h>   /* Kernel process structure */
+#include <kernel_error.h>    /* Kernel error codes */
+#include <stdint.h>          /* Generic int types */
+#include <ctrl_block.h>      /* Kernel process structure */
+#include <sys/syscall_api.h> /* System call API */
 
 /*******************************************************************************
  * CONSTANTS
@@ -270,4 +271,18 @@ void* memory_alloc_kernel_pages(const size_t page_count, OS_RETURN_E* err);
 void memory_free_kernel_pages(const void* page_addr, 
                               const size_t page_count, 
                               OS_RETURN_E* err);
+
+/**
+ * @brief System call handler to allocate memory pages.
+ * 
+ * @details System call handler to  allocate memory pages. This 
+ * system call uses as memmgt_page_alloc_param_t sctructure given as parameter.
+ * 
+ * @param[in] func The syscall function ID, must correspond to the alloc_pages
+ * call.
+ * @param[in, out] params The parameters used by the function, must be of type 
+ * memmgt_page_alloc_param_t.
+ */
+void memory_alloc_page(const SYSCALL_FUNCTION_E func, void* params);
+
 #endif /* #ifndef __CPU_MEMMGT_H_ */

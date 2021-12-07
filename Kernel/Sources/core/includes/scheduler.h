@@ -54,44 +54,6 @@ enum SYSTEM_STATE
  */
 typedef enum SYSTEM_STATE SYSTEM_STATE_E;
 
-/** @brief waitpid function system call parameters.*/
-struct waitpid_params
-{
-    /** @brief The return values of the main process' thread. */
-    int32_t status;
-
-    /** @brief The pid of the waited process. */
-    int32_t pid;
-
-    /** @brief The process termination cause. */
-    THREAD_TERMINATE_CAUSE_E term_cause;
-
-    /** @brief Receives the system call error status. */
-    OS_RETURN_E error;
-};
-
-/** @brief Short name for struct waitpid_params */
-typedef struct waitpid_params waitpid_params_t;
-
-/** @brief Scheduling parameters structure.*/
-struct sched_param
-{
-    /** @brief The pid of the current process. */
-    int32_t pid;
-
-    /** @brief The tid of the calling thread. */
-    int32_t tid;
-
-    /** @brief The priority of the calling thread. */
-    uint32_t priority;
-
-    /** @brief Receives the system call error status. */
-    OS_RETURN_E error;
-};
-
-/** @brief Short name for struct sched_param */
-typedef struct sched_param sched_param_t;
-
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/

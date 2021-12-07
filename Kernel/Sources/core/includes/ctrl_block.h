@@ -136,7 +136,7 @@ struct kernel_process
     /** @brief Process children list. */
     queue_t* children;
 
-    /** @brief Process free page table quque. */
+    /** @brief Process free page table queue. */
     queue_t* free_page_table;
 
     /** @brief The process page directory pointer. */
