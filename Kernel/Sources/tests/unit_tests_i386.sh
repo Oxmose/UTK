@@ -28,7 +28,7 @@ function testcase() {
         error=$((error + 1))
         cat filtered.out
         echo "================="
-        diff filtered.out refs/general/$filename.valid
+        diff filtered.out refs/general/$filename.valid  
         mv filtered.out errors/$filename.error
     else
         echo -e "\e[92mPASSED\e[39m"

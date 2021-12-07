@@ -56,8 +56,17 @@
 /** @brief Kernel's 16 bits data segment limit address. */
 #define KERNEL_DATA_SEGMENT_LIMIT_16 0x000FFFFF
 
+/** @brief User's 32 bits code segment base address. */
+#define USER_CODE_SEGMENT_BASE_32  0x00000000
+/** @brief User's 32 bits code segment limit address. */
+#define USER_CODE_SEGMENT_LIMIT_32 0x000FFFFF
+/** @brief User's 32 bits data segment base address. */
+#define USER_DATA_SEGMENT_BASE_32  0x00000000
+/** @brief User's 32 bits data segment limit address. */
+#define USER_DATA_SEGMENT_LIMIT_32 0x000FFFFF
+
 /** @brief Kernel's TSS segment descriptor. */
-#define TSS_SEGMENT 0x28
+#define TSS_SEGMENT 0x38
 
 /***************************
  * GDT Flags
@@ -137,7 +146,7 @@
 #define IDT_TYPE_TRAP_GATE 0x0F
 
 /** @brief Number of entries in the kernel's GDT. */
-#define GDT_ENTRY_COUNT (6 + MAX_CPU_COUNT)
+#define GDT_ENTRY_COUNT (7 + MAX_CPU_COUNT)
 
 /*******************************************************************************
  * STRUCTURES
@@ -924,6 +933,27 @@ void cpu_setup_gdt(void)
     uint32_t kernel_data_16_seg_type =  GDT_TYPE_WRITABLE |
                                         GDT_TYPE_GROW_DOWN;
 
+    /* Set the kernel code descriptor */
+    uint32_t user_code_32_seg_flags = GDT_FLAG_GRANULARITY_4K |
+                                      GDT_FLAG_32_BIT_SEGMENT |
+                                      GDT_FLAG_PL3 |
+                                      GDT_FLAG_SEGMENT_PRESENT |
+                                      GDT_FLAG_CODE_TYPE;
+
+    uint32_t user_code_32_seg_type =  GDT_TYPE_EXECUTABLE |
+                                      GDT_TYPE_READABLE |
+                                      GDT_TYPE_PROTECTED;
+
+    /* Set the kernel data descriptor */
+    uint32_t user_data_32_seg_flags = GDT_FLAG_GRANULARITY_4K |
+                                      GDT_FLAG_32_BIT_SEGMENT |
+                                      GDT_FLAG_PL3 |
+                                      GDT_FLAG_SEGMENT_PRESENT |
+                                      GDT_FLAG_DATA_TYPE;
+
+    uint32_t user_data_32_seg_type =  GDT_TYPE_WRITABLE |
+                                      GDT_TYPE_GROW_DOWN;
+
     /************************************
      * TSS ENTRY
      ***********************************/
@@ -954,6 +984,14 @@ void cpu_setup_gdt(void)
     format_gdt_entry(&cpu_gdt[KERNEL_DS_16 / 8],
                      KERNEL_DATA_SEGMENT_BASE_16, KERNEL_DATA_SEGMENT_LIMIT_16,
                      kernel_data_16_seg_type, kernel_data_16_seg_flags);
+    
+    format_gdt_entry(&cpu_gdt[USER_CS_32 / 8],
+                     USER_CODE_SEGMENT_BASE_32, USER_CODE_SEGMENT_LIMIT_32,
+                     user_code_32_seg_type, user_code_32_seg_flags);
+
+    format_gdt_entry(&cpu_gdt[USER_DS_32 / 8],
+                     USER_DATA_SEGMENT_BASE_32, USER_DATA_SEGMENT_LIMIT_32,
+                     user_data_32_seg_type, user_data_32_seg_flags);
 
     for(i = 0; i < MAX_CPU_COUNT; ++i)
     {

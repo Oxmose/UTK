@@ -141,6 +141,7 @@ void* init_sys(void* args)
 
 #ifdef TEST_MODE_ENABLED
     ustar_test();
+    fork_test();
 #endif
 
     pid = fork();
@@ -156,9 +157,7 @@ void* init_sys(void* args)
         //init_shell();
         while(1)
         {
-            sched_sleep(1000);
         }
-        return 0;
     }
 
     /* If we return better go away and cry in a corner */

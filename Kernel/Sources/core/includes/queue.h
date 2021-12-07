@@ -18,8 +18,8 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#ifndef __LIB_QUEUE_H_
-#define __LIB_QUEUE_H_
+#ifndef __CORE_QUEUE_H_
+#define __CORE_QUEUE_H_
 
 #include <stddef.h>    /* Standard definitons */
 #include <stdint.h>    /* Generic int types */
@@ -280,4 +280,4 @@ queue_node_t* queue_find(queue_t* queue, void* data, OS_RETURN_E *error);
  */
 OS_RETURN_E queue_remove(queue_t* queue, queue_node_t* node);
 
-#endif /* #ifndef __LIB_QUEUE_H_ */
+#endif /* #ifndef __CORE_QUEUE_H_ */

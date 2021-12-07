@@ -168,4 +168,40 @@ void cpu_get_syscall_data(const cpu_state_t* cpu_state,
                           uint32_t* syscall_id,
                           void** params);
 
+/** 
+ * @brief Switch the CPU to user mode
+ *
+ * @details Switches the CPU to user mode (usually reduring the priviledge)
+ * level. Its implementation is dependent on the used architecture. Once the 
+ * call to this function returns, the CPU is in user mode.
+ */
+void cpu_switch_user_mode(void);
+
+/**
+ * @brief Lock a spinlock.
+ *
+ * @details Lock the spinlock passed in parameters.
+ *
+ * @param[in, out] lockword The spinlock to use.
+ */
+void cpu_lock_spinlock(volatile uint32_t* lockword);
+
+/**
+ * @brief Compare and swap primitive.
+ * 
+ * @details The compare and swap primitive allows to compare a value stored in
+ * the memory and replace it with a new value is the old value equals a certain
+ * value.
+ * 
+ * @param[in, out] memory The memory region to be compared and swaped, on 
+ * 32bits.
+ * @param[in] old_val The old value to compare.
+ * @param[in] new_val The new value to compare.
+ * 
+ * @return The value stored in the memory is returned. 
+ */
+int32_t cpu_compare_and_swap(volatile int32_t* memory, 
+                             const int32_t old_val, 
+                             const int32_t new_val);
+
 #endif /* #ifndef __CPU_API_H_ */

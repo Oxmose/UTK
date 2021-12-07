@@ -83,6 +83,8 @@ enum OS_RETURN
     OS_ERR_DIR_NOT_EMPTY                   = 23,
     /** @brief Name too long. */
     OS_ERR_NAME_TOO_LONG                   = 24,
+    /** @brief The resource has been destroyed. */
+    OS_ERR_RES_DESTROYED                   = 25,
 };
 
 /**

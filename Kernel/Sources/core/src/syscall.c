@@ -54,9 +54,16 @@
 
 /** @brief Stores the handlers for each system call. */
 static syscall_handler_t kernel_interrupt_handlers[SYSCALL_MAX_ID] = {
-    {sched_fork_process},
-    {sched_wait_process_pid},
-};
+    {sched_fork_process},           /* SYSCALL_FORK */
+    {sched_wait_process_pid},       /* SYSCALL_WAITPID */
+    {NULL},                           /* SYSCALL_EXIT */         
+    {NULL},                           /* SYSCALL_FUTEX_WAIT */      
+    {NULL},                           /* SYSCALL_FUTEX_WAKE */       
+    {sched_get_process_params},     /* SYSCALL_SCHED_GET_PARAMS */ 
+    {NULL},                           /* SYSCALL_SCHED_SET_PARAMS */ 
+    {NULL},                           /* SYSCALL_MUTEX_CREATE */     
+    {NULL},                           /* SYSCALL_MUTEX_DESTROY */
+}; 
 
 /*******************************************************************************
  * STATIC FUNCTIONS DECLARATION
@@ -104,7 +111,7 @@ static void syscall_handler(cpu_state_t *cpu_state,
     }
     else 
     {
-        KERNEL_ERROR("Unkonwn system call ID %d\n", func);
+        KERNEL_ERROR("Unknown system call ID %d\n", func);
     }    
 }
 
@@ -119,18 +126,4 @@ void syscall_init(void)
         KERNEL_ERROR("Could not initialize system call manager\n");
         KERNEL_PANIC(err);
     }
-}
-
-OS_RETURN_E syscall_do(const SYSCALL_FUNCTION_E func, void* params)
-{
-    /* Checks if the system call exists */
-    if(func >= SYSCALL_MAX_ID)
-    {
-        return OS_ERR_SYSCALL_UNKNOWN;
-    }
-
-    /* Generate the syscall */
-    cpu_syscall(func, params);
-
-    return OS_NO_ERR;
 }

@@ -17,12 +17,13 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#ifndef __CORE_SYSCALL_H_
-#define __CORE_SYSCALL_H_
+#ifndef __LIB_SYSCALL_H_
+#define __LIB_SYSCALL_H_
 
 #include <stdint.h>       /* Generic int types */
 #include <stddef.h>       /* Standard definitions */
 #include <kernel_error.h> /* Kernel error codes */
+#include <syscall.h>      /* Kernel syscall manager */
 
 /*******************************************************************************
  * CONSTANTS
@@ -34,48 +35,24 @@
  * STRUCTURES
  ******************************************************************************/
 
-/** @brief Defines the ID for each system call */
-enum SYSCALL_FUNCTION
-{
-    SYSCALL_FORK = 0,
-    SYSCALL_WAITPID,          
-    SYSCALL_EXIT,             
-    SYSCALL_FUTEX_WAIT,      
-    SYSCALL_FUTEX_WAKE,       
-    SYSCALL_SCHED_GET_PARAMS, 
-    SYSCALL_SCHED_SET_PARAMS, 
-    SYSCALL_MUTEX_CREATE,     
-    SYSCALL_MUTEX_DESTROY,    
-    /* 9 */
-    SYSCALL_MAX_ID
-};
-
-/** @brief Short name for enum SYSCALL_FUNCTION */
-typedef enum SYSCALL_FUNCTION SYSCALL_FUNCTION_E;
-
-/** @brief Defines the system call handler structure. */
-struct syscall_handler
-{
-    /** @brief System call handler routine. */
-    void(*handler)(SYSCALL_FUNCTION_E, void*);
-};
-
-/** 
- * @brief Defines syscall_handler_t type as a shorcut for 
- * struct syscall_handler.
- */
-typedef struct syscall_handler syscall_handler_t;
+/* None */
 
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
 
-/**
- * @brief Initializes the system call manager.
+/** 
+ * @brief Raises a system call.
  * 
- * @details Initializes the system call manager. The system call table is 
- * validated and the system call interrupts / raise method are initialized.
+ * @details Raises a system call. Thus function uses the CPU API to raise the 
+ * system call with the desired method. The system calls parameters are passed
+ * by the CPU API.
+ * 
+ * @param[in] func The system ID to raise.
+ * @param[in, out] params The system call parameters.
+ *
+ * @return OS_NO_ERR is returned on success. Otherwise an error is returned.
  */
-void syscall_init(void);
+OS_RETURN_E syscall_do(const SYSCALL_FUNCTION_E func, void* params);
 
-#endif /* #ifndef __CORE_SYSCALL_H_ */
+#endif /* #ifndef __LIB_SYSCALL_H_ */

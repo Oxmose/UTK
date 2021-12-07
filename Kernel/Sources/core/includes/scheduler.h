@@ -29,7 +29,10 @@
  * CONSTANTS
  ******************************************************************************/
 
-/* None */
+/** @brief Scheduler's thread lowest priority. */
+#define KERNEL_LOWEST_PRIORITY  63
+/** @brief Scheduler's thread highest priority. */
+#define KERNEL_HIGHEST_PRIORITY 0
 
 /*******************************************************************************
  * STRUCTURES
@@ -69,6 +72,25 @@ struct waitpid_params
 
 /** @brief Short name for struct waitpid_params */
 typedef struct waitpid_params waitpid_params_t;
+
+/** @brief Scheduling parameters structure.*/
+struct sched_param
+{
+    /** @brief The pid of the current process. */
+    int32_t pid;
+
+    /** @brief The tid of the calling thread. */
+    int32_t tid;
+
+    /** @brief The priority of the calling thread. */
+    uint32_t priority;
+
+    /** @brief Receives the system call error status. */
+    OS_RETURN_E error;
+};
+
+/** @brief Short name for struct sched_param */
+typedef struct sched_param sched_param_t;
 
 /*******************************************************************************
  * FUNCTIONS
@@ -233,12 +255,14 @@ void sched_set_thread_termination_cause(const THREAD_TERMINATE_CAUSE_E
 
 /**
  * @brief Terninates a thread before it's normal termination.
+ * 
+ * @param[in] ret_code The return code for the thread.
  *
  * @details Terminates a thread before its return. The return state of the
  * thread will be KILLED. The termination cause must be set before calling this
  * function.
  */
-void sched_terminate_self(void);
+void sched_terminate_self(void* ret_code);
 
 /**
  * @brief Returns the number of time the scheduler was called.
@@ -248,8 +272,6 @@ void sched_terminate_self(void);
  * @return The number of time the scheduler was called.
  */
 uint64_t sched_get_schedule_count(void);
-
-
 
 /**
  * @brief Syscall handler to forks the current process.
@@ -300,9 +322,22 @@ OS_RETURN_E sched_join_thread(kernel_thread_t* thread, void** ret_val,
  * 
  * @param[in] func The syscall function ID, must correspond to the wait_process
  * call.
- * @param[int, out] params The parameters used by the function, must be of type 
+ * @param[in, out] params The parameters used by the function, must be of type 
  * waitpid_params_t.
  */
 void sched_wait_process_pid(const SYSCALL_FUNCTION_E func, void* params);
+
+/**
+ * @brief System call handler to get the current process parameters.
+ * 
+ * @details System call handler to get the current process parameters. This 
+ * system call fills as sched_param_t sctructure given as parameter.
+ * 
+ * @param[in] func The syscall function ID, must correspond to the get_params
+ * call.
+ * @param[in, out] params The parameters used by the function, must be of type 
+ * sched_param_t.
+ */
+void sched_get_process_params(const SYSCALL_FUNCTION_E func, void* params);
 
 #endif /* #ifndef __CORE_SCHEDULER_H_ */

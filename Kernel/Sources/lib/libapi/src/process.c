@@ -17,10 +17,11 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#include <stddef.h>        /* Standard definitions */
-#include <stdint.h>        /* Generic int types */
-#include <scheduler.h>     /* Scheduler */
-#include <syscall.h>       /* Syscall maanger */
+#include <stddef.h>          /* Standard definitions */
+#include <stdint.h>          /* Generic int types */
+#include <scheduler.h>       /* Scheduler */
+#include <sys/syscall_api.h> /* Syscall API */
+
 /* UTK configuration file */
 #include <config.h>
 
@@ -57,25 +58,13 @@
 
 int32_t fork(void)
 {
-    int32_t current_pid;
-    int32_t new_pid;
-    int32_t params;
+    int32_t pid;
 
-    /* Get the current PID */
-    current_pid = sched_get_pid();
+    pid = 0;
+    syscall_do(SYSCALL_FORK, &pid);
 
-    syscall_do(SYSCALL_FORK, &params);
-
-    /* If the current pid is different, we are in the forked process */
-    new_pid = sched_get_pid();
-    if(new_pid != current_pid)
-    {
-        return 0;
-    }
-    else
-    {
-        return params;
-    }
+    /* Here pid = 0 for the new process */
+    return pid;
 }
 
 int32_t waitpid(const int32_t pid, 

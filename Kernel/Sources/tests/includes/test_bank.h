@@ -78,7 +78,8 @@ void lapic_timer_test(void);
 #define PANIC_TEST 0
 #define QUEUE_TEST 0
 #define TIME_TEST 0
-#define USTAR_TEST 1
+#define USTAR_TEST 0
+#define FORK_TEST 0
 
 void output_test(void);
 void kheap_test(void);
@@ -86,5 +87,6 @@ void panic_test(void);
 void queue_test(void);
 void time_test(void);
 void ustar_test(void);
+void* fork_test(void);
 
 #endif /* __TEST_BANK_H_ */

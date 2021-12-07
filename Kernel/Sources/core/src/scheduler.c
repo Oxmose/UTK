@@ -53,10 +53,6 @@
  * CONSTANTS
  ******************************************************************************/
 
-/** @brief Scheduler's thread lowest priority. */
-#define KERNEL_LOWEST_PRIORITY  63
-/** @brief Scheduler's thread highest priority. */
-#define KERNEL_HIGHEST_PRIORITY 0
 /** @brief Scheduler's thread initial priority. */
 #define KERNEL_INIT_PRIORITY    KERNEL_HIGHEST_PRIORITY
 /** @brief Scheduler's idle thread priority. */
@@ -1011,13 +1007,14 @@ void sched_set_thread_termination_cause(const THREAD_TERMINATE_CAUSE_E cause)
     active_thread->return_cause = cause;
 }
 
-void sched_terminate_self(void)
+void sched_terminate_self(void* ret_code)
 {
     if(active_thread == NULL)
     {
         return;
     }
 
+    active_thread->ret_val = ret_code;
     active_thread->return_state = THREAD_RETURN_STATE_KILLED;
 
     active_thread->end_time = time_get_current_uptime();
@@ -1647,4 +1644,33 @@ void sched_wait_process_pid(const SYSCALL_FUNCTION_E func, void* params)
         KERNEL_ERROR("Could not clear node child\n");
         KERNEL_PANIC(err);
     }
+}
+
+void sched_get_process_params(const SYSCALL_FUNCTION_E func, void* params)
+{
+    sched_param_t*           func_params;
+
+    func_params = (sched_param_t*)params;
+
+    if(func != SYSCALL_SCHED_GET_PARAMS)
+    {
+        if(func_params != NULL)
+        {
+            func_params->pid   = -1;
+            func_params->tid   = -1;
+            func_params->error = OS_ERR_UNAUTHORIZED_ACTION;
+        }
+        return;
+    }
+    if(func_params == NULL)
+    {
+        return;
+    }
+
+    /* Fills the structure. Here we will add new parameters when needed */
+    func_params->pid = active_process->pid;
+    func_params->tid = active_thread->tid;
+    func_params->priority = active_thread->priority;
+
+    func_params->error = OS_NO_ERR;
 }

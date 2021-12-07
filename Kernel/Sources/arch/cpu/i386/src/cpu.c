@@ -1237,7 +1237,7 @@ uintptr_t cpu_get_current_pgdir(void)
 {
     uintptr_t current_pgdir;
 
-        /* Init thread context */
+    /* Init thread context */
     __asm__ __volatile__(
         "mov %%cr3, %%eax\n\t"
         "mov %%eax, %0\n\t"
@@ -1296,6 +1296,19 @@ void cpu_restore_context(cpu_state_t* cpu_state,
     KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
 }
 
+__inline__ int32_t cpu_compare_and_swap(volatile int32_t* memory,
+                                        const int32_t oldval,
+                                        const int32_t newval)
+{
+    int32_t prev;
+    __asm__ __volatile__ (
+            "lock cmpxchg %2, %1\n\t"
+            : "=a" (prev), "+m" (*memory)
+            : "r" (newval), "0" (oldval)
+            : "memory");
+    return prev;
+}
+
 void cpu_set_next_thread_instruction(const cpu_state_t* cpu_state,
                                      stack_state_t* stack_state, 
                                      const uintptr_t next_inst)
@@ -1332,6 +1345,32 @@ void cpu_get_syscall_data(const cpu_state_t* cpu_state,
     {
         *params = (void*)cpu_state->edx;
     }
+}
+
+void cpu_switch_user_mode(void)
+{
+    /* Setup stack requirement and performs switch to user mode */
+    __asm__ __volatile__(
+        "cli                             \n\t"
+        "mov %0, %%ax                    \n\t"
+        "mov %%ax, %%ds                  \n\t"
+        "mov %%ax, %%es                  \n\t"
+        "mov %%ax, %%fs                  \n\t"
+        "mov %%ax, %%gs                  \n\t"
+        "mov %%esp, %%eax                \n\t"
+        "push %0                         \n\t"
+        "push %%eax                      \n\t"
+        "pushf                           \n\t"
+        "pop %%eax                       \n\t"
+        "or $0x200, %%eax                \n\t"
+        "push %%eax                      \n\t"
+        "push %1                         \n\t"
+        "push $user_mode_entry           \n\t"
+        "iret                            \n\t"
+        "user_mode_entry:                \n\t"
+        :
+        : "i" (USER_DS_32 | 0x3) , "i" (USER_CS_32 | 0x3)
+        : "eax");
 }
 
 void validate_architecture(void)

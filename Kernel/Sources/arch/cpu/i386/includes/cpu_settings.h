@@ -36,6 +36,11 @@
 /** @brief Kernel's 16 bits data segment descriptor. */
 #define KERNEL_DS_16 0x20
 
+/** @brief User's 32 bits code segment descriptor. */
+#define USER_CS_32 0x28
+/** @brief User's 32 bits data segment descriptor. */
+#define USER_DS_32 0x30
+
 /** @brief Select the thread code segment. */
 #define THREAD_KERNEL_CS KERNEL_CS_32
 /** @brief Select the thread code segment. */

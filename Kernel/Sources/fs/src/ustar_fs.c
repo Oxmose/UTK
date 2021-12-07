@@ -313,7 +313,7 @@ inline static void ustar_get_path(const char* path, char* buffer)
     strncpy(buffer, path, len);
 }
 
-inline static uint8_t is_root(const char* path, const char* file)
+inline static bool_t is_root(const char* path, const char* file)
 {
     char* buffer;
     size_t len;
