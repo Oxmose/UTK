@@ -143,6 +143,7 @@ void* init_sys(void* args)
     ustar_test();
     fork_test();
     user_heap_test();
+    memory_usage_test();
 #endif
 
     pid = fork();

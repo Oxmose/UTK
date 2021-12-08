@@ -285,4 +285,29 @@ void memory_free_kernel_pages(const void* page_addr,
  */
 void memory_alloc_page(const SYSCALL_FUNCTION_E func, void* params);
 
+/**
+ * @brief @brief Returns the amount of free pages memory (in bytes) for the 
+ * kernel.
+ * 
+ * @return The amount of free pages memory (in bytes) for the 
+ * kernel. 
+ */
+uint32_t memory_get_free_kpages(void);
+
+/**
+ * @brief @brief Returns the amount of free pages memory (in bytes) for the 
+ * current process.
+ * 
+ * @return The amount of free pages memory (in bytes) for the 
+ * current process. 
+ */
+uint32_t memory_get_free_pages(void);
+
+/**
+ * @brief @brief Returns the amount of free frames memory (in bytes).
+ * 
+ * @return the amount of free frames memory (in bytes).
+ */
+uint32_t memory_get_free_frames(void);
+
 #endif /* #ifndef __CPU_MEMMGT_H_ */

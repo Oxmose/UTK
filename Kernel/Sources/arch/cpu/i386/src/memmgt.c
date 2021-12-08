@@ -89,6 +89,32 @@ enum MEM_ALLOC_START
  */
 typedef enum MEM_ALLOC_START MEM_ALLOC_START_E;
 
+/** @brief Defines the structure used when copying the memory image of a 
+ * process.
+ */
+struct mem_copy_self_data
+{
+    /** @brief The PGDir frame address */
+    uintptr_t*  new_pgdir_frame;
+    /** @brief The PGDir page address */
+    uintptr_t*  new_pgdir_page;  
+    /** @brief The pagetable page address */
+    uintptr_t*  new_pgtable_page;
+    /** @brief The current data page */
+    uintptr_t*  new_data_page;
+
+    /** @brief Tells if the PGDir was mapped. */
+    bool_t      mapped_pgdir;
+    /** @brief Tells if the PGDir frame was acquired. */
+    bool_t      acquired_ref_pgdir;
+};
+
+/** 
+ * @brief Defines mem_copy_self_data_t type as a shorcut for 
+ * struct mem_copy_self_data.
+ */
+typedef struct mem_copy_self_data mem_copy_self_data_t;
+
 /*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
@@ -458,6 +484,17 @@ static void paging_init(void);
 
 static void memory_paging_enable(void);
 
+/* TODO Document */
+static OS_RETURN_E memory_copy_self_stack(mem_copy_self_data_t* data, 
+                                          const void* kstack_addr,
+                                          const size_t kstack_size);
+static OS_RETURN_E memory_copy_self_pgtable(mem_copy_self_data_t* data);
+static OS_RETURN_E memory_create_new_pagedir(mem_copy_self_data_t* data);
+static OS_RETURN_E memory_copy_self_clean(mem_copy_self_data_t* data, 
+                                          OS_RETURN_E past_err);
+
+static uint32_t get_free_mem(queue_t* mem_pool);
+
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
@@ -518,6 +555,24 @@ static void* memory_alloc_frames(const size_t frame_count, OS_RETURN_E* err)
 
     return address;
 }
+
+static uint32_t get_free_mem(queue_t* mem_pool)
+{
+    queue_node_t* head;
+    mem_range_t*  range;
+    uint32_t      total;
+
+    total = 0;
+    head = mem_pool->head;
+    while(head != NULL)
+    {
+        range = (mem_range_t*)head->data;
+        total += range->limit - range->base;
+        head = head->next;
+    }
+    return total;
+}
+
 
 static void memory_free_frames(void* frame_addr, 
                                const size_t frame_count,
@@ -1437,6 +1492,9 @@ static void* get_block(queue_t* list,
 
         /* Modify the block */
         range->base += length * KERNEL_FRAME_SIZE;
+
+        /* Update priority */
+        selected->priority = range->base;
     }
     else 
     {
@@ -1502,6 +1560,7 @@ static void add_block(queue_t* list,
     while(cursor != NULL)
     {
         range = (mem_range_t*)cursor->data;
+        //kernel_printf("Walking 0x%p 0x%p\n", range->base, range->limit);
         /* Try to merge blocks */
         if(range->base == limit)
         {
@@ -1525,6 +1584,7 @@ static void add_block(queue_t* list,
                     }
                 }
             }
+            cursor->priority = range->base;
 
             break;
         }
@@ -1599,6 +1659,7 @@ static void add_block(queue_t* list,
             KERNEL_PANIC(internal_err);
         }       
     }
+
     if(err != NULL)
     {
         *err = OS_NO_ERR;
@@ -2039,8 +2100,13 @@ static void kernel_mmap_internal(const void* virt_addr,
     to_map = mapping_size + ((uintptr_t)virt_addr - virt_align);
     reverse_to_map = to_map;
 
+    if(err != NULL)
+    {
+        *err = OS_NO_ERR;
+    }
+
     /* Check for existing mapping */
-    if(is_mapped(virt_align, to_map))
+    if(is_mapped(virt_align, to_map) == TRUE)
     {
         KERNEL_ERROR("Trying to remap memory\n");
         if(err != NULL)
@@ -2279,6 +2345,483 @@ static void memory_paging_enable(void)
     EXIT_CRITICAL(int_state);
 }
 
+static OS_RETURN_E memory_copy_self_clean(mem_copy_self_data_t* data, 
+                                          OS_RETURN_E past_err)
+{
+    OS_RETURN_E err;
+
+    if(data->new_data_page != NULL)
+    {
+        memory_free_pages_to(free_kernel_pages, data->new_data_page, 1, &err);
+        data->new_data_page = NULL;
+        if(err != OS_NO_ERR)
+        {
+            KERNEL_PANIC(err);
+        }
+    }
+
+    if(data->new_pgtable_page != NULL)
+    {
+        memory_free_pages_to(free_kernel_pages, data->new_pgtable_page, 1, &err);
+        data->new_pgtable_page = NULL;
+        if(err != OS_NO_ERR)
+        {
+            KERNEL_PANIC(err);
+        }
+    }
+
+    if(data->mapped_pgdir == TRUE)
+    {
+        memory_munmap(data->new_pgdir_page, KERNEL_PAGE_SIZE, &err);
+        data->mapped_pgdir = FALSE;
+        if(err != OS_NO_ERR)
+        {
+            KERNEL_PANIC(err);
+        }
+    }
+
+    if(data->new_pgdir_page != NULL)
+    {
+        memory_free_pages_to(free_kernel_pages, data->new_pgdir_page, 1, &err);
+        data->new_pgdir_page = NULL;
+        if(err != OS_NO_ERR)
+        {
+            KERNEL_PANIC(err);
+        }
+    }
+
+    if(data->new_pgdir_frame != NULL)
+    {
+        memory_free_frames(data->new_pgdir_frame, 1, &err);
+        data->new_pgdir_frame = NULL;
+        if(err != OS_NO_ERR)
+        {
+            KERNEL_PANIC(err);
+        }
+    }
+
+    if(data->acquired_ref_pgdir == TRUE)
+    {
+        data->acquired_ref_pgdir = FALSE;
+        memory_release_ref((uintptr_t)data->new_pgdir_frame);
+    }
+
+    kernel_error("Could not copy process mapping\n");
+
+    return past_err;
+}
+
+static OS_RETURN_E memory_create_new_pagedir(mem_copy_self_data_t* data)
+{
+    OS_RETURN_E err;
+
+    data->new_pgdir_frame = (uintptr_t*)memory_alloc_frames(1, &err);
+    if(err != OS_NO_ERR)
+    {
+        KERNEL_ERROR("Could not copy process mapping\n");
+        return err;
+    }
+    memory_acquire_ref((uintptr_t)data->new_pgdir_frame);
+    data->acquired_ref_pgdir = TRUE;
+
+    data->new_pgdir_page = (uintptr_t*)memory_alloc_pages_from(free_kernel_pages,
+                                                         1, 
+                                                         MEM_ALLOC_BEGINING,
+                                                         &err);
+    if(err != OS_NO_ERR)
+    {
+        return memory_copy_self_clean(data, err);
+    }
+
+    memory_mmap_direct(data->new_pgdir_page, data->new_pgdir_frame, 
+                       KERNEL_PAGE_SIZE, 0, 0, 1,0, &err);
+    if(err != OS_NO_ERR)
+    {
+        return memory_copy_self_clean(data, err);
+    }
+    data->mapped_pgdir = TRUE;
+
+    return OS_NO_ERR;
+}
+
+static OS_RETURN_E memory_copy_self_pgtable(mem_copy_self_data_t* data)
+{
+    uintptr_t*  current_pgdir;
+    uintptr_t*  current_pgtable;
+    uintptr_t*  new_pgtable_frame;
+    uint32_t    i;
+    uint32_t    j;
+    OS_RETURN_E err;
+    OS_RETURN_E saved_err;
+
+    /* The current page directory is always recursively mapped */
+    current_pgdir = (uintptr_t*)&_KERNEL_RECUR_PG_DIR_BASE;
+
+    /* Copy the page directory kernel entries, minus the recursive entry */    
+    for(i = KERNEL_FIRST_PGDIR_ENTRY; i < KERNEL_PGDIR_SIZE - 1; ++i)
+    {
+        data->new_pgdir_page[i] = current_pgdir[i];
+    }
+
+    /* Set the recursive entry on the new page directory */
+    data->new_pgdir_page[KERNEL_PGDIR_SIZE - 1] = 
+                                            (uintptr_t)data->new_pgdir_frame |
+                                            PG_DIR_FLAG_PAGE_SIZE_4KB        |
+                                            PG_DIR_FLAG_PAGE_SUPER_ACCESS    |
+                                            PG_DIR_FLAG_PAGE_READ_WRITE      |
+                                            PG_DIR_FLAG_PAGE_PRESENT;
+    
+    /* Copy the rest of the page table and set copy on write */
+    for(i = 0; i < KERNEL_FIRST_PGDIR_ENTRY; ++i)
+    {
+        if((current_pgdir[i] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
+        {
+            /* Get recursive virtual address */
+            current_pgtable = (uintptr_t*)(((uintptr_t)&_KERNEL_RECUR_PG_TABLE_BASE) + 
+                                           KERNEL_PAGE_SIZE * 
+                                           i);
+
+            /* Create new page table */
+            new_pgtable_frame = memory_alloc_frames(1, &err);
+            if(err != OS_NO_ERR)
+            {
+                break;
+            }     
+            
+            memory_mmap_direct(data->new_pgtable_page, 
+                               new_pgtable_frame, 
+                               KERNEL_PAGE_SIZE, 
+                               0, 
+                               0,
+                               1,
+                               0,
+                               &err);
+            if(err != OS_NO_ERR)
+            {
+                memory_free_frames(new_pgtable_frame, 1, &err);
+                if(err != OS_NO_ERR)
+                {
+                    KERNEL_PANIC(err);
+                }
+                break;
+            }
+
+            data->new_pgdir_page[i] = (current_pgdir[i] & ~PG_ENTRY_ADDR_MASK) | 
+                                (uintptr_t)new_pgtable_frame;
+            memory_acquire_ref((uintptr_t)new_pgtable_frame);
+
+            for(j = 0; j < KERNEL_PGDIR_SIZE; ++j)
+            {
+                if((current_pgtable[j] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
+                {
+                    /* Copy mapping and set as read only / COW here the current
+                     * process is also set as RO. Hardware mapping is copied as 
+                     * is.
+                     */
+                    if((current_pgtable[j] & PAGE_FLAG_READ_WRITE) != 0 &&
+                       (current_pgtable[j] & PAGE_FLAG_OS_CUSTOM_MASK) == 
+                        PAGE_FLAG_REGULAR)
+                    {
+
+                        current_pgtable[j] = (current_pgtable[j] & 
+                                            ~PAGE_FLAG_READ_WRITE) | 
+                                            PAGE_FLAG_READ_ONLY    |
+                                            PAGE_FLAG_COPY_ON_WRITE; 
+                        data->new_pgtable_page[j] = current_pgtable[j];
+                        /* Increment the reference count */
+                        memory_acquire_ref(data->new_pgtable_page[j] & 
+                                           PG_ENTRY_ADDR_MASK);
+                    }
+                    else if((current_pgtable[j] & PAGE_FLAG_OS_CUSTOM_MASK) != 
+                            PAGE_FLAG_PRIVATE)
+                    {
+                        data->new_pgtable_page[j] = current_pgtable[j];
+                        /* Increment the reference count */
+                        memory_acquire_ref(data->new_pgtable_page[j] & 
+                                           PG_ENTRY_ADDR_MASK);
+                    }
+                    else 
+                    {
+                        data->new_pgtable_page[j] = 0;
+                    }
+                }
+                else 
+                {
+                    data->new_pgtable_page[j] = 0;
+                }
+            }
+
+            memory_munmap(data->new_pgtable_page, KERNEL_PAGE_SIZE, &err);
+            if(err != OS_NO_ERR)
+            {
+                KERNEL_PANIC(err);
+            }
+        }
+    }
+
+    saved_err = err;
+
+    /* If we stopped because of an error */
+    if(i != KERNEL_FIRST_PGDIR_ENTRY)
+    {
+        /* Skip the last that is already cleaned */
+        --i;
+
+        /* Free what we created */
+        for(; (int32_t)i >= 0; --i)
+        {
+            if((current_pgdir[i] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
+            {
+                /* Get recursive virtual address */
+                current_pgtable = (uintptr_t*)(((uintptr_t)&_KERNEL_RECUR_PG_TABLE_BASE) + 
+                                            KERNEL_PAGE_SIZE * 
+                                            i);
+
+                new_pgtable_frame = (uintptr_t*)
+                                    (data->new_pgdir_page[i] & PG_ENTRY_ADDR_MASK);
+
+                memory_mmap_direct(data->new_pgtable_page, 
+                                   new_pgtable_frame, 
+                                   KERNEL_PAGE_SIZE, 
+                                   0, 
+                                   0,
+                                   1,
+                                   0,
+                                   &err);
+                if(err != OS_NO_ERR)
+                {
+                    KERNEL_PANIC(err);
+                }
+
+                for(j = 0; j < KERNEL_PGDIR_SIZE; ++j)
+                {
+                    if((current_pgtable[j] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
+                    {
+                        if((current_pgtable[j] & PAGE_FLAG_READ_WRITE) != 0 &&
+                           (current_pgtable[j] & PAGE_FLAG_OS_CUSTOM_MASK) == 
+                            PAGE_FLAG_REGULAR)
+                        {
+                            /* Reset current page values */
+                            current_pgtable[j] &= ~PAGE_FLAG_COPY_ON_WRITE;
+                            current_pgtable[j] |= PAGE_FLAG_READ_WRITE; 
+
+                            /* Decrement the reference count */
+                            memory_release_ref(data->new_pgtable_page[j] & 
+                                               PG_ENTRY_ADDR_MASK);
+                        }
+                        else if((current_pgtable[j] & 
+                                 PAGE_FLAG_OS_CUSTOM_MASK) != 
+                                PAGE_FLAG_PRIVATE)
+                        {
+                            /* Decrement the reference count */
+                            memory_release_ref(data->new_pgtable_page[j] & 
+                                               PG_ENTRY_ADDR_MASK);
+                        }
+                    }
+                }
+                memory_munmap(data->new_pgtable_page, KERNEL_PAGE_SIZE, &err);
+                if(err != OS_NO_ERR)
+                {
+                    KERNEL_PANIC(err);
+                }
+                memory_free_frames(new_pgtable_frame, 1, &err);  
+                if(err != OS_NO_ERR)
+                {
+                    KERNEL_PANIC(err);
+                }  
+            }
+        }
+    }
+
+    return saved_err;
+}
+
+static OS_RETURN_E memory_copy_self_stack(mem_copy_self_data_t* data, 
+                                          const void* kstack_addr,
+                                          const size_t kstack_size)
+{
+    uintptr_t   curr_addr;
+    uint16_t    pgtable_entry;
+    uintptr_t*  new_pgtable_frame;
+    uintptr_t*  new_data_frame;
+    OS_RETURN_E err;
+
+    curr_addr = (uintptr_t)kstack_addr;
+    while(curr_addr < (uintptr_t)kstack_addr + kstack_size)
+    {
+        pgtable_entry = (curr_addr >> PG_TABLE_ENTRY_OFFSET) & 
+                        PG_TABLE_ENTRY_OFFSET_MASK;
+
+        new_pgtable_frame = (uintptr_t*)
+                            data->new_pgdir_page[curr_addr >> PG_DIR_ENTRY_OFFSET];
+        if(((uintptr_t)new_pgtable_frame & PG_DIR_FLAG_PAGE_PRESENT) == 0)
+        {
+            new_pgtable_frame = memory_alloc_frames(1, &err);
+            if(err != OS_NO_ERR)
+            {
+                KERNEL_ERROR("Could not create new kstack page frame\n");
+                break;
+            }
+            memory_acquire_ref((uintptr_t)new_pgtable_frame);
+            data->new_pgdir_page[curr_addr >> PG_DIR_ENTRY_OFFSET] = 
+                (uintptr_t)new_pgtable_frame  |
+                PG_DIR_FLAG_PAGE_SIZE_4KB     |
+                PG_DIR_FLAG_PAGE_SUPER_ACCESS |
+                PG_DIR_FLAG_PAGE_READ_WRITE   |
+                PG_DIR_FLAG_PAGE_PRESENT;
+        }
+
+        memory_mmap_direct(data->new_pgtable_page, 
+                           new_pgtable_frame, 
+                           KERNEL_PAGE_SIZE, 
+                           0, 
+                           0,
+                           1,
+                           0,
+                           &err);
+        if(err != OS_NO_ERR)
+        {
+            KERNEL_ERROR("Could not create new kstack page frame\n");
+            memory_free_frames(new_pgtable_frame, 1, NULL);
+            break;
+        }
+
+        /* Allocate the new frame */
+        new_data_frame = memory_alloc_frames(1, &err);
+        if(err != OS_NO_ERR)
+        {
+            KERNEL_ERROR("Could not create new kstack page frame\n");
+            memory_munmap(data->new_pgtable_page, KERNEL_PAGE_SIZE, &err);
+            if(err != OS_NO_ERR)
+            {
+                KERNEL_PANIC(err);
+            }
+            memory_free_frames(new_pgtable_frame, 1, &err);
+            if(err != OS_NO_ERR)
+            {
+                KERNEL_PANIC(err);
+            }
+            break;
+        }
+        memory_acquire_ref((uintptr_t)new_data_frame);
+
+        /* Map the new frame */
+        memory_mmap_direct(data->new_data_page, 
+                           new_data_frame, 
+                           KERNEL_PAGE_SIZE, 
+                           0, 
+                           0, 
+                           1, 
+                           0,
+                           &err);
+        if(err != OS_NO_ERR)
+        {
+            KERNEL_ERROR("Could not create new kstack page frame\n");
+            memory_munmap(data->new_pgtable_page, KERNEL_PAGE_SIZE, &err);
+            if(err != OS_NO_ERR)
+            {
+                KERNEL_PANIC(err);
+            }
+            memory_free_frames(new_pgtable_frame, 1, &err);
+            if(err != OS_NO_ERR)
+            {
+                KERNEL_PANIC(err);
+            }
+            memory_free_frames(new_data_frame, 1, &err);
+            {
+                KERNEL_PANIC(err);
+            }
+            break;
+        }
+
+        /* Copy data */
+        memcpy(data->new_data_page, (void*)curr_addr, KERNEL_PAGE_SIZE);
+
+        /* Unmap the new frame */
+        memory_munmap(data->new_data_page, KERNEL_PAGE_SIZE, &err);
+        if(err != OS_NO_ERR)
+        {
+            KERNEL_PANIC(err);
+        }
+
+        /* Update the mapping */
+        data->new_pgtable_page[pgtable_entry] =
+            (uintptr_t)new_data_frame |
+            PAGE_FLAG_SUPER_ACCESS    | 
+            PAGE_FLAG_READ_WRITE      |
+            PAGE_FLAG_CACHE_WB        |
+            PAGE_FLAG_PRIVATE         |
+            PAGE_FLAG_PRESENT;
+
+        memory_munmap(data->new_pgtable_page, KERNEL_PAGE_SIZE, &err);
+        if(err != OS_NO_ERR)
+        {
+            KERNEL_PANIC(err);
+        }
+
+        curr_addr += KERNEL_PAGE_SIZE;
+    }
+
+    /* If an error occured, free the resources */
+    if(curr_addr < (uintptr_t)kstack_addr + kstack_size)
+    {
+        /* Skip frst that is already cleaned */
+        curr_addr -= KERNEL_PAGE_SIZE;
+        while(curr_addr > (uintptr_t)kstack_addr)
+        {
+            pgtable_entry = (curr_addr >> PG_TABLE_ENTRY_OFFSET) & 
+                            PG_TABLE_ENTRY_OFFSET_MASK;
+
+            new_pgtable_frame = (uintptr_t*)
+                            data->new_pgdir_page[curr_addr >> PG_DIR_ENTRY_OFFSET];
+
+            memory_mmap_direct(data->new_pgtable_page, 
+                               new_pgtable_frame, 
+                               KERNEL_PAGE_SIZE, 
+                               0, 
+                               0,
+                               1,
+                               0,
+                               &err);
+            if(err != OS_NO_ERR)
+            {
+                KERNEL_PANIC(err);
+            }
+
+            /* Deallocate the new frame */
+            new_data_frame = (uintptr_t*)(data->new_pgtable_page[pgtable_entry] & 
+                                         PG_ENTRY_ADDR_MASK);
+            memory_free_frames(new_data_frame, 1, &err);
+            if(err != OS_NO_ERR)
+            {
+                KERNEL_PANIC(err);
+            }
+
+            /* Update the mapping */
+            data->new_pgtable_page[pgtable_entry] = 0;
+            data->new_pgdir_page[curr_addr >> PG_DIR_ENTRY_OFFSET] = 0;
+
+            memory_munmap(data->new_pgtable_page, KERNEL_PAGE_SIZE, &err);
+            if(err != OS_NO_ERR)
+            {
+                KERNEL_PANIC(err);
+            }
+            curr_addr -= KERNEL_PAGE_SIZE;
+        }
+
+        memory_free_frames(new_pgtable_frame, 1, &err);
+        if(err != OS_NO_ERR)
+        {
+            KERNEL_PANIC(err);
+        }
+
+        return OS_ERR_MEMORY_NOT_MAPPED;
+    }
+
+    return OS_NO_ERR;
+}
+
+
 void memory_manager_init(void)
 {
     queue_node_t* cursor;
@@ -2478,11 +3021,27 @@ void* memory_alloc_stack(const size_t stack_size,
 OS_RETURN_E memory_free_stack(void* stack, const size_t stack_size)
 {
     uint32_t    int_state;
+    size_t      page_count;
+    size_t      aligned_size;
     OS_RETURN_E err;
+
+
+    aligned_size = stack_size + ((uintptr_t)stack & (KERNEL_PAGE_SIZE - 1));
+    page_count = aligned_size / KERNEL_PAGE_SIZE;
+    if(aligned_size % KERNEL_PAGE_SIZE != 0)
+    {
+        ++page_count;
+    }
 
     ENTER_CRITICAL(int_state);
 
     memory_munmap(stack, stack_size, &err);
+    if(err != OS_NO_ERR)
+    {
+        KERNEL_PANIC(err);
+    }
+    memory_free_pages_to(sched_get_current_process()->free_page_table, 
+                         stack, page_count, &err);
 
     EXIT_CRITICAL(int_state);
 
@@ -2658,405 +3217,90 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process,
                                      const void* kstack_addr,
                                      const size_t kstack_size)
 {
-    uintptr_t*  new_pgdir_frame;
-    uintptr_t*  new_pgdir_page;  
-    uintptr_t*  new_pgtable_frame; 
-    uintptr_t*  new_pgtable_page;
-    uintptr_t*  current_pgdir;
-    uintptr_t*  current_pgtable;
-    uintptr_t*  new_data_page;
-    uintptr_t*  new_data_frame;
-    uintptr_t   curr_addr;
-    uint16_t    pgtable_entry;
-    uint32_t    i;
-    uint32_t    j;
-    OS_RETURN_E err;
+    OS_RETURN_E          err;
+    mem_copy_self_data_t data;
 
     if(dst_process == NULL)
     {
         return OS_ERR_NULL_POINTER;
     }
 
+    memset(&data, 0, sizeof(mem_copy_self_data_t));
+
     KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, "[MEMMGT] Copying process image");
 
     /* Create a new page directory and map for kernel */
-    new_pgdir_frame = (uintptr_t*)memory_alloc_frames(1, &err);
+    err = memory_create_new_pagedir(&data);
     if(err != OS_NO_ERR)
     {
-        KERNEL_ERROR("Could not copy process mapping\n");
-        return err;
+        return memory_copy_self_clean(&data, err);
     }
-
-    new_pgdir_page = (uintptr_t*)memory_alloc_pages_from(free_kernel_pages,
-                                                         1, 
-                                                         MEM_ALLOC_BEGINING,
-                                                         &err);
-    if(err != OS_NO_ERR)
-    {
-        memory_free_frames(new_pgdir_frame, 1, NULL);
-        KERNEL_ERROR("Could not copy process mapping\n");
-        return err;
-    }
-
-    memory_mmap_direct(new_pgdir_page, 
-                       new_pgdir_frame, 
-                       KERNEL_PAGE_SIZE, 
-                       0, 
-                       0, 
-                       1,
-                       0,
-                       &err);
-    if(err != OS_NO_ERR)
-    {
-        memory_free_pages_to(free_kernel_pages, new_pgdir_frame, 1, NULL);
-        memory_free_frames(new_pgdir_frame, 1, NULL);
-        KERNEL_ERROR("Could not copy process mapping\n");
-        return err;
-    }
-
-    memory_acquire_ref((uintptr_t)new_pgdir_frame);
-
-    /* Create temporary pages */
-    new_pgtable_page = memory_alloc_pages_from(free_kernel_pages,
-                                               1, 
-                                               MEM_ALLOC_BEGINING,
-                                               &err);
-    if(err != OS_NO_ERR)
-    {
-        memory_munmap(new_pgdir_page, KERNEL_PAGE_SIZE, NULL);
-        memory_free_frames(new_pgdir_frame, 1, NULL);
-        memory_free_pages_to(free_kernel_pages, new_pgdir_frame, 1, NULL);
-        KERNEL_ERROR("Could not copy process mapping\n");
-        return err;
-    }
-
-    new_data_page    = memory_alloc_pages_from(free_kernel_pages, 
-                                               1, 
-                                               MEM_ALLOC_BEGINING,
-                                               &err);
-
-    if(err != OS_NO_ERR)
-    {
-        memory_free_pages_to(free_kernel_pages, new_pgtable_page, 1, NULL);
-        memory_munmap(new_pgdir_page, KERNEL_PAGE_SIZE, NULL);
-        memory_free_frames(new_pgdir_frame, 1, NULL);
-        memory_free_pages_to(free_kernel_pages, new_pgdir_frame, 1, NULL);
-        KERNEL_ERROR("Could not copy process mapping\n");
-        return err;
-    }
-
-    /* The current page directory is always recursively mapped */
-    current_pgdir = (uintptr_t*)&_KERNEL_RECUR_PG_DIR_BASE;
-
-    /* Copy the page directory kernel entries, minus the recursive entry */    
-    for(i = KERNEL_FIRST_PGDIR_ENTRY; i < KERNEL_PGDIR_SIZE - 1; ++i)
-    {
-        new_pgdir_page[i] = current_pgdir[i];
-    }
-
-    /* Set the recursive entry on the new page directory */
-    new_pgdir_page[KERNEL_PGDIR_SIZE - 1] = (uintptr_t)new_pgdir_frame    |
-                                            PG_DIR_FLAG_PAGE_SIZE_4KB     |
-                                            PG_DIR_FLAG_PAGE_SUPER_ACCESS |
-                                            PG_DIR_FLAG_PAGE_READ_WRITE   |
-                                            PG_DIR_FLAG_PAGE_PRESENT;
     
-
-    /* Copy the rest of the page table and set copy on write */
-    for(i = 0; i < KERNEL_FIRST_PGDIR_ENTRY; ++i)
+    /* Create temporary pages */
+    data.new_pgtable_page = memory_alloc_pages_from(free_kernel_pages,
+                                               1, 
+                                               MEM_ALLOC_BEGINING,
+                                               &err);
+    if(err != OS_NO_ERR)
     {
-        if((current_pgdir[i] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
-        {
-            /* Get recursive virtual address */
-            current_pgtable = (uintptr_t*)(((uintptr_t)&_KERNEL_RECUR_PG_TABLE_BASE) + 
-                                           KERNEL_PAGE_SIZE * 
-                                           i);
-
-            /* Create new page table */
-            new_pgtable_frame = memory_alloc_frames(1, &err);
-            if(err != OS_NO_ERR)
-            {
-                break;
-            }     
-            
-            memory_mmap_direct(new_pgtable_page, 
-                               new_pgtable_frame, 
-                               KERNEL_PAGE_SIZE, 
-                               0, 
-                               0,
-                               1,
-                               0,
-                               &err);
-            if(err != OS_NO_ERR)
-            {
-                memory_free_frames(new_pgtable_frame, 1, NULL);
-                break;
-            }
-
-            new_pgdir_page[i] = (current_pgdir[i] & ~PG_ENTRY_ADDR_MASK) | 
-                                (uintptr_t)new_pgtable_frame;
-            memory_acquire_ref((uintptr_t)new_pgtable_frame);
-
-            for(j = 0; j < KERNEL_PGDIR_SIZE; ++j)
-            {
-                if((current_pgtable[j] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
-                {
-                    /* Copy mapping and set as read only / COW here the current
-                     * process is also set as RO. Hardware mapping is copied as 
-                     * is.
-                     */
-                    if((current_pgtable[j] & PAGE_FLAG_READ_WRITE) != 0 &&
-                       (current_pgtable[j] & PAGE_FLAG_OS_CUSTOM_MASK) == 
-                        PAGE_FLAG_REGULAR)
-                    {
-
-                        current_pgtable[j] = (current_pgtable[j] & 
-                                            ~PAGE_FLAG_READ_WRITE) | 
-                                            PAGE_FLAG_READ_ONLY    |
-                                            PAGE_FLAG_COPY_ON_WRITE; 
-                        new_pgtable_page[j] = current_pgtable[j];
-                        /* Increment the reference count */
-                        memory_acquire_ref(new_pgtable_page[j] & 
-                                           PG_ENTRY_ADDR_MASK);
-                    }
-                    else if((current_pgtable[j] & PAGE_FLAG_OS_CUSTOM_MASK) != 
-                            PAGE_FLAG_PRIVATE)
-                    {
-                        new_pgtable_page[j] = current_pgtable[j];
-                        /* Increment the reference count */
-                        memory_acquire_ref(new_pgtable_page[j] & 
-                                           PG_ENTRY_ADDR_MASK);
-                    }
-                    else 
-                    {
-                        new_pgtable_page[j] = 0;
-                    }
-                }
-                else 
-                {
-                    new_pgtable_page[j] = 0;
-                }
-            }
-
-            memory_munmap(new_pgtable_page, KERNEL_PAGE_SIZE, NULL);
-        }
-        
+        return memory_copy_self_clean(&data, err);
     }
 
-    /* TODO: put this in function: clean copy */
-    /* If we stopped because of an error */
-    if(i != KERNEL_FIRST_PGDIR_ENTRY)
+    data.new_data_page = memory_alloc_pages_from(free_kernel_pages, 
+                                                 1, 
+                                                 MEM_ALLOC_BEGINING,
+                                                 &err);
+    if(err != OS_NO_ERR)
     {
-        /* Skip the last that is already cleaned */
-        --i;
-        /* Free what we created */
-        for(; (int32_t)i >= 0; --i)
-        {
-            if((current_pgdir[i] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
-            {
-                /* Get recursive virtual address */
-                current_pgtable = (uintptr_t*)(((uintptr_t)&_KERNEL_RECUR_PG_TABLE_BASE) + 
-                                            KERNEL_PAGE_SIZE * 
-                                            i);
-
-                new_pgtable_frame = (uintptr_t*)
-                                    (new_pgdir_page[i] & PG_ENTRY_ADDR_MASK);
-
-                memory_mmap_direct(new_pgtable_page, 
-                                   new_pgtable_frame, 
-                                   KERNEL_PAGE_SIZE, 
-                                   0, 
-                                   0,
-                                   1,
-                                   0,
-                                   NULL);
-
-                for(j = 0; j < KERNEL_PGDIR_SIZE; ++j)
-                {
-                    if((current_pgtable[j] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
-                    {
-                        if((current_pgtable[j] & PAGE_FLAG_READ_WRITE) != 0 &&
-                           (current_pgtable[j] & PAGE_FLAG_OS_CUSTOM_MASK) == 
-                            PAGE_FLAG_REGULAR)
-                        {
-                            /* Reset current page values */
-                            current_pgtable[j] &= ~PAGE_FLAG_COPY_ON_WRITE;
-                            current_pgtable[j] |= PAGE_FLAG_READ_WRITE; 
-
-                            /* Decrement the reference count */
-                            memory_release_ref(new_pgtable_page[j] & 
-                                               PG_ENTRY_ADDR_MASK);
-                        }
-                        else if((current_pgtable[j] & 
-                                 PAGE_FLAG_OS_CUSTOM_MASK) != 
-                                PAGE_FLAG_PRIVATE)
-                        {
-                            /* Decrement the reference count */
-                            memory_release_ref(new_pgtable_page[j] & 
-                                               PG_ENTRY_ADDR_MASK);
-                        }
-                    }
-                }
-                memory_munmap(new_pgtable_page, KERNEL_PAGE_SIZE, NULL);
-                memory_free_frames(new_pgtable_frame, 1, NULL);    
-            }
-        }
-
-        memory_free_pages_to(free_kernel_pages, new_pgtable_page, 1, NULL);
-        memory_munmap(new_pgdir_page, KERNEL_PAGE_SIZE, NULL);
-        memory_free_frames(new_pgdir_frame, 1, NULL);
-        memory_free_pages_to(free_kernel_pages, new_pgdir_frame, 1, NULL);
-        KERNEL_ERROR("Could not copy process mapping\n");
-        return err;
+        return memory_copy_self_clean(&data, err);
     }
 
-    /* TODO: put this in function */
+    /* Copy the page table and set COW for both processes */
+    err = memory_copy_self_pgtable(&data);
+    if(err != OS_NO_ERR)
+    {
+        return memory_copy_self_clean(&data, err);
+    }
+    
     /* Map and duplicate the kernel stack */
-    curr_addr = (uintptr_t)kstack_addr;
-    while(curr_addr < (uintptr_t)kstack_addr + kstack_size)
+    err = memory_copy_self_stack(&data, kstack_addr, kstack_size);
+    if(err != OS_NO_ERR)
     {
-        pgtable_entry = (curr_addr >> PG_TABLE_ENTRY_OFFSET) & 
-                        PG_TABLE_ENTRY_OFFSET_MASK;
-
-        new_pgtable_frame = (uintptr_t*)
-                            new_pgdir_page[curr_addr >> PG_DIR_ENTRY_OFFSET];
-        if(((uintptr_t)new_pgtable_frame & PG_DIR_FLAG_PAGE_PRESENT) == 0)
-        {
-            new_pgtable_frame = memory_alloc_frames(1, &err);
-            if(err != OS_NO_ERR)
-            {
-                KERNEL_ERROR("Could not create new kstack page frame\n");
-                break;
-            }
-            memory_acquire_ref((uintptr_t)new_pgtable_frame);
-            new_pgdir_page[curr_addr >> PG_DIR_ENTRY_OFFSET] = 
-                (uintptr_t)new_pgtable_frame  |
-                PG_DIR_FLAG_PAGE_SIZE_4KB     |
-                PG_DIR_FLAG_PAGE_SUPER_ACCESS |
-                PG_DIR_FLAG_PAGE_READ_WRITE   |
-                PG_DIR_FLAG_PAGE_PRESENT;
-        }
-
-        memory_mmap_direct(new_pgtable_page, 
-                           new_pgtable_frame, 
-                           KERNEL_PAGE_SIZE, 
-                           0, 
-                           0,
-                           1,
-                           0,
-                           &err);
-        if(err != OS_NO_ERR)
-        {
-            KERNEL_ERROR("Could not create new kstack page frame\n");
-            memory_free_frames(new_pgtable_frame, 1, NULL);
-            break;
-        }
-
-        /* Allocate the new frame */
-        new_data_frame = memory_alloc_frames(1, &err);
-        if(err != OS_NO_ERR)
-        {
-            KERNEL_ERROR("Could not create new kstack page frame\n");
-            memory_munmap(new_pgtable_page, KERNEL_PAGE_SIZE, NULL);
-            memory_free_frames(new_pgtable_frame, 1, NULL);
-            break;
-        }
-        memory_acquire_ref((uintptr_t)new_data_frame);
-
-        /* Map the new frame */
-        memory_mmap_direct(new_data_page, 
-                           new_data_frame, 
-                           KERNEL_PAGE_SIZE, 
-                           0, 
-                           0, 
-                           1, 
-                           0,
-                           &err);
-        if(err != OS_NO_ERR)
-        {
-            KERNEL_ERROR("Could not create new kstack page frame\n");
-            memory_munmap(new_pgtable_page, KERNEL_PAGE_SIZE, NULL);
-            memory_free_frames(new_pgtable_frame, 1, NULL);
-            memory_free_frames(new_data_frame, 1, NULL);
-            break;
-        }
-
-        /* Copy data */
-        memcpy(new_data_page, (void*)curr_addr, KERNEL_PAGE_SIZE);
-
-        /* Unmap the new frame */
-        memory_munmap(new_data_page, KERNEL_PAGE_SIZE, NULL);
-
-        /* Update the mapping */
-        new_pgtable_page[pgtable_entry] =
-            (uintptr_t)new_data_frame |
-            PAGE_FLAG_SUPER_ACCESS    | 
-            PAGE_FLAG_READ_WRITE      |
-            PAGE_FLAG_CACHE_WB        |
-            PAGE_FLAG_PRIVATE         |
-            PAGE_FLAG_PRESENT;
-
-        memory_munmap(new_pgtable_page, KERNEL_PAGE_SIZE, NULL);
-
-        curr_addr += KERNEL_PAGE_SIZE;
+        return memory_copy_self_clean(&data, err);
     }
-
-    /* TODO: put this in function: clean stack */
-    /* If an error occured, free the resources */
-    if(curr_addr < (uintptr_t)kstack_addr + kstack_size)
-    {
-        /* Skip frst that is already cleaned */
-        curr_addr -= KERNEL_PAGE_SIZE;
-        while(curr_addr > (uintptr_t)kstack_addr)
-        {
-            pgtable_entry = (curr_addr >> PG_TABLE_ENTRY_OFFSET) & 
-                            PG_TABLE_ENTRY_OFFSET_MASK;
-
-            new_pgtable_frame = (uintptr_t*)
-                            new_pgdir_page[curr_addr >> PG_DIR_ENTRY_OFFSET];
-
-            memory_mmap_direct(new_pgtable_page, 
-                               new_pgtable_frame, 
-                               KERNEL_PAGE_SIZE, 
-                               0, 
-                               0,
-                               1,
-                               0,
-                               NULL);
-
-            /* Allocate the new frame */
-            new_data_frame = (uintptr_t*)(new_pgtable_page[pgtable_entry] & 
-                                         PG_ENTRY_ADDR_MASK);
-            memory_free_frames(new_data_frame, 1, NULL);
-
-            /* Update the mapping */
-            new_pgtable_page[pgtable_entry] = 0;
-            new_pgdir_page[curr_addr >> PG_DIR_ENTRY_OFFSET] = 0;
-
-            memory_munmap(new_pgtable_page, KERNEL_PAGE_SIZE, NULL);
-            /* We don't free the pagtable frame, the clean copy will do it for 
-             * us 
-             */
-
-            curr_addr -= KERNEL_PAGE_SIZE;
-        }
-
-        /* TODO: add call to clean copy */
-    }
-
 
     /* Unmap the new page directory for the kernel */
-    memory_munmap(new_pgdir_page, KERNEL_PAGE_SIZE, NULL);
-    memory_free_pages_to(free_kernel_pages, new_pgdir_page, 1, NULL);     
-    memory_free_pages_to(free_kernel_pages, new_pgtable_page, 1, NULL);
-    memory_free_pages_to(free_kernel_pages, new_data_page, 1, NULL);   
+    memory_munmap(data.new_pgdir_page, KERNEL_PAGE_SIZE, &err);
+    data.mapped_pgdir = FALSE;
+    if(err != OS_NO_ERR)
+    {
+        KERNEL_PANIC(err);
+    }
+    memory_free_pages_to(free_kernel_pages, data.new_pgdir_page, 1, &err); 
+    data.new_pgdir_page = NULL;
+    if(err != OS_NO_ERR)
+    {
+        KERNEL_PANIC(err);
+    }    
+    memory_free_pages_to(free_kernel_pages, data.new_pgtable_page, 1, &err);
+    data.new_pgtable_page = NULL;
+    if(err != OS_NO_ERR)
+    {
+        KERNEL_PANIC(err);
+    }    
+    memory_free_pages_to(free_kernel_pages, data.new_data_page, 1, &err); 
+    data.new_data_page = NULL;
+    if(err != OS_NO_ERR)
+    {
+        KERNEL_PANIC(err);
+    }      
 
     /* Set the destination process data */
-    dst_process->page_dir = (uintptr_t)new_pgdir_frame;
+    dst_process->page_dir = (uintptr_t)data.new_pgdir_frame;
     dst_process->free_page_table = paging_copy_free_page_table(&err);
     if(err != OS_NO_ERR)
     {
-        /* TODO call clean stack */
+        return memory_copy_self_clean(&data, err);
     }
 
     return OS_NO_ERR;
@@ -3286,9 +3530,13 @@ void memory_clean_process_memory(uintptr_t pg_dir)
         }
 
         memory_munmap(pgtable_page, KERNEL_PAGE_SIZE, NULL);
+        memory_release_ref((uintptr_t)(pgdir_page[pgdir_entry] & PG_ENTRY_ADDR_MASK) & 
+                                   PG_ENTRY_ADDR_MASK);
     }
 
     memory_munmap(pgdir_page, KERNEL_PAGE_SIZE, NULL);
+    memory_release_ref((uintptr_t)pg_dir & 
+                                   PG_ENTRY_ADDR_MASK);
 
     memory_free_pages_to(free_kernel_pages, pgdir_page, 1, NULL);
     memory_free_pages_to(free_kernel_pages, pgtable_page, 1, NULL);
@@ -3430,7 +3678,7 @@ void memory_alloc_page(const SYSCALL_FUNCTION_E func, void* params)
 
     if(curr_proc == NULL)
     {
-        KERNEL_ERROR("Cannot allocate frames when no process is running\n");
+        KERNEL_ERROR("Cannot allocate pages when no process is running\n");
         func_params->error = OS_ERR_UNAUTHORIZED_ACTION;
         return;
     }
@@ -3444,7 +3692,7 @@ void memory_alloc_page(const SYSCALL_FUNCTION_E func, void* params)
     if(err != OS_NO_ERR)
     {
         func_params->error = err;
-        KERNEL_ERROR("Error while allocating frames\n");
+        KERNEL_ERROR("Error while allocating pages\n");
         EXIT_CRITICAL(int_state);
         return;
     }
@@ -3500,4 +3748,23 @@ void memory_alloc_page(const SYSCALL_FUNCTION_E func, void* params)
 
     func_params->start_addr = pages;
     func_params->error      = OS_NO_ERR;
+}
+
+uint32_t memory_get_free_kpages(void)
+{
+    return get_free_mem(free_kernel_pages);
+}
+
+uint32_t memory_get_free_pages(void)
+{
+    kernel_process_t* curr_proc;
+
+    curr_proc = sched_get_current_process();
+
+    return get_free_mem(curr_proc->free_page_table);
+}
+
+uint32_t memory_get_free_frames(void)
+{
+    return get_free_mem(free_memory_map);
 }

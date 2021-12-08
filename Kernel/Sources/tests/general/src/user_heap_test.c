@@ -43,7 +43,7 @@ void user_heap_test(void)
     kill_qemu();
 }
 #else 
-void kheap_test(void)
+void user_heap_test(void)
 {
 }
 #endif

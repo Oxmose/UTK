@@ -73,4 +73,13 @@ void* kmalloc(const size_t size);
  */
 void kfree(void* ptr);
 
+/**
+ * @brief Returns the kernel heap available memory.
+ * 
+ * @details Returns the kernel heap available memory.
+ * 
+ * @return The kernel heap available memory is returned.
+ */
+uint32_t kheap_get_free(void);
+
 #endif /* #ifndef __CORE_KHEAP_H_ */

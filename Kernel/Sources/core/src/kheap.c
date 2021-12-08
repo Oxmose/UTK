@@ -583,3 +583,8 @@ void kfree(void* ptr)
 
     EXIT_CRITICAL(int_state);
 }
+
+uint32_t kheap_get_free(void)
+{
+    return mem_free;
+}
