@@ -124,8 +124,8 @@ static mem_chunk_t* last_chunk;
 
 /** @brief Quantity of free memory in the kernel's heap. */
 static uint32_t mem_free;
-/** @brief Quantity of used memory in the kernel's heap. */
-static uint32_t kheap_mem_used;
+/** @brief Quantity of initial free memory in the kernel's heap. */
+static uint32_t kheap_init_free;
 /** @brief Quantity of memory used to store meta data in the kernel's heap. */
 static uint32_t mem_meta;
 
@@ -381,7 +381,7 @@ inline static void remove_free(mem_chunk_t* chunk)
     int n = memory_chunk_slot(len);
 
     LIST_REMOVE_FROM(&free_chunk[n], chunk, free);
-    mem_free -= len - HEADER_SIZE;
+    mem_free -= len;
 }
 
 /**
@@ -397,7 +397,7 @@ inline static void push_free(mem_chunk_t *chunk)
     int n = memory_chunk_slot(len);
 
     LIST_PUSH(&free_chunk[n], chunk, free);
-    mem_free += len - HEADER_SIZE;
+    mem_free += len;
 }
 
 void kheap_init(void)
@@ -412,7 +412,7 @@ void kheap_init(void)
     int8_t* mem_end = (int8_t*)(((uintptr_t)mem + size) & (~(ALIGN - 1)));
 
     mem_free = 0;
-    kheap_mem_used = 0;
+    kheap_init_free = 0;
     mem_meta = 0;
     first_chunk = NULL;
     last_chunk = NULL;
@@ -436,7 +436,8 @@ void kheap_init(void)
     n   = memory_chunk_slot(len);
 
     LIST_PUSH(&free_chunk[n], second, free);
-    mem_free = len - HEADER_SIZE;
+    mem_free = len;
+    kheap_init_free = mem_free;
     mem_meta = sizeof(mem_chunk_t) * 2 + HEADER_SIZE;
 
     init = 1;
@@ -509,20 +510,19 @@ void* kmalloc(size_t size)
         LIST_PUSH(&free_chunk[n], chunk2, free);
 
         mem_meta += HEADER_SIZE;
-        mem_free += len - HEADER_SIZE;
+        mem_free += len;
     }
 
     chunk->used = 1;
 
     mem_free -= size2;
-    kheap_mem_used += size2 - len - HEADER_SIZE;
 
     KERNEL_DEBUG(KHEAP_DEBUG_ENABLED, 
                  "[KHEAP] Kheap allocated 0x%p -> %uB (%uB free, %uB used)",
                  chunk->data,
                  size2 - len - HEADER_SIZE,
                  mem_free, 
-                 kheap_mem_used);
+                 kheap_init_free - mem_free);
 
     EXIT_CRITICAL(int_state);
 
@@ -549,7 +549,6 @@ void kfree(void* ptr)
     prev = CONTAINER(mem_chunk_t, all, chunk->all.prev);
 
     used = memory_chunk_size(chunk);
-    kheap_mem_used -= used;
 
     if (next->used == 0)
     {

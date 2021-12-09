@@ -70,12 +70,12 @@ void memory_usage_test(void)
     new_frame_free = memory_get_free_frames();
     new_kheap_free = kheap_get_free();
 
-    kernel_printf("[TESTMODE] Page %d -> %d (%d), KPage %d -> %d (%d), Frame %d -> %d (%d), KHeap %d -> %d (%d)\n",
-        page_free, new_page_free, page_free - new_page_free,
-        kpage_free, new_kpage_free, kpage_free - new_kpage_free,
-        frame_free, new_frame_free, frame_free - new_frame_free,
-        kheap_free, new_kheap_free, kheap_free - new_kheap_free);
-#if 1
+    kernel_printf("[TESTMODE] Page (%d), KPage (%d), Frame (%d), KHeap (%d)\n",
+        page_free - new_page_free,
+        kpage_free - new_kpage_free,
+        frame_free - new_frame_free,
+       (kheap_free > new_kheap_free ? kheap_free - new_kheap_free : 0));
+
     pid = fork();
     if(pid < 0)
     {
@@ -90,11 +90,11 @@ void memory_usage_test(void)
         new_frame_free = memory_get_free_frames();
         new_kheap_free = kheap_get_free();
 
-        kernel_printf("[TESTMODE] Page %d -> %d (%d), KPage %d -> %d (%d), Frame %d -> %d (%d), KHeap %d -> %d (%d)\n",
-        page_free, new_page_free, page_free - new_page_free,
-        kpage_free, new_kpage_free, kpage_free - new_kpage_free,
-        frame_free, new_frame_free, frame_free - new_frame_free,
-        kheap_free, new_kheap_free, kheap_free - new_kheap_free);
+        kernel_printf("[TESTMODE] Page (%d), KPage (%d), Frame (%d), KHeap (%d)\n",
+        page_free - new_page_free,
+        kpage_free - new_kpage_free,
+        frame_free - new_frame_free,
+       (kheap_free > new_kheap_free ? kheap_free - new_kheap_free : 0));
 
         pid = waitpid(pid, &status, &term_cause, &err);
         if(err != OS_NO_ERR)
@@ -112,12 +112,7 @@ void memory_usage_test(void)
          * exit syscall */
         sched_terminate_self((void*)42);
     }
-#else 
-    (void)pid;
-    (void)status;
-    (void)term_cause;
-    (void)err;
-#endif
+
     sched_sleep(500);
     sched_sleep(500);
     sched_sleep(500);
@@ -126,11 +121,86 @@ void memory_usage_test(void)
     new_frame_free = memory_get_free_frames();
     new_kheap_free = kheap_get_free();
 
-    kernel_printf("[TESTMODE] Page %d -> %d (%d), KPage %d -> %d (%d), Frame %d -> %d (%d), KHeap %d -> %d (%d)\n",
-        page_free, new_page_free, page_free - new_page_free,
-        kpage_free, new_kpage_free, kpage_free - new_kpage_free,
-        frame_free, new_frame_free, frame_free - new_frame_free,
-        kheap_free, new_kheap_free, kheap_free - new_kheap_free);
+    kernel_printf("[TESTMODE] Page (%d), KPage (%d), Frame (%d), KHeap (%d)\n",
+        page_free - new_page_free,
+        kpage_free - new_kpage_free,
+        frame_free - new_frame_free,
+       (kheap_free > new_kheap_free ? kheap_free - new_kheap_free : 0));
+    
+    pid = fork();
+    if(pid < 0)
+    {
+        kernel_error("[TESTMODE] Could not fork\n");
+        kill_qemu();
+    }
+
+    if(pid)
+    {
+        new_page_free = memory_get_free_pages();
+        new_kpage_free = memory_get_free_kpages();
+        new_frame_free = memory_get_free_frames();
+        new_kheap_free = kheap_get_free();
+
+        kernel_printf("[TESTMODE] Page (%d), KPage (%d), Frame (%d), KHeap (%d)\n",
+        page_free - new_page_free,
+        kpage_free - new_kpage_free,
+        frame_free - new_frame_free,
+       (kheap_free > new_kheap_free ? kheap_free - new_kheap_free : 0));
+
+        pid = waitpid(pid, &status, &term_cause, &err);
+        if(err != OS_NO_ERR)
+        {
+            kernel_error("[TESTMODE] Could not wait PID %d\n", err);
+            kill_qemu();
+
+        }
+        kernel_printf("[TESTMODE] Process %d returned %d, %d\n", pid, status, err);
+    }
+    else 
+    {
+        
+        pid = fork();
+        if(pid < 0)
+        {
+            kernel_error("[TESTMODE] Could not fork\n");
+            kill_qemu();
+        }
+
+        if(pid)
+        {
+            pid = waitpid(pid, &status, &term_cause, &err);
+            if(err != OS_NO_ERR)
+            {
+                kernel_error("[TESTMODE] Could not wait PID %d\n", err);
+                kill_qemu();
+
+            }
+            kernel_printf("[TESTMODE] Process %d returned %d, %d\n", pid, status, err);
+
+            sched_terminate_self((void*)22);
+        }
+        else 
+        {
+            sched_sleep(1000);
+            /* Here we cant return, this should be replaced in the future by the
+            * exit syscall */
+            sched_terminate_self((void*)666);
+        }
+    }
+
+    sched_sleep(500);
+    sched_sleep(500);
+    sched_sleep(500);
+    new_page_free = memory_get_free_pages();
+    new_kpage_free = memory_get_free_kpages();
+    new_frame_free = memory_get_free_frames();
+    new_kheap_free = kheap_get_free();
+
+    kernel_printf("[TESTMODE] Page (%d), KPage (%d), Frame (%d), KHeap (%d)\n",
+        page_free - new_page_free,
+        kpage_free - new_kpage_free,
+        frame_free - new_frame_free,
+       (kheap_free > new_kheap_free ? kheap_free - new_kheap_free : 0));
 
     kill_qemu();
 }

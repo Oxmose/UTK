@@ -992,7 +992,7 @@ static void init_frame_ref_table(uintptr_t next_free_mem)
                                                     sizeof(uintptr_t));
                 if(frame_ref_dir[dir_entry] == (uintptr_t)NULL)
                 {
-                    KERNEL_ERROR("Cannot allocated reference page table\n",
+                    KERNEL_ERROR("Cannot allocate reference page table\n",
                                  current_addr);
                     KERNEL_PANIC(OS_ERR_MALLOC);
                 }
@@ -2440,6 +2440,9 @@ static OS_RETURN_E memory_create_new_pagedir(mem_copy_self_data_t* data)
         return memory_copy_self_clean(data, err);
     }
     data->mapped_pgdir = TRUE;
+
+    /* Init the page directory to be empty */
+    memset(data->new_pgdir_page, 0, KERNEL_PAGE_SIZE);
 
     return OS_NO_ERR;
 }
