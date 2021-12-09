@@ -21,14 +21,14 @@ function testcase() {
     # Filter output
     grep "\[TESTMODE\]\|ERROR" test.out > filtered.out
     #Compare output
-    diff filtered.out refs/general/$filename.valid >> /dev/null
+    diff -b filtered.out refs/general/$filename.valid >> /dev/null
     if (( $? != 0 ))
     then
         echo -e "\e[31mERROR \e[39m"
         error=$((error + 1))
         cat filtered.out
         echo "================="
-        diff filtered.out refs/general/$filename.valid  
+        diff -b filtered.out refs/general/$filename.valid  
         mv filtered.out errors/$filename.error
     else
         echo -e "\e[92mPASSED\e[39m"
@@ -61,7 +61,7 @@ function testcase_arch() {
     # Filter output
     grep "\[TESTMODE\]\|ERROR" test.out > filtered.out
     #Compare output
-    diff filtered.out refs/x86_i386/$filename.valid >> /dev/null
+    diff -b filtered.out refs/x86_i386/$filename.valid >> /dev/null
     if (( $? != 0 ))
     then
         echo -e "\e[31mERROR \e[39m"
