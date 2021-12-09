@@ -81,7 +81,7 @@ void lapic_timer_test(void);
 #define USTAR_TEST 0
 #define FORK_TEST 0
 #define USER_HEAP_TEST 0
-#define MEMORY_USAGE_TEST 1
+#define MEMORY_USAGE_TEST 0
 
 void output_test(void);
 void kheap_test(void);
