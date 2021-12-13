@@ -13,13 +13,14 @@
  *
  * @details Queue structures. These queues are used as priority queue or regular 
  * queues. A queue can virtually store every type of data and is just a wrapper.
- * This queue library is thread safe.
+ *
+ * @warning This implementation is not thread safe.
  *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#ifndef __CORE_QUEUE_H_
-#define __CORE_QUEUE_H_
+#ifndef __LIB_QUEUE_H_
+#define __LIB_QUEUE_H_
 
 #include <stddef.h>    /* Standard definitons */
 #include <stdint.h>    /* Generic int types */
@@ -116,10 +117,10 @@ typedef struct queue queue_t;
  ******************************************************************************/
 
 /** 
- * @brief Create an allocator strucutre.
+ * @brief Create an allocator structure.
  * 
  * @param[in] malloc The memory allocation function used by the allocator.
- * @param[in] free The memory free function used by the alloctor.
+ * @param[in] free The memory free function used by the allocator.
  */
 #define QUEUE_ALLOCATOR(malloc, free) (queue_alloc_t){malloc, free}
 
@@ -280,4 +281,4 @@ queue_node_t* queue_find(queue_t* queue, void* data, OS_RETURN_E *error);
  */
 OS_RETURN_E queue_remove(queue_t* queue, queue_node_t* node);
 
-#endif /* #ifndef __CORE_QUEUE_H_ */
+#endif /* #ifndef __LIB_QUEUE_H_ */

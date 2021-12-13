@@ -82,6 +82,8 @@ void lapic_timer_test(void);
 #define FORK_TEST 0
 #define USER_HEAP_TEST 0
 #define MEMORY_USAGE_TEST 0
+#define VECTOR_TEST 0
+#define UHASHTABLE_TEST 0
 
 void output_test(void);
 void kheap_test(void);
@@ -92,5 +94,7 @@ void ustar_test(void);
 void fork_test(void);
 void user_heap_test(void);
 void memory_usage_test(void);
+void vector_test(void);
+void uhashtable_test(void);
 
 #endif /* __TEST_BANK_H_ */

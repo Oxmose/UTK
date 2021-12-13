@@ -227,15 +227,34 @@ struct kernel_thread
 
     /** @brief Thread's end time. */
     uint64_t end_time;
-
-    /** @brief Thread's additional storage. */
-    uint8_t thread_storage[THREAD_PRIVATE_STORAGE_SIZE];
 };
 
 /**
  * @brief Defines kernel_thread_t type as a shorcut for struct kernel_thread.
  */
 typedef struct kernel_thread kernel_thread_t;
+
+/** @brief This is the representation of a thread's resource. */
+struct thread_resource
+{
+    /** @brief The data used to represent the resource, can vary depending on 
+     * the resource. */
+    void* data;
+
+    /** 
+     * @brief The data used to represent the resource, can vary depending on 
+     * the resource. *
+     * 
+     * @param[in, out] data The data used for the cleanup, if data was allocated
+     * dynamically, it should be freed by this function. 
+     */
+    void (*cleanup)(void* data);
+};
+
+/**
+ * @brief Defines kernel_thread_t type as a shorcut for struct kernel_thread.
+ */
+typedef struct thread_resource thread_resource_t;
 
 /*******************************************************************************
  * FUNCTIONS

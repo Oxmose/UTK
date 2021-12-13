@@ -117,6 +117,8 @@ void kernel_kickstart(void)
 
 #ifdef TEST_MODE_ENABLED
     queue_test();
+    vector_test();
+    uhashtable_test();
 #endif
 
     kernel_interrupt_init();

@@ -79,6 +79,8 @@ OS_RETURN_E mutex_init(mutex_t* mutex,
                        const uint32_t flags,
                        const uint16_t priority)
 {
+    sched_param_t sched_params;
+
     if(mutex == NULL)
     {
         return OS_ERR_NULL_POINTER;
@@ -99,12 +101,13 @@ OS_RETURN_E mutex_init(mutex_t* mutex,
     mutex->futex.addr = (uint32_t*)&mutex->state;
     mutex->futex.wait = MUTEX_STATE_LOCKED_WAIT;
 
-    syscall_do(SYSCALL_MUTEX_CREATE, mutex);
-
-    if(mutex->state != MUTEX_STATE_UNLOCKED)
+    syscall_do(SYSCALL_SCHED_GET_PARAMS, &sched_params);
+    if(sched_params->error != OS_NO_ERR)
     {
-        return mutex->state;
+        return sched_params->error;
     }
+
+    mutex->owner = sched_params->tid;
 
     KERNEL_DEBUG(MUTEX_DEBUG_ENABLED, "Mutex 0x%p initialized\n", mutex);
 

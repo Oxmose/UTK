@@ -114,8 +114,7 @@ void memory_usage_test(void)
     }
 
     sched_sleep(500);
-    sched_sleep(500);
-    sched_sleep(500);
+    
     new_page_free = memory_get_free_pages();
     new_kpage_free = memory_get_free_kpages();
     new_frame_free = memory_get_free_frames();
@@ -136,6 +135,8 @@ void memory_usage_test(void)
 
     if(pid)
     {
+        sched_sleep(500);
+
         new_page_free = memory_get_free_pages();
         new_kpage_free = memory_get_free_kpages();
         new_frame_free = memory_get_free_frames();
@@ -158,7 +159,9 @@ void memory_usage_test(void)
     }
     else 
     {
-        
+
+        sched_sleep(500);
+
         pid = fork();
         if(pid < 0)
         {

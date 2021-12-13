@@ -112,7 +112,7 @@ extern uint8_t _KERNEL_HEAP_BASE;
 extern uint8_t _KERNEL_HEAP_SIZE;
 
 /** @brief Kernel's heap initialization state. */
-static uint32_t init = 0;
+static bool_t init = FALSE;
 
 /* Heap data */
 /** @brief Kernel's heap free memory chunks. */
@@ -440,7 +440,7 @@ void kheap_init(void)
     kheap_init_free = mem_free;
     mem_meta = sizeof(mem_chunk_t) * 2 + HEADER_SIZE;
 
-    init = 1;
+    init = TRUE;
 
     KERNEL_DEBUG(KHEAP_DEBUG_ENABLED, 
                  "[KHEAP] Kernel Heap Initialized at 0x%p", 
@@ -460,7 +460,7 @@ void* kmalloc(size_t size)
     size_t       len;
     uint32_t     int_state;
 
-    if(init == 0)
+    if(init == FALSE || size == 0)
     {
         return NULL;
     }
@@ -537,7 +537,7 @@ void kfree(void* ptr)
     mem_chunk_t* prev;
     uint32_t     int_state;
 
-    if(init == 0 || ptr == NULL)
+    if(init == FALSE || ptr == NULL)
     {
         return;
     }

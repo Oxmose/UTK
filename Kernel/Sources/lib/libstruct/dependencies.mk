@@ -4,7 +4,7 @@ DEP_INCLUDES += -I ../../io/includes
 DEP_INCLUDES += -I ../../arch/cpu/includes
 DEP_INCLUDES += -I ../../arch/board/includes
 DEP_INCLUDES += -I ../libc/includes
-DEP_INCLUDES += -I ../libstruct/includes
+DEP_INCLUDES += -I ../libapi/includes
 DEP_INCLUDES += -I includes
 
 ifeq ($(TESTS), TRUE)

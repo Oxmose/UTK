@@ -500,6 +500,11 @@ void* malloc(size_t size)
         user_heap_init();
     }
 
+    if(size == 0)
+    {
+        return NULL;
+    }
+
     size = (size + ALIGN - 1) & (~(ALIGN - 1));
 
     if (size < MIN_SIZE)

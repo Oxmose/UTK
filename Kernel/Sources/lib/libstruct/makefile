@@ -31,15 +31,15 @@ all: init module
 
 init: 
 	@echo "\e[1m\e[34m\n#-------------------------------------------------------------------------------\e[22m\e[39m"
-	@echo "\e[1m\e[34m| Compiling libapi module\e[22m\e[39m"
+	@echo "\e[1m\e[34m| Compiling libstruct module\e[22m\e[39m"
 	@echo "\e[1m\e[34m#-------------------------------------------------------------------------------\n\e[22m\e[39m"
 
 	@mkdir -p $(BUILD_DIR)
 	@mkdir -p $(BIN_DIR)
 
 module: compile_asm compile_cc
-	@ar r $(BIN_DIR)/libapi.a $(BUILD_DIR)/*.o
-	@echo "\e[1m\e[92m=> Generated libapi module\e[22m\e[39m"
+	@ar r $(BIN_DIR)/libstruct.a $(BUILD_DIR)/*.o
+	@echo "\e[1m\e[92m=> Generated libstruct module\e[22m\e[39m"
 	@echo "\e[1m\e[92m--------------------------------------------------------------------------------\n\e[22m\e[39m"
 
 # Assembly sources compilation
@@ -67,7 +67,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.S
 clean:
 	$(RM) -rf $(BUILD_DIR) $(BIN_DIR)
 	@echo "\e[1m\e[34m\n#-------------------------------------------------------------------------------\e[22m\e[39m"
-	@echo "\e[1m\e[34m| Cleaned libapi module\e[22m\e[39m"
+	@echo "\e[1m\e[34m| Cleaned libstruct module\e[22m\e[39m"
 	@echo "\e[1m\e[34m#-------------------------------------------------------------------------------\n\e[22m\e[39m"
 
 # Check header files modifications

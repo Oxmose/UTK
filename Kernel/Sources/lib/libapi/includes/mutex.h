@@ -76,11 +76,6 @@ struct mutex
 
     /** @brief Mutex's futex data */
     futex_t futex;
-
-    /** Kernel Data, cannot be access by user land */
-
-    /** @brief Waiting thread list */
-    queue_t* wait_list;
 };
 
 /**

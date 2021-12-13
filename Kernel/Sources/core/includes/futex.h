@@ -22,12 +22,19 @@
 
 #include <stdint.h>       /* Standard int definitions */
 #include <kernel_error.h> /* Kernel error API */
-
+#include <syscall.h>      /* System call manager */
+#include <queue.h>        /* Kernel queues */
 /* UTK configuration file */
 #include <config.h>
 
 /*******************************************************************************
  * CONSTANTS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * STRUCTURES
  ******************************************************************************/
 
 /** @brief Futex structure definition. */
@@ -49,15 +56,20 @@ struct futex
 typedef struct futex futex_t;
 
 /*******************************************************************************
- * STRUCTURES
- ******************************************************************************/
-
-/* None */
-
-/*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
 
-/* None */
+/**
+ * @brief System call handler to wait on a given futex.
+ * 
+ * @details System call handler to wait on a given futex. This system call 
+ * receive the futex to wait and the value to observe as parameters.
+ * 
+ * @param[in] func The syscall function ID, must correspond to the futex_wait
+ * call.
+ * @param[in, out] params The parameters used by the function, must be of type 
+ * futex_t.
+ */
+void futex_wait(const SYSCALL_FUNCTION_E func, void* params);
 
 #endif /* #ifndef __CORE_FUTEX_H_ */

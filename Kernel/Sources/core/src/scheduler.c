@@ -153,6 +153,9 @@ static void thread_exit(void);
  */
 static void sched_clean_thread(kernel_thread_t* thread);
 
+/* TODO: Document */
+static void sched_clean_thread_resources(kernel_thread_t* thread);
+
 /**
  * @brief Cleans a process memory and resources.
  *
@@ -317,6 +320,12 @@ static void thread_exit(void)
     sched_schedule();
 }
 
+static void sched_clean_thread_resources(kernel_thread_t* thread)
+{
+    /* TODO */
+    (void)thread;
+}
+
 static void sched_clean_thread(kernel_thread_t* thread)
 {
     kernel_process_t* process;
@@ -330,6 +339,9 @@ static void sched_clean_thread(kernel_thread_t* thread)
     ENTER_CRITICAL(int_state);
 
     KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "Cleaning thread");
+
+    /* Clean thread's resources */
+    sched_clean_thread_resources(thread);
 
     /* Clean the stacks */
     if(process != active_process)
