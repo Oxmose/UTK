@@ -1,4 +1,6 @@
-<img src="https://github.com/Oxmose/UTK-Reboot/raw/main/Doc/logo/utk_logo.png" width="200">
+<p align="center">
+	<img src="https://github.com/Oxmose/UTK-Reboot/raw/main/Doc/logo/utk_logo.png" width="200">
+</p>
 
 ## UTK - Utility Kernel
 
