@@ -20,7 +20,7 @@
 #define __X86_ACPI_H_
 
 #include <stdint.h>       /* Generic int types */
-#include <queue.h>        /* Queue library */
+#include <vector.h>       /* Vector library */
 #include <kernel_error.h> /* Kernel error codes */
 
 /*******************************************************************************
@@ -79,6 +79,8 @@ typedef struct local_apic
  * @details Initializes all the ACPI structures. The function will search for 
  * the ACPI RSDP and then parse all the ACPI information. Each supported entry 
  * is stored for further use.
+ * 
+ * @warning This function should be called with interrupt disabled.
  */
 void acpi_init(void);
 
@@ -172,6 +174,6 @@ OS_RETURN_E acpi_check_lapic_id(const uint32_t lapic_id);
  *
  * @return Returns the list of IO apics registered.
  */
-const queue_t* acpi_get_io_apics(void);
+const vector_t* acpi_get_io_apics(void);
 
 #endif /* #ifndef __X86_ACPI_H_ */

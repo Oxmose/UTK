@@ -107,19 +107,19 @@ typedef struct vector vector_t;
  * allocate the required memory and initialize the memory with the value 
  * provided as parameter.
  * 
- * @param[out] vector A pointer to the vector to initialize.
  * @param[in] allocator The allocator to be used when allocating and freeing the
  * vector.
  * @param[in] init_data The initial data to set to the elements of the vector 
  * during its creation.
  * @param[in] size The initial size of the vector.
+ * @param[out] error The error buffer to received the error status.
  * 
- * @returns The error status is returned.
+ * @returns A pointer to the created vector is returned.
  */
-OS_RETURN_E vector_init(vector_t* vector,
-                        vector_alloc_t allocator,
+vector_t* vector_create(vector_alloc_t allocator,
                         void* init_data,
-                        const size_t size);
+                        const size_t size,
+                        OS_RETURN_E* error);
 
 /**
  * @brief Destroys a vector.
@@ -148,19 +148,17 @@ OS_RETURN_E vector_destroy(vector_t* vector);
 OS_RETURN_E vector_clear(vector_t* vector);
 
 /**
- * @brief Performs a copy of a vector.
+ * @brief Performs a copy of a vector and returns it.
  * 
- * @details Copies a vector to another vector. The destination vector is 
- * initialized. It is the responsability of the user to make sure the
- * destination vector already released all its resources. The function 
+ * @details Copies a vector to another vector. The function
  * initialize the destination vector before performing the copy.
  * 
- * @param[out] dst The destination vector.
  * @param[in] src The source vector.
+ * @param[in] error The error status buffer.
  * 
- * @return The error status is retuned.
+ * @return The copy of the vector is returned.
  */
-OS_RETURN_E vector_copy(vector_t* dst, const vector_t* src);
+vector_t* vector_copy(const vector_t* src, OS_RETURN_E* error);
 
 /**
  * @brief Shrinks a vector.

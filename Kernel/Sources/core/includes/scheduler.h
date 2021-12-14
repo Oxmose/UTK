@@ -71,6 +71,15 @@ typedef enum SYSTEM_STATE SYSTEM_STATE_E;
 void sched_init(void);
 
 /**
+ * @brief Calls the scheduler dispatch function.
+ *
+ * @details Calls the scheduler. This will raise an interrupt since we should
+ * never call the scheduler routine outside of an interrupt context.
+ */
+
+void sched_schedule(void);
+
+/**
  * @brief Puts the calling thread to sleep.
  *
  * @details Puts the calling thread to sleep for at least time_ms microseconds.
@@ -301,5 +310,38 @@ void sched_wait_process_pid(const SYSCALL_FUNCTION_E func, void* params);
  * sched_param_t.
  */
 void sched_get_process_params(const SYSCALL_FUNCTION_E func, void* params);
+
+/**
+ * @brief Locks a thread from being scheduled.
+ *
+ * @details Removes the active thread from the active threads table, the thread
+ * might be contained in an other structure such as a mutex.
+ *
+ * @param block_type The type of block (mutex, sem, ...)
+ *
+ * @return The current thread system's node is returned on success. If the call
+ * failed, NULL is returned.
+ */
+queue_node_t* sched_lock_thread(const THREAD_WAIT_TYPE_E block_type);
+
+/**
+ * @brief Unlocks a thread from behing scheduled.
+ *
+ * @details Unlocks a thread from behing scheduled. Adds a thread to the active
+ * threads table, the thread might be contained in an other structure such as a
+ * mutex.
+ *
+ * @param[in] node The node containing the thread to unlock.
+ * @param[in] block_type The type of block (mutex, sem, ...)
+ * @param[in] do_schedule Set to 1 the thread should be immediatly scheduled.
+ *
+ * @return The success state or the error code.
+ * - OS_NO_ERR is returned if no error is encountered.
+ * - OS_ERR_NULL_POINTER is returned if the thread handle is NULL.
+ * - OS_ERR_NO_SUCH_ID is returned if thread cannot be found in the system.
+ */
+OS_RETURN_E sched_unlock_thread(queue_node_t* node,
+                                const THREAD_WAIT_TYPE_E block_type,
+                                const bool_t do_schedule);
 
 #endif /* #ifndef __CORE_SCHEDULER_H_ */

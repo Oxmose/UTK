@@ -160,7 +160,7 @@ void io_apic_init(void)
     uint32_t            i;
     uint32_t            j;
     uint32_t            read_count;
-    const queue_node_t* acpi_io_apic;
+    const vector_t*     acpi_io_apic;
     io_apic_t*          cursor_apic;
     OS_RETURN_E         err;
 
@@ -182,10 +182,10 @@ void io_apic_init(void)
         KERNEL_PANIC(OS_ERR_MALLOC);
     }
 
-    acpi_io_apic = acpi_get_io_apics()->head;
+    acpi_io_apic = acpi_get_io_apics();
     for(i = 0; i < io_apic_count; ++i)
     {
-        cursor_apic = (io_apic_t*)acpi_io_apic->data;
+        cursor_apic = (io_apic_t*)acpi_io_apic->array[i];
         /* Get IO APIC data*/
         io_apics[i].base_addr = cursor_apic->io_apic_addr;
         io_apics[i].id        = cursor_apic->apic_id;
@@ -221,7 +221,6 @@ void io_apic_init(void)
         {
             io_apic_set_irq_mask(j, 0);
         }
-        acpi_io_apic = acpi_io_apic->next;
     }
 
 #ifdef TEST_MODE_ENABLED

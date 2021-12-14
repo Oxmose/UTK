@@ -22,7 +22,6 @@
 #include <stdint.h>        /* Generic int types */
 #include <string.h>        /* String manipulation */
 #include <panic.h>         /* Kernel panic */
-#include <critical.h>      /* Critical sections */
 #include <kernel_output.h> /* Kernel output methods */
 
 /* UTK configuration file */
@@ -155,8 +154,6 @@ OS_RETURN_E queue_delete_queue(queue_t** queue)
 
 OS_RETURN_E queue_push(queue_node_t* node, queue_t* queue)
 {
-    uint32_t word;
-
     KERNEL_DEBUG(QUEUE_DEBUG_ENABLED, 
                  "[QUEUE] queue 0x%p in queue 0x%p", 
                  node, 
@@ -166,8 +163,6 @@ OS_RETURN_E queue_push(queue_node_t* node, queue_t* queue)
     {
         return OS_ERR_NULL_POINTER;
     }
-
-    ENTER_CRITICAL(word);
 
     /* If this queue is empty */
     if(queue->head == NULL)
@@ -204,11 +199,8 @@ OS_RETURN_E queue_push(queue_node_t* node, queue_t* queue)
 
     if(node->next != NULL && node->prev != NULL && node->next == node->prev)
     {
-        EXIT_CRITICAL(word);
         return OS_ERR_UNAUTHORIZED_ACTION;
     }
-
-    EXIT_CRITICAL(word);
 
     return OS_NO_ERR;
 }
@@ -219,7 +211,6 @@ OS_RETURN_E queue_push_prio(queue_node_t* node,
                             const uintptr_t priority)
 {
     queue_node_t* cursor;
-    uint32_t      word;
 
     KERNEL_DEBUG(QUEUE_DEBUG_ENABLED, 
                  "[QUEUE] Enqueue 0x%p in queue 0x%p", 
@@ -231,8 +222,6 @@ OS_RETURN_E queue_push_prio(queue_node_t* node,
         KERNEL_DEBUG(QUEUE_DEBUG_ENABLED, "[QUEUE] Enqueue NULL");
         return OS_ERR_NULL_POINTER;
     }
-
-    ENTER_CRITICAL(word);
 
     node->priority = priority;
 
@@ -293,11 +282,8 @@ OS_RETURN_E queue_push_prio(queue_node_t* node,
 
     if(node->next != NULL && node->prev != NULL && node->next == node->prev)
     {
-        EXIT_CRITICAL(word);
         return OS_ERR_UNAUTHORIZED_ACTION;
     }
-
-    EXIT_CRITICAL(word);
 
     return OS_NO_ERR;
 }
@@ -305,7 +291,6 @@ OS_RETURN_E queue_push_prio(queue_node_t* node,
 queue_node_t* queue_pop(queue_t* queue, OS_RETURN_E* error)
 {
     queue_node_t* node;
-    uint32_t      word;
 
     KERNEL_DEBUG(QUEUE_DEBUG_ENABLED, 
                  "[QUEUE] Dequeue element in queue 0x%p", 
@@ -325,12 +310,9 @@ queue_node_t* queue_pop(queue_t* queue, OS_RETURN_E* error)
         *error = OS_NO_ERR;
     }
 
-    ENTER_CRITICAL(word);
-
     /* If this queue is empty */
     if(queue->head == NULL)
     {
-        EXIT_CRITICAL(word);
         return NULL;
     }
 
@@ -371,14 +353,12 @@ queue_node_t* queue_pop(queue_t* queue, OS_RETURN_E* error)
         *error = OS_NO_ERR;
     }
 
-    EXIT_CRITICAL(word);
     return node;
 }
 
 queue_node_t* queue_find(queue_t* queue, void* data, OS_RETURN_E *error)
 {
     queue_node_t* node;
-    uint32_t      word;
 
     KERNEL_DEBUG(QUEUE_DEBUG_ENABLED, 
                  "[QUEUE] Find data 0x%p in queue 0x%p", 
@@ -395,16 +375,12 @@ queue_node_t* queue_find(queue_t* queue, void* data, OS_RETURN_E *error)
         return NULL;
     }
 
-    ENTER_CRITICAL(word);
-
     /* Search for the data */
     node = queue->head;
     while(node != NULL && node->data != data)
     {
         node = node->next;
     }
-
-    EXIT_CRITICAL(word);
 
     /* No such data */
     if(node == NULL)
@@ -427,7 +403,6 @@ queue_node_t* queue_find(queue_t* queue, void* data, OS_RETURN_E *error)
 OS_RETURN_E queue_remove(queue_t* queue, queue_node_t* node)
 {
     queue_node_t* cursor;
-    uint32_t      word;
 
     if(queue == NULL || node == NULL)
     {
@@ -439,8 +414,6 @@ OS_RETURN_E queue_remove(queue_t* queue, queue_node_t* node)
                  node, 
                  queue);
 
-    ENTER_CRITICAL(word);
-
     /* Search for node in the queue*/
     cursor = queue->head;
     while(cursor != NULL && cursor != node)
@@ -450,7 +423,6 @@ OS_RETURN_E queue_remove(queue_t* queue, queue_node_t* node)
 
     if(cursor == NULL)
     {
-        EXIT_CRITICAL(word);
         return OS_ERR_NO_SUCH_ID;
     }
 
@@ -480,8 +452,6 @@ OS_RETURN_E queue_remove(queue_t* queue, queue_node_t* node)
     node->prev = NULL;
 
     node->enlisted = 0;
-
-    EXIT_CRITICAL(word);
 
     return OS_NO_ERR;
 }

@@ -23,7 +23,7 @@
  *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
-#if 0
+
 #include <scheduler.h>       /* Scheduler constants */
 #include <atomic.h>          /* Spinlock API */
 #include <kernel_output.h>   /* Kernel outputs */
@@ -37,7 +37,7 @@
 
 /* Header file */
 #include <mutex.h>
-
+#if 0
 /*******************************************************************************
  * CONSTANTS
  ******************************************************************************/
@@ -99,7 +99,7 @@ OS_RETURN_E mutex_init(mutex_t* mutex,
     mutex->state      = MUTEX_STATE_WAIT_INIT;
     mutex->flags      = flags | priority << 8;
     mutex->futex.addr = (uint32_t*)&mutex->state;
-    mutex->futex.wait = MUTEX_STATE_LOCKED_WAIT;
+    mutex->futex.val  = MUTEX_STATE_LOCKED_WAIT;
 
     syscall_do(SYSCALL_SCHED_GET_PARAMS, &sched_params);
     if(sched_params->error != OS_NO_ERR)
@@ -186,7 +186,7 @@ OS_RETURN_E mutex_lock(mutex_t* mutex)
                              MUTEX_STATE_UNLOCKED, 
                              MUTEX_STATE_LOCKED);
 
-    if(mutex->state != MUTEX_STATE_UNLOCKED)
+    if(mutex_state != MUTEX_STATE_UNLOCKED)
     {    
         do
         {
@@ -194,11 +194,12 @@ OS_RETURN_E mutex_lock(mutex_t* mutex)
              * if the mutex unlocked, then try to lock it again in
              * the next check, oterwise, we are still locked and need to wait. 
              */
-            if(mutex->state == MUTEX_STATE_LOCKED_WAIT || 
+            if(mutex_state == MUTEX_STATE_LOCKED_WAIT || 
                ATOMIC_CAS(&mutex->state, 
                           MUTEX_STATE_LOCKED, 
                           MUTEX_STATE_LOCKED_WAIT) != MUTEX_STATE_UNLOCKED)
             {
+                mutex->futex.val = MUTEX_STATE_LOCKED_WAIT;
                 syscall_do(SYSCALL_FUTEX_WAIT, &mutex->futex);
                 if(mutex->futex.error != OS_NO_ERR)
                 {
@@ -212,9 +213,9 @@ OS_RETURN_E mutex_lock(mutex_t* mutex)
                                      MUTEX_STATE_LOCKED_WAIT);
             
             /* Sanity check */
-            if(mutex->state != MUTEX_STATE_UNLOCKED &&
-               mutex->state != MUTEX_STATE_LOCKED   && 
-               mutex->state != MUTEX_STATE_LOCKED_WAIT)
+            if(mutex_state != MUTEX_STATE_UNLOCKED &&
+               mutex_state != MUTEX_STATE_LOCKED   && 
+               mutex_state != MUTEX_STATE_LOCKED_WAIT)
             {
                 return OS_ERR_NOT_INITIALIZED;
             }
@@ -294,19 +295,21 @@ OS_RETURN_E mutex_unlock(mutex_t* mutex)
                              MUTEX_STATE_UNLOCKED);
 
     /* If other threads wait for the mutex */
-    if(mutex->state == MUTEX_STATE_LOCKED_WAIT)
+    if(mutex_state == MUTEX_STATE_LOCKED_WAIT)
     {
         ATOMIC_CAS(&mutex->state, 
                    MUTEX_STATE_LOCKED_WAIT,
                    MUTEX_STATE_UNLOCKED);
 
+        /* Wake only one thread */
+        mutex->futex.val = 1;
         syscall_do(SYSCALL_FUTEX_WAKE, &mutex->futex);
         if(mutex->futex.error != OS_NO_ERR)
         {
             return mutex->futex.error;
         }
     }
-    else if(mutex->state != MUTEX_STATE_UNLOCKED)
+    else if(mutex_state != MUTEX_STATE_UNLOCKED)
     {
         /* Here the mutex was in another state, which is undefined behavior */
         return OS_ERR_NOT_INITIALIZED;
@@ -367,8 +370,8 @@ OS_RETURN_E mutex_try_lock(mutex_t* mutex, int32_t* value)
                              MUTEX_STATE_UNLOCKED, 
                              MUTEX_STATE_LOCKED);
 
-    *value = mutex->state;
-    if(mutex->state != MUTEX_STATE_UNLOCKED)
+    *value = mutex_state;
+    if(mutex_state != MUTEX_STATE_UNLOCKED)
     {    
         return OS_NO_ERR;
     }

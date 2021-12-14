@@ -52,6 +52,8 @@ enum THREAD_STATE
     THREAD_STATE_JOINING,
     /** @brief Thread's scheduling state: being copied. */
     THREAD_STATE_COPYING,
+    /** @brief Thread's scheduling state: waiting. */
+    THREAD_STATE_WAITING,
 };
 
 /**
@@ -250,11 +252,6 @@ struct thread_resource
      */
     void (*cleanup)(void* data);
 };
-
-/**
- * @brief Defines kernel_thread_t type as a shorcut for struct kernel_thread.
- */
-typedef struct thread_resource thread_resource_t;
 
 /*******************************************************************************
  * FUNCTIONS

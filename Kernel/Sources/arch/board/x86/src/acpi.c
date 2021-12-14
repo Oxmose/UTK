@@ -21,7 +21,7 @@
 #include <kernel_output.h> /* Kernel output methods */
 #include <memmgt.h>        /* Memory management */
 #include <panic.h>         /* Kernel panic */
-#include <queue.h>         /* Queue library */
+#include <vector.h>        /* Vector library */
 #include <kheap.h>         /* Kernel heap */
 #include <kernel_error.h>  /* Kernel error codes */
 #include <arch_memmgt.h>   /* Atcihtecture memory management */
@@ -320,13 +320,13 @@ typedef struct acpi_page_tree acpi_page_tree_t;
 static uint32_t cpu_count;
 
 /** @brief Stores the detected CPUs' lapics. */
-static queue_t* cpu_lapics;
+static vector_t* cpu_lapics;
 
 /* IO APIC */
 /** @brief Stores the number of detected IO APIC. */
 static uint32_t io_apic_count;
 /** @brief Stores the detected IO APICs' information table. */
-static queue_t* io_apics;
+static vector_t* io_apics;
 
 /* ACPI Tables pointers */
 /** @brief Stores the MADT descriptor's address in memory. */
@@ -648,7 +648,6 @@ static void acpi_parse_apic(acpi_madt_t* madt_ptr)
     uintptr_t      madt_entry;
     uintptr_t      madt_limit;
     apic_header_t* header;
-    queue_node_t*  new_node;
     OS_RETURN_E    err;
 
     cpu_count = 0;
@@ -698,26 +697,14 @@ static void acpi_parse_apic(acpi_madt_t* madt_ptr)
                     if(cpu_count < MAX_CPU_COUNT)
                     {
                         /* Add CPU info to the lapic table */
-                        new_node = queue_create_node(
-                            (void*)madt_entry, 
-                            QUEUE_ALLOCATOR(kmalloc, kfree), 
-                            &err);
+                        err = vector_push(cpu_lapics, (void*)madt_entry);
                         if(err != OS_NO_ERR)
                         {
                             KERNEL_ERROR(
                             "Could not allocate node for new lapic %d\n",
                             err);
                             continue;
-                        }
-                        err = queue_push(new_node, cpu_lapics);
-                        if(err != OS_NO_ERR)
-                        {
-                            queue_delete_node(&new_node);
-                            KERNEL_ERROR(
-                            "Could not enqueue node for new lapic %d\n",
-                            err);
-                            continue;
-                        }                            
+                        }                                           
                         ++cpu_count;
                     }
                     else
@@ -739,24 +726,11 @@ static void acpi_parse_apic(acpi_madt_t* madt_ptr)
 
                     if(io_apic_count < MAX_IO_APIC_COUNT)
                     {
-                        /* Add IO APIC info to the table */
-                        new_node = queue_create_node(
-                            (void*)madt_entry, 
-                            QUEUE_ALLOCATOR(kmalloc, kfree), 
-                            &err);
+                        err = vector_push(io_apics, (void*)madt_entry);
                         if(err != OS_NO_ERR)
                         {
                             KERNEL_ERROR(
-                            "Could not allocate node for new IO APIC %d\n",
-                            err);
-                            continue;
-                        }
-                        err = queue_push(new_node, io_apics);
-                        if(err != OS_NO_ERR)
-                        {
-                            queue_delete_node(&new_node);
-                            KERNEL_ERROR(
-                            "Could not enqueue node for new IO APIC\n");
+                            "Could not add node for new IO APIC\n");
                             continue;
                         }    
                         ++io_apic_count;
@@ -1100,16 +1074,17 @@ void acpi_init(void)
 
     acpi_mapping = NULL;
 
-    cpu_lapics = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree), &err);
-    if(err != OS_NO_ERR)
+
+    cpu_lapics = vector_create(VECTOR_ALLOCATOR(kmalloc, kfree), NULL, 0, &err);
+    if(cpu_lapics == NULL || err != OS_NO_ERR)
     {
-        KERNEL_ERROR("Could not create LAPIC queue\n");
+        KERNEL_ERROR("Could not create LAPIC vector\n");
         KERNEL_PANIC(err);
     }
-    io_apics = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree), &err);
-    if(err != OS_NO_ERR)
+    io_apics = vector_create(VECTOR_ALLOCATOR(kmalloc, kfree), NULL, 0, &err);
+    if(io_apics == NULL || err != OS_NO_ERR)
     {
-        KERNEL_ERROR("Could not create IO-APIC queue\n");
+        KERNEL_ERROR("Could not create IO-APIC vector\n");
         KERNEL_PANIC(err);
     }
 
@@ -1147,6 +1122,20 @@ void acpi_init(void)
     acpi_test();
 #endif
 
+    /* Ensure as little space as possible is used */
+    err = vector_shrink_to_fit(io_apics);
+    if(err != OS_NO_ERR)
+    {
+        KERNEL_ERROR("Could not shrink ACPI structures: %d\n", err);
+        KERNEL_PANIC(err);
+    }
+    err = vector_shrink_to_fit(cpu_lapics);
+    if(err != OS_NO_ERR)
+    {
+        KERNEL_ERROR("Could not shrink ACPI structures: %d\n", err);
+        KERNEL_PANIC(err);
+    }
+    
     acpi_initialized = TRUE;
 }
 
@@ -1219,26 +1208,22 @@ int32_t acpi_get_remaped_irq(const uint32_t irq_number)
 
 const void* acpi_get_io_apic_address(const uint32_t io_apic_id)
 {
-    io_apic_t*    io_apic;
-    queue_node_t* node;
+    size_t i;
 
     if(acpi_initialized != TRUE || madt == NULL || io_apic_id >= io_apic_count)
     {
         return NULL;
     }
 
-    node = io_apics->head;
-    io_apic = NULL;
-    while (node)
+    for(i = 0; i < io_apics->size; ++i)
     {
-        io_apic = (io_apic_t*)node->data;
-        if(io_apic->apic_id == io_apic_id)
+        if(((io_apic_t*)io_apics->array[i])->apic_id == io_apic_id)
         {
-            break;
+            return io_apics->array[i];
         }
     }
 
-    return (void*)io_apic;
+    return NULL;
 }
 
 void* acpi_get_lapic_addr(void)
@@ -1253,33 +1238,25 @@ void* acpi_get_lapic_addr(void)
 
 OS_RETURN_E acpi_check_lapic_id(const uint32_t lapic_id)
 {
-    local_apic_t* lapic;
-    queue_node_t* node;
-    OS_RETURN_E   err;
-
-    err = OS_ERR_NO_SUCH_ID;
+    size_t i;
 
     if(acpi_initialized != TRUE)
     {
         return OS_ERR_NOT_INITIALIZED;
     }
 
-    node = cpu_lapics->head;
-    lapic = NULL;
-    while (node)
+    for(i = 0; i < cpu_lapics->size; ++i)
     {
-        lapic = (local_apic_t*)node->data;
-        if(lapic->apic_id == lapic_id)
+        if(((local_apic_t*)cpu_lapics->array[i])->apic_id == lapic_id)
         {
-            err = OS_NO_ERR;
-            break;
+            return OS_NO_ERR;
         }
     }
 
-    return err;
+    return OS_ERR_NO_SUCH_ID;
 }
 
-const queue_t* acpi_get_io_apics(void)
+const vector_t* acpi_get_io_apics(void)
 {
     return io_apics;
 }
@@ -1295,29 +1272,23 @@ int32_t get_cpu_count(void)
 
 int32_t cpu_get_id(void)
 {   
-    uint32_t i;
     uint32_t lapic_id;
-    queue_node_t* node;
-    local_apic_t* lapic;
+    size_t   i;
 
     /* If lapic is not activated but we only use one CPU */
     if(cpu_count == 0 || acpi_initialized == FALSE)
     {
         return 0;
-    }    
+    }   
 
-    node = cpu_lapics->tail;
-    i = 0;
     lapic_id = lapic_get_id();
-    while(node != NULL)
+
+    for(i = 0; i < cpu_lapics->size; ++i)
     {
-        lapic = (local_apic_t*)node->data;
-        if(lapic->apic_id == lapic_id)
+        if(((local_apic_t*)cpu_lapics->array[i])->apic_id == lapic_id)
         {
             return i;
         }
-        node = node->prev;
-        ++i;
     }
 
     return 0;

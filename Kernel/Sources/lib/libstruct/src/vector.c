@@ -104,16 +104,31 @@
     }                                                                       \
 }
 
-OS_RETURN_E vector_init(vector_t* vector,
-                        vector_alloc_t allocator,
+vector_t* vector_create(vector_alloc_t allocator,
                         void* init_data,
-                        const size_t size)
+                        const size_t size,
+                        OS_RETURN_E* error)
 {
-    size_t i;
+    vector_t* vector;
+    size_t    i;
 
-    if(vector == NULL || allocator.malloc == NULL || allocator.free == NULL)
+    if(allocator.malloc == NULL || allocator.free == NULL)
     {
-        return OS_ERR_NULL_POINTER;
+        if(error != NULL)
+        {
+            *error = OS_ERR_NULL_POINTER;
+        }
+        return NULL;
+    }
+
+    vector = allocator.malloc(sizeof(vector_t));
+    if(vector == NULL)
+    {
+        if(error != NULL)
+        {
+            *error = OS_ERR_MALLOC;
+        }
+        return NULL;
     }
 
     /* Allocate the data */
@@ -123,7 +138,11 @@ OS_RETURN_E vector_init(vector_t* vector,
         vector->array = allocator.malloc(size * sizeof(void*));
         if(vector->array == NULL)
         {
-            return OS_ERR_MALLOC;
+            if(error != NULL)
+            {
+                *error = OS_ERR_MALLOC;
+            }
+            return NULL;
         }
     }
 
@@ -138,7 +157,11 @@ OS_RETURN_E vector_init(vector_t* vector,
     vector->size      = size;
     vector->capacity  = size;
 
-    return OS_NO_ERR;
+    if(error != NULL)
+    {
+        *error = OS_NO_ERR;
+    }
+    return vector;
 }
 
 OS_RETURN_E vector_destroy(vector_t* vector)
@@ -159,6 +182,9 @@ OS_RETURN_E vector_destroy(vector_t* vector)
     vector->size      = 0;
     vector->capacity  = 0;
 
+    /* Free vector structure */
+    vector->allocator.free(vector);
+
     return OS_NO_ERR;
 }
 
@@ -174,28 +200,37 @@ OS_RETURN_E vector_clear(vector_t* vector)
     return OS_NO_ERR;
 }
 
-OS_RETURN_E vector_copy(vector_t* dst, const vector_t* src)
+vector_t* vector_copy(const vector_t* src, OS_RETURN_E* error)
 {
-    OS_RETURN_E err;
+    vector_t* copy;
 
-    if(dst == NULL || src == NULL)
+    if(src == NULL)
     {
-        return OS_ERR_NULL_POINTER;
+        if(error != NULL)
+        {
+            *error = OS_ERR_NULL_POINTER;
+        }
+        return NULL;
     }
 
-    err = vector_init(dst, src->allocator, NULL, src->capacity);
-    if(err != OS_NO_ERR)
+    copy = vector_create(src->allocator, NULL, src->capacity, error);
+    if(copy == NULL || *error != OS_NO_ERR)
     {
-        return err;
+        return NULL;
     }
 
     /* Here we do not need to copy the entire array, just the part that contains
      * valid data as size <= capacity.
      */
-    dst->size = src->size;
-    memcpy(dst->array, src->array, src->size * sizeof(void*));
+    copy->size = src->size;
+    memcpy(copy->array, src->array, src->size * sizeof(void*));
 
-    return OS_NO_ERR;
+    if(error != NULL)
+    {
+        *error = OS_NO_ERR;
+    }
+
+    return copy;
 }
 
 OS_RETURN_E vector_shrink_to_fit(vector_t* vector)

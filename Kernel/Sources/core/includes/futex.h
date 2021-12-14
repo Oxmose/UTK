@@ -43,8 +43,8 @@ struct futex
     /** @brief Futex atomic memory region */
     uint32_t* addr;
 
-    /** @brief Futex waiting value */
-    uint32_t wait;
+    /** @brief Futex waiting value or number of threads to wake */
+    uint32_t val;
 
     /** @brief The futex's error state */
     OS_RETURN_E error;
@@ -71,5 +71,19 @@ typedef struct futex futex_t;
  * futex_t.
  */
 void futex_wait(const SYSCALL_FUNCTION_E func, void* params);
+
+/**
+ * @brief System call handler to wake on a given futex.
+ * 
+ * @details System call handler to wake on a given futex. This system call 
+ * receive the futex to wake the threads on the value to observe. Wake can
+ * wake multiple threads depending on the valu provided in parameters.
+ * 
+ * @param[in] func The syscall function ID, must correspond to the futex_wake
+ * call.
+ * @param[in, out] params The parameters used by the function, must be of type 
+ * futex_t.
+ */
+void futex_wake(const SYSCALL_FUNCTION_E func, void* params);
 
 #endif /* #ifndef __CORE_FUTEX_H_ */

@@ -131,13 +131,14 @@ typedef struct uhashtable uhashtable_t;
  * initialized and its memory allocated. It should be destroyed once the hash 
  * table is no longer in use.
  * 
- * @param[out] table A pointer to the unsigned hash table to initialize.
  * @param[in] allocator The allocator to be used when allocating and freeing the
  * hash table.
+ * @param[out] error The buffer to return the error status.
  * 
- * @returns The error status is returned.
+ * @returns A pointer to the newly created table is returned.
  */
-OS_RETURN_E uhashtable_init(uhashtable_t* table, uhashtable_alloc_t allocator);
+uhashtable_t* uhashtable_create(uhashtable_alloc_t allocator, 
+                                OS_RETURN_E* error);
 
 /**
  * @brief Destroys an unsigned hash table.

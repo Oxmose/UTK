@@ -129,8 +129,6 @@ static queue_t* sleeping_threads_table;
  * STATIC FUNCTIONS DECLARATION
  ******************************************************************************/
 
-static void sched_schedule(void);
-
 /**
  * @brief Thread's exit point.
  *
@@ -243,19 +241,6 @@ static void schedule_int(cpu_state_t* cpu_state,
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
-
-static void sched_schedule(void)
-{
-    OS_RETURN_E err;
-
-    /* Raise scheduling interrupt */
-    err = cpu_raise_interrupt(SCHEDULER_SW_INT_LINE);
-    if(err != OS_NO_ERR)
-    {
-        KERNEL_ERROR("Could not raise schedule interrupt\n");
-        KERNEL_PANIC(err);
-    }
-}
 
 static void thread_exit(void)
 {
@@ -911,6 +896,19 @@ void sched_init(void)
     cpu_restore_context(NULL, NULL, idle_thread);
 }
 
+void sched_schedule(void)
+{
+    OS_RETURN_E err;
+
+    /* Raise scheduling interrupt */
+    err = cpu_raise_interrupt(SCHEDULER_SW_INT_LINE);
+    if(err != OS_NO_ERR)
+    {
+        KERNEL_ERROR("Could not raise schedule interrupt\n");
+        KERNEL_PANIC(err);
+    }
+}
+
 OS_RETURN_E sched_sleep(const unsigned int time_ms)
 {
     uint64_t curr_time;
@@ -1084,6 +1082,8 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
         return;
     }
 
+    ENTER_CRITICAL(int_state);
+
     err = queue_push(new_proc_node, active_process->children);
     if(err != OS_NO_ERR)
     {
@@ -1093,6 +1093,9 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
             KERNEL_ERROR("Internal error while forking process\n");
             KERNEL_PANIC(err);
         }
+
+        EXIT_CRITICAL(int_state);
+
         kfree(new_proc);
         if(new_pid != NULL)
         {
@@ -1114,6 +1117,8 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
             KERNEL_PANIC(err);
         }
 
+        EXIT_CRITICAL(int_state);
+
         kfree(new_proc);
         if(new_pid != NULL)
         {
@@ -1134,6 +1139,8 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
             KERNEL_ERROR("Internal error while forking process\n");
             KERNEL_PANIC(err);
         }
+
+        EXIT_CRITICAL(int_state);
 
         kfree(new_proc);
         if(new_pid != NULL)
@@ -1161,6 +1168,8 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
             KERNEL_ERROR("Internal error while forking process\n");
             KERNEL_PANIC(err);
         }
+
+        EXIT_CRITICAL(int_state);
 
         kfree(new_proc);
         if(new_pid != NULL)
@@ -1191,6 +1200,8 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
             KERNEL_PANIC(err);
         }
 
+        EXIT_CRITICAL(int_state);
+
         kfree(main_thread);
         kfree(new_proc);
         if(new_pid != NULL)
@@ -1215,6 +1226,8 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
             KERNEL_ERROR("Internal error while forking process\n");
             KERNEL_PANIC(err);
         }
+
+        EXIT_CRITICAL(int_state);
 
         kfree(main_thread);
         kfree(new_proc);
@@ -1246,6 +1259,8 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
             KERNEL_PANIC(err);
         }
 
+        EXIT_CRITICAL(int_state);
+
         kfree(main_thread);
         kfree(new_proc);
         if(new_pid != NULL)
@@ -1255,7 +1270,6 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
         return;
     }  
 
-    ENTER_CRITICAL(int_state);
     main_thread->state = THREAD_STATE_READY;
     err = queue_push(main_thread_node_th, 
                      active_threads_table[main_thread->priority]);
@@ -1277,6 +1291,8 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
             KERNEL_ERROR("Internal error while forking process\n");
             KERNEL_PANIC(err);
         }
+
+        EXIT_CRITICAL(int_state);
 
         kfree(main_thread);
         kfree(new_proc);
@@ -1313,6 +1329,8 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
             KERNEL_ERROR("Internal error while forking process\n");
             KERNEL_PANIC(err);
         }
+
+        EXIT_CRITICAL(int_state);
 
         kfree(main_thread);
         kfree(new_proc);
@@ -1642,6 +1660,8 @@ void sched_wait_process_pid(const SYSCALL_FUNCTION_E func, void* params)
     }
 
     sched_clean_process(child);
+
+    EXIT_CRITICAL(int_state);
     
     err = queue_remove(active_process->children, child_node);
     if(err != OS_NO_ERR)
@@ -1649,6 +1669,8 @@ void sched_wait_process_pid(const SYSCALL_FUNCTION_E func, void* params)
         KERNEL_ERROR("Could not unqueue child\n");
         KERNEL_PANIC(err);
     }
+
+    EXIT_CRITICAL(int_state);
 
     err = queue_delete_node(&child_node);
     if(err != OS_NO_ERR)
@@ -1685,4 +1707,75 @@ void sched_get_process_params(const SYSCALL_FUNCTION_E func, void* params)
     func_params->priority = active_thread->priority;
 
     func_params->error = OS_NO_ERR;
+}
+
+queue_node_t* sched_lock_thread(const THREAD_WAIT_TYPE_E block_type)
+{
+    queue_node_t* current_thread_node;
+
+    /* Cant lock kernel thread */
+    if(active_thread == idle_thread)
+    {
+        return NULL;
+    }
+
+    current_thread_node = active_thread_node;
+
+    /* Lock the thread */
+    active_thread->state      = THREAD_STATE_WAITING;
+    active_thread->block_type = block_type;
+
+    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "Thread %d locked, reason: %d\n",
+                 active_thread->tid, block_type);
+
+    return current_thread_node;
+}
+
+OS_RETURN_E sched_unlock_thread(queue_node_t* node,
+                                const THREAD_WAIT_TYPE_E block_type,
+                                const bool_t do_schedule)
+{
+    OS_RETURN_E      err;
+    uint32_t         int_state;
+    kernel_thread_t* thread;
+
+    thread = (kernel_thread_t*)node->data;
+
+    /* Check thread value */
+    if(thread == NULL || thread == idle_thread)
+    {
+        return OS_ERR_NO_SUCH_ID;
+    }
+
+    /* Check thread state */
+    if(thread->state != THREAD_STATE_WAITING ||
+       thread->block_type != block_type)
+    {
+        return OS_ERR_INCORRECT_VALUE;
+    }
+
+    ENTER_CRITICAL(int_state);
+
+    /* Unlock thread state */
+    thread->state = THREAD_STATE_READY;
+    err = queue_push(node, active_threads_table[thread->priority]);
+    if(err != OS_NO_ERR)
+    {
+        EXIT_CRITICAL(int_state);
+
+        KERNEL_ERROR("Could not enqueue thread in active table [%d]\n", err);
+        KERNEL_PANIC(err);
+    }
+
+    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "Thread %d unlocked, reason: %d\n",
+                 active_thread->tid, block_type);
+
+    EXIT_CRITICAL(int_state);
+
+    if(do_schedule == TRUE)
+    {
+        sched_schedule();
+    }
+
+    return OS_NO_ERR;
 }

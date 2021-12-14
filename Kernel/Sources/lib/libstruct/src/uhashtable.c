@@ -291,20 +291,42 @@ static OS_RETURN_E uhashtable_rehash(uhashtable_t* table, const float growth)
     return OS_NO_ERR;
 }
 
-OS_RETURN_E uhashtable_init(uhashtable_t* table, uhashtable_alloc_t allocator)
+uhashtable_t* uhashtable_create(uhashtable_alloc_t allocator, 
+                                OS_RETURN_E* error)
 {
-    if(table == NULL || allocator.free == NULL || allocator.malloc == NULL)
+    uhashtable_t* table;
+
+    if(allocator.free == NULL || allocator.malloc == NULL)
     {
-        return OS_ERR_NULL_POINTER;
+        if(error != NULL)
+        {
+            *error = OS_ERR_NULL_POINTER;
+        }
+        return NULL;
     }
 
     /* Initialize the table */
+    table = allocator.malloc(sizeof(uhashtable_t));
+    if(table == NULL)
+    {
+        if(error != NULL)
+        {
+            *error = OS_ERR_MALLOC;
+        }
+        return NULL;
+    }
+
     table->entries = allocator.malloc(sizeof(uhashtable_entry_t*) *
                                       HT_INITIAL_SIZE);
 
     if(table->entries == NULL)
     {
-        return OS_ERR_MALLOC;
+        allocator.free(table);
+        if(error != NULL)
+        {
+            *error = OS_ERR_MALLOC;
+        }
+        return NULL;
     }
 
     memset(table->entries, 0, sizeof(uhashtable_entry_t*) * HT_INITIAL_SIZE);
@@ -313,7 +335,12 @@ OS_RETURN_E uhashtable_init(uhashtable_t* table, uhashtable_alloc_t allocator)
     table->size           = 0;
     table->graveyard_size = 0;
 
-    return OS_NO_ERR;
+    if(error != NULL)
+    {
+        *error = OS_NO_ERR;
+    }
+
+    return table;
 }
 
 OS_RETURN_E uhashtable_destroy(uhashtable_t* table)
@@ -340,6 +367,9 @@ OS_RETURN_E uhashtable_destroy(uhashtable_t* table)
     table->capacity       = 0;
     table->graveyard_size = 0;
     table->entries        = NULL;
+
+    /* Free memory */
+    table->allocator.free(table);
 
     return OS_NO_ERR;
 }

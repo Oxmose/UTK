@@ -17,35 +17,35 @@ uint32_t random_get(void)
 void uhashtable_test(void)
 {
     size_t       i;
-    uhashtable_t table;
+    uhashtable_t* table;
     uint32_t     data;
     OS_RETURN_E  err;
 
-    err = uhashtable_init(&table, UHASHTABLE_ALLOCATOR(kmalloc, kfree));
-    if(err != OS_NO_ERR)
+    table = uhashtable_create(UHASHTABLE_ALLOCATOR(kmalloc, kfree), &err);
+    if(table == NULL || err != OS_NO_ERR)
     {
         kernel_error("Could not initialize hashtable: %d\n", err);
         kill_qemu();
     }
-    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table.size, table.capacity);
+    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table->size, table->capacity);
     
     kernel_printf("[TESTMODE] ==== Set\n");
     for(i = 0; i < 26; ++i)
     {
-        err = uhashtable_set(&table, i, (void*)(i * 10));
+        err = uhashtable_set(table, i, (void*)(i * 10));
         if(err != OS_NO_ERR)
         {
             kernel_error("Could not set hashtable: %d\n", err);
             kill_qemu();
         }
     }
-    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table.size, table.capacity);
+    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table->size, table->capacity);
     
 
     kernel_printf("[TESTMODE] ==== Get\n");
     for(i = 0; i < 26; ++i)
     {
-        err = uhashtable_get(&table, i, (void**)&data);
+        err = uhashtable_get(table, i, (void**)&data);
         kernel_printf("[TESTMODE] Key: %d | Value: %d\n", i, data);
         if(err != OS_NO_ERR)
         {
@@ -53,12 +53,12 @@ void uhashtable_test(void)
             kill_qemu();
         }
     }
-    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table.size, table.capacity);
+    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table->size, table->capacity);
 
     kernel_printf("[TESTMODE] ==== Set\n");
     for(i = 0; i < 26; i += 2)
     {
-        err = uhashtable_set(&table, i, (void*)(i * 100));
+        err = uhashtable_set(table, i, (void*)(i * 100));
         if(err != OS_NO_ERR)
         {
             kernel_error("Could not set hashtable: %d\n", err);
@@ -67,19 +67,19 @@ void uhashtable_test(void)
     }
     for(i = 0; i < 26; i += 2)
     {
-        err = uhashtable_set(&table, i, (void*)(i * 1000));
+        err = uhashtable_set(table, i, (void*)(i * 1000));
         if(err != OS_NO_ERR)
         {
             kernel_error("Could not set hashtable: %d\n", err);
             kill_qemu();
         }
     }
-    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table.size, table.capacity);
+    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table->size, table->capacity);
 
     kernel_printf("[TESTMODE] ==== Get\n");
     for(i = 0; i < 26; ++i)
     {
-        err = uhashtable_get(&table, i, (void**)&data);
+        err = uhashtable_get(table, i, (void**)&data);
         kernel_printf("[TESTMODE] Key: %d | Value: %d\n", i, data);
         if(err != OS_NO_ERR)
         {
@@ -87,14 +87,14 @@ void uhashtable_test(void)
             kill_qemu();
         }
     }
-    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table.size, table.capacity);
+    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table->size, table->capacity);
 
     kernel_printf("[TESTMODE] ==== Remove\n");
     for(i = 0; i < 26; ++i)
     {
         if(i % 2 == 0)
         {
-            err = uhashtable_remove(&table, i, NULL);
+            err = uhashtable_remove(table, i, NULL);
             
             if(err != OS_NO_ERR)
             {
@@ -103,12 +103,12 @@ void uhashtable_test(void)
             }
         }
     }
-    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table.size, table.capacity);
+    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table->size, table->capacity);
 
     kernel_printf("[TESTMODE] ==== Get\n");
     for(i = 0; i < 30; ++i)
     {
-        err = uhashtable_get(&table, i, (void**)&data);
+        err = uhashtable_get(table, i, (void**)&data);
         
         if(err != OS_NO_ERR)
         {
@@ -128,22 +128,22 @@ void uhashtable_test(void)
             kernel_printf("[TESTMODE] Key: %d | Value: %d\n", i, data);
         }
     }
-    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table.size, table.capacity);
+    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table->size, table->capacity);
 
     kernel_printf("[TESTMODE] ==== Destroy\n");
 
-    err = uhashtable_destroy(&table);
+    err = uhashtable_destroy(table);
     if(err != OS_NO_ERR)
     {
         kernel_error("Could not destroy hashtable: %d\n", err);
         kill_qemu();
     }
-    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table.size, table.capacity);
+    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table->size, table->capacity);
 
     kernel_printf("[TESTMODE] ==== Get\n");
     for(i = 0; i < 30; ++i)
     {
-        err = uhashtable_get(&table, i, (void**)&data);
+        err = uhashtable_get(table, i, (void**)&data);
         
         if(err != OS_ERR_NULL_POINTER)
         {
@@ -151,16 +151,16 @@ void uhashtable_test(void)
             kill_qemu();
         }
     }
-    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table.size, table.capacity);
+    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table->size, table->capacity);
 
 
-    err = uhashtable_init(&table, UHASHTABLE_ALLOCATOR(kmalloc, kfree));
-    if(err != OS_NO_ERR)
+    table = uhashtable_create(UHASHTABLE_ALLOCATOR(kmalloc, kfree), &err);
+    if(table == NULL || err != OS_NO_ERR)
     {
         kernel_error("Could not initialize hashtable: %d\n", err);
         kill_qemu();
     }
-    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table.size, table.capacity);
+    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table->size, table->capacity);
 
     uint32_t* table_data = kmalloc(sizeof(uint32_t) * 200000);
     if(table_data == NULL)
@@ -172,17 +172,17 @@ void uhashtable_test(void)
     for(i = 0; i < 200000; ++i)
     {
         table_data[i] = random_get();
-        err = uhashtable_set(&table, i, (void*)table_data[i]);
+        err = uhashtable_set(table, i, (void*)table_data[i]);
         if(err != OS_NO_ERR)
         {
             kernel_error("Could not set hashtable: %d\n", err);
             kill_qemu();
         }
     }
-    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table.size, table.capacity);
+    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table->size, table->capacity);
     for(i = 0; i < 200000; ++i)
     {
-        err = uhashtable_get(&table, i, (void**)&data);
+        err = uhashtable_get(table, i, (void**)&data);
         
         if(err != OS_NO_ERR)
         {
@@ -198,13 +198,13 @@ void uhashtable_test(void)
 
     kernel_printf("[TESTMODE] ==== Destroy\n");
 
-    err = uhashtable_destroy(&table);
+    err = uhashtable_destroy(table);
     if(err != OS_NO_ERR)
     {
         kernel_error("Could not destroy hashtable: %d\n", err);
         kill_qemu();
     }
-    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table.size, table.capacity);
+    kernel_printf("[TESTMODE] Size: %d, Capacity: %d\n", table->size, table->capacity);
     
     kfree(table_data);
 

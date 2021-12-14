@@ -563,6 +563,7 @@ static uint32_t get_free_mem(queue_t* mem_pool)
     uint32_t      total;
 
     total = 0;
+
     head = mem_pool->head;
     while(head != NULL)
     {
@@ -570,6 +571,7 @@ static uint32_t get_free_mem(queue_t* mem_pool)
         total += range->limit - range->base;
         head = head->next;
     }
+
     return total;
 }
 
@@ -729,12 +731,13 @@ static void memory_free_pages_to(queue_t* page_table,
                  page_count, 
                  page_addr);
 
+    EXIT_CRITICAL(int_state);
+
     if(err != NULL)
     {
         *err = OS_NO_ERR;
     }
 
-    EXIT_CRITICAL(int_state);
 }
 
 static void memory_acquire_ref(uintptr_t phys_addr)
@@ -1950,6 +1953,7 @@ static queue_t* paging_copy_free_page_table(OS_RETURN_E* err)
     queue_node_t* cursor;
     queue_node_t* new_node;
     mem_range_t*  range;
+    uint32_t      int_state;
 
     /* Create the new table */
     new_table = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree), 
@@ -1968,6 +1972,8 @@ static queue_t* paging_copy_free_page_table(OS_RETURN_E* err)
             KERNEL_PANIC(internal_err);
         }
     }
+
+    ENTER_CRITICAL(int_state);
 
     current_table = sched_get_current_process()->free_page_table;
     cursor = current_table->head;
@@ -2066,6 +2072,8 @@ static queue_t* paging_copy_free_page_table(OS_RETURN_E* err)
 
         return NULL;
     }
+
+    EXIT_CRITICAL(int_state);
 
     if(err != NULL)
     {
@@ -2824,13 +2832,10 @@ static OS_RETURN_E memory_copy_self_stack(mem_copy_self_data_t* data,
     return OS_NO_ERR;
 }
 
-
 void memory_manager_init(void)
 {
     queue_node_t* cursor;
     mem_range_t*  mem_range;
-
-    (void)mem_range;
 
     /* Print inital memory mapping */
     print_kernel_map();
