@@ -85,6 +85,8 @@ enum OS_RETURN
     OS_ERR_NAME_TOO_LONG                   = 24,
     /** @brief The resource has been destroyed. */
     OS_ERR_RES_DESTROYED                   = 25,
+    /** @brief The resource's owner died while holding the resource. */
+    OS_ERR_OWNER_DIED                      = 26,
 };
 
 /**

@@ -72,8 +72,8 @@ static char panic_file[PANIC_MAX_FILE_NAME_LENGTH];
  * STATIC FUNCTIONS DELCARATIONS
  ******************************************************************************/
 
-static void print_panic_header(uintptr_t int_id, 
-                               stack_state_t* stack_state, 
+static void print_panic_header(uintptr_t int_id,
+                               stack_state_t* stack_state,
                                uint32_t error_code);
 
 static void print_cpu_state(cpu_state_t* cpu_state, stack_state_t* stack_state);
@@ -84,8 +84,8 @@ static void print_cpu_flags(stack_state_t* stack_state);
  * FUNCTIONS
  ******************************************************************************/
 
-static void print_panic_header(uintptr_t int_id, 
-                               stack_state_t* stack_state, 
+static void print_panic_header(uintptr_t int_id,
+                               stack_state_t* stack_state,
                                uint32_t error_code)
 {
     kernel_printf("##############################    KERNEL PANIC    ##########"
@@ -232,7 +232,7 @@ static void print_cpu_flags(stack_state_t* stack_state)
     int8_t vif_f = (stack_state->eflags & 0x8000) >> 19;
     int8_t vip_f = (stack_state->eflags & 0x100000) >> 20;
 
-    
+
     kernel_printf("  ");
 
     if(cf_f != 0)
@@ -319,7 +319,7 @@ void panic(cpu_state_t* cpu_state, uintptr_t int_id, stack_state_t* stack_state)
     uint32_t seconds;
 
     kernel_process_t* process;
-    kernel_thread_t*  thread;    
+    kernel_thread_t*  thread;
 
     time = rtc_get_current_daytime();
     hours = time / 3600;
@@ -364,7 +364,7 @@ void panic(cpu_state_t* cpu_state, uintptr_t int_id, stack_state_t* stack_state)
     kernel_printf("\n[TESTMODE] PANIC %d\n", error_code);
     kernel_printf("  File: %s at line %d\n", panic_file, panic_line);
     /* Kill QEMU */
-    cpu_outw(0x2000, 0x604);    
+    cpu_outw(0x2000, 0x604);
     while(1)
     {
         __asm__ ("hlt");
@@ -386,7 +386,7 @@ void panic(cpu_state_t* cpu_state, uintptr_t int_id, stack_state_t* stack_state)
     kernel_printf("  Error: ");
     perror(error_code);
     kernel_printf(" (%d)\n", error_code);
-    kernel_printf("  Process: %s | Thread: %s\n", 
+    kernel_printf("  Process: %s | Thread: %s\n",
                   process != NULL ? process->name : "NO_PROCESS",
                   thread != NULL ? thread->name : "NO_THREAD");
     kernel_printf("  File: %s at line %d\n", panic_file, panic_line);
@@ -408,8 +408,8 @@ void panic(cpu_state_t* cpu_state, uintptr_t int_id, stack_state_t* stack_state)
     }
 }
 
-void kernel_panic(const uint32_t error_code, 
-                  const char* file, 
+void kernel_panic(const uint32_t error_code,
+                  const char* file,
                   const uint32_t line)
 {
     /* Save the error code to memory */
@@ -417,9 +417,16 @@ void kernel_panic(const uint32_t error_code,
     strncpy(panic_file, file, PANIC_MAX_FILE_NAME_LENGTH);
     panic_line = line;
 
-    /* Raise INT, sti ensure 1 cycle of execution where no interrupt occur, 
+    /* Raise INT, sti ensure 1 cycle of execution where no interrupt occur,
      * thus, letting int execute
      */
     __asm__ __volatile__("sti\n\t"
                          "int %0" :: "i" (PANIC_INT_LINE));
+
+    /* We should never get here, but just in case */
+    while(1)
+    {
+        cpu_clear_interrupt();
+        cpu_hlt();
+    }
 }

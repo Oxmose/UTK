@@ -95,11 +95,11 @@ void sched_schedule(void);
  */
 OS_RETURN_E sched_sleep(const uint32_t time_ms);
 
-/** 
+/**
  * @brief Returns the current system's state.
- * 
+ *
  * @details Returns the current system's state.
- * 
+ *
  * @return The current system's state is returned.
  */
 SYSTEM_STATE_E sched_get_system_state(void);
@@ -189,7 +189,7 @@ OS_RETURN_E sched_set_priority(const uint32_t priority);
  * @param[in] priority The priority of the thread.
  * @param[in] name The name of the thread.
  * @param[in] type The thread type.
- * @param[in] stack_size The thread's stack size in bytes, must be a multiple of 
+ * @param[in] stack_size The thread's stack size in bytes, must be a multiple of
  * the system's page size.
  * @param[in] function The thread routine to be executed.
  * @param[in] args The arguments to be used by the thread.
@@ -226,7 +226,7 @@ void sched_set_thread_termination_cause(const THREAD_TERMINATE_CAUSE_E
 
 /**
  * @brief Terninates a thread before it's normal termination.
- * 
+ *
  * @param[in] ret_code The return code for the thread.
  *
  * @details Terminates a thread before its return. The return state of the
@@ -246,23 +246,23 @@ uint64_t sched_get_schedule_count(void);
 
 /**
  * @brief Syscall handler to forks the current process.
- * 
+ *
  * @details Forks the current process. A complete copy of the current process
- * will be done and memory will be marked as COW for both new and current 
+ * will be done and memory will be marked as COW for both new and current
  * process. Only the calling thread will be copied to the new process.
- * 
+ *
  * @param[in] func The system call function id used to fork the current process.
- * @param[out] new_pid This buffer is used to is used to retune the new process 
+ * @param[out] new_pid This buffer is used to is used to retune the new process
  * and the PID. -1 is returned on error.
  */
 void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid);
 
 /**
  * @brief Returns the current process handler.
- * 
- * @details Returns the current process handler. If the system is not yet 
+ *
+ * @details Returns the current process handler. If the system is not yet
  * initialized, the kernel main process handler is returned,
- * 
+ *
  * @return The current process handler is returned.
  */
 kernel_process_t* sched_get_current_process(void);
@@ -279,7 +279,7 @@ kernel_process_t* sched_get_current_process(void);
  * @param[out] term_cause The buffer to store the termination cause of the
  * thread.
  *
- * @return The success state or the error code. OS_NO_ERR is returned if no 
+ * @return The success state or the error code. OS_NO_ERR is returned if no
  * error is encountered. Otherwise an error code is set.
  */
 OS_RETURN_E sched_join_thread(kernel_thread_t* thread, void** ret_val,
@@ -287,26 +287,26 @@ OS_RETURN_E sched_join_thread(kernel_thread_t* thread, void** ret_val,
 
 /**
  * @brief System call handler to wait for a child process to terminate.
- * 
+ *
  * @details System call handler to wait for a child process to terminate. Waits
  * for the process' main thread to terminate and return its status.
- * 
+ *
  * @param[in] func The syscall function ID, must correspond to the wait_process
  * call.
- * @param[in, out] params The parameters used by the function, must be of type 
+ * @param[in, out] params The parameters used by the function, must be of type
  * waitpid_params_t.
  */
 void sched_wait_process_pid(const SYSCALL_FUNCTION_E func, void* params);
 
 /**
  * @brief System call handler to get the current process parameters.
- * 
- * @details System call handler to get the current process parameters. This 
+ *
+ * @details System call handler to get the current process parameters. This
  * system call fills as sched_param_t sctructure given as parameter.
- * 
+ *
  * @param[in] func The syscall function ID, must correspond to the get_params
  * call.
- * @param[in, out] params The parameters used by the function, must be of type 
+ * @param[in, out] params The parameters used by the function, must be of type
  * sched_param_t.
  */
 void sched_get_process_params(const SYSCALL_FUNCTION_E func, void* params);
@@ -343,5 +343,41 @@ queue_node_t* sched_lock_thread(const THREAD_WAIT_TYPE_E block_type);
 OS_RETURN_E sched_unlock_thread(queue_node_t* node,
                                 const THREAD_WAIT_TYPE_E block_type,
                                 const bool_t do_schedule);
+
+/**
+ * @brief Adds a resource to the thread's resource queue.
+ *
+ * @details AAds a resource to the thread's resource queue. The cleanup function
+ * will be called with the resource as parameter to release the resource when
+ * needed.
+ *
+ * @param[in,out] thread The thread to give the resource to.
+ * @param[in] resource The resoutce to add to the thread.
+ * @param[in] cleanup The cleanup fonction to call when the resource needs to be
+ * released.
+ * @param[out] resource_node The resource node buffer that will be filled with
+ * the newly created resource node.
+ *
+ * @return The error status is returned.
+ */
+OS_RETURN_E sched_thread_add_resource(kernel_thread_t* thread,
+                                      void* resource,
+                                      void (*cleanup)(void* resource),
+                                      queue_node_t** resource_node);
+
+/**
+ * @brief Removes a resource from the thread's resource queue.
+ *
+ * @details Removes a resource from the thread's resource queue. The cleanup
+ * function is not called in this case.
+ *
+ * @param[in,out] thread The thread to remove the resource from.
+ * @param[out] resource_node The resource node filled when calling
+ * sched_thread_add_resource.
+ *
+ * @return The error status is returned.
+ */
+OS_RETURN_E sched_thread_remove_resource(kernel_thread_t* thread,
+                                         queue_node_t** resource_node);
 
 #endif /* #ifndef __CORE_SCHEDULER_H_ */

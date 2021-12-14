@@ -4,7 +4,7 @@
 
 ## UTK - Utility Kernel
 
-* UTK is a kernel created for training and educational purposes. It is designed to execute in kernel mode only. 
+* UTK is a kernel created for training and educational purposes. It is designed to execute in kernel mode only.
 
 * UTK has a configuration file allowing the kernel to be customized depending on the system it will run on.
 
@@ -36,7 +36,7 @@
 
 ### Synchronization
 
-* Futex based synchronization. Robust implementation: if a blocking thread crashes without releasing the futex, the kernel releases it for the next threadd to acquire it.
+* Futex based synchronization.
 * Mutex: Non recursive/Recursive - Priority inheritance capable. Futex based.
 * Semaphore: FIFO based, priority of the locking thread is not relevant to select the next thread to unlock. Futex based.
 * Spinlocks: Disables interrupt on single-core architecture.
@@ -77,7 +77,7 @@ To build UTK, choose the architecture you want and execute.
 Architecture list to use in the TARGET flag:
 * x86_i386
 ### Compilation
-make target=[TARGET] TESTS=[TRUE/FALSE] DEBUG=[TRUE/FALSE] 
+make target=[TARGET] TESTS=[TRUE/FALSE] DEBUG=[TRUE/FALSE]
 
 ### Execution
 make target=[TARGET] run

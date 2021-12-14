@@ -9,8 +9,8 @@
  *
  * @brief Thread and process structures definitions.
  *
- * @details hread and process structures definitions. The files contains all the 
- * data relative to the thread's management in the system (thread structure, 
+ * @details hread and process structures definitions. The files contains all the
+ * data relative to the thread's management in the system (thread structure,
  * thread state) and processes.
  *
  * @copyright Alexy Torres Aurora Dugo
@@ -133,7 +133,7 @@ struct kernel_process
     queue_node_t* main_thread;
 
     /** @brief List of the process threads. */
-    queue_t* threads;   
+    queue_t* threads;
 
     /** @brief Process children list. */
     queue_t* children;
@@ -229,6 +229,9 @@ struct kernel_thread
 
     /** @brief Thread's end time. */
     uint64_t end_time;
+
+    /** @brief Thread's resource queue. */
+    queue_t* resources;
 };
 
 /**
@@ -239,16 +242,16 @@ typedef struct kernel_thread kernel_thread_t;
 /** @brief This is the representation of a thread's resource. */
 struct thread_resource
 {
-    /** @brief The data used to represent the resource, can vary depending on 
+    /** @brief The data used to represent the resource, can vary depending on
      * the resource. */
     void* data;
 
-    /** 
-     * @brief The data used to represent the resource, can vary depending on 
+    /**
+     * @brief The data used to represent the resource, can vary depending on
      * the resource. *
-     * 
+     *
      * @param[in, out] data The data used for the cleanup, if data was allocated
-     * dynamically, it should be freed by this function. 
+     * dynamically, it should be freed by this function.
      */
     void (*cleanup)(void* data);
 };

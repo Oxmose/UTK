@@ -71,7 +71,7 @@ void rtc_test2(void);
 void rtc_test3(void);
 void lapic_timer_test(void);
 
-#endif 
+#endif
 
 #define OUTPUT_TEST 0
 #define KHEAP_TEST 0
@@ -88,7 +88,7 @@ void lapic_timer_test(void);
 #define SCHEDULER_LOAD_TEST 0
 #define SCHEDULER_PREEMPT_TEST 0
 #define SCHEDULER_SLEEP_TEST 0
-#define FUTEX_TEST 0
+#define FUTEX_TEST 1
 
 void output_test(void);
 void kheap_test(void);
