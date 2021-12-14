@@ -1,6 +1,8 @@
-# UTK - Utility Kernel
+<p align="center">
+	<img src="https://github.com/Oxmose/UTK-Reboot/raw/main/Doc/logo/utk_logo.png" width="200">
+</p>
 
-![UTK Logo](./Doc/logo/utk_logo.png | width=200)
+## UTK - Utility Kernel
 
 * UTK is a kernel created for training and educational purposes. It is designed to execute in kernel mode only. 
 
@@ -13,9 +15,9 @@
 *UTK Build status*
 
 
-| Status | Master | Dev |
+| Status | Main | Dev |
 | --- | --- | --- |
-| Travis CI | [![Build Status](https://www.travis-ci.com/Oxmose/UTK-Reboot.svg?branch=master)](https://www.travis-ci.com/Oxmose/UTK-Reboot) | [![Build Status](https://www.travis-ci.com/Oxmose/UTK-Reboot.svg?branch=dev)](https://www.travis-ci.com/Oxmose/UTK-Reboot) |
+| Travis CI | [![Build Status](https://app.travis-ci.com/Oxmose/UTK-Reboot.svg?branch=main)](https://app.travis-ci.com/Oxmose/UTK-Reboot) | [![Build Status](https://app.travis-ci.com/Oxmose/UTK-Reboot.svg?branch=dev)](https://app.travis-ci.com/Oxmose/UTK-Reboot) |
 | Codacy | [![Codacy Badge](https://app.codacy.com/project/badge/Grade/ae0df892bb124da8b16d015e4f4f2aeb)](https://www.codacy.com/gh/Oxmose/UTK-Reboot/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Oxmose/UTK-Reboot&amp;utm_campaign=Badge_Grade)| N/A |
 
 
