@@ -24,31 +24,33 @@
 ----------
 
 ## Architecture supported
-| i386 | x86_64 | ARMv7 (v15) |
+| i386 | x86_64 | ARM |
 | --- | --- | --- |
-|  YES |   SOON |      LATTER |
-
-### Multicore support
-
-* BMP support
-* CPU thread affinity
+|  YES |   TBD | TBD |
 
 ### Memory Management
 
 * Higher-half kernel.
 * Virtual/physical memory allocator
+* Process isolation
 
 ### Synchronization
 
-* Mutex: Non recursive/Recursive - Priority inheritance capable.
-* Semaphore: FIFO based, priority of the locking thread is not relevant to select the next thread to unlock.
-* Spinlocks: Disables interrupt on monocore systems, Test And Set on multicore systems.
-* Message queues and mailboxes
+* Futex based synchronization. Robust implementation: if a blocking thread crashes without releasing the futex, the kernel releases it for the next threadd to acquire it.
+* Mutex: Non recursive/Recursive - Priority inheritance capable. Futex based.
+* Semaphore: FIFO based, priority of the locking thread is not relevant to select the next thread to unlock. Futex based.
+* Spinlocks: Disables interrupt on single-core architecture.
 
 ### Scheduler
 
 * Priority based scheduler (threads can change their priority at execution time).
 * Round Robin for all the threads having the same priority.
+
+### Process / Thread management
+
+* Fork / WaitPID
+* Kernel threads support
+* System calls
 
 ### BSP Support: i386/x86_64
 
@@ -60,22 +62,26 @@
 * SMBIOS support.
 * Serial output support.
 * Interrupt API (handlers can be set by the user).
-* 80x25 16colors VGA support. VESA Graphic support.
+* 80x25 16colors VGA support.
 * Time management API.
-* Keyboard (ASCII QWERTY) and mouse drivers.
 
+----------
+
+## Roadmap
+You can see the planned tasks / features in the project's kanban on GitHub.
+
+----------
 ## Build and run
-To build UTK, choose the architecture you want and execute:
+To build UTK, choose the architecture you want and execute.
 
-./build_[ARCH].sh [QEMU | HW] [GRUB | UTK] [k_name]
+Architecture list to use in the TARGET flag:
+* x86_i386
+### Compilation
+make target=[TARGET] TESTS=[TRUE/FALSE] DEBUG=[TRUE/FALSE] 
 
-	 [QEMU | HW]
-		- Choose QEMU to build a QEMU image
-		- Choose HW to build a bootable image
+### Execution
+make target=[TARGET] run
 
-	 [GRUB | UTK]
-		- Choose GRUB to use GRUB as bootloader
-		- Choose UTK to use UTK as bootloader
-
-	 [k_name]
-		-Set the name of the kernel
+### Tests and Debug
+* The user can compile with the TESTS flag set to TRUE to enable internal testing
+* The user can compile with the DEBUG flag set to TRUE to enable debuging support (-O0 -g3)
