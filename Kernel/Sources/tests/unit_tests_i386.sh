@@ -17,7 +17,7 @@ function testcase() {
     make target=x86_i386 TESTS=TRUE && (make target=x86_i386 qemu-test-mode | tee test.out)
     mv test.out Sources/tests/test.out
     cd Sources/tests
-    } > /dev/null
+    } &> /dev/null
     # Filter output
     grep "\[TESTMODE\]\|ERROR" test.out > filtered.out
     #Compare output
@@ -57,7 +57,7 @@ function testcase_arch() {
     make target=x86_i386 TESTS=TRUE && (make target=x86_i386 qemu-test-mode | tee test.out)
     mv test.out Sources/tests/test.out
     cd Sources/tests
-    } > /dev/null
+    } &> /dev/null
     # Filter output
     grep "\[TESTMODE\]\|ERROR" test.out > filtered.out
     #Compare output
@@ -107,7 +107,12 @@ done
 make -C ../../ clean
 mkdir -p errors
 
-echo -e "\e[94m=== Arch specific tests\e[39m"
+echo 
+echo
+echo -e "\e[94m#-----------------------------------------------------------------#\e[39m"
+echo -e "\e[94m|                       Arch specific tests                       |\e[39m"
+echo -e "\e[94m#-----------------------------------------------------------------#\e[39m"
+echo
 for entry in "./x86_i386/src/"/*.c
 do
     if [ $(basename -- "$entry") != "kill_qemu.c" ]; then
@@ -117,7 +122,12 @@ do
     fi
 done
 
-echo -e "\e[94m=== Generic tests\e[39m"
+echo 
+echo
+echo -e "\e[94m#-----------------------------------------------------------------#\e[39m"
+echo -e "\e[94m|                          Generic tests                          |\e[39m"
+echo -e "\e[94m#-----------------------------------------------------------------#\e[39m"
+echo
 for entry in "./general/src/"/*.c
 do
     testcase $entry

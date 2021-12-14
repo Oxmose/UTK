@@ -1,0 +1,17 @@
+[TESTMODE] Futex tests starts
+[TESTMODE] Thread 0 waits on futex
+[TESTMODE] Futex 1 passed, waited 2110000000
+[TESTMODE] Futex 2 passed, waited 1105000000
+[TESTMODE] Futex tests 1 thread passed
+[TESTMODE] Futex th 1 - 0
+[TESTMODE] Futex th 2 - 0
+[TESTMODE] Futex th 1 - 1
+[TESTMODE] Futex th 2 - 1
+[TESTMODE] Futex th 1 - 2
+[TESTMODE] Futex th 2 - 2
+[TESTMODE] Futex tests passed 2
+[TESTMODE] Futex th 3 - 0
+[TESTMODE] Waking 2
+[TESTMODE] Futex th 3 - 0
+[TESTMODE] Futex th 3 - 0
+[TESTMODE] Futex tests passed

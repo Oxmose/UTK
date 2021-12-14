@@ -1,5 +1,7 @@
 # UTK - Utility Kernel
 
+![UTK Logo](./Doc/logo/utk_logo.png | width=200)
+
 * UTK is a kernel created for training and educational purposes. It is designed to execute in kernel mode only. 
 
 * UTK has a configuration file allowing the kernel to be customized depending on the system it will run on.

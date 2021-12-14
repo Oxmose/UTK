@@ -76,7 +76,7 @@
 #define KERNEL_MAX_PROCESS 4096 
 
 /** @brief System's main timer interrupt frequency */
-#define KERNEL_MAIN_TIMER_FREQ 100
+#define KERNEL_MAIN_TIMER_FREQ 200
 
 /** @brief System's RTC interrupt frequency */
 #define KERNEL_RTC_TIMER_FREQ 5

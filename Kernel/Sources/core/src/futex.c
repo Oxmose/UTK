@@ -17,12 +17,13 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#include <stdint.h>     /* Generic int types */
-#include <queue.h>      /* Queues */
-#include <uhashtable.h> /* Hash tables */
-#include <kheap.h>      /* Kernel heap */
-#include <scheduler.h>  /* Scheduler API */
-#include <panic.h>      /* Kernel panix */
+#include <stdint.h>        /* Generic int types */
+#include <queue.h>         /* Queues */
+#include <uhashtable.h>    /* Hash tables */
+#include <kheap.h>         /* Kernel heap */
+#include <scheduler.h>     /* Scheduler API */
+#include <panic.h>         /* Kernel panix */
+#include <kernel_output.h> /* Kernel error output */
 
 /* UTK configuration file */
 #include <config.h>
@@ -89,7 +90,7 @@ uhashtable_t* futex_table;
     }                                       \
 }
 
-OS_RETURN_E futex_init(void)
+void futex_init(void)
 {
     OS_RETURN_E err;
 
@@ -97,12 +98,11 @@ OS_RETURN_E futex_init(void)
     futex_table = uhashtable_create(UHASHTABLE_ALLOCATOR(kmalloc, kfree), &err);
     if(futex_table == NULL || err != OS_NO_ERR)
     {
-        return err;
+        KERNEL_ERROR("Could not initialize futex table: %d\n", err);
+        KERNEL_PANIC(err);
     }
     
     is_init = TRUE;
-
-    return OS_NO_ERR;
 }
 
 void futex_wait(const SYSCALL_FUNCTION_E func, void* params)
@@ -130,12 +130,20 @@ void futex_wait(const SYSCALL_FUNCTION_E func, void* params)
         func_params->error = is_init ? 
                                 OS_ERR_UNAUTHORIZED_ACTION : 
                                 OS_ERR_NOT_INITIALIZED;
+        return;
     }
 
     func_params->error = OS_NO_ERR;
     created_queue      = FALSE;
 
     ENTER_CRITICAL(int_state);
+
+    /* Check if the value has changed */
+    if(*func_params->addr != func_params->val)
+    {
+        EXIT_CRITICAL(int_state);
+        return;
+    }
 
     /* Get the futex waiting list */
     err = uhashtable_get(futex_table, 
@@ -182,6 +190,7 @@ void futex_wait(const SYSCALL_FUNCTION_E func, void* params)
     data_info.waiting_thread = sched_lock_thread(THREAD_WAIT_TYPE_RESOURCE);
     if(data_info.waiting_thread == NULL)
     {
+        func_params->error = OS_ERR_OUT_OF_BOUND;
         if(created_queue == TRUE)
         {
             err = queue_delete_queue(&wait_queue);
@@ -191,7 +200,6 @@ void futex_wait(const SYSCALL_FUNCTION_E func, void* params)
                                      NULL);
             CHECK_UNRECOVERABLE_ERROR(err);
         }
-        func_params->error = OS_ERR_OUT_OF_BOUND;
         EXIT_CRITICAL(int_state);
         return;
     }
@@ -201,6 +209,7 @@ void futex_wait(const SYSCALL_FUNCTION_E func, void* params)
                                   &err);
     if(err != OS_NO_ERR)
     {
+        func_params->error = err;
         err = sched_unlock_thread(data_info.waiting_thread, 
                                   THREAD_WAIT_TYPE_RESOURCE, 
                                   FALSE);
@@ -214,7 +223,6 @@ void futex_wait(const SYSCALL_FUNCTION_E func, void* params)
                                     NULL);
             CHECK_UNRECOVERABLE_ERROR(err);
         }
-        func_params->error = err;
         EXIT_CRITICAL(int_state);
         return;
     }
@@ -222,6 +230,7 @@ void futex_wait(const SYSCALL_FUNCTION_E func, void* params)
     err = queue_push(wait_node, wait_queue);
     if(err != OS_NO_ERR)
     {
+        func_params->error = err;
         err = sched_unlock_thread(data_info.waiting_thread, 
                                   THREAD_WAIT_TYPE_RESOURCE, 
                                   FALSE);
@@ -237,7 +246,6 @@ void futex_wait(const SYSCALL_FUNCTION_E func, void* params)
                                     NULL);
             CHECK_UNRECOVERABLE_ERROR(err);
         }
-        func_params->error = err;
         EXIT_CRITICAL(int_state);
         return;
     }
@@ -257,8 +265,10 @@ void futex_wake(const SYSCALL_FUNCTION_E func, void* params)
     futex_t*      func_params;
     queue_t*      wait_queue;
     queue_node_t* wait_node;
+    queue_node_t* save_node;
     futex_data_t* data_info;  
     uint32_t      int_state;
+    size_t        i;
 
     func_params = (futex_t*)params;
 
@@ -267,7 +277,7 @@ void futex_wake(const SYSCALL_FUNCTION_E func, void* params)
         return;
     }
 
-    if(func != SYSCALL_FUTEX_WAIT || is_init == FALSE)
+    if(func != SYSCALL_FUTEX_WAKE || is_init == FALSE)
     {
 
         func_params->addr  = NULL;
@@ -275,12 +285,13 @@ void futex_wake(const SYSCALL_FUNCTION_E func, void* params)
         func_params->error = is_init ? 
                                 OS_ERR_UNAUTHORIZED_ACTION : 
                                 OS_ERR_NOT_INITIALIZED;
+        return;
     }
 
     func_params->error = OS_NO_ERR;
 
     ENTER_CRITICAL(int_state);
-    
+
     /* Get the futex waiting list */
     err = uhashtable_get(futex_table, 
                          (uintptr_t)func_params->addr, 
@@ -295,52 +306,62 @@ void futex_wake(const SYSCALL_FUNCTION_E func, void* params)
         return;
     }
 
-    /* Make the first thread in the list for which the value has change. 
-     * If the list is empty, clear it */
+    /* Wake i threads */
     wait_node = wait_queue->head;
-    while(wait_node != NULL)
+    for(i = 0; i < func_params->val; ++i)
     {
-        data_info = (futex_data_t*)wait_node->data;
-        if(data_info->wait != *func_params->addr)
+        /* Make the first thread in the list for which the value has change. 
+        * If the list is empty, clear it */
+        while(wait_node != NULL)
         {
-            /* We found out candidate, the value changed from what it was 
-             * waiting from */
+            data_info = (futex_data_t*)wait_node->data;
+            if(data_info->wait != *func_params->addr)
+            {
+                /* We found out candidate, the value changed from what it was 
+                * waiting from */
+                break;
+            }
+            wait_node = wait_node->next;
+        }
+        /* Nothing was found */
+        if(wait_node == NULL || err != OS_NO_ERR)
+        {
+            func_params->error = err;
+
+            EXIT_CRITICAL(int_state);
+            return;
+        }
+
+        save_node = wait_node;
+        wait_node = wait_node->next;
+
+        /* Put back the thread in the scheduler */
+        err = sched_unlock_thread(data_info->waiting_thread, 
+                                  THREAD_WAIT_TYPE_RESOURCE, 
+                                  FALSE);
+        CHECK_UNRECOVERABLE_ERROR(err);
+
+        /* Delete the node */
+        err = queue_remove(wait_queue, save_node);
+        CHECK_UNRECOVERABLE_ERROR(err);
+        err = queue_delete_node(&save_node);
+        CHECK_UNRECOVERABLE_ERROR(err);
+        
+        /* If this was the last entry in the queue, delete the queue */
+        if(wait_queue->size == 0)
+        {
+            /* Delete the queue */
+            err = queue_delete_queue(&wait_queue);
+            CHECK_UNRECOVERABLE_ERROR(err);
+
+            /* Remove from the hash table */
+            err = uhashtable_remove(futex_table, 
+                                    (uintptr_t)func_params->addr, 
+                                    NULL);
+            CHECK_UNRECOVERABLE_ERROR(err);
+
+            /* Nothing more to wake up */
             break;
         }
-        wait_node = wait_node->next;
-    }
-    /* Nothing was found */
-    if(wait_node == NULL || err != OS_NO_ERR)
-    {
-        func_params->error = err;
-
-        EXIT_CRITICAL(int_state);
-        return;
-    }
-
-    /* Put back the thread in the scheduler */
-    err = sched_unlock_thread(data_info->waiting_thread, 
-                              THREAD_WAIT_TYPE_RESOURCE, 
-                              FALSE);
-    CHECK_UNRECOVERABLE_ERROR(err);
-
-    /* Delete the node */
-    err = queue_remove(wait_queue, wait_node);
-    CHECK_UNRECOVERABLE_ERROR(err);
-    err = queue_delete_node(&wait_node);
-    CHECK_UNRECOVERABLE_ERROR(err);
-    
-    /* If this was the last entry in the queue, delete the queue */
-    if(wait_queue->size == 0)
-    {
-        /* Delete the queue */
-        err = queue_delete_queue(&wait_queue);
-        CHECK_UNRECOVERABLE_ERROR(err);
-
-        /* Remove from the hash table */
-        err = uhashtable_remove(futex_table, 
-                               (uintptr_t)func_params->addr, 
-                               NULL);
-        CHECK_UNRECOVERABLE_ERROR(err);
     }
 }

@@ -1264,13 +1264,16 @@ void cpu_restore_context(cpu_state_t* cpu_state,
     (void)stack_state;
     (void)cpu_state;
 
-    /* On context restore, the CR0.TS bit is set to catch FPU/SSE use */
+    /* On context restore, the CR0.TS bit is set to catch FPU/SSE use 
+     * TODO: Set it back when FPU saving is supported 
+     */
+#if 0
     __asm__ __volatile__(
         "mov %%cr0, %%eax\n\t"
         "or  $0x00000008, %%eax\n\t"
         "mov %%eax, %%cr0\n\t"
     :::"eax");
-
+#endif
     __asm__ __volatile__(
         "mov  %%eax, %%cr3\n\t"
         "mov  %%edx, %%esp\n\t"

@@ -362,6 +362,7 @@ void panic(cpu_state_t* cpu_state, uintptr_t int_id, stack_state_t* stack_state)
 
 #ifdef TEST_MODE_ENABLED
     kernel_printf("\n[TESTMODE] PANIC %d\n", error_code);
+    kernel_printf("  File: %s at line %d\n", panic_file, panic_line);
     /* Kill QEMU */
     cpu_outw(0x2000, 0x604);    
     while(1)

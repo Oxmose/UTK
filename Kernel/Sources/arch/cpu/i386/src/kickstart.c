@@ -42,6 +42,7 @@
 #include <scheduler.h>             /* Kernel scheduler */
 #include <syscall.h>               /* System calls manager */
 #include <init_rd.h>               /* Init ram disk */
+#include <futex.h>                 /* FUtex API */
 
 /* UTK configuration file */
 #include <config.h>
@@ -202,6 +203,9 @@ void kernel_kickstart(void)
     bios_call_test();
     panic_test();
 #endif
+
+    futex_init();
+    KERNEL_SUCCESS("Futex initialized\n");
 
     /* Initialize the init ram disk */
     err = initrd_init_device(&initrd_device);

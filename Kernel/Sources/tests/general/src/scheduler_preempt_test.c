@@ -40,7 +40,7 @@ static void* print_th_pre(void*args)
     return NULL;
 }
 
-void scheduler_preemt_test(void)
+void scheduler_preempt_test(void)
 {
     kernel_thread_t* thread[4];
     OS_RETURN_E err;
@@ -85,7 +85,7 @@ void scheduler_preemt_test(void)
     kill_qemu();
 }
 #else
-void scheduler_preemt_test(void)
+void scheduler_preempt_test(void)
 {
 
 }

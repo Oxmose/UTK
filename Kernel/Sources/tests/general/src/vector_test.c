@@ -138,7 +138,7 @@ void vector_test(void)
         kernel_error("Error. Resize %d\n", err);
         kill_qemu();
     }
-    for(i = 0; i < vector->size; ++i)
+    for(i = 0; i < 20; ++i)
     {
         vector_get(vector, i, (void**)&data);
         if(err != OS_NO_ERR)

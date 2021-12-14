@@ -60,6 +60,14 @@ typedef struct futex futex_t;
  ******************************************************************************/
 
 /**
+ * @brief Initializes the futex facility.
+ * 
+ * @details Initializes the futex facility. If the function was not able to 
+ * alocate the necessary resources, a kernel panic is generated. 
+ */
+void futex_init(void);
+
+/**
  * @brief System call handler to wait on a given futex.
  * 
  * @details System call handler to wait on a given futex. This system call 

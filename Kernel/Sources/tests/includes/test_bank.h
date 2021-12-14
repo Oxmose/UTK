@@ -83,11 +83,12 @@ void lapic_timer_test(void);
 #define USER_HEAP_TEST 0
 #define MEMORY_USAGE_TEST 0
 #define VECTOR_TEST 0
-#define UHASHTABLE_TEST 1
+#define UHASHTABLE_TEST 0
 #define CRITICAL_TEST 0
 #define SCHEDULER_LOAD_TEST 0
 #define SCHEDULER_PREEMPT_TEST 0
 #define SCHEDULER_SLEEP_TEST 0
+#define FUTEX_TEST 0
 
 void output_test(void);
 void kheap_test(void);
@@ -102,7 +103,8 @@ void vector_test(void);
 void uhashtable_test(void);
 void critical_test(void);
 void scheduler_load_test(void);
-void scheduler_preemt_test(void);
+void scheduler_preempt_test(void);
 void scheduler_sleep_test(void);
+void futex_test(void);
 
 #endif /* __TEST_BANK_H_ */

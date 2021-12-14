@@ -146,8 +146,9 @@ void* init_sys(void* args)
     memory_usage_test();
     critical_test();
     scheduler_load_test();
-    scheduler_preemt_test();
+    scheduler_preempt_test();
     scheduler_sleep_test();
+    futex_test();
 #endif
 
     pid = fork();
