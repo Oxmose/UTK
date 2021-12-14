@@ -365,24 +365,7 @@
  * STRUCTURES
  ******************************************************************************/
 
-/**
- * @brief CPUID Information data structure. Stores the data returned by a CPUID
- * instrucion.
- */
-struct cpu_info
-{
-    /** @brief 32 Bits cpu flags. */
-    uint32_t cpu_flags;
-
-    /**
-     * @brief Returned CPUID data, [0] contains ECX value and [1] contains EDX
-     * value.
-     */
-    uint32_t cpuid_data[2];
-};
-
-/** @brief Defines cpu_info_t type as a shorcut for struct cpu_info. */
-typedef struct cpu_info cpu_info_t;
+/* None */
 
 /*******************************************************************************
  * GLOBAL VARIABLES

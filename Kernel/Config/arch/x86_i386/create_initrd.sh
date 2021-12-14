@@ -5,7 +5,7 @@ echo -e "\e[1m\e[34m| Creating init ram disk for architecture x86_i386\e[22m\e[3
 echo -e "\e[1m\e[34m#-------------------------------------------------------------------------------\n\e[22m\e[39m"
 
 # Create tar file
-echo "Creating TAR with files:" 
+echo "Creating TAR with files:"
 curr_dir=$(pwd)
 cd $1/../Config/arch/x86_i386/initrd/
 chmod -R 0777 *
@@ -19,7 +19,7 @@ filesize=$(( $filesize + 512))
 
 echo -e "\nInitrd size: $filesize"
 
-# Create master block 
+# Create master block
 echo -n "UTKINIRD" > $1/utk.initrd              # Magic
 filesize_hex=''
 while [ $filesize -gt 0 ]
@@ -34,12 +34,12 @@ do
     filesize=$(( $filesize / 256 ))
 done
 while [ ${#filesize_hex} -lt 32 ]
-do 
+do
     filesize_hex=$(echo "$filesize_hex\x00")
 done
 echo -n -e $filesize_hex >> $1/utk.initrd         # Size
 for (( i=0; i<62; i++ ))                       # Free space
-do  
+do
     echo -n -e '\xBE\xBE\xBE\xBE\xBE\xBE\xBE\xBE' >> $1/utk.initrd
 done
 

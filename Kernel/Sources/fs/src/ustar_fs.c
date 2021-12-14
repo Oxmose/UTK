@@ -999,8 +999,6 @@ OS_RETURN_E ustar_write_file(const vfs_vnode_t* vnode,
             return err;
         }
         write += size;
-        size  = 0;
-        ++real_inode;
     }
     
     if(actual_size != NULL)

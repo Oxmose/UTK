@@ -3418,7 +3418,7 @@ OS_RETURN_E memory_declare_hw(const uintptr_t phys_addr, const size_t size)
             /* We may need to free the table if empty */
             for(i = 0; i < FRAME_REF_TABLE_SIZE; ++i)
             {
-                if(current_table[table_entry] != 0)
+                if(current_table[i] != 0)
                 {
                     break;
                 }
