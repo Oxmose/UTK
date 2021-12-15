@@ -36,7 +36,7 @@ void kill_qemu(void);
 #define PIC_TEST3 0
 #define IO_APIC_TEST 0
 #define IO_APIC_TEST2 0
-#define LAPIC_TEST 1
+#define LAPIC_TEST 0
 #define LAPIC_TEST2 0
 #define PIT_TEST 0
 #define PIT_TEST2 0
