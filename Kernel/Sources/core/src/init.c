@@ -23,8 +23,8 @@
 #include <panic.h>         /* Kernel panic */
 #include <cpu_api.h>       /* CPU API */
 
-#include <init_rd.h> 
-#include <sys/process.h> 
+#include <init_rd.h>
+#include <sys/process.h>
 #include <rt_clock.h>
 
 /* UTK configuration file */
@@ -91,12 +91,12 @@ UTK - Shell v0.1            00:00:00 Wed 01/02/2022                   CPU: 100%
     graphic_set_color_scheme(scheme);
     graphic_put_cursor_at(0, 0);
     kernel_printf(" UTK - Shell v0.1               ");
-    
+
     /* Print date */
     time = rtc_get_current_daytime();
     date = rtc_get_current_date();
 
-    kernel_printf("%02d:%02d:%02d %02d/%02d/%04d                     ", 
+    kernel_printf("%02d:%02d:%02d %02d/%02d/%04d                     ",
                   time / 60 / 60, (time / 60) % 60, time % 60,
                   date.day, date.month, date.year);
 
@@ -116,7 +116,7 @@ void init_shell(void)
     graphic_clear_screen();
 
     /* Wait in loop */
-    while(1) 
+    while(1)
     {
         update_shell(5);
         sched_sleep(200);
@@ -135,8 +135,8 @@ void* init_sys(void* args)
 
     (void)args;
 
-    KERNEL_INFO("INIT Started | PID: %d | TID: %d\n", 
-                sched_get_pid(), 
+    KERNEL_INFO("INIT Started | PID: %d | TID: %d\n",
+                sched_get_pid(),
                 sched_get_tid());
 
 #ifdef TEST_MODE_ENABLED
@@ -149,6 +149,7 @@ void* init_sys(void* args)
     scheduler_preempt_test();
     scheduler_sleep_test();
     futex_test();
+    mutex_test();
 #endif
 
     pid = fork();
@@ -158,7 +159,7 @@ void* init_sys(void* args)
         pid = waitpid(pid, &status, &term_cause, &err);
         kernel_printf("Process %d returned %d, %d\n", pid, status, err);
     }
-    else 
+    else
     {
         /* Here we should load an elf and start another program */
         //init_shell();
@@ -176,8 +177,8 @@ void* idle_sys(void* args)
 {
     (void)args;
 
-    KERNEL_INFO("IDLE Started | PID: %d | TID: %d\n", 
-                sched_get_pid(), 
+    KERNEL_INFO("IDLE Started | PID: %d | TID: %d\n",
+                sched_get_pid(),
                 sched_get_tid());
 
     while(1)

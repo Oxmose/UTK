@@ -312,6 +312,19 @@ void sched_wait_process_pid(const SYSCALL_FUNCTION_E func, void* params);
 void sched_get_process_params(const SYSCALL_FUNCTION_E func, void* params);
 
 /**
+ * @brief System call handler to set the current process parameters.
+ *
+ * @details System call handler to set the current process parameters. This
+ * system call uses as sched_param_t sctructure given as parameter.
+ *
+ * @param[in] func The syscall function ID, must correspond to the set_params
+ * call.
+ * @param[in, out] params The parameters used by the function, must be of type
+ * sched_param_t.
+ */
+void sched_set_process_params(const SYSCALL_FUNCTION_E func, void* params);
+
+/**
  * @brief Locks a thread from being scheduled.
  *
  * @details Removes the active thread from the active threads table, the thread

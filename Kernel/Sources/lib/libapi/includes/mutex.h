@@ -73,9 +73,6 @@ struct mutex
 
     /** @brief TID of the owner thread */
     int32_t owner;
-
-    /** @brief Mutex's futex data */
-    futex_t futex;
 };
 
 /**
@@ -107,7 +104,7 @@ typedef struct mutex mutex_t;
  * - OS_ERR_NULL_POINTER is returned if the pointer to the mutex to
  *   initialize is NULL.
  */
-OS_RETURN_E mutex_init(mutex_t* mutex, 
+OS_RETURN_E mutex_init(mutex_t* mutex,
                        const uint32_t flags,
                        const uint16_t priority);
 

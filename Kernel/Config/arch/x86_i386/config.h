@@ -20,10 +20,10 @@
 #define ARCH_I386    1
 #define ARCH_32_BITS 1
 
-/* Kernel memory offset 
+/* Kernel memory offset
  * WARNING This value should be updated to fit other configuration files
  */
-#define KERNEL_MEM_OFFSET 0xE0000000 
+#define KERNEL_MEM_OFFSET 0xE0000000
 #define KERNEL_MEM_START  0x00100000
 
 /* Defines the processes virtual space start address */
@@ -53,7 +53,7 @@
 
 #define KERNEL_LOG_LEVEL DEBUG_LOG_LEVEL
 
-/* Defines the kernel frame and page size */ 
+/* Defines the kernel frame and page size */
 #define KERNEL_FRAME_SIZE 0x1000
 #define KERNEL_PAGE_SIZE  KERNEL_FRAME_SIZE
 
@@ -64,7 +64,7 @@
 #define KERNEL_VIRTUAL_ADDR_MAX 0x100000000
 #define KERNEL_VIRTUAL_ADDR_MAX_MASK 0xFFFFFFFF
 
-/** 
+/**
  * @brief Defines the minimal amount of memory blocks reserved for kernel paging
  * One block is 4Kb and can map 4MB. Set this number to map the entierety of the
  * kernel.
@@ -73,7 +73,7 @@
 
 /** @brief Defines the maximum number of process in the system. This number is
  * limited by the PCID feature.*/
-#define KERNEL_MAX_PROCESS 4096 
+#define KERNEL_MAX_PROCESS 4096
 
 /** @brief System's main timer interrupt frequency */
 #define KERNEL_MAIN_TIMER_FREQ 200
@@ -92,7 +92,7 @@
 
 /*******************************************************************************
  * DEBUG Configuration
- * 
+ *
  * Set to 0 to disable debug output for a specific module
  * Set to 1 to enable debug output for a specific module
  ******************************************************************************/

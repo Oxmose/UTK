@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @file syscall.c
- * 
+ *
  * @see syscall.h
  *
  * @author Alexy Torres Aurora Dugo
@@ -10,10 +10,10 @@
  * @version 1.0
  *
  * @brief System call management.
- * 
+ *
  * @details System call management. This modules defines the functions used to
  * perform system calls as well as their management.
- * 
+ *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
@@ -25,7 +25,7 @@
 #include <kernel_error.h>       /* Kernel error codes */
 #include <panic.h>              /* Kernel panic */
 #include <memmgt.h>             /* Memory management API */
-
+#include <futex.h>              /* Futex API */
 /* UTK configuration file */
 #include <config.h>
 
@@ -57,15 +57,13 @@
 static syscall_handler_t kernel_interrupt_handlers[SYSCALL_MAX_ID] = {
     {sched_fork_process},             /* SYSCALL_FORK */
     {sched_wait_process_pid},         /* SYSCALL_WAITPID */
-    {NULL},                           /* SYSCALL_EXIT */         
-    {NULL},                           /* SYSCALL_FUTEX_WAIT */      
-    {NULL},                           /* SYSCALL_FUTEX_WAKE */       
-    {sched_get_process_params},       /* SYSCALL_SCHED_GET_PARAMS */ 
-    {NULL},                           /* SYSCALL_SCHED_SET_PARAMS */ 
-    {NULL},                           /* SYSCALL_MUTEX_CREATE */     
-    {NULL},                           /* SYSCALL_MUTEX_DESTROY */
+    {NULL},                           /* SYSCALL_EXIT */
+    {futex_wait},                     /* SYSCALL_FUTEX_WAIT */
+    {futex_wake},                     /* SYSCALL_FUTEX_WAKE */
+    {sched_get_process_params},       /* SYSCALL_SCHED_GET_PARAMS */
+    {sched_set_process_params},       /* SYSCALL_SCHED_SET_PARAMS */
     {memory_alloc_page},              /* SYSCALL_PAGE_ALLOC */
-}; 
+};
 
 /*******************************************************************************
  * STATIC FUNCTIONS DECLARATION
@@ -74,8 +72,8 @@ static syscall_handler_t kernel_interrupt_handlers[SYSCALL_MAX_ID] = {
 /**
  * @brief Kernel's syscall interrupt handler.
  *
- * @details  Kernel's syscall interrupt handler. This function received the 
- * system call interrupt with the CPU and stack state. It then dispatch the 
+ * @details  Kernel's syscall interrupt handler. This function received the
+ * system call interrupt with the CPU and stack state. It then dispatch the
  * system call to the right call.
  *
  * @param[in, out] cpu_state The cpu registers structure.
@@ -109,19 +107,24 @@ static void syscall_handler(cpu_state_t *cpu_state,
 
     if(func < SYSCALL_MAX_ID)
     {
+        if(kernel_interrupt_handlers[func].handler == NULL)
+        {
+            KERNEL_ERROR("Tried to call un unknown SYSCALL: %d\n", func);
+            KERNEL_PANIC(OS_ERR_SYSCALL_UNKNOWN);
+        }
         kernel_interrupt_handlers[func].handler(func, params);
     }
-    else 
+    else
     {
         KERNEL_ERROR("Unknown system call ID %d\n", func);
-    }    
+    }
 }
 
 void syscall_init(void)
 {
     OS_RETURN_E err;
     /* Init the system call handler */
-    err = kernel_interrupt_register_int_handler(SYSCALL_INT_LINE, 
+    err = kernel_interrupt_register_int_handler(SYSCALL_INT_LINE,
                                                 syscall_handler);
     if(err != OS_NO_ERR)
     {

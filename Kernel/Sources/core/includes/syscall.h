@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @file syscall.h
- * 
+ *
  * @see syscall.c
  *
  * @author Alexy Torres Aurora Dugo
@@ -10,10 +10,10 @@
  * @version 1.0
  *
  * @brief System call management.
- * 
+ *
  * @details System call management. This modules defines the functions used to
  * perform system calls as well as their management.
- * 
+ *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
@@ -38,16 +38,14 @@
 enum SYSCALL_FUNCTION
 {
     SYSCALL_FORK = 0,
-    SYSCALL_WAITPID,          
-    SYSCALL_EXIT,             
-    SYSCALL_FUTEX_WAIT,      
-    SYSCALL_FUTEX_WAKE,       
-    SYSCALL_SCHED_GET_PARAMS, 
-    SYSCALL_SCHED_SET_PARAMS, 
-    SYSCALL_MUTEX_CREATE,     
-    SYSCALL_MUTEX_DESTROY,    
+    SYSCALL_WAITPID,
+    SYSCALL_EXIT,
+    SYSCALL_FUTEX_WAIT,
+    SYSCALL_FUTEX_WAKE,
+    SYSCALL_SCHED_GET_PARAMS,
+    SYSCALL_SCHED_SET_PARAMS,
     SYSCALL_PAGE_ALLOC,
-    /* 9 */
+    /* 7 */
     SYSCALL_MAX_ID
 };
 
@@ -61,8 +59,8 @@ struct syscall_handler
     void(*handler)(SYSCALL_FUNCTION_E, void*);
 };
 
-/** 
- * @brief Defines syscall_handler_t type as a shorcut for 
+/**
+ * @brief Defines syscall_handler_t type as a shorcut for
  * struct syscall_handler.
  */
 typedef struct syscall_handler syscall_handler_t;
@@ -73,8 +71,8 @@ typedef struct syscall_handler syscall_handler_t;
 
 /**
  * @brief Initializes the system call manager.
- * 
- * @details Initializes the system call manager. The system call table is 
+ *
+ * @details Initializes the system call manager. The system call table is
  * validated and the system call interrupts / raise method are initialized.
  */
 void syscall_init(void);

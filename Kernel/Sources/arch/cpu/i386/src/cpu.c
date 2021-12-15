@@ -11,7 +11,7 @@
  *
  * @brief i386 CPU management functions
  *
- * @details i386 CPU manipulation functions. Wraps inline assembly calls for 
+ * @details i386 CPU manipulation functions. Wraps inline assembly calls for
  * ease of development.
  *
  * @copyright Alexy Torres Aurora Dugo
@@ -1179,7 +1179,7 @@ uint32_t cpu_get_saved_interrupt_state(const cpu_state_t* cpu_state,
     return stack_state->eflags & CPU_EFLAGS_IF;
 }
 
-void cpu_init_thread_context(void (*entry_point)(void), 
+void cpu_init_thread_context(void (*entry_point)(void),
                              kernel_thread_t* thread)
 {
     uintptr_t stack_index;
@@ -1188,9 +1188,9 @@ void cpu_init_thread_context(void (*entry_point)(void),
 
     /* Set EIP, ESP and EBP */
     thread->cpu_context.eip = (uintptr_t)entry_point;
-    thread->cpu_context.esp = thread->kstack + (stack_index - 18) * 
+    thread->cpu_context.esp = thread->kstack + (stack_index - 18) *
                               sizeof(uintptr_t);
-    thread->cpu_context.ebp = thread->kstack + (stack_index - 1) * 
+    thread->cpu_context.ebp = thread->kstack + (stack_index - 1) *
                                sizeof(uintptr_t);
 
     /* Init thread kernel stack */
@@ -1211,8 +1211,8 @@ void cpu_init_thread_context(void (*entry_point)(void),
     ((uintptr_t*)thread->kstack)[stack_index - 15] = K_THREAD_INIT_ESI;
     ((uintptr_t*)thread->kstack)[stack_index - 16] = K_THREAD_INIT_EDI;
     ((uintptr_t*)thread->kstack)[stack_index - 17] = thread->cpu_context.ebp;
-    ((uintptr_t*)thread->kstack)[stack_index - 18] = 
-                                        thread->kstack + (stack_index - 17) * 
+    ((uintptr_t*)thread->kstack)[stack_index - 18] =
+                                        thread->kstack + (stack_index - 17) *
                                         sizeof(uintptr_t);
 }
 
@@ -1232,23 +1232,23 @@ uintptr_t cpu_get_current_pgdir(void)
     return current_pgdir;
 }
 
-void cpu_save_context(const cpu_state_t* cpu_state, 
-                      const stack_state_t* stack_state, 
+void cpu_save_context(const cpu_state_t* cpu_state,
+                      const stack_state_t* stack_state,
                       kernel_thread_t* thread)
 {
     (void)stack_state;
     thread->cpu_context.esp = (uintptr_t)&cpu_state->esp;
 }
 
-void cpu_restore_context(cpu_state_t* cpu_state, 
-                         const stack_state_t* stack_state, 
+void cpu_restore_context(cpu_state_t* cpu_state,
+                         const stack_state_t* stack_state,
                          const kernel_thread_t* thread)
 {
     (void)stack_state;
     (void)cpu_state;
 
-    /* On context restore, the CR0.TS bit is set to catch FPU/SSE use 
-     * TODO: Set it back when FPU saving is supported 
+    /* On context restore, the CR0.TS bit is set to catch FPU/SSE use
+     * TODO: Set it back when FPU saving is supported
      */
 #if 0
     __asm__ __volatile__(
@@ -1274,7 +1274,7 @@ void cpu_restore_context(cpu_state_t* cpu_state,
         "pop  %%es\n\t"
         "pop  %%ds\n\t"
         "add  $8, %%esp\n\t"
-        "iret\n\t"        
+        "iret\n\t"
         : :"a"(thread->process->page_dir), "d"(thread->cpu_context.esp));
 
 
@@ -1282,21 +1282,8 @@ void cpu_restore_context(cpu_state_t* cpu_state,
     KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
 }
 
-__inline__ int32_t cpu_compare_and_swap(volatile int32_t* memory,
-                                        const int32_t oldval,
-                                        const int32_t newval)
-{
-    int32_t prev;
-    __asm__ __volatile__ (
-            "lock cmpxchg %2, %1\n\t"
-            : "=a" (prev), "+m" (*memory)
-            : "r" (newval), "0" (oldval)
-            : "memory");
-    return prev;
-}
-
 void cpu_set_next_thread_instruction(const cpu_state_t* cpu_state,
-                                     stack_state_t* stack_state, 
+                                     stack_state_t* stack_state,
                                      const uintptr_t next_inst)
 {
     (void) cpu_state;
@@ -1309,14 +1296,14 @@ void cpu_syscall(uint32_t syscall_id, void* params)
     __asm__ __volatile__(
         "mov %0, %%ecx\n\t"
         "mov %1, %%edx\n\t"
-        "int %2\n\t" 
+        "int %2\n\t"
         :
-        : "r" (syscall_id), "r" (params), "i" (SYSCALL_INT_LINE) 
+        : "r" (syscall_id), "r" (params), "i" (SYSCALL_INT_LINE)
         : "ecx", "edx");
 }
 
-void cpu_get_syscall_data(const cpu_state_t* cpu_state, 
-                          const stack_state_t* stack_state, 
+void cpu_get_syscall_data(const cpu_state_t* cpu_state,
+                          const stack_state_t* stack_state,
                           uint32_t* syscall_id,
                           void** params)
 {
@@ -1372,9 +1359,9 @@ void validate_architecture(void)
     char     vendor_str[26] = "CPU Vendor:             \n\0";
 
     output_buff_index = 0;
-#endif 
+#endif
 
-    KERNEL_DEBUG(KICKSTART_DEBUG_ENABLED, "[KICKSTART] Detecting cpu"); 
+    KERNEL_DEBUG(KICKSTART_DEBUG_ENABLED, "[KICKSTART] Detecting cpu");
 
     ret = cpu_cpuid(CPUID_GETVENDORSTRING, (uint32_t*)regs);
 
@@ -1612,7 +1599,7 @@ void validate_architecture(void)
     output_buff[output_buff_index - 2] = '\n';
     output_buff[output_buff_index - 1] = 0;
     KERNEL_INFO(output_buff);
-#endif 
+#endif
 
     /* Validate features */
     if((regs[3] & EDX_SEP) != EDX_SEP)
@@ -1654,6 +1641,35 @@ void validate_architecture(void)
     /* Might be used in future to check extended features */
     (void)regs_ext;
 
-    KERNEL_DEBUG(KICKSTART_DEBUG_ENABLED, 
+    KERNEL_DEBUG(KICKSTART_DEBUG_ENABLED,
                  "[KICKSTART] Validating architecture end");
+}
+
+int32_t cpu_compare_and_swap(volatile int32_t* memory,
+                             const int32_t oldval,
+                             const int32_t newval)
+{
+    int32_t prev;
+    __asm__ __volatile__ (
+            "lock cmpxchg %2, %1\n\t"
+            : "=a" (prev), "+m" (*memory)
+            : "r" (newval), "0" (oldval)
+            : "memory");
+    return prev;
+}
+
+int32_t cpu_fetch_and_add(volatile int32_t* memory, const int32_t val)
+{
+    int32_t prev;
+    __asm__ __volatile__ (
+            "lock xadd %0, %1\n\t"
+            : "=r" (prev), "+m" (*memory)
+            : "0" (val), "m" (*memory)
+            : "memory");
+    return prev;
+}
+void cpu_atomic_store(volatile int32_t* memory, const int32_t val)
+{
+    /* x86 guarantees that aligned loads and stores up to 64 bits are atomic */
+    *memory = val;
 }

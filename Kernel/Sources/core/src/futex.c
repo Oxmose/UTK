@@ -451,6 +451,7 @@ void futex_wake(const SYSCALL_FUNCTION_E func, void* params)
     func_params->error = OS_NO_ERR;
     futex_phys         = memory_get_phys_addr((uintptr_t)func_params->addr);
 
+
     ENTER_CRITICAL(int_state);
 
     /* Get the futex waiting list */
@@ -477,8 +478,11 @@ void futex_wake(const SYSCALL_FUNCTION_E func, void* params)
             wait_node = wait_node->next;
         }
 
-        /* Nothing was found */
-        CHECK_ERROR_STATE(OS_NO_ERR, wait_node == NULL);
+        /* Nothing was found, this returns */
+        if(wait_node == NULL)
+        {
+            break;
+        }
 
         save_node = wait_node;
         wait_node = wait_node->next;
@@ -518,4 +522,6 @@ void futex_wake(const SYSCALL_FUNCTION_E func, void* params)
             break;
         }
     }
+
+    EXIT_CRITICAL(int_state);
 }

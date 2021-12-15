@@ -37,7 +37,7 @@
 
 /* Header file */
 #include <mutex.h>
-#if 0
+
 /*******************************************************************************
  * CONSTANTS
  ******************************************************************************/
@@ -52,6 +52,9 @@
 #define MUTEX_STATE_WAIT_INIT   3
 /** @brief Mutex state destroyed. */
 #define MUTEX_STATE_DESTROYED   4
+
+/** @brief Defines the maximal number of threads locked on the mutex. */
+#define MUTEX_MAX_LOCKED_THREAD 0xFFFFFFFF
 
 /*******************************************************************************
  * STRUCTURES
@@ -75,7 +78,7 @@
  * FUNCTIONS
  ******************************************************************************/
 
-OS_RETURN_E mutex_init(mutex_t* mutex, 
+OS_RETURN_E mutex_init(mutex_t* mutex,
                        const uint32_t flags,
                        const uint16_t priority)
 {
@@ -95,54 +98,53 @@ OS_RETURN_E mutex_init(mutex_t* mutex,
 
     /* Init the mutex*/
     memset(mutex, 0, sizeof(mutex_t));
-    
-    mutex->state      = MUTEX_STATE_WAIT_INIT;
+
     mutex->flags      = flags | priority << 8;
-    mutex->futex.addr = (uint32_t*)&mutex->state;
-    mutex->futex.val  = MUTEX_STATE_LOCKED_WAIT;
 
     syscall_do(SYSCALL_SCHED_GET_PARAMS, &sched_params);
-    if(sched_params->error != OS_NO_ERR)
+    if(sched_params.error != OS_NO_ERR)
     {
-        return sched_params->error;
+        return sched_params.error;
     }
 
-    mutex->owner = sched_params->tid;
+    mutex->owner = sched_params.tid;
+    mutex->state = MUTEX_STATE_UNLOCKED;
 
-    KERNEL_DEBUG(MUTEX_DEBUG_ENABLED, "Mutex 0x%p initialized\n", mutex);
+    KERNEL_DEBUG(MUTEX_DEBUG_ENABLED, "Mutex 0x%p initialized", mutex);
 
     return OS_NO_ERR;
 }
 
 OS_RETURN_E mutex_destroy(mutex_t* mutex)
 {
+    futex_t futex;
+
     if(mutex == NULL)
     {
         return OS_ERR_NULL_POINTER;
     }
-    /* Unlock all threads and destroys the mutex in kernel space */
-    syscall_do(SYSCALL_MUTEX_DESTROY, mutex);   
+    /* Wakeup all threads locked on the mutex */
+    futex.addr   = (uint32_t*)&mutex->state;
+    futex.val    = MUTEX_MAX_LOCKED_THREAD;
 
-    if(mutex->state != MUTEX_STATE_DESTROYED)
-    {
-        return mutex->state;
-    } 
+    mutex->owner = -1;
 
-    KERNEL_DEBUG(MUTEX_DEBUG_ENABLED, "Mutex 0x%p destroyed\n", mutex);
+    ATOMIC_STORE(&mutex->state, MUTEX_STATE_DESTROYED);
+    syscall_do(SYSCALL_FUTEX_WAKE, &futex);
 
-    return OS_NO_ERR;
+    KERNEL_DEBUG(MUTEX_DEBUG_ENABLED, "Mutex 0x%p destroyed", mutex);
+
+    return futex.error;
 }
 
 OS_RETURN_E mutex_lock(mutex_t* mutex)
 {
-    OS_RETURN_E err;
-    OS_RETURN_E err2;
-    uint32_t    prio;
-    uint32_t    recursive;
-    int32_t     mutex_state;
-    int32_t     tid;
-
+    OS_RETURN_E   err;
+    uint32_t      prio;
+    uint32_t      recursive;
+    int32_t       mutex_state;
     sched_param_t sched_params;
+    futex_t       futex;
 
     /* Check if mutex is initialized */
     if(mutex == NULL)
@@ -154,13 +156,11 @@ OS_RETURN_E mutex_lock(mutex_t* mutex)
      * has not been destroyed
      */
     if(mutex->state != MUTEX_STATE_UNLOCKED &&
-       mutex->state != MUTEX_STATE_LOCKED   && 
+       mutex->state != MUTEX_STATE_LOCKED   &&
        mutex->state != MUTEX_STATE_LOCKED_WAIT)
     {
         return OS_ERR_NOT_INITIALIZED;
     }
-
-    tid = -1;
 
     /* Prepare data in case of specific parameters */
     prio = (mutex->flags >> 8) & MUTEX_PRIORITY_ELEVATION_NONE;
@@ -168,10 +168,10 @@ OS_RETURN_E mutex_lock(mutex_t* mutex)
     if(prio != MUTEX_PRIORITY_ELEVATION_NONE || recursive != 0)
     {
         syscall_do(SYSCALL_SCHED_GET_PARAMS, &sched_params);
-        
+
         if(sched_params.error != OS_NO_ERR)
         {
-            return err;
+            return sched_params.error;
         }
     }
 
@@ -182,46 +182,46 @@ OS_RETURN_E mutex_lock(mutex_t* mutex)
     }
 
     /* Get mutex state */
-    mutex_state = ATOMIC_CAS(&mutex->state, 
-                             MUTEX_STATE_UNLOCKED, 
+    mutex_state = ATOMIC_CAS(&mutex->state,
+                             MUTEX_STATE_UNLOCKED,
                              MUTEX_STATE_LOCKED);
-
     if(mutex_state != MUTEX_STATE_UNLOCKED)
-    {    
+    {
         do
         {
-            /* Last check, if some process were already waitign or 
+            /* Last check, if some process were already waitign or
              * if the mutex unlocked, then try to lock it again in
-             * the next check, oterwise, we are still locked and need to wait. 
+             * the next check, oterwise, we are still locked and need to wait.
              */
-            if(mutex_state == MUTEX_STATE_LOCKED_WAIT || 
-               ATOMIC_CAS(&mutex->state, 
-                          MUTEX_STATE_LOCKED, 
+            if(mutex_state == MUTEX_STATE_LOCKED_WAIT ||
+               ATOMIC_CAS(&mutex->state,
+                          MUTEX_STATE_LOCKED,
                           MUTEX_STATE_LOCKED_WAIT) != MUTEX_STATE_UNLOCKED)
             {
-                mutex->futex.val = MUTEX_STATE_LOCKED_WAIT;
-                syscall_do(SYSCALL_FUTEX_WAIT, &mutex->futex);
-                if(mutex->futex.error != OS_NO_ERR)
+                futex.addr = (uint32_t*)&mutex->state;
+                futex.val  = MUTEX_STATE_LOCKED_WAIT;
+                syscall_do(SYSCALL_FUTEX_WAIT, &futex);
+                if(futex.error != OS_NO_ERR)
                 {
-                    return mutex->futex.error;
+                    return futex.error;
                 }
-            }           
+            }
 
             /* We were woken up, check the new state of the mutex */
-            mutex_state = ATOMIC_CAS(&mutex->state, 
-                                     MUTEX_STATE_UNLOCKED, 
+            mutex_state = ATOMIC_CAS(&mutex->state,
+                                     MUTEX_STATE_UNLOCKED,
                                      MUTEX_STATE_LOCKED_WAIT);
-            
+
             /* Sanity check */
             if(mutex_state != MUTEX_STATE_UNLOCKED &&
-               mutex_state != MUTEX_STATE_LOCKED   && 
+               mutex_state != MUTEX_STATE_LOCKED   &&
                mutex_state != MUTEX_STATE_LOCKED_WAIT)
             {
                 return OS_ERR_NOT_INITIALIZED;
             }
         }while(mutex_state != MUTEX_STATE_UNLOCKED);
     }
-    
+
     /* We aquired the mutex, set the relevant information */
     if(recursive != 0)
     {
@@ -235,32 +235,31 @@ OS_RETURN_E mutex_lock(mutex_t* mutex)
 
         sched_params.priority = prio >> 8;
         syscall_do(SYSCALL_SCHED_SET_PARAMS, &sched_params);
-        
+
         if(sched_params.error != OS_NO_ERR)
         {
             /* Unlock the mutex and return error */
-            err2 = mutex_unlock(mutex);
-            if(err2 != OS_NO_ERR)
+            err = mutex_unlock(mutex);
+            if(err != OS_NO_ERR)
             {
                 /* If the had an error unlocking the mutex, kill the process */
-                syscall_do(SYSCALL_EXIT, &err2);
+                syscall_do(SYSCALL_EXIT, (void*)err);
             }
-            kernel_error("Could not elevate priority mutex[%d]\n", err);
             return err;
         }
     }
 
-    KERNEL_DEBUG(MUTEX_DEBUG_ENABLED, "Mutex 0x%p aquired\n", mutex);
+    KERNEL_DEBUG(MUTEX_DEBUG_ENABLED, "Mutex 0x%p aquired", mutex);
 
     return OS_NO_ERR;
 }
 
 OS_RETURN_E mutex_unlock(mutex_t* mutex)
 {
-    OS_RETURN_E          err;
-    uint32_t             prio;
-    uint32_t             int_state;
-    sched_param_t        sched_params;
+    uint32_t      prio;
+    uint32_t      mutex_state;
+    sched_param_t sched_params;
+    futex_t       futex;
 
     /* Check if mutex is initialized */
     if(mutex == NULL)
@@ -276,52 +275,50 @@ OS_RETURN_E mutex_unlock(mutex_t* mutex)
         syscall_do(SYSCALL_SCHED_GET_PARAMS, &sched_params);
         if(sched_params.error != OS_NO_ERR)
         {
-            return err;
+            return sched_params.error;
         }
 
         sched_params.priority = mutex->acquired_thread_priority;
 
-        syscall_do(SYSCALL_SCHED_SET_PARAMS, &sched_params);        
+        syscall_do(SYSCALL_SCHED_SET_PARAMS, &sched_params);
         if(sched_params.error != OS_NO_ERR)
         {
-            return err;
+            return sched_params.error;
         }
     }
     mutex->locker_tid = -1;
 
     /* Get mutex state */
-    mutex_state = ATOMIC_CAS(&mutex->state, 
-                             MUTEX_STATE_LOCKED,
-                             MUTEX_STATE_UNLOCKED);
+    mutex_state = ATOMIC_FETCH_ADD(&mutex->state, -1);
 
     /* If other threads wait for the mutex */
-    if(mutex_state == MUTEX_STATE_LOCKED_WAIT)
+    if(mutex_state != MUTEX_STATE_LOCKED)
     {
-        ATOMIC_CAS(&mutex->state, 
-                   MUTEX_STATE_LOCKED_WAIT,
-                   MUTEX_STATE_UNLOCKED);
-
-        /* Wake only one thread */
-        mutex->futex.val = 1;
-        syscall_do(SYSCALL_FUTEX_WAKE, &mutex->futex);
-        if(mutex->futex.error != OS_NO_ERR)
+        ATOMIC_STORE(&mutex->state, MUTEX_STATE_UNLOCKED);        /* Wake only one thread */
+        futex.addr = (uint32_t*)&mutex->state;
+        futex.val  = 1;
+        syscall_do(SYSCALL_FUTEX_WAKE, &futex);
+        if(futex.error != OS_NO_ERR)
         {
-            return mutex->futex.error;
+            return futex.error;
         }
     }
-    else if(mutex_state != MUTEX_STATE_UNLOCKED)
+    else if(mutex_state != MUTEX_STATE_LOCKED &&
+            mutex_state != MUTEX_STATE_UNLOCKED &&
+            mutex_state != MUTEX_STATE_LOCKED_WAIT)
     {
         /* Here the mutex was in another state, which is undefined behavior */
         return OS_ERR_NOT_INITIALIZED;
     }
 
+    KERNEL_DEBUG(MUTEX_DEBUG_ENABLED, "Mutex 0x%p released", mutex);
+
     return OS_NO_ERR;
 }
 
-OS_RETURN_E mutex_try_lock(mutex_t* mutex, int32_t* value)
+OS_RETURN_E mutex_trylock(mutex_t* mutex, int32_t* value)
 {
     OS_RETURN_E err;
-    OS_RETURN_E err2;
     uint32_t    prio;
     uint32_t    recursive;
     int32_t     mutex_state;
@@ -338,44 +335,43 @@ OS_RETURN_E mutex_try_lock(mutex_t* mutex, int32_t* value)
      * has not been destroyed
      */
     if(mutex->state != MUTEX_STATE_UNLOCKED &&
-       mutex->state != MUTEX_STATE_LOCKED   && 
+       mutex->state != MUTEX_STATE_LOCKED   &&
        mutex->state != MUTEX_STATE_LOCKED_WAIT)
     {
         return OS_ERR_NOT_INITIALIZED;
     }
 
-    tid = -1;
 
     /* Prepare data in case of specific parameters */
     prio = (mutex->flags >> 8) & MUTEX_PRIORITY_ELEVATION_NONE;
     recursive = mutex->flags & MUTEX_FLAG_RECURSIVE;
-    if(prio != MUTEX_PRIORITY_ELEVATION_NONE || retursive != 0)
+    if(prio != MUTEX_PRIORITY_ELEVATION_NONE || recursive != 0)
     {
         syscall_do(SYSCALL_SCHED_GET_PARAMS, &sched_params);
-        
+
         if(sched_params.error != OS_NO_ERR)
         {
-            return err;
+            return sched_params.error;
         }
     }
 
     /* If the current thread is the mutex's locked, just return */
-    if(retursive != 0 && sched_params.tid == mutex->locker_tid)
+    if(recursive != 0 && sched_params.tid == mutex->locker_tid)
     {
         return OS_NO_ERR;
     }
 
     /* Get mutex state */
-    mutex_state = ATOMIC_CAS(&mutex->state, 
-                             MUTEX_STATE_UNLOCKED, 
+    mutex_state = ATOMIC_CAS(&mutex->state,
+                             MUTEX_STATE_UNLOCKED,
                              MUTEX_STATE_LOCKED);
 
     *value = mutex_state;
     if(mutex_state != MUTEX_STATE_UNLOCKED)
-    {    
-        return OS_NO_ERR;
+    {
+        return OS_ERR_UNAUTHORIZED_ACTION;
     }
-    
+
     /* We aquired the mutex, set the relevant information */
     if(recursive != 0)
     {
@@ -389,23 +385,21 @@ OS_RETURN_E mutex_try_lock(mutex_t* mutex, int32_t* value)
 
         sched_params.priority = prio >> 8;
         syscall_do(SYSCALL_SCHED_SET_PARAMS, &sched_params);
-        
+
         if(sched_params.error != OS_NO_ERR)
         {
             /* Unlock the mutex and return error */
-            err2 = mutex_unlock(mutex);
-            if(err2 != OS_NO_ERR)
+            err = mutex_unlock(mutex);
+            if(err != OS_NO_ERR)
             {
                 /* If the had an error unlocking the mutex, kill the process */
-                syscall_do(SYSCALL_EXIT, err2);
+                syscall_do(SYSCALL_EXIT, (void*)err);
             }
-            kernel_error("Could not elevate priority mutex[%d]\n", err);
             return err;
         }
     }
 
-    KERNEL_DEBUG(MUTEX_DEBUG_ENABLED, "Mutex 0x%p aquired\n", mutex);
+    KERNEL_DEBUG(MUTEX_DEBUG_ENABLED, "Mutex 0x%p aquired", mutex);
 
     return OS_NO_ERR;
 }
-#endif

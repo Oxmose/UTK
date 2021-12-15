@@ -1834,6 +1834,40 @@ void sched_get_process_params(const SYSCALL_FUNCTION_E func, void* params)
     func_params->error = OS_NO_ERR;
 }
 
+void sched_set_process_params(const SYSCALL_FUNCTION_E func, void* params)
+{
+    sched_param_t*           func_params;
+
+    func_params = (sched_param_t*)params;
+
+    if(func != SYSCALL_SCHED_SET_PARAMS)
+    {
+        if(func_params != NULL)
+        {
+            func_params->pid   = -1;
+            func_params->tid   = -1;
+            func_params->error = OS_ERR_UNAUTHORIZED_ACTION;
+        }
+        return;
+    }
+    if(func_params == NULL)
+    {
+        return;
+    }
+
+    func_params->error = OS_NO_ERR;
+
+    /* Here we will set new parameters when needed */
+    if(func_params->priority <= KERNEL_LOWEST_PRIORITY)
+    {
+        active_thread->priority = func_params->priority;
+    }
+    else
+    {
+        func_params->error = OS_ERR_FORBIDEN_PRIORITY;
+    }
+}
+
 queue_node_t* sched_lock_thread(const THREAD_WAIT_TYPE_E block_type)
 {
     queue_node_t* current_thread_node;

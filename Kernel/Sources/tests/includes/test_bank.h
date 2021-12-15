@@ -36,7 +36,7 @@ void kill_qemu(void);
 #define PIC_TEST3 0
 #define IO_APIC_TEST 0
 #define IO_APIC_TEST2 0
-#define LAPIC_TEST 0
+#define LAPIC_TEST 1
 #define LAPIC_TEST2 0
 #define PIT_TEST 0
 #define PIT_TEST2 0
@@ -88,7 +88,8 @@ void lapic_timer_test(void);
 #define SCHEDULER_LOAD_TEST 0
 #define SCHEDULER_PREEMPT_TEST 0
 #define SCHEDULER_SLEEP_TEST 0
-#define FUTEX_TEST 1
+#define FUTEX_TEST 0
+#define MUTEX_TEST 0
 
 void output_test(void);
 void kheap_test(void);
@@ -106,5 +107,6 @@ void scheduler_load_test(void);
 void scheduler_preempt_test(void);
 void scheduler_sleep_test(void);
 void futex_test(void);
+void mutex_test(void);
 
 #endif /* __TEST_BANK_H_ */

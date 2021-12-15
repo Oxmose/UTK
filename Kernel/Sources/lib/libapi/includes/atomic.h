@@ -81,19 +81,44 @@ typedef volatile uint32_t spinlock_t;
 
 /**
  * @brief Compare and swap primitive.
- * 
+ *
  * @details The compare and swap primitive allows to compare a value stored in
  * the memory and replace it with a new value is the old value equals a certain
  * value.
- * 
- * @param[in, out] memory The memory region to be compared and swaped, on 
+ *
+ * @param[in, out] memory The memory region to be compared and swaped, on
  * 32bits.
  * @param[in] old_val The old value to compare.
  * @param[in] new_val The new value to compare.
- * 
- * @return The value stored in the memory is returned. 
+ *
+ * @return The value stored in the memory is returned.
  */
 #define ATOMIC_CAS(memory, old_val, new_val) \
     cpu_compare_and_swap(memory, old_val, new_val)
+
+/**
+ * @brief Atomically fecth the value in the memory and add a givne value to it.
+ *
+ * @details This primitive fecthes the value stored at the memory region given
+ * as parameter. It adds the value provided in parameters and returns the value
+ * before the addition operation.
+ *
+ * @param[out] memory The memory region to fetch and add.
+ * @param[in] val The value to add.
+ *
+ * @returns The previous value contained in the memory region is returned.
+ */
+
+#define ATOMIC_FETCH_ADD(memory, val) cpu_fetch_and_add(memory, val)
+
+/**
+ * @brief Atomically stores a value in the memory.
+ *
+ * @details Atomically stores a value in the memory.
+ *
+ * @param[out] memory The memory region to modify.
+ * @param[in] val The value to store.
+ */
+#define ATOMIC_STORE(memory, val) cpu_atomic_store(memory, val)
 
 #endif /* #ifndef __LIB_ATOMIC_H_ */
