@@ -29,9 +29,6 @@
 
 #include <stddef.h>    /* Standard definitions */
 #include <stdint.h>    /* Generic int types */
-#include <queue.h>     /* Kernel queues */
-#include <critical.h>  /* Critical sections */
-#include <futex.h>     /* Futex API */
 
 /*******************************************************************************
  * CONSTANTS
