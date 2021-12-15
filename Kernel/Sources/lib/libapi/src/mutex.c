@@ -29,6 +29,7 @@
 #include <kernel_output.h>   /* Kernel outputs */
 #include <string.h>          /* Standard memory lib */
 #include <kernel_error.h>    /* Kernel errors */
+#include <futex.h>           /* Futex API */
 #include <sys/process.h>     /* Process and threads management API */
 #include <sys/syscall_api.h> /* System calls API */
 
