@@ -17,7 +17,7 @@ function testcase() {
     make target=x86_i386 TESTS=TRUE && (make target=x86_i386 qemu-test-mode | tee test.out)
     mv test.out Sources/tests/test.out
     cd Sources/tests
-    } &> /dev/null
+    } #&> /dev/null
     # Filter output
     grep "\[TESTMODE\]\|ERROR" test.out > filtered.out
     #Compare output
@@ -28,7 +28,7 @@ function testcase() {
         error=$((error + 1))
         cat filtered.out
         echo "================="
-        diff -b filtered.out refs/general/$filename.valid  
+        diff -b filtered.out refs/general/$filename.valid
         mv filtered.out errors/$filename.error
     else
         echo -e "\e[92mPASSED\e[39m"
@@ -57,7 +57,7 @@ function testcase_arch() {
     make target=x86_i386 TESTS=TRUE && (make target=x86_i386 qemu-test-mode | tee test.out)
     mv test.out Sources/tests/test.out
     cd Sources/tests
-    } &> /dev/null
+    } #&> /dev/null
     # Filter output
     grep "\[TESTMODE\]\|ERROR" test.out > filtered.out
     #Compare output
@@ -107,7 +107,7 @@ done
 make -C ../../ clean
 mkdir -p errors
 
-echo 
+echo
 echo
 echo -e "\e[94m#-----------------------------------------------------------------#\e[39m"
 echo -e "\e[94m|                       Arch specific tests                       |\e[39m"
@@ -122,7 +122,7 @@ do
     fi
 done
 
-echo 
+echo
 echo
 echo -e "\e[94m#-----------------------------------------------------------------#\e[39m"
 echo -e "\e[94m|                          Generic tests                          |\e[39m"
