@@ -11,7 +11,7 @@
  *
  * @brief Process related functions.
  *
- * @details Process related functions. This module defines the user API to 
+ * @details Process related functions. This module defines the user API to
  * create, manage and delete processes and threads.
  *
  * @copyright Alexy Torres Aurora Dugo
@@ -67,15 +67,15 @@ int32_t fork(void)
     return pid;
 }
 
-int32_t waitpid(const int32_t pid, 
-                int32_t* status, 
-                int32_t* term_cause, 
+int32_t waitpid(const int32_t pid,
+                int32_t* status,
+                int32_t* term_cause,
                 OS_RETURN_E* err)
 {
     waitpid_params_t params;
 
     params.pid = pid;
-    
+
     syscall_do(SYSCALL_WAITPID, &params);
 
     if(status != NULL)

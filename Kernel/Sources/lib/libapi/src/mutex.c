@@ -124,6 +124,17 @@ OS_RETURN_E mutex_destroy(mutex_t* mutex)
     {
         return OS_ERR_NULL_POINTER;
     }
+
+    /* Check if we can enter the critical section, also check if the mutex
+     * has not been destroyed
+     */
+    if(mutex->state != MUTEX_STATE_UNLOCKED &&
+       mutex->state != MUTEX_STATE_LOCKED   &&
+       mutex->state != MUTEX_STATE_LOCKED_WAIT)
+    {
+        return OS_ERR_NOT_INITIALIZED;
+    }
+
     /* Wakeup all threads locked on the mutex */
     futex.addr   = (uint32_t*)&mutex->state;
     futex.val    = MUTEX_MAX_LOCKED_THREAD;
@@ -192,7 +203,7 @@ OS_RETURN_E mutex_lock(mutex_t* mutex)
         {
             /* Last check, if some process were already waitign or
              * if the mutex unlocked, then try to lock it again in
-             * the next check, oterwise, we are still locked and need to wait.
+             * the next check, otherwise, we are still locked and need to wait.
              */
             if(mutex_state == MUTEX_STATE_LOCKED_WAIT ||
                ATOMIC_CAS(&mutex->state,

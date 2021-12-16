@@ -1,0 +1,3 @@
+[TESTMODE] Spinlock test start
+[TESTMODE]Lock res = 4000000
+[TESTMODE] Spinlock test passed.

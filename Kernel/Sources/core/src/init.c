@@ -149,7 +149,9 @@ void* init_sys(void* args)
     scheduler_preempt_test();
     scheduler_sleep_test();
     futex_test();
+    spinlock_test();
     mutex_test();
+    semaphore_test();
 #endif
 
     pid = fork();

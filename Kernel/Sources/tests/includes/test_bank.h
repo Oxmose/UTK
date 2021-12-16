@@ -90,6 +90,8 @@ void lapic_timer_test(void);
 #define SCHEDULER_SLEEP_TEST 0
 #define FUTEX_TEST 0
 #define MUTEX_TEST 0
+#define SEMAPHORE_TEST 0
+#define SPINLOCK_TEST 0
 
 void output_test(void);
 void kheap_test(void);
@@ -108,5 +110,7 @@ void scheduler_preempt_test(void);
 void scheduler_sleep_test(void);
 void futex_test(void);
 void mutex_test(void);
+void semaphore_test(void);
+void spinlock_test(void);
 
 #endif /* __TEST_BANK_H_ */
