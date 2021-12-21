@@ -46,9 +46,9 @@ static void test_sw_interupts_lock(void)
     if((err = kernel_interrupt_register_int_handler(MIN_INTERRUPT_LINE, incrementer_handler)))
     {
         kernel_error("TEST_SW_INT_LOCK INIT\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT_LOCK INIT\n");
     }
@@ -56,9 +56,9 @@ static void test_sw_interupts_lock(void)
     if((err = kernel_interrupt_register_int_handler(MIN_INTERRUPT_LINE + 1, decrementer_handler)))
     {
         kernel_error("TEST_SW_INT_LOCK INIT\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT_LOCK INIT\n");
     }
@@ -74,9 +74,9 @@ static void test_sw_interupts_lock(void)
     if(cnt_val != counter)
     {
         kernel_error("TEST_SW_INT_LOCK 0 %d != %d\n", cnt_val, counter);
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT_LOCK 0\n");
     }
@@ -86,9 +86,9 @@ static void test_sw_interupts_lock(void)
     if(cnt_val != counter)
     {
         kernel_error("TEST_SW_INT_LOCK 1 %d != %d\n", cnt_val, counter);
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT_LOCK 1\n");
     }
@@ -100,9 +100,9 @@ static void test_sw_interupts_lock(void)
     if(cnt_val + 3 * MIN_INTERRUPT_LINE != counter)
     {
         kernel_error("TEST_SW_INT_LOCK 2 %d != %d\n", cnt_val, counter);
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT_LOCK 2\n");
     }
@@ -117,9 +117,9 @@ static void test_sw_interupts_lock(void)
     if(cnt_val != counter)
     {
         kernel_error("TEST_SW_INT_LOCK 3 %d != %d\n", cnt_val, counter);
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT_LOCK 3\n");
     }
@@ -131,9 +131,9 @@ static void test_sw_interupts_lock(void)
     if(cnt_val != counter)
     {
         kernel_error("TEST_SW_INT_LOCK 4 %d != %d\n", cnt_val, counter);
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT_LOCK 4\n");
     }
@@ -145,9 +145,9 @@ static void test_sw_interupts_lock(void)
     if(cnt_val != counter)
     {
         kernel_error("TEST_SW_INT_LOCK 5 %d != %d\n", cnt_val, counter);
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT_LOCK 5\n");
     }
@@ -159,9 +159,9 @@ static void test_sw_interupts_lock(void)
     if(cnt_val + MIN_INTERRUPT_LINE != counter)
     {
         kernel_error("TEST_SW_INT_LOCK 6 %d != %d\n", cnt_val, counter);
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT_LOCK 6\n");
     }
@@ -177,9 +177,9 @@ static void test_sw_interupts_lock(void)
     if(cnt_val != counter)
     {
         kernel_error("TEST_SW_INT_LOCK 7 %d != %d\n", cnt_val, counter);
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT_LOCK 7\n");
     }
@@ -188,9 +188,9 @@ static void test_sw_interupts_lock(void)
     if((err = kernel_interrupt_remove_int_handler(MIN_INTERRUPT_LINE)))
     {
         kernel_error("TEST_SW_INT_LOCK 8\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT_LOCK 8\n");
     }
@@ -198,9 +198,9 @@ static void test_sw_interupts_lock(void)
     if((err = kernel_interrupt_remove_int_handler(MIN_INTERRUPT_LINE + 1)))
     {
         kernel_error("TEST_SW_INT_LOCK 9\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT_LOCK 9\n");
     }
@@ -224,9 +224,9 @@ void test_sw_interupts(void)
      != OR_ERR_UNAUTHORIZED_INTERRUPT_LINE)
     {
         kernel_error("TEST_SW_INT 0\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT 0\n");
     }
@@ -236,9 +236,9 @@ void test_sw_interupts(void)
      != OR_ERR_UNAUTHORIZED_INTERRUPT_LINE)
     {
         kernel_error("TEST_SW_INT 1\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT 1\n");
     }
@@ -248,9 +248,9 @@ void test_sw_interupts(void)
      != OR_ERR_UNAUTHORIZED_INTERRUPT_LINE)
     {
         kernel_error("TEST_SW_INT 2\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT 2\n");
     }
@@ -260,9 +260,9 @@ void test_sw_interupts(void)
      != OR_ERR_UNAUTHORIZED_INTERRUPT_LINE)
     {
         kernel_error("TEST_SW_INT 3\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT 3\n");
     }
@@ -272,9 +272,9 @@ void test_sw_interupts(void)
      != OS_ERR_NULL_POINTER)
     {
         kernel_error("TEST_SW_INT 4\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT 4\n");
     }
@@ -284,9 +284,9 @@ void test_sw_interupts(void)
      != OS_ERR_INTERRUPT_NOT_REGISTERED)
     {
         kernel_error("TEST_SW_INT 5\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT 5\n");
     }
@@ -296,9 +296,9 @@ void test_sw_interupts(void)
      != OS_NO_ERR)
     {
         kernel_error("TEST_SW_INT 6\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT 6\n");
     }
@@ -307,9 +307,9 @@ void test_sw_interupts(void)
      != OS_ERR_INTERRUPT_ALREADY_REGISTERED)
     {
         kernel_error("TEST_SW_INT 7\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT 7\n");
     }
@@ -318,9 +318,9 @@ void test_sw_interupts(void)
     if((err = kernel_interrupt_remove_int_handler(MIN_INTERRUPT_LINE)) != OS_NO_ERR)
     {
         kernel_error("TEST_SW_INT 8\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT 8\n");
     }
@@ -331,7 +331,7 @@ void test_sw_interupts(void)
     /* REGISTER FROM MIN TO MAX INC AND SEND INT, TEST COUNTER */
     for(i = MIN_INTERRUPT_LINE; i <= MAX_INTERRUPT_LINE; ++i)
     {
-        if(i == PANIC_INT_LINE || 
+        if(i == PANIC_INT_LINE ||
            i == PIC_SPURIOUS_IRQ_MASTER + INT_PIC_IRQ_OFFSET ||
            i == PIC_SPURIOUS_IRQ_SLAVE + INT_PIC_IRQ_OFFSET ||
            i == 0xFF)
@@ -342,9 +342,9 @@ void test_sw_interupts(void)
         if(err != OS_NO_ERR)
         {
             kernel_error("TEST_SW_INT 9 [%d]\n", err);
-            KERNEL_PANIC(err);
+            kill_qemu();
         }
-        else 
+        else
         {
             kernel_printf("[TESTMODE] TEST_SW_INT 9\n");
         }
@@ -579,16 +579,16 @@ void test_sw_interupts(void)
     if(cnt_val != counter)
     {
         kernel_error("TEST_SW_INT 10\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT 10\n");
     }
 
     for(i = MIN_INTERRUPT_LINE; i <= MAX_INTERRUPT_LINE; ++i)
     {
-        if(i == PANIC_INT_LINE || 
+        if(i == PANIC_INT_LINE ||
            i == PIC_SPURIOUS_IRQ_MASTER + INT_PIC_IRQ_OFFSET ||
            i == PIC_SPURIOUS_IRQ_SLAVE + INT_PIC_IRQ_OFFSET ||
            i == 0xFF)
@@ -598,9 +598,9 @@ void test_sw_interupts(void)
         if((err = kernel_interrupt_remove_int_handler(i)) != OS_NO_ERR)
         {
             kernel_error("TEST_SW_INT 11\n");
-            KERNEL_PANIC(err);
+            kill_qemu();
         }
-        else 
+        else
         {
             kernel_printf("[TESTMODE] TEST_SW_INT 11\n");
         }
@@ -609,7 +609,7 @@ void test_sw_interupts(void)
     /* REGISTER FROM MIN TO MAX DEC AND SEND INT, TEST COUNTER */
     for(i = MIN_INTERRUPT_LINE; i <= MAX_INTERRUPT_LINE; ++i)
     {
-        if(i == PANIC_INT_LINE || 
+        if(i == PANIC_INT_LINE ||
            i == PIC_SPURIOUS_IRQ_MASTER + INT_PIC_IRQ_OFFSET ||
            i == PIC_SPURIOUS_IRQ_SLAVE + INT_PIC_IRQ_OFFSET ||
            i == 0xFF)
@@ -619,9 +619,9 @@ void test_sw_interupts(void)
         if((err = kernel_interrupt_register_int_handler(i, decrementer_handler)) != OS_NO_ERR)
         {
             kernel_error("TEST_SW_INT 12\n");
-            KERNEL_PANIC(err);
+            kill_qemu();
         }
-        else 
+        else
         {
             kernel_printf("[TESTMODE] TEST_SW_INT 12\n");
         }
@@ -856,16 +856,16 @@ void test_sw_interupts(void)
     if(cnt_val != counter)
     {
         kernel_error("TEST_SW_INT 13 %d != %d\n", cnt_val, counter);
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_INT 13\n");
     }
 
     for(i = MIN_INTERRUPT_LINE; i <= MAX_INTERRUPT_LINE; ++i)
     {
-        if(i == PANIC_INT_LINE || 
+        if(i == PANIC_INT_LINE ||
            i == PIC_SPURIOUS_IRQ_MASTER + INT_PIC_IRQ_OFFSET ||
            i == PIC_SPURIOUS_IRQ_SLAVE + INT_PIC_IRQ_OFFSET ||
            i == 0xFF)
@@ -875,9 +875,9 @@ void test_sw_interupts(void)
         if((err = kernel_interrupt_remove_int_handler(i)) != OS_NO_ERR)
         {
             kernel_error("TEST_SW_INT 14\n");
-            KERNEL_PANIC(err);
+            kill_qemu();
         }
-        else 
+        else
         {
             kernel_printf("[TESTMODE] TEST_SW_INT 14\n");
         }
@@ -890,7 +890,7 @@ void interrupt_test(void)
 {
     kernel_printf("[TESTMODE] Software interrupt\n");
     test_sw_interupts();
-    
+
 
     kernel_printf("[TESTMODE] Software interrupt lock\n");
     test_sw_interupts_lock();
@@ -900,7 +900,7 @@ void interrupt_test(void)
     /* Kill QEMU */
     kill_qemu();
 }
-#else 
+#else
 void interrupt_test(void)
 {
 }

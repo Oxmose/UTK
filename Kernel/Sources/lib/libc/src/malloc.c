@@ -11,7 +11,7 @@
  *
  * @brief Memory allocation routine.
  *
- * @details Memory allocation routine. This module contains the memory 
+ * @details Memory allocation routine. This module contains the memory
  * allocation routines.
  *
  * @copyright Alexy Torres Aurora Dugo
@@ -20,9 +20,10 @@
 #include <stddef.h>          /* Standard definitions */
 #include <stdint.h>          /* Generic int types */
 #include <stddef.h>          /* Standard definitions */
-#include <atomic.h>          /* Atomic operations */
+#include <mutex.h>           /* Mutex library */
 #include <sys/syscall_api.h> /* System calls API */
 #include <kernel_output.h>   /* Kernel output manager */
+#include <panic.h>           /* Kernel panic */
 
 /* UTK configuration file */
 #include <config.h>
@@ -68,7 +69,7 @@ struct list
     struct list* prev;
 };
 
-/** 
+/**
  * @brief Defines list_t type as a shorcut for struct list.
  */
 typedef struct list list_t;
@@ -92,7 +93,7 @@ struct mem_chunk
     };
 };
 
-/** 
+/**
  * @brief Defines mem_chunk_t type as a shorcut for struct mem_chunk.
  */
 typedef struct mem_chunk mem_chunk_t;
@@ -135,8 +136,8 @@ static uint32_t kheap_mem_init;
 /** @brief Quantity of memory used to store meta data in the Heap. */
 static uint32_t mem_meta;
 
-/* TODO: Replace spinlock with mutex */
-static spinlock_t lock;
+/* Malloc mutex */
+static mutex_t lock;
 
 /*******************************************************************************
  * STATIC FUNCTIONS DECLARATION
@@ -192,6 +193,12 @@ inline static void push_free(mem_chunk_t *chunk);
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
+#define MALLOC_ASSERT(COND, MSG, ERROR) {                     \
+    if((COND) == FALSE)                                       \
+    {                                                         \
+        PANIC(ERROR, "MALLOC", MSG, TRUE);                    \
+    }                                                         \
+}
 
 #define CONTAINER(C, l, v) ((C*)(((char*)v) - (uintptr_t)&(((C*)0)->l)))
 
@@ -411,8 +418,8 @@ inline static void push_free(mem_chunk_t *chunk)
 
 /**
  * @brief Initializes the process's heap.
- * 
- * @details Setups process heap management. It will also allign process heap 
+ *
+ * @details Setups process heap management. It will also allign process heap
  * start and initialize the basic heap parameters such as its size.
  */
 static void user_heap_init(void)
@@ -424,6 +431,7 @@ static void user_heap_init(void)
     uint32_t     size;
     int8_t*      mem_start;
     int8_t*      mem_end;
+    OS_RETURN_E  err;
 
     memmgt_page_alloc_param_t alloc_param;
 
@@ -475,12 +483,15 @@ static void user_heap_init(void)
     kheap_mem_init = mem_free;
     mem_meta = sizeof(mem_chunk_t) * 2 + HEADER_SIZE;
 
-    lock = SPINLOCK_INIT_VALUE;
+    err = mutex_init(&lock, MUTEX_PRIORITY_ELEVATION_NONE, 0);
+    MALLOC_ASSERT(err == OS_NO_ERR,
+                  "Could not initialize user heap lock.",
+                  err);
 
     init = TRUE;
 
-    KERNEL_DEBUG(USER_HEAP_DEBUG_ENABLED, 
-                 "User Heap Initialized at 0x%p", 
+    KERNEL_DEBUG(USER_HEAP_DEBUG_ENABLED,
+                 "User Heap Initialized at 0x%p",
                  mem_start);
 }
 
@@ -491,8 +502,8 @@ void* malloc(size_t size)
     mem_chunk_t* chunk2;
     size_t       size2;
     size_t       len;
+    OS_RETURN_E  err;
 
-    SPINLOCK_LOCK(lock);
 
     /* TODO, this should be removed as init should be done in crto0 */
     if(init == FALSE)
@@ -505,6 +516,11 @@ void* malloc(size_t size)
         return NULL;
     }
 
+    err = mutex_lock(&lock);
+    MALLOC_ASSERT(err == OS_NO_ERR,
+                  "Could not lock user heap lock.",
+                  err);
+
     size = (size + ALIGN - 1) & (~(ALIGN - 1));
 
     if (size < MIN_SIZE)
@@ -516,7 +532,11 @@ void* malloc(size_t size)
 
     if (n >= NUM_SIZES)
     {
-        SPINLOCK_UNLOCK(lock);
+        err = mutex_unlock(&lock);
+        MALLOC_ASSERT(err == OS_NO_ERR,
+                      "Could not unlock user heap lock.",
+                      err);
+
         return NULL;
     }
 
@@ -525,7 +545,11 @@ void* malloc(size_t size)
         ++n;
         if (n >= NUM_SIZES)
         {
-            SPINLOCK_UNLOCK(lock);
+            err = mutex_unlock(&lock);
+            MALLOC_ASSERT(err == OS_NO_ERR,
+                          "Could not unlock user heap lock.",
+                          err);
+
             return NULL;
         }
     }
@@ -555,14 +579,17 @@ void* malloc(size_t size)
 
     mem_free -= size2;
 
-    KERNEL_DEBUG(USER_HEAP_DEBUG_ENABLED, 
+    KERNEL_DEBUG(USER_HEAP_DEBUG_ENABLED,
                  "User heap allocated 0x%p -> %uB (%uB free, %uB used)",
                  chunk->data,
                  size2 - len - HEADER_SIZE,
-                 mem_free, 
+                 mem_free,
                  kheap_mem_init - mem_free);
 
-    SPINLOCK_UNLOCK(lock);
+    err = mutex_unlock(&lock);
+    MALLOC_ASSERT(err == OS_NO_ERR,
+                  "Could not unlock user heap lock.",
+                  err);
 
     return chunk->data;
 }
@@ -573,13 +600,17 @@ void free(void* ptr)
     mem_chunk_t* chunk;
     mem_chunk_t* next;
     mem_chunk_t* prev;
+    OS_RETURN_E  err;
 
     if(init == 0 || ptr == NULL)
     {
         return;
     }
 
-    SPINLOCK_LOCK(lock);
+    err = mutex_lock(&lock);
+    MALLOC_ASSERT(err == OS_NO_ERR,
+                  "Could not lock user heap lock.",
+                  err);
 
     chunk = (mem_chunk_t*)((int8_t*)ptr - HEADER_SIZE);
     next = CONTAINER(mem_chunk_t, all, chunk->all.next);
@@ -612,10 +643,13 @@ void free(void* ptr)
         push_free(chunk);
     }
 
-    KERNEL_DEBUG(USER_HEAP_DEBUG_ENABLED, 
-                 "Heap freed 0x%p -> %uB", 
-                 ptr, 
+    KERNEL_DEBUG(USER_HEAP_DEBUG_ENABLED,
+                 "Heap freed 0x%p -> %uB",
+                 ptr,
                  used);
 
-    SPINLOCK_UNLOCK(lock);
+    err = mutex_unlock(&lock);
+    MALLOC_ASSERT(err == OS_NO_ERR,
+                  "Could not unlock user heap lock.",
+                  err);
 }

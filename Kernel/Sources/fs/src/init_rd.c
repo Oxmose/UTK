@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @file init_rd.c
- * 
+ *
  * @see init_rd.h
  *
  * @author Alexy Torres Aurora Dugo
@@ -10,10 +10,10 @@
  * @version 1.0
  *
  * @brief Kernel's init ram disk driver.
- * 
- * @details Kernel's init ram disk driver. Defines the functions and 
+ *
+ * @details Kernel's init ram disk driver. Defines the functions and
  * structures used by the kernel to manage manage the init ram disk.
- * 
+ *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
@@ -27,9 +27,7 @@
 #include <config.h>
 
 /* Tests header file */
-#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
-#endif
 
 /* Header file */
 #include <init_rd.h>
@@ -59,7 +57,7 @@ typedef struct initrd_master_block initrd_master_block_t;
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-extern initrd_master_block_t _KERNEL_INITRD_MEM_ADDR;
+extern initrd_master_block_t _KERNEL_INITRD_MEM_BASE;
 
 extern uint32_t _KERNEL_INITRD_MEM_SIZE;
 
@@ -79,11 +77,11 @@ OS_RETURN_E initrd_init_device(initrd_device_t* device)
 {
     initrd_master_block_t* master_block;
 
-    device->start_addr = (uintptr_t)&_KERNEL_INITRD_MEM_ADDR;
-    master_block = (initrd_master_block_t*)&_KERNEL_INITRD_MEM_ADDR;
+    device->start_addr = (uintptr_t)&_KERNEL_INITRD_MEM_BASE;
+    master_block = (initrd_master_block_t*)&_KERNEL_INITRD_MEM_BASE;
 
-    KERNEL_DEBUG(INITRD_DEBUG_ENABLED, 
-                 "[INITRD] Initializing INITRD at 0x%p", 
+    KERNEL_DEBUG(INITRD_DEBUG_ENABLED,
+                 "[INITRD] Initializing INITRD at 0x%p",
                  device->start_addr);
 
     if((device->start_addr & (KERNEL_PAGE_SIZE - 1)) != 0)
@@ -92,14 +90,14 @@ OS_RETURN_E initrd_init_device(initrd_device_t* device)
         return OS_ERR_ALIGN;
     }
 
-    KERNEL_DEBUG(INITRD_DEBUG_ENABLED, 
-                 "[INITRD] Magic is 0x%llx", 
+    KERNEL_DEBUG(INITRD_DEBUG_ENABLED,
+                 "[INITRD] Magic is 0x%llx",
                  master_block->magic);
-    KERNEL_DEBUG(INITRD_DEBUG_ENABLED, 
-                 "[INITRD] Size is 0x%X", 
+    KERNEL_DEBUG(INITRD_DEBUG_ENABLED,
+                 "[INITRD] Size is 0x%X",
                  master_block->size);
 
-    /* The UTK init ram disk starts with a magic block of 512 bytes (based on 
+    /* The UTK init ram disk starts with a magic block of 512 bytes (based on
      * USTAR block size) with metadata.
      */
     if(master_block->magic != UTK_INITRD_MAGIC)
@@ -120,8 +118,8 @@ OS_RETURN_E initrd_init_device(initrd_device_t* device)
     current_dev.start_addr = device->start_addr;
     current_dev.end_addr = device->end_addr;
 
-    KERNEL_DEBUG(INITRD_DEBUG_ENABLED, 
-                 "[INITRD] Initialized INITRD at 0x%p->0x%p, size: 0x%X", 
+    KERNEL_DEBUG(INITRD_DEBUG_ENABLED,
+                 "[INITRD] Initialized INITRD at 0x%p->0x%p, size: 0x%X",
                  device->start_addr,
                  device->end_addr,
                  device->size);
@@ -142,9 +140,9 @@ OS_RETURN_E initrd_get_device(initrd_device_t* device)
     return OS_NO_ERR;
 }
 
-OS_RETURN_E initrd_read_blocks(const vfs_device_t* device, 
+OS_RETURN_E initrd_read_blocks(const vfs_device_t* device,
                                const uint32_t block_id,
-	                           void* buffer, 
+	                           void* buffer,
                                const size_t size,
                                const size_t offset)
 {
@@ -154,8 +152,8 @@ OS_RETURN_E initrd_read_blocks(const vfs_device_t* device,
 
     initrd_dev = (initrd_device_t*)device->device_data;
 
-    KERNEL_DEBUG(INITRD_DEBUG_ENABLED, 
-                 "[INITRD] Reading block 0x%p, size 0x%p, offset: 0x%X", 
+    KERNEL_DEBUG(INITRD_DEBUG_ENABLED,
+                 "[INITRD] Reading block 0x%p, size 0x%p, offset: 0x%X",
                  block_id,
                  size,
                  offset);
@@ -170,7 +168,7 @@ OS_RETURN_E initrd_read_blocks(const vfs_device_t* device,
 
     /* We always skip the master block */
     block_addr = current_dev.start_addr +
-                 block_id + 
+                 block_id +
                  sizeof(initrd_master_block_t) +
                  offset;
     block_end_addr = block_addr + size;
@@ -187,9 +185,9 @@ OS_RETURN_E initrd_read_blocks(const vfs_device_t* device,
     return OS_NO_ERR;
 }
 
-OS_RETURN_E initrd_write_blocks(const vfs_device_t* device, 
+OS_RETURN_E initrd_write_blocks(const vfs_device_t* device,
                                 const uint32_t block_id,
-	                            const void* buffer, 
+	                            const void* buffer,
                                 const size_t size,
                                 const size_t offset)
 {
@@ -206,11 +204,11 @@ OS_RETURN_E initrd_write_blocks(const vfs_device_t* device,
         KERNEL_ERROR("Wrong INITRD device\n");
         return OS_ERR_UNAUTHORIZED_ACTION;
     }
-    
+
     /* We always skip the master block */
     block_addr = current_dev.start_addr +
-                 block_id + 
-                 sizeof(initrd_master_block_t) + 
+                 block_id +
+                 sizeof(initrd_master_block_t) +
                  offset;
     block_end_addr = block_addr + size;
 
@@ -226,7 +224,7 @@ OS_RETURN_E initrd_write_blocks(const vfs_device_t* device,
     return OS_NO_ERR;
 }
 
-OS_RETURN_E initrd_flush(const vfs_device_t* device, 
+OS_RETURN_E initrd_flush(const vfs_device_t* device,
                          const uint32_t block_id,
                          const size_t size,
                          const size_t offset)

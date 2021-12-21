@@ -31,9 +31,7 @@
 #include <config.h>
 
 /* Tests header file */
-#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
-#endif
 
 /* Header file */
 #include <futex.h>
@@ -142,9 +140,9 @@ static void futex_recover(futex_t* futex,
                           const OS_RETURN_E error);
 
 /**
- * @brief Cleans the resources used by a mutex.
+ * @brief Cleans the resources used by a futex.
  *
- * @details Cleans the resources used by a mutex. It releases the kernel queues
+ * @details Cleans the resources used by a futex. It releases the kernel queues
  * and nodes allocated to the resource.
  *
  * @param[in,out] futex_resource The resource sent by the kernel.
@@ -155,6 +153,13 @@ static void futex_cleanup(void* futex_resource);
  * FUNCTIONS
  ******************************************************************************/
 
+#define FUTEX_ASSERT(COND, MSG, ERROR) {                    \
+    if((COND) == FALSE)                                     \
+    {                                                       \
+        PANIC(ERROR, "FUTEX", MSG, TRUE);                   \
+    }                                                       \
+}
+
 #define CHECK_ERROR_STATE(err, condition) {                         \
     if(err != OS_NO_ERR || (condition))                             \
     {                                                               \
@@ -162,13 +167,6 @@ static void futex_cleanup(void* futex_resource);
         EXIT_CRITICAL(int_state)                                    \
         return;                                                     \
     }                                                               \
-}
-
-#define CHECK_ERROR_RECOVER(err) {  \
-    if(err != OS_NO_ERR)            \
-    {                               \
-        KERNEL_PANIC(err);          \
-    }                               \
 }
 
 static void futex_recover(futex_t* futex,
@@ -187,7 +185,9 @@ static void futex_recover(futex_t* futex,
         thread = (kernel_thread_t*)recover_data->locked_thread->data;
         err = sched_thread_remove_resource(thread,
                                            &recover_data->created_res_node);
-        CHECK_ERROR_RECOVER(err);
+        FUTEX_ASSERT(err == OS_NO_ERR,
+                     "Could not recover from failed futex",
+                     err);
     }
 
     if(recover_data->pushed_wait_queue != NULL)
@@ -195,13 +195,17 @@ static void futex_recover(futex_t* futex,
         /* Here created wait node should always be non NULL. */
         err = queue_remove(recover_data->pushed_wait_queue,
                            recover_data->created_wait_node);
-        CHECK_ERROR_RECOVER(err);
+        FUTEX_ASSERT(err == OS_NO_ERR,
+                     "Could not recover from failed futex",
+                     err);
     }
 
     if(recover_data->created_wait_node != NULL)
     {
         err = queue_delete_node(&recover_data->created_wait_node);
-        CHECK_ERROR_RECOVER(err);
+        FUTEX_ASSERT(err == OS_NO_ERR,
+                     "Could not recover from failed futex",
+                     err);
     }
 
     if(recover_data->locked_thread != NULL)
@@ -209,7 +213,9 @@ static void futex_recover(futex_t* futex,
         err = sched_unlock_thread(recover_data->locked_thread,
                                   THREAD_WAIT_TYPE_RESOURCE,
                                   FALSE);
-        CHECK_ERROR_RECOVER(err);
+        FUTEX_ASSERT(err == OS_NO_ERR,
+                     "Could not recover from failed futex",
+                     err);
     }
 
     if(recover_data->futex_table != NULL)
@@ -217,13 +223,17 @@ static void futex_recover(futex_t* futex,
         err = uhashtable_remove(recover_data->futex_table,
                                 (uintptr_t)futex->addr,
                                 NULL);
-        CHECK_ERROR_RECOVER(err);
+        FUTEX_ASSERT(err == OS_NO_ERR,
+                     "Could not recover from failed futex",
+                     err);
     }
 
     if(recover_data->created_futex_queue != NULL)
     {
         err = queue_delete_queue(&recover_data->created_futex_queue);
-        CHECK_ERROR_RECOVER(err);
+        FUTEX_ASSERT(err == OS_NO_ERR,
+                     "Could not recover from failed futex",
+                     err);
     }
 }
 
@@ -251,17 +261,17 @@ static void futex_cleanup(void* futex_resource)
     err = uhashtable_get(futex_table,
                          resource->futex_id,
                          (void**)(&wait_queue));
-    CHECK_ERROR_RECOVER(err);
+    FUTEX_ASSERT(err == OS_NO_ERR, "Could not cleanup futex", err);
 
     /* Get the node */
     wait_node = queue_find(wait_queue, (void*)resource->associated_data, &err);
-    CHECK_ERROR_RECOVER(err);
+    FUTEX_ASSERT(err == OS_NO_ERR, "Could not cleanup futex", err);
 
     /* Delete the table node */
     err = queue_remove(wait_queue, wait_node);
-    CHECK_ERROR_RECOVER(err);
+    FUTEX_ASSERT(err == OS_NO_ERR, "Could not cleanup futex", err);
     err = queue_delete_node(&wait_node);
-    CHECK_ERROR_RECOVER(err);
+    FUTEX_ASSERT(err == OS_NO_ERR, "Could not cleanup futex", err);
 
     /* If this was the last entry in the queue, delete the queue */
     if(wait_queue->size == 0)
@@ -270,11 +280,11 @@ static void futex_cleanup(void* futex_resource)
         err = uhashtable_remove(futex_table,
                                 resource->futex_id,
                                 NULL);
-        CHECK_ERROR_RECOVER(err);
+        FUTEX_ASSERT(err == OS_NO_ERR, "Could not cleanup futex", err);
 
         /* Delete the queue */
         err = queue_delete_queue(&wait_queue);
-        CHECK_ERROR_RECOVER(err);
+        FUTEX_ASSERT(err == OS_NO_ERR, "Could not cleanup futex", err);
     }
 
     EXIT_CRITICAL(int_state);
@@ -286,11 +296,7 @@ void futex_init(void)
 
     /* Create the hashtable */
     futex_table = uhashtable_create(UHASHTABLE_ALLOCATOR(kmalloc, kfree), &err);
-    if(futex_table == NULL || err != OS_NO_ERR)
-    {
-        KERNEL_ERROR("Could not initialize futex table: %d\n", err);
-        KERNEL_PANIC(err);
-    }
+    FUTEX_ASSERT(err == OS_NO_ERR, "Could not initialize futex table", err);
 
     is_init = TRUE;
 }
@@ -491,19 +497,19 @@ void futex_wake(const SYSCALL_FUNCTION_E func, void* params)
         thread = (kernel_thread_t*)data_info->waiting_thread->data;
         err = sched_thread_remove_resource(thread,
                                            &data_info->resource_node);
-        CHECK_ERROR_RECOVER(err);
+        FUTEX_ASSERT(err == OS_NO_ERR, "Could not remove futex resource", err);
 
         /* Put back the thread in the scheduler */
         err = sched_unlock_thread(data_info->waiting_thread,
                                   THREAD_WAIT_TYPE_RESOURCE,
                                   FALSE);
-        CHECK_ERROR_RECOVER(err);
+        FUTEX_ASSERT(err == OS_NO_ERR, "Unlock futex thread", err);
 
         /* Delete the node */
         err = queue_remove(wait_queue, save_node);
-        CHECK_ERROR_RECOVER(err);
+        FUTEX_ASSERT(err == OS_NO_ERR, "Could not remove futex resource", err);
         err = queue_delete_node(&save_node);
-        CHECK_ERROR_RECOVER(err);
+        FUTEX_ASSERT(err == OS_NO_ERR, "Could not remove futex resource", err);
 
         /* If this was the last entry in the queue, delete the queue */
         if(wait_queue->size == 0)
@@ -512,11 +518,11 @@ void futex_wake(const SYSCALL_FUNCTION_E func, void* params)
             err = uhashtable_remove(futex_table,
                                     futex_phys,
                                     NULL);
-            CHECK_ERROR_RECOVER(err);
+            FUTEX_ASSERT(err == OS_NO_ERR, "Could not remove futex", err);
 
             /* Delete the queue */
             err = queue_delete_queue(&wait_queue);
-            CHECK_ERROR_RECOVER(err);
+            FUTEX_ASSERT(err == OS_NO_ERR, "Could not remove futex", err);
 
             /* Nothing more to wake up */
             break;

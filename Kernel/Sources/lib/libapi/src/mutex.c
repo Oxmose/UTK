@@ -119,6 +119,7 @@ OS_RETURN_E mutex_init(mutex_t* mutex,
 OS_RETURN_E mutex_destroy(mutex_t* mutex)
 {
     futex_t futex;
+    int32_t mutex_state;
 
     if(mutex == NULL)
     {
@@ -128,9 +129,10 @@ OS_RETURN_E mutex_destroy(mutex_t* mutex)
     /* Check if we can enter the critical section, also check if the mutex
      * has not been destroyed
      */
-    if(mutex->state != MUTEX_STATE_UNLOCKED &&
-       mutex->state != MUTEX_STATE_LOCKED   &&
-       mutex->state != MUTEX_STATE_LOCKED_WAIT)
+    mutex_state = mutex->state;
+    if(mutex_state != MUTEX_STATE_UNLOCKED &&
+       mutex_state != MUTEX_STATE_LOCKED   &&
+       mutex_state != MUTEX_STATE_LOCKED_WAIT)
     {
         return OS_ERR_NOT_INITIALIZED;
     }
@@ -167,9 +169,10 @@ OS_RETURN_E mutex_lock(mutex_t* mutex)
     /* Check if we can enter the critical section, also check if the mutex
      * has not been destroyed
      */
-    if(mutex->state != MUTEX_STATE_UNLOCKED &&
-       mutex->state != MUTEX_STATE_LOCKED   &&
-       mutex->state != MUTEX_STATE_LOCKED_WAIT)
+    mutex_state = mutex->state;
+    if(mutex_state != MUTEX_STATE_UNLOCKED &&
+       mutex_state != MUTEX_STATE_LOCKED   &&
+       mutex_state != MUTEX_STATE_LOCKED_WAIT)
     {
         return OS_ERR_NOT_INITIALIZED;
     }
@@ -279,6 +282,17 @@ OS_RETURN_E mutex_unlock(mutex_t* mutex)
         return OS_ERR_NULL_POINTER;
     }
 
+    /* Check if we can enter the critical section, also check if the mutex
+     * has not been destroyed
+     */
+    mutex_state = mutex->state;
+    if(mutex_state != MUTEX_STATE_UNLOCKED &&
+       mutex_state != MUTEX_STATE_LOCKED   &&
+       mutex_state != MUTEX_STATE_LOCKED_WAIT)
+    {
+        return OS_ERR_NOT_INITIALIZED;
+    }
+
     /* Set back old data */
     prio = (mutex->flags >> 8) & MUTEX_PRIORITY_ELEVATION_NONE;
     if(prio != MUTEX_PRIORITY_ELEVATION_NONE)
@@ -346,13 +360,13 @@ OS_RETURN_E mutex_trylock(mutex_t* mutex, int32_t* value)
     /* Check if we can enter the critical section, also check if the mutex
      * has not been destroyed
      */
-    if(mutex->state != MUTEX_STATE_UNLOCKED &&
-       mutex->state != MUTEX_STATE_LOCKED   &&
-       mutex->state != MUTEX_STATE_LOCKED_WAIT)
+    mutex_state = mutex->state;
+    if(mutex_state != MUTEX_STATE_UNLOCKED &&
+       mutex_state != MUTEX_STATE_LOCKED   &&
+       mutex_state != MUTEX_STATE_LOCKED_WAIT)
     {
         return OS_ERR_NOT_INITIALIZED;
     }
-
 
     /* Prepare data in case of specific parameters */
     prio = (mutex->flags >> 8) & MUTEX_PRIORITY_ELEVATION_NONE;

@@ -32,24 +32,24 @@ void queue_test(void)
     if(nodes[0] == NULL || error != OS_NO_ERR)
     {
         kernel_error("TEST_KQUEUE 0\n");
-        KERNEL_PANIC(error);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count++);
-    }   
+    }
 
     /* Delete node */
     error = queue_delete_node(&nodes[0]);
     if(nodes[0] != NULL || error != OS_NO_ERR)
     {
         kernel_error("TEST_KQUEUE 1\n");
-        KERNEL_PANIC(error);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count++);
-    } 
+    }
 
     error = OS_ERR_NULL_POINTER;
 
@@ -58,12 +58,12 @@ void queue_test(void)
     if(nodes[0] == NULL || error != OS_NO_ERR)
     {
         kernel_error("TEST_KQUEUE 2\n");
-        KERNEL_PANIC(error);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count++);
-    } 
+    }
 
     error = OS_ERR_NULL_POINTER;
 
@@ -72,24 +72,24 @@ void queue_test(void)
     if(queue == NULL || error != OS_NO_ERR)
     {
         kernel_error("TEST_KQUEUE 3\n");
-        KERNEL_PANIC(error);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count++);
-    } 
+    }
 
     /* Delete queue */
     error = queue_delete_queue(&queue);
     if(queue != NULL || error != OS_NO_ERR)
     {
         kernel_error("TEST_KQUEUE 4\n");
-        KERNEL_PANIC(error);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count++);
-    } 
+    }
 
     error = OS_ERR_NULL_POINTER;
 
@@ -98,60 +98,60 @@ void queue_test(void)
     if(queue == NULL || error != OS_NO_ERR)
     {
         kernel_error("TEST_KQUEUE 5\n");
-        KERNEL_PANIC(error);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count++);
-    } 
+    }
 
     /* Enqueue node */
     error = queue_push(nodes[0], queue);
     if(error != OS_NO_ERR)
     {
         kernel_error("TEST_KQUEUE 6\n");
-        KERNEL_PANIC(error);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count++);
-    } 
+    }
 
     /* Delete node */
     error = queue_delete_node(&nodes[0]);
     if(nodes[0] == NULL || error != OS_ERR_UNAUTHORIZED_ACTION)
     {
         kernel_error("TEST_KQUEUE 7 %d %d\n", nodes[0], error);
-        KERNEL_PANIC(error);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count++);
-    } 
+    }
 
     /* Enqueue NULL node */
     error = queue_push(NULL, queue);
     if(error != OS_ERR_NULL_POINTER)
     {
         kernel_error("TEST_KQUEUE 8\n");
-        KERNEL_PANIC(error);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count++);
-    } 
+    }
 
     /* Delete queue */
     error = queue_delete_queue(&queue);
     if(queue == NULL || error != OS_ERR_UNAUTHORIZED_ACTION)
     {
         kernel_error("TEST_KQUEUE 9\n");
-        KERNEL_PANIC(error);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count++);
-    } 
+    }
 
     error = OS_ERR_NULL_POINTER;
 
@@ -160,12 +160,12 @@ void queue_test(void)
     if(nodes[0] == NULL || error != OS_NO_ERR)
     {
         kernel_error("TEST_KQUEUE 10\n");
-        KERNEL_PANIC(error);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count++);
-    } 
+    }
 
     error = OS_ERR_NULL_POINTER;
 
@@ -176,12 +176,12 @@ void queue_test(void)
         if(nodes[i] == NULL || error != OS_NO_ERR)
         {
             kernel_error("TEST_KQUEUE 11\n");
-            KERNEL_PANIC(error);
+            kill_qemu();
         }
-        else 
+        else
         {
             kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count);
-        } 
+        }
 
         error = OS_ERR_NULL_POINTER;
     }
@@ -193,12 +193,12 @@ void queue_test(void)
         if(error != OS_NO_ERR)
         {
             kernel_error("TEST_KQUEUE 12\n");
-            KERNEL_PANIC(error);
+            kill_qemu();
         }
-        else 
+        else
         {
             kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count);
-        } 
+        }
     }
     ++test_count;
 
@@ -211,21 +211,21 @@ void queue_test(void)
         if(nodes[i] == NULL || error != OS_NO_ERR)
         {
             kernel_error("TEST_KQUEUE 14\n");
-            KERNEL_PANIC(error);
+            kill_qemu();
         }
-        else 
+        else
         {
             kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count);
-        } 
+        }
         if((uint32_t)nodes[i]->data != sorted[i])
         {
             kernel_error("TEST_KQUEUE 15\n");
-            KERNEL_PANIC(error);
+            kill_qemu();
         }
-        else 
+        else
         {
             kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count+ 1);
-        } 
+        }
 
 
         error = OS_ERR_NULL_POINTER;
@@ -236,12 +236,12 @@ void queue_test(void)
     if(queue->size != 0)
     {
         kernel_error("TEST_KQUEUE 16\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count++);
-    } 
+    }
 
     /* Delete nodes */
     for(uint8_t i = 0; i < 40; ++i)
@@ -250,12 +250,12 @@ void queue_test(void)
         if(nodes[i] != NULL || error != OS_NO_ERR)
         {
             kernel_error("TEST_KQUEUE 17\n");
-            KERNEL_PANIC(error);
+            kill_qemu();
         }
-        else 
+        else
         {
             kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count);
-        } 
+        }
     }
     ++test_count;
 
@@ -266,12 +266,12 @@ void queue_test(void)
         if(nodes[i] == NULL || error != OS_NO_ERR)
         {
             kernel_error("TEST_KQUEUE 18\n");
-            KERNEL_PANIC(error);
+            kill_qemu();
         }
-        else 
+        else
         {
             kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count);
-        } 
+        }
 
         error = OS_ERR_NULL_POINTER;
     }
@@ -284,12 +284,12 @@ void queue_test(void)
         if(error != OS_NO_ERR)
         {
             kernel_error("TEST_KQUEUE 19\n");
-            KERNEL_PANIC(error);
+            kill_qemu();
         }
-        else 
+        else
         {
             kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count);
-        } 
+        }
     }
     ++test_count;
 
@@ -302,12 +302,12 @@ void queue_test(void)
     if(find == NULL || error != OS_NO_ERR || find->data != (void*) 9)
     {
         kernel_error("TEST_KQUEUE 20\n");
-        KERNEL_PANIC(error);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count++);
-    } 
+    }
 
     error = OS_ERR_NULL_POINTER;
 
@@ -316,12 +316,12 @@ void queue_test(void)
     if(find != NULL || error != OS_ERR_NO_SUCH_ID)
     {
         kernel_error("TEST_KQUEUE 21\n");
-        KERNEL_PANIC(error);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count++);
-    } 
+    }
 
     error = OS_ERR_NULL_POINTER;
 
@@ -332,22 +332,22 @@ void queue_test(void)
         if(nodes[i] == NULL || error != OS_NO_ERR)
         {
             kernel_error("TEST_KQUEUE 22\n");
-            KERNEL_PANIC(error);
+            kill_qemu();
         }
-        else 
+        else
         {
             kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count);
-        } 
+        }
         if((uint32_t)nodes[i]->data != unsorted[i%10])
         {
 
             kernel_error("TEST_KQUEUE 23 %d %d %d\n", (uint32_t)nodes[i]->data, unsorted[i%10], i);
-            KERNEL_PANIC(error);
+            kill_qemu();
         }
-        else 
+        else
         {
             kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count + 1);
-        } 
+        }
         error = OS_ERR_NULL_POINTER;
     }
     ++test_count;
@@ -355,60 +355,60 @@ void queue_test(void)
     if(queue->size != 0)
     {
         kernel_error("TEST_KQUEUE 24\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count++);
-    } 
+    }
 
     /* Dequeue node on empty queue */
     find = queue_pop(queue, &error);
     if(find != NULL || error != OS_NO_ERR)
     {
         kernel_error("TEST_KQUEUE 25\n");
-        KERNEL_PANIC(error);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count++);
-    } 
+    }
 
     /* Delete queue */
     error = queue_delete_queue(&queue);
     if(queue != NULL || error != OS_NO_ERR)
     {
         kernel_error("TEST_KQUEUE 26\n");
-        KERNEL_PANIC(error);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count++);
-    } 
+    }
 
     /* Enqueue node on NULL queue */
     error = queue_push(nodes[0], queue);
     if(error != OS_ERR_NULL_POINTER)
     {
         kernel_error("TEST_KQUEUE 27\n");
-        KERNEL_PANIC(error);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count++);
-    } 
+    }
 
     /* Dequeue node on NULL queue */
     find = queue_pop(queue, &error);
     if(find != NULL || error != OS_ERR_NULL_POINTER)
     {
         kernel_error("TEST_KQUEUE 28\n");
-        KERNEL_PANIC(error);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count++);
-    } 
+    }
 
     /* Delete nodes */
     for(uint8_t i = 0; i < 40; ++i)
@@ -417,19 +417,19 @@ void queue_test(void)
         if(nodes[i] != NULL || error != OS_NO_ERR)
         {
             kernel_error("TEST_KQUEUE 29\n");
-            KERNEL_PANIC(error);
+            kill_qemu();
         }
-        else 
+        else
         {
             kernel_printf("[TESTMODE] Kernel Queue %d passed.\n", test_count);
-        } 
+        }
     }
 
     kernel_printf("[TESTMODE] Kernel queues tests passed\n");
 
     kill_qemu();
 }
-#else 
+#else
 void queue_test(void)
 {
 

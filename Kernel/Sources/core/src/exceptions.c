@@ -35,9 +35,7 @@
 #include <config.h>
 
 /* Tests header file */
-#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
-#endif
 
 /* Header file */
 #include <exceptions.h>
@@ -83,30 +81,36 @@ static void div_by_zero_handler(cpu_state_t* cpu_state, uintptr_t int_id,
  * FUNCTIONS
  ******************************************************************************/
 
+#define EXC_ASSERT(COND, MSG, ERROR) {                      \
+    if((COND) == FALSE)                                     \
+    {                                                       \
+        PANIC(ERROR, "EXCEPTION", MSG, TRUE);               \
+    }                                                       \
+}
+
 static void div_by_zero_handler(cpu_state_t* cpu_state,
                                 uintptr_t int_id,
                                 stack_state_t* stack_state)
 {
-    (void)cpu_state;
     kernel_process_t* proc;
 
+    (void)cpu_state;
+    (void)int_id;
+    (void)stack_state;
+
     /* If the exception line is not the divide by zero exception */
-    if(int_id != DIV_BY_ZERO_LINE)
-    {
-        KERNEL_ERROR("Divide by zero handler in wrong exception line.\n");
-        panic(cpu_state, int_id, stack_state);
-    }
+    EXC_ASSERT(int_id != DIV_BY_ZERO_LINE,
+               "Divide by zero invocated with wrong exception line.",
+               OS_ERR_INCORRECT_VALUE);
 
     proc = sched_get_current_process();
-    if(proc != NULL)
-    {
-        /* TODO: If we have a current process, kill the process */
-    }
-    else
-    {
-        KERNEL_ERROR("Divide by zero.\n");
-        panic(cpu_state, int_id, stack_state);
-    }
+
+    EXC_ASSERT(proc != NULL,
+               "Divide by zero in kernel",
+               OS_ERR_DIV_BY_ZERO);
+
+    /* TODO: Kill the process */
+
 }
 
 void kernel_exception_init(void)
@@ -118,16 +122,11 @@ void kernel_exception_init(void)
 
     err = kernel_exception_register_handler(DIV_BY_ZERO_LINE,
                                             div_by_zero_handler);
-    if(err != OS_NO_ERR)
-    {
-        KERNEL_ERROR("Could not initialize exception manager.\n");
-        KERNEL_PANIC(err);
-    }
+    EXC_ASSERT(err == OS_NO_ERR,
+               "Could not initialize exception manager.",
+               err);
 
-#ifdef TEST_MODE_ENABLED
-    exception_test();
-#endif
-
+    KERNEL_TEST_POINT(exception_test);
 }
 
 OS_RETURN_E kernel_exception_register_handler(const uint32_t exception_line,

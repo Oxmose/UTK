@@ -107,8 +107,8 @@ OS_RETURN_E sem_destroy(semaphore_t* sem)
     {
         sem->level = sem->waiters;
         SPINLOCK_UNLOCK(sem->lock);
-        futex.addr = (uint32_t*)&sem->level;
         futex.val  = waiters;
+        futex.addr = (uint32_t*)&sem->level;
         syscall_do(SYSCALL_FUTEX_WAKE, &futex);
         if(futex.error != OS_NO_ERR)
         {
@@ -146,26 +146,24 @@ OS_RETURN_E sem_pend(semaphore_t* sem)
     {
         ++sem->waiters;
 
-        SPINLOCK_UNLOCK(sem->lock);
-
         /* Wait on futex until the semaphore is opened */
         futex.addr = (uint32_t*)&sem->level;
         futex.val  = sem->level;
+
+        SPINLOCK_UNLOCK(sem->lock);
+
         syscall_do(SYSCALL_FUTEX_WAIT, &futex);
 
         SPINLOCK_LOCK(sem->lock);
 
+        /* We are not waiting anymore */
+        --sem->waiters;
+
         if(futex.error != OS_NO_ERR)
         {
-            /* We are not waiting anymore */
-            --sem->waiters;
-
             SPINLOCK_UNLOCK(sem->lock);
             return futex.error;
         }
-
-        /* We were woken up, not waiting anymore */
-        --sem->waiters;
 
         /* Check if the semaphore is still initialized */
         if(sem->init == FALSE)
@@ -178,6 +176,7 @@ OS_RETURN_E sem_pend(semaphore_t* sem)
 
     /* We acquired the semaphore */
     --sem->level;
+
     SPINLOCK_UNLOCK(sem->lock);
 
     KERNEL_DEBUG(SEMAPHORE_DEBUG_ENABLED, "Semaphore 0x%p acquired.", sem);
@@ -210,6 +209,7 @@ OS_RETURN_E sem_post(semaphore_t* sem)
         futex.addr = (uint32_t*)&sem->level;
         futex.val  = 1;
         syscall_do(SYSCALL_FUTEX_WAKE, &futex);
+
         if(futex.error != OS_NO_ERR)
         {
             SPINLOCK_UNLOCK(sem->lock);

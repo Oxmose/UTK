@@ -9,9 +9,6 @@ DEP_INCLUDES += -I ../../cpu/includes
 DEP_INCLUDES += -I ../../../time/includes
 DEP_INCLUDES += -I includes
 DEP_INCLUDES += -I ../includes
-
-ifeq ($(TESTS), TRUE)
 DEP_INCLUDES += -I ../../../tests/includes
-endif
 
 DEP_LIBS=

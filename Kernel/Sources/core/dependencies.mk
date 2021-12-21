@@ -7,7 +7,4 @@ DEP_INCLUDES += -I ../global
 DEP_INCLUDES += -I ../io/includes
 DEP_INCLUDES += -I ../time/includes
 DEP_INCLUDES += -I ../fs/includes
-
-ifeq ($(TESTS), TRUE)
 DEP_INCLUDES += -I ../tests/includes
-endif

@@ -27,9 +27,9 @@
 #ifndef __LIB_MUTEX_H_
 #define __LIB_MUTEX_H_
 
-#include <stddef.h>    /* Standard definitions */
-#include <stdint.h>    /* Generic int types */
-
+#include <stddef.h>       /* Standard definitions */
+#include <stdint.h>       /* Generic int types */
+#include <kernel_error.h> /* Kernel error API */
 /*******************************************************************************
  * CONSTANTS
  ******************************************************************************/

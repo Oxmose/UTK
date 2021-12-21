@@ -33,7 +33,7 @@ CHECKSUM    equ -(MAGIC + FLAGS)
 ;-------------------------------------------------------------------------------
 ; MACRO DEFINE
 ;-------------------------------------------------------------------------------
-; Kernel memory layout 
+; Kernel memory layout
 KERNEL_START_PAGE_ID equ (KERNEL_MEM_OFFSET >> 22)
 __kinit_low          equ (__kinit - KERNEL_MEM_OFFSET)
 
@@ -76,22 +76,22 @@ multiboot_header_start:
     dd multiboot_header_end - multiboot_header_start
     dd -(MAGIC + (multiboot_header_end - multiboot_header_start))
 align 8
-    ; info request 
+    ; info request
     dw 1
     dw 0
     dd 4 * 2 + 8
-    dd 3 
+    dd 3
     dd 6
 align 8
     ; module align
     dw 6
     dw 0
-    dd 8 
+    dd 8
 ; Multiboot terminate tag
 align 8
-    dw 0                                                 
-    dw 0                                                                            
-    dd 8  
+    dw 0
+    dw 0
+    dd 8
 multiboot_header_end:
 
 section .low_startup_code
@@ -105,10 +105,10 @@ __kinit:
     ; Save Multiboot info to memory
     mov dword [_kernel_multiboot_ptr], ebx
 
-    ; Init pre-boot stack 
+    ; Init pre-boot stack
     mov eax, _kernel_preboot_stack
     add eax, 0x1FC
-    mov esp, eax 
+    mov esp, eax
     mov ebp, esp
 
     ; Call pre-boot routines
@@ -150,13 +150,13 @@ _kernel_multiboot_ptr:
 
 section .high_startup_code
 align 4
-; High memory loader 
+; High memory loader
 __kinit_high:
     ; Init stack
     mov eax, _KERNEL_STACKS_BASE
     mov ebx, KERNEL_STACK_SIZE - 4
     add eax, ebx
-    mov esp, eax 
+    mov esp, eax
     mov ebp, esp
 
     ; Clear flags
@@ -172,17 +172,17 @@ __kinit_high:
 
 __kinit_end:
     ; Disable interrupt and loop forever
-    cli 
+    cli
     hlt
     jmp __kinit_end
 
 ;-------------------------------------------------------------------------------
 ; DATA
 ;-------------------------------------------------------------------------------
-section .data 
+section .data
 
 ;-------------------------------------------------------------------------------
-; Kernel initial page directory: 
+; Kernel initial page directory:
 ; 16MB mapped for high addresses
 ; 4MB mapped 1-1 for low addresses
 align 0x1000
@@ -190,7 +190,7 @@ _kinit_pgdir:
     ; First 4MB R/W Present.
     dd 0x00000083
     ; Pages before kernel space.
-    times (KERNEL_START_PAGE_ID - 1) dd 0         
+    times (KERNEL_START_PAGE_ID - 1) dd 0
     ; This page directory entry defines a 4MB page containing the kernel.
     dd 0x00000083
     ; This page directory entry defines a 4MB page containing the kernel.

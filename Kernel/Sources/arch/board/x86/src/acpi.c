@@ -26,14 +26,13 @@
 #include <kernel_error.h>  /* Kernel error codes */
 #include <arch_memmgt.h>   /* Atcihtecture memory management */
 #include <lapic.h>         /* LAPIC driver */
+#include <stddef.h>        /* Standard definitions */
 
 /* UTK configuration file */
 #include <config.h>
 
 /* Tests header file */
-#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
-#endif
 
 /* Header file */
 #include <acpi.h>
@@ -346,26 +345,26 @@ static acpi_page_tree_t* acpi_mapping;
 
 /**
  * @brief Search a page in the ACPI mapped tree.
- * 
+ *
  * @details Search a page in the ACPI mapped tree. The function return 0 if the
  * page was not found, otherwise 1 is returned.
- * 
+ *
  * @param[in] addr The address of the mapped page to search.
  * @param[in] node The starting point node to walk the tree.
- * 
- * @return The function return FALSE if the page was not found, otherwise TRUE 
+ *
+ * @return The function return FALSE if the page was not found, otherwise TRUE
  * is returned.
  */
 static bool_t walk_acpi_tree(acpi_page_tree_t* node, const uintptr_t addr);
 
 /**
  * @brief Search a page in the ACPI mapped tree.
- * 
+ *
  * @details Search a page in the ACPI mapped tree. The function return 0 if the
  * page was not found, otherwise 1 is returned.
- * 
+ *
  * @param[in] addr The address of the mapped page to search.
- * 
+ *
  * @return The function return FALSE if the page was not found, otherwise TRUE
  * is returned.
  */
@@ -373,9 +372,9 @@ static bool_t is_page_mapped(const uintptr_t addr);
 
 /**
  * @brief Adds a mapped page node to the ACPI page tree.
- * 
+ *
  * @details Adds a mapped page node to the ACPI page tree.
- * 
+ *
  * @param[in] node The starting point node to walk the tree.
  * @param[in] addr The address of the mapped page to add.
  */
@@ -383,18 +382,18 @@ static void add_acpi_tree(acpi_page_tree_t* node, const uintptr_t addr);
 
 /**
  * @brief Adds a mapped page to the ACPI page tree.
- * 
+ *
  * @details Adds a mapped page to the ACPI page tree.
- * 
+ *
  * @param[in] addr The address of the mapped page to add.
  */
 static void add_mapped_page(uintptr_t addr);
 
 /**
  * @brief Adds a mapped page to the ACPI page tree.
- * 
+ *
  * @details Adds a mapped page to the ACPI page tree.
- * 
+ *
  * @param[in] addr The address of the mapped page to add.
  */
 static void add_mapped_page(uintptr_t addr);
@@ -424,7 +423,7 @@ static void acpi_parse_apic(acpi_madt_t* madt_ptr);
 
 /**
  * @brief Parse the APIC DSDT table.
- * 
+ *
  * @details The function will save the DSDT table address in for further use.
  *
  * @param dsdt_ptr[in] The address of the DSDT entry to parse.
@@ -433,9 +432,9 @@ static void acpi_parse_dsdt(acpi_dsdt_t* dsdt_ptr);
 
 /**
  * @brief Parse the APIC FADT table.
- * 
- * @details Parse the APIC FADT table. The function will save the FADT table 
- * address in for further use. Then the FACS and DSDT addresses are extracted 
+ *
+ * @details Parse the APIC FADT table. The function will save the FADT table
+ * address in for further use. Then the FACS and DSDT addresses are extracted
  * and both tables are parsed.
  *
  * @param[in] fadt_ptr The address of the FADT entry to parse.
@@ -444,10 +443,10 @@ static void acpi_parse_fadt(acpi_fadt_t* fadt_ptr);
 
 /**
  * @brief Parse the APIC SDT table.
- * 
- * @details Parse the APIC SDT table. The function will detect the SDT given as 
- * parameter thanks to the information contained in the header. Then, if the 
- * entry is correctly detected and supported, the parsing function corresponding 
+ *
+ * @details Parse the APIC SDT table. The function will detect the SDT given as
+ * parameter thanks to the information contained in the header. Then, if the
+ * entry is correctly detected and supported, the parsing function corresponding
  * will be called.
  *
  * @param[in] header The address of the SDT entry to parse..
@@ -456,9 +455,9 @@ static void acpi_parse_dt(acpi_header_t* header);
 
 /**
  * @brief Parse the APIC RSDT table.
- * 
- * @details Parse the APIC RSDT table. The function will detect the read each 
- * entries of the RSDT and call the corresponding functions to parse the entries 
+ *
+ * @details Parse the APIC RSDT table. The function will detect the read each
+ * entries of the RSDT and call the corresponding functions to parse the entries
  * correctly.
  *
  * @param[in] rsdt_ptr The address of the RSDT entry to parse.
@@ -467,7 +466,7 @@ static void acpi_parse_rsdt(rsdt_descriptor_t* rsdt_ptr);
 
 /**
  * @brief Parse the APIC XSDT table.
- * @details The function will detect the read each entries of the XSDT and call 
+ * @details The function will detect the read each entries of the XSDT and call
  * the corresponding functions to parse the entries correctly.
  *
  * @param xsdt_ptr[in] The address of the XSDT entry to parse.
@@ -476,8 +475,8 @@ static void acpi_parse_xsdt(xsdt_descriptor_t* xsdt_ptr);
 
 /**
  * @brief Use the APIC RSDP to parse the ACPI infomation.
- * 
- * @details Use the APIC RSDP to parse the ACPI infomation. The function will 
+ *
+ * @details Use the APIC RSDP to parse the ACPI infomation. The function will
  * detect the RSDT or XSDT pointed and parse them.
  *
  * @param[in] rsdp_desc The RSDP to walk.
@@ -487,6 +486,13 @@ static void acpi_parse_rsdp(rsdp_descriptor_t* rsdp_desc);
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
+
+#define ACPI_ASSERT(COND, MSG, ERROR) {                     \
+    if((COND) == FALSE)                                     \
+    {                                                       \
+        PANIC(ERROR, "ACPI", MSG, TRUE);                    \
+    }                                                       \
+}
 
 static bool_t walk_acpi_tree(acpi_page_tree_t* node, const uintptr_t addr)
 {
@@ -515,26 +521,25 @@ static bool_t is_page_mapped(const uintptr_t addr)
 
 static void add_acpi_tree(acpi_page_tree_t* node, const uintptr_t addr)
 {
-    if(node == NULL)
-    {
-        KERNEL_ERROR("Adding to a NULL node\n");
-        KERNEL_PANIC(OS_ERR_NULL_POINTER);
-    }
-    else if(node->address == addr)
-    {
-        KERNEL_ERROR("Adding an already existing node\n");
-        KERNEL_PANIC(OS_ERR_NULL_POINTER);
-    }
-    else if(addr > node->address)
+    ACPI_ASSERT(node != NULL,
+                "Cannot add NULL node to ACPI tree",
+                OS_ERR_NULL_POINTER);
+
+    ACPI_ASSERT(node->address != addr,
+                "Cannot add an already existing node to ACPI tree",
+                OS_ERR_UNAUTHORIZED_ACTION);
+
+    /* Add on top of tree */
+    if(addr > node->address)
     {
         if(node->right == NULL)
         {
             node->right = kmalloc(sizeof(acpi_page_tree_t));
-            if(node->right == NULL)
-            {
-                KERNEL_ERROR("Could not allocate ACPI mapping tree\n");
-                KERNEL_PANIC(OS_ERR_MALLOC);
-            }
+
+            ACPI_ASSERT(node->right != NULL,
+                        "Could not allocate ACPI node",
+                        OS_ERR_MALLOC);
+
             node->right->right = NULL;
             node->right->left  = NULL;
             node->right->address = addr;
@@ -550,11 +555,11 @@ static void add_acpi_tree(acpi_page_tree_t* node, const uintptr_t addr)
         if(node->left == NULL)
         {
             node->left = kmalloc(sizeof(acpi_page_tree_t));
-            if(node->left == NULL)
-            {
-                KERNEL_ERROR("Could not allocate ACPI mapping tree\n");
-                KERNEL_PANIC(OS_ERR_MALLOC);
-            }
+
+            ACPI_ASSERT(node->left != NULL,
+                        "Could not allocate ACPI node",
+                        OS_ERR_MALLOC);
+
             node->left->right = NULL;
             node->left->left  = NULL;
             node->left->address = addr;
@@ -572,16 +577,16 @@ static void add_mapped_page(uintptr_t addr)
     if(acpi_mapping == NULL)
     {
         acpi_mapping = kmalloc(sizeof(acpi_page_tree_t));
-        if(acpi_mapping == NULL)
-        {
-            KERNEL_ERROR("Could not allocate ACPI mapping tree\n");
-            KERNEL_PANIC(OS_ERR_MALLOC);
-        }
+
+        ACPI_ASSERT(acpi_mapping != NULL,
+                    "Could not allocate ACPI mapping tree",
+                    OS_ERR_MALLOC);
+
         acpi_mapping->right = NULL;
         acpi_mapping->left  = NULL;
         acpi_mapping->address = addr;
     }
-    else 
+    else
     {
         add_acpi_tree(acpi_mapping, addr);
     }
@@ -596,8 +601,8 @@ static void acpi_map_data(const void* start_addr, size_t size)
     addr_align = (uintptr_t)start_addr & PAGE_ALIGN_MASK;
     size       = size + (uintptr_t)start_addr - addr_align;
 
-    KERNEL_DEBUG(ACPI_DEBUG_ENABLED, 
-                         "[ACPI] Mapping request: 0x%p (%d)", 
+    KERNEL_DEBUG(ACPI_DEBUG_ENABLED,
+                         "[ACPI] Mapping request: 0x%p (%d)",
                          addr_align, size);
 
     /* Search for mapping for each pages */
@@ -606,34 +611,35 @@ static void acpi_map_data(const void* start_addr, size_t size)
         /* Try to map, if already mapped skip */
         if(is_page_mapped(addr_align) == 0)
         {
-            KERNEL_DEBUG(ACPI_DEBUG_ENABLED, 
-                         "[ACPI] Mapping: 0x%p", 
+            KERNEL_DEBUG(ACPI_DEBUG_ENABLED,
+                         "[ACPI] Mapping: 0x%p",
                          addr_align);
+
             err = memory_declare_hw(addr_align, KERNEL_PAGE_SIZE);
-            if(err != OS_NO_ERR)
-            {
-                KERNEL_ERROR("Could not declare ACPI region\n");
-                KERNEL_PANIC(err)
-            }
-            memory_mmap_direct((void*)addr_align, 
-                                (void*)addr_align, 
-                                KERNEL_PAGE_SIZE, 
-                                1, 
+
+            ACPI_ASSERT(err == OS_NO_ERR,
+                        "Could not declare ACPI region",
+                        err);
+
+            memory_mmap_direct((void*)addr_align,
+                                (void*)addr_align,
+                                KERNEL_PAGE_SIZE,
+                                1,
                                 0,
                                 0,
                                 1,
                                 NULL);
-            
+
             add_mapped_page(addr_align);
         }
-        
+
         /* Update address and size */
         addr_align += KERNEL_PAGE_SIZE;
         if(size >= KERNEL_PAGE_SIZE)
         {
             size -= KERNEL_PAGE_SIZE;
         }
-        else 
+        else
         {
             size = 0;
         }
@@ -653,11 +659,9 @@ static void acpi_parse_apic(acpi_madt_t* madt_ptr)
     cpu_count = 0;
     io_apic_count = 0;
 
-    if(madt_ptr == NULL)
-    {
-        KERNEL_ERROR("Tried to parse a NULL MADT\n");
-        KERNEL_PANIC(OS_ERR_NULL_POINTER);
-    }
+    ACPI_ASSERT(madt_ptr != NULL,
+                "Tried to parse a NULL MADT",
+                OS_ERR_NULL_POINTER);
 
     acpi_map_data(madt_ptr, sizeof(acpi_madt_t));
 
@@ -670,91 +674,84 @@ static void acpi_parse_apic(acpi_madt_t* madt_ptr)
         sum += ((uint8_t*)madt_ptr)[i];
     }
 
-    if((sum & 0xFF) == 0)
+    ACPI_ASSERT((sum & 0xFF) == 0,
+                "MADT checksum failed",
+                OS_ERR_CHECKSUM_FAILED);
+
+    ACPI_ASSERT(*((uint32_t*)madt_ptr->header.signature) == ACPI_APIC_SIG,
+                "Invalid MADT signature",
+                OS_ERR_WRONG_SIGNATURE);
+
+
+    madt_entry = (uintptr_t)(madt_ptr + 1);
+    madt_limit = ((uintptr_t)madt_ptr) + madt_ptr->header.length;
+
+    acpi_map_data((void*)madt_entry, madt_limit - madt_entry);
+
+    while (madt_entry < madt_limit)
     {
-        if(*((uint32_t*)madt_ptr->header.signature) == ACPI_APIC_SIG)
+        /* Get entry header */
+        header = (apic_header_t*)madt_entry;
+        type = header->type;
+
+        /* Check entry type */
+        if(type == APIC_TYPE_LOCAL_APIC)
         {
-            madt_entry = (uintptr_t)(madt_ptr + 1);
-            madt_limit = ((uintptr_t)madt_ptr) + madt_ptr->header.length;
+            KERNEL_DEBUG(ACPI_DEBUG_ENABLED,
+                "[ACPI] Found LAPIC: CPU #%d | ID #%d | FLAGS %x",
+                ((local_apic_t*)madt_entry)->acpi_cpu_id,
+                ((local_apic_t*)madt_entry)->apic_id,
+                ((local_apic_t*)madt_entry)->flags);
 
-            acpi_map_data((void*)madt_entry, madt_limit - madt_entry);
-          
-            while (madt_entry < madt_limit)
+            if(cpu_count < MAX_CPU_COUNT)
             {
-                /* Get entry header */
-                header = (apic_header_t*)madt_entry;
-                type = header->type;
-
-                /* Check entry type */
-                if(type == APIC_TYPE_LOCAL_APIC)
+                /* Add CPU info to the lapic table */
+                err = vector_push(cpu_lapics, (void*)madt_entry);
+                if(err != OS_NO_ERR)
                 {
-                    KERNEL_DEBUG(ACPI_DEBUG_ENABLED, 
-                        "[ACPI] Found LAPIC: CPU #%d | ID #%d | FLAGS %x",
-                        ((local_apic_t*)madt_entry)->acpi_cpu_id,
-                        ((local_apic_t*)madt_entry)->apic_id,
-                        ((local_apic_t*)madt_entry)->flags);
-
-                    if(cpu_count < MAX_CPU_COUNT)
-                    {
-                        /* Add CPU info to the lapic table */
-                        err = vector_push(cpu_lapics, (void*)madt_entry);
-                        if(err != OS_NO_ERR)
-                        {
-                            KERNEL_ERROR(
-                            "Could not allocate node for new lapic %d\n",
-                            err);
-                            continue;
-                        }                                           
-                        ++cpu_count;
-                    }
-                    else
-                    {
-                        KERNEL_INFO(
-                            "Exceeded CPU count (%u), ignoring CPU %d\n",
-                            MAX_CPU_COUNT,
-                            ((local_apic_t*)madt_entry)->acpi_cpu_id);
-                    }
+                    KERNEL_ERROR(
+                    "Could not allocate node for new lapic %d\n",
+                    err);
+                    continue;
                 }
-                else if(type == APIC_TYPE_IO_APIC)
-                {
-                    KERNEL_DEBUG(ACPI_DEBUG_ENABLED, 
-                        "[ACPI] Found IO-APIC ADDR 0x%p | ID #%d | GSIB %x",
-                        ((io_apic_t*)madt_entry)->io_apic_addr,
-                        ((io_apic_t*)madt_entry)->apic_id,
-                        ((io_apic_t*)madt_entry)->
-                        global_system_interrupt_base);
-
-                    if(io_apic_count < MAX_IO_APIC_COUNT)
-                    {
-                        err = vector_push(io_apics, (void*)madt_entry);
-                        if(err != OS_NO_ERR)
-                        {
-                            KERNEL_ERROR(
-                            "Could not add node for new IO APIC\n");
-                            continue;
-                        }    
-                        ++io_apic_count;
-                    }
-                    else
-                    {
-                        KERNEL_INFO(
-                            "Exceeded IO-APIC count, ignoring IO-APIC %d\n",
-                            ((io_apic_t*)madt_entry)->apic_id);
-                    }
-                }
-                madt_entry += header->length;
+                ++cpu_count;
+            }
+            else
+            {
+                KERNEL_INFO(
+                    "Exceeded CPU count (%u), ignoring CPU %d\n",
+                    MAX_CPU_COUNT,
+                    ((local_apic_t*)madt_entry)->acpi_cpu_id);
             }
         }
-        else
+        else if(type == APIC_TYPE_IO_APIC)
         {
-            KERNEL_ERROR("MADT Signature comparison failed\n");
-            KERNEL_PANIC(OS_ERR_WRONG_SIGNATURE);
+            KERNEL_DEBUG(ACPI_DEBUG_ENABLED,
+                "[ACPI] Found IO-APIC ADDR 0x%p | ID #%d | GSIB %x",
+                ((io_apic_t*)madt_entry)->io_apic_addr,
+                ((io_apic_t*)madt_entry)->apic_id,
+                ((io_apic_t*)madt_entry)->
+                global_system_interrupt_base);
+
+            if(io_apic_count < MAX_IO_APIC_COUNT)
+            {
+                err = vector_push(io_apics, (void*)madt_entry);
+                if(err != OS_NO_ERR)
+                {
+                    KERNEL_ERROR(
+                    "Could not add node for new IO APIC\n");
+                    continue;
+                }
+                ++io_apic_count;
+            }
+            else
+            {
+                KERNEL_INFO(
+                    "Exceeded IO-APIC count, ignoring IO-APIC %d\n",
+                    ((io_apic_t*)madt_entry)->apic_id);
+            }
         }
-    }
-    else
-    {
-        KERNEL_ERROR("MADT Checksum failed\n");
-        KERNEL_PANIC(OS_ERR_CHECKSUM_FAILED);
+        madt_entry += header->length;
     }
 }
 
@@ -763,11 +760,9 @@ static void acpi_parse_dsdt(acpi_dsdt_t* dsdt_ptr)
     int32_t  sum;
     uint32_t i;
 
-    if(dsdt_ptr == NULL)
-    {
-        KERNEL_ERROR("Tried to parse a NULL DSDT\n");
-        KERNEL_PANIC(OS_ERR_NULL_POINTER);
-    }
+    ACPI_ASSERT(dsdt_ptr != NULL,
+                "Tried to parse a NULL DSDT",
+                OS_ERR_NULL_POINTER);
 
     acpi_map_data(dsdt_ptr, sizeof(acpi_dsdt_t));
 
@@ -782,17 +777,14 @@ static void acpi_parse_dsdt(acpi_dsdt_t* dsdt_ptr)
     {
         sum += ((uint8_t*)dsdt_ptr)[i];
     }
-    if((sum & 0xFF) != 0)
-    {
-        KERNEL_ERROR("DSDT Checksum failed\n");
-        KERNEL_PANIC(OS_ERR_CHECKSUM_FAILED);
-    }
 
-    if(*((uint32_t*)dsdt_ptr->header.signature) != ACPI_DSDT_SIG)
-    {
-        KERNEL_ERROR("DSDT Signature comparison failed\n");
-        KERNEL_PANIC(OS_ERR_WRONG_SIGNATURE);
-    }
+    ACPI_ASSERT((sum & 0xFF) == 0,
+                "DSDT Checksum failed",
+                OS_ERR_CHECKSUM_FAILED);
+
+    ACPI_ASSERT(*((uint32_t*)dsdt_ptr->header.signature) == ACPI_DSDT_SIG,
+                "Wrong DSDT Signature",
+                OS_ERR_WRONG_SIGNATURE);
 }
 
 static void acpi_parse_fadt(acpi_fadt_t* fadt_ptr)
@@ -800,11 +792,9 @@ static void acpi_parse_fadt(acpi_fadt_t* fadt_ptr)
     int32_t  sum;
     uint32_t i;
 
-    if(fadt_ptr == NULL)
-    {
-        KERNEL_ERROR("Tried to parse a NULL FADT\n");
-        KERNEL_PANIC(OS_ERR_NULL_POINTER);
-    }
+    ACPI_ASSERT(fadt_ptr != NULL,
+                "Tried to parse a NULL FADT",
+                OS_ERR_NULL_POINTER);
 
     acpi_map_data(fadt_ptr, sizeof(acpi_fadt_t));
 
@@ -817,35 +807,25 @@ static void acpi_parse_fadt(acpi_fadt_t* fadt_ptr)
         sum += ((uint8_t*)fadt_ptr)[i];
     }
 
-    if((sum & 0xFF) == 0)
-    {
-        if(*((uint32_t*)fadt_ptr->header.signature) == ACPI_FACP_SIG)
-        {
-            /* Parse DSDT */
-            acpi_parse_dsdt((acpi_dsdt_t*)fadt_ptr->dsdt);
-        }
-        else
-        {
-            KERNEL_ERROR("FADT Signature comparison failed\n");
-            KERNEL_PANIC(OS_ERR_WRONG_SIGNATURE);
-        }
-    }
-    else 
-    {
-        KERNEL_ERROR("FADT Checksum failed\n");
-        KERNEL_PANIC(OS_ERR_CHECKSUM_FAILED);
-    }
+    ACPI_ASSERT((sum & 0xFF) == 0,
+                "FADT Checksum failed",
+                OS_ERR_CHECKSUM_FAILED);
+
+    ACPI_ASSERT(*((uint32_t*)fadt_ptr->header.signature) == ACPI_FACP_SIG,
+                "FADT Signature comparison failed",
+                OS_ERR_WRONG_SIGNATURE);
+
+    /* Parse DSDT */
+    acpi_parse_dsdt((acpi_dsdt_t*)fadt_ptr->dsdt);
 }
 
 static void acpi_parse_dt(acpi_header_t* header)
 {
     char sig_str[5];
 
-    if(header == NULL)
-    {
-        KERNEL_ERROR("Tried to parse a NULL DT\n");
-        return;
-    }
+    ACPI_ASSERT(header != NULL,
+                "Tried to parse a NULL DT",
+                OS_ERR_NULL_POINTER);
 
     acpi_map_data(header, sizeof(acpi_header_t));
 
@@ -865,7 +845,7 @@ static void acpi_parse_dt(acpi_header_t* header)
         acpi_parse_apic((acpi_madt_t*)header);
         madt = (acpi_madt_t *)header;
     }
-    else 
+    else
     {
         KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "[ACPI] Not supported: %s", sig_str);
     }
@@ -879,11 +859,9 @@ static void acpi_parse_rsdt(rsdt_descriptor_t* rsdt_ptr)
     int8_t         sum;
     uint8_t        i;
 
-    if(rsdt_ptr == NULL)
-    {
-        KERNEL_ERROR("Tried to parse a NULL RSDT\n");
-        KERNEL_PANIC(OS_ERR_NULL_POINTER);
-    }
+    ACPI_ASSERT(rsdt_ptr != NULL,
+                "Tried to parse a NULL RSDT",
+                OS_ERR_NULL_POINTER);
 
     acpi_map_data(rsdt_ptr, sizeof(rsdt_descriptor_t));
 
@@ -896,33 +874,25 @@ static void acpi_parse_rsdt(rsdt_descriptor_t* rsdt_ptr)
         sum += ((uint8_t*)rsdt_ptr)[i];
     }
 
-    if((sum & 0xFF) == 0)
-    {
-        if(*((uint32_t*)rsdt_ptr->header.signature) == ACPI_RSDT_SIG)
-        {
-            range_begin = (uintptr_t)(&rsdt_ptr->dt_pointers);
-            range_end   = ((uintptr_t)rsdt_ptr + rsdt_ptr->header.length);
+    ACPI_ASSERT((sum & 0xFF) == 0,
+                "RSDT Checksum failed",
+                OS_ERR_CHECKSUM_FAILED);
 
-            acpi_map_data((void*)range_begin, range_end - range_begin);
+    ACPI_ASSERT(*((uint32_t*)rsdt_ptr->header.signature) == ACPI_RSDT_SIG,
+                "Wrong RSDT Signature",
+                OS_ERR_WRONG_SIGNATURE);
 
-            /* Parse each SDT of the RSDT */
-            while(range_begin < range_end)
-            {
-                address = (acpi_header_t*)(*(uintptr_t*)range_begin);
-                acpi_parse_dt(address);
-                range_begin += sizeof(uintptr_t);
-            }
-        }
-        else 
-        {
-            KERNEL_ERROR("RSDT Signature comparison failed\n");
-            KERNEL_PANIC(OS_ERR_WRONG_SIGNATURE);
-        }
-    }
-    else
+    range_begin = (uintptr_t)(&rsdt_ptr->dt_pointers);
+    range_end   = ((uintptr_t)rsdt_ptr + rsdt_ptr->header.length);
+
+    acpi_map_data((void*)range_begin, range_end - range_begin);
+
+    /* Parse each SDT of the RSDT */
+    while(range_begin < range_end)
     {
-        KERNEL_ERROR("RSDT Checksum failed\n");
-        KERNEL_PANIC(OS_ERR_CHECKSUM_FAILED);
+        address = (acpi_header_t*)(*(uintptr_t*)range_begin);
+        acpi_parse_dt(address);
+        range_begin += sizeof(uintptr_t);
     }
 }
 
@@ -934,11 +904,9 @@ static void acpi_parse_xsdt(xsdt_descriptor_t* xsdt_ptr)
     int8_t         sum;
     uint8_t        i;
 
-    if(xsdt_ptr == NULL)
-    {
-        KERNEL_ERROR("Tried to parse a NULL XSDT\n");
-        KERNEL_PANIC(OS_ERR_NULL_POINTER);
-    }
+    ACPI_ASSERT(xsdt_ptr != NULL,
+                "Tried to parse a NULL XSDT",
+                OS_ERR_NULL_POINTER);
 
     acpi_map_data(xsdt_ptr, sizeof(xsdt_descriptor_t));
 
@@ -951,33 +919,25 @@ static void acpi_parse_xsdt(xsdt_descriptor_t* xsdt_ptr)
         sum += ((uint8_t*)xsdt_ptr)[i];
     }
 
-    if((sum & 0xFF) == 0)
-    {
-        if(*((uint32_t*)xsdt_ptr->header.signature) == ACPI_XSDT_SIG)
-        {
-            range_begin = (uintptr_t)(&xsdt_ptr->dt_pointers);
-            range_end   = ((uintptr_t)xsdt_ptr + xsdt_ptr->header.length);
+    ACPI_ASSERT((sum & 0xFF) == 0,
+                "XSDT Checksum failed",
+                OS_ERR_CHECKSUM_FAILED);
 
-            acpi_map_data((void*)range_begin, range_end - range_begin);
-            
-            /* Parse each SDT of the RSDT */
-            while(range_begin < range_end)
-            {
-                address = (acpi_header_t*)(*(uintptr_t*)range_begin);
-                acpi_parse_dt((acpi_header_t*)address);
-                range_begin += sizeof(uintptr_t);
-            }
-        }
-        else 
-        {
-            KERNEL_ERROR("XSDT Signature comparison failed\n");
-            KERNEL_PANIC(OS_ERR_WRONG_SIGNATURE);
-        }
-    }
-    else
+    ACPI_ASSERT(*((uint32_t*)xsdt_ptr->header.signature) == ACPI_XSDT_SIG,
+                "Wrong XSDT Signature",
+                OS_ERR_WRONG_SIGNATURE);
+
+    range_begin = (uintptr_t)(&xsdt_ptr->dt_pointers);
+    range_end   = ((uintptr_t)xsdt_ptr + xsdt_ptr->header.length);
+
+    acpi_map_data((void*)range_begin, range_end - range_begin);
+
+    /* Parse each SDT of the RSDT */
+    while(range_begin < range_end)
     {
-        KERNEL_ERROR("XSDT Checksum failed\n");
-        KERNEL_PANIC(OS_ERR_CHECKSUM_FAILED);
+        address = (acpi_header_t*)(*(uintptr_t*)range_begin);
+        acpi_parse_dt((acpi_header_t*)address);
+        range_begin += sizeof(uintptr_t);
     }
 }
 
@@ -988,11 +948,9 @@ static void acpi_parse_rsdp(rsdp_descriptor_t* rsdp_desc)
     uintptr_t            xsdt_addr;
     rsdp_descriptor_2_t* extended_rsdp;
 
-    if(rsdp_desc == NULL)
-    {
-        KERNEL_ERROR("Tried to parse a NULL RSDP\n");
-        KERNEL_PANIC(OS_ERR_NULL_POINTER);
-    }
+    ACPI_ASSERT(rsdp_desc != NULL,
+                "Tried to parse a NULL RSDP",
+                OS_ERR_NULL_POINTER);
 
     KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "[ACPI] Parsing RSDP at 0x%p", rsdp_desc);
 
@@ -1005,57 +963,47 @@ static void acpi_parse_rsdp(rsdp_descriptor_t* rsdp_desc)
         sum += ((uint8_t*)rsdp_desc)[i];
     }
 
-    if((sum & 0xFF) == 0)
+    ACPI_ASSERT((sum & 0xFF) == 0,
+                "RSDP Checksum failed",
+                OS_ERR_CHECKSUM_FAILED);
+
+    KERNEL_DEBUG(ACPI_DEBUG_ENABLED,
+                    "[ACPI] Revision %d detected",
+                    rsdp_desc->revision);
+
+    ACPI_ASSERT((rsdp_desc->revision == 0 || rsdp_desc->revision == 2),
+                "Unsupported ACPI version",
+                OS_ERR_NOT_SUPPORTED);
+
+    /* ACPI version check */
+    if(rsdp_desc->revision == 0)
     {
-        KERNEL_DEBUG(ACPI_DEBUG_ENABLED, 
-                     "[ACPI] Revision %d detected", 
-                     rsdp_desc->revision);
-
-        /* ACPI version check */
-        if(rsdp_desc->revision == 0)
-        {
-            acpi_parse_rsdt((rsdt_descriptor_t*)rsdp_desc->rsdt_address);          
-        }
-        else if(rsdp_desc->revision == 2)
-        {
-            extended_rsdp = (rsdp_descriptor_2_t*) rsdp_desc;
-            sum = 0;
-
-            for(i = 0; i < sizeof(rsdp_descriptor_2_t); ++i)
-            {
-                sum += ((uint8_t*)extended_rsdp)[i];
-            }
-            if(sum == 0)
-            {
-                xsdt_addr = extended_rsdp->xsdt_address;
-
-                if(xsdt_addr)
-                {
-                    acpi_parse_xsdt((xsdt_descriptor_t*)xsdt_addr);
-                }
-                else
-                {
-                    acpi_parse_rsdt((rsdt_descriptor_t*)
-                                    rsdp_desc->rsdt_address);
-                }
-            }
-            else 
-            {
-                KERNEL_ERROR("Extended RSDP Checksum failed\n");
-                KERNEL_PANIC(OS_ERR_CHECKSUM_FAILED);
-            }
-
-        }
-        else
-        {
-            KERNEL_ERROR("Unsupported ACPI version %d\n", rsdp_desc->revision);
-            KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
-        }
+        acpi_parse_rsdt((rsdt_descriptor_t*)rsdp_desc->rsdt_address);
     }
-    else
+    else if(rsdp_desc->revision == 2)
     {
-        KERNEL_ERROR("RSDP Checksum failed\n");
-        KERNEL_PANIC(OS_ERR_CHECKSUM_FAILED);
+        extended_rsdp = (rsdp_descriptor_2_t*) rsdp_desc;
+        sum = 0;
+
+        for(i = 0; i < sizeof(rsdp_descriptor_2_t); ++i)
+        {
+            sum += ((uint8_t*)extended_rsdp)[i];
+        }
+        if(sum == 0)
+        {
+            xsdt_addr = extended_rsdp->xsdt_address;
+
+            if(xsdt_addr)
+            {
+                acpi_parse_xsdt((xsdt_descriptor_t*)xsdt_addr);
+            }
+            else
+            {
+                acpi_parse_rsdt((rsdt_descriptor_t*)
+                                rsdp_desc->rsdt_address);
+            }
+        }
+
     }
 }
 
@@ -1065,7 +1013,7 @@ void acpi_init(void)
     uint8_t*    range_end;
     uint64_t    signature;
     OS_RETURN_E err;
-    
+
     err = OS_NO_ERR;
 
     /* Init pointers */
@@ -1076,17 +1024,14 @@ void acpi_init(void)
 
 
     cpu_lapics = vector_create(VECTOR_ALLOCATOR(kmalloc, kfree), NULL, 0, &err);
-    if(cpu_lapics == NULL || err != OS_NO_ERR)
-    {
-        KERNEL_ERROR("Could not create LAPIC vector\n");
-        KERNEL_PANIC(err);
-    }
+    ACPI_ASSERT((cpu_lapics != NULL && err == OS_NO_ERR),
+                "Could not create LAPIC vector",
+                err);
+
     io_apics = vector_create(VECTOR_ALLOCATOR(kmalloc, kfree), NULL, 0, &err);
-    if(io_apics == NULL || err != OS_NO_ERR)
-    {
-        KERNEL_ERROR("Could not create IO-APIC vector\n");
-        KERNEL_PANIC(err);
-    }
+    ACPI_ASSERT((io_apics != NULL && err == OS_NO_ERR),
+                "Could not create IO-APIC vector",
+                err);
 
     cpu_count     = 0;
     io_apic_count = 0;
@@ -1094,7 +1039,7 @@ void acpi_init(void)
     /* Define ACPI table search address range */
     range_begin = (uint8_t*)0x000E0000;
     range_end   = (uint8_t*)0x000FFFFF;
-    
+
     /* Map the memory */
     acpi_map_data(range_begin, range_end - range_begin);
 
@@ -1106,8 +1051,8 @@ void acpi_init(void)
         /* Checking the RSDP signature */
         if(signature == ACPI_RSDP_SIG)
         {
-            KERNEL_DEBUG(ACPI_DEBUG_ENABLED, 
-                         "[ACPI] RSDP found at 0x%p", 
+            KERNEL_DEBUG(ACPI_DEBUG_ENABLED,
+                         "[ACPI] RSDP found at 0x%p",
                          range_begin);
 
             /* Parse RSDP */
@@ -1118,24 +1063,19 @@ void acpi_init(void)
         range_begin += sizeof(uintptr_t);
     }
 
-#ifdef TEST_MODE_ENABLED
-    acpi_test();
-#endif
+    KERNEL_TEST_POINT(acpi_test)
 
     /* Ensure as little space as possible is used */
     err = vector_shrink_to_fit(io_apics);
-    if(err != OS_NO_ERR)
-    {
-        KERNEL_ERROR("Could not shrink ACPI structures: %d\n", err);
-        KERNEL_PANIC(err);
-    }
+    ACPI_ASSERT(err == OS_NO_ERR,
+                "Could not shrink IO-APIC structures",
+                err);
+
     err = vector_shrink_to_fit(cpu_lapics);
-    if(err != OS_NO_ERR)
-    {
-        KERNEL_ERROR("Could not shrink ACPI structures: %d\n", err);
-        KERNEL_PANIC(err);
-    }
-    
+    ACPI_ASSERT(err == OS_NO_ERR,
+                "Could not shrink LAPIC structures",
+                err);
+
     acpi_initialized = TRUE;
 }
 
@@ -1271,7 +1211,7 @@ int32_t get_cpu_count(void)
 }
 
 int32_t cpu_get_id(void)
-{   
+{
     uint32_t lapic_id;
     size_t   i;
 
@@ -1279,7 +1219,7 @@ int32_t cpu_get_id(void)
     if(cpu_count == 0 || acpi_initialized == FALSE)
     {
         return 0;
-    }   
+    }
 
     lapic_id = lapic_get_id();
 

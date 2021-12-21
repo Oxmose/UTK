@@ -31,9 +31,7 @@
 #include <config.h>
 
 /* Tests header file */
-#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
-#endif
 
 /* Header file */
 #include <vga_text.h>
@@ -127,7 +125,7 @@ static kernel_graphic_driver_t vga_text_driver = {
  * @param[in] column The colums index where to write the character.
  * @param[in] character The character to display on the screem.
  */
-inline static void vga_print_char(const uint32_t line, 
+inline static void vga_print_char(const uint32_t line,
                                   const uint32_t column,
                                   const char character);
 
@@ -142,26 +140,33 @@ inline static void vga_print_char(const uint32_t line,
  */
 static void vga_process_char(const char character);
 
-/** 
+/**
  * @brief Returns the VGA frame buffer virtual address.
- * 
- * @details Returns the VGA frame buffer virtual address correponding to a 
+ *
+ * @details Returns the VGA frame buffer virtual address correponding to a
  * certain region of the buffer given the parameters.
- * 
+ *
  * @param[in] line The frame buffer line.
  * @param[in] column The frame buffer column.
  *
- * @return The frame buffer virtual address is returned correponding to a 
+ * @return The frame buffer virtual address is returned correponding to a
  * certain region of the buffer given the parameters is returned.
  */
-inline static uint16_t* vga_get_framebuffer(const uint32_t line, 
+inline static uint16_t* vga_get_framebuffer(const uint32_t line,
                                             const uint32_t column);
 
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
 
-inline static void vga_print_char(const uint32_t line, 
+#define VGA_ASSERT(COND, MSG, ERROR) {                      \
+    if((COND) == FALSE)                                     \
+    {                                                       \
+        PANIC(ERROR, "VGA", MSG, TRUE);                     \
+    }                                                       \
+}
+
+inline static void vga_print_char(const uint32_t line,
                                   const uint32_t column,
                                   const char character)
 {
@@ -298,7 +303,7 @@ static void vga_process_char(const char character)
     }
 }
 
-static inline uint16_t* vga_get_framebuffer(const uint32_t line, 
+static inline uint16_t* vga_get_framebuffer(const uint32_t line,
                                             const uint32_t column)
 {
     /* Avoid overflow on text mode */
@@ -323,16 +328,12 @@ void vga_init(void)
     vga_framebuffer = (uint16_t*)VGA_TEXT_FRAMEBUFFER;
 
     /* Declared the new hardware */
-    err = memory_declare_hw((uintptr_t)vga_framebuffer, 
+    err = memory_declare_hw((uintptr_t)vga_framebuffer,
                              VGA_TEXT_FRAMEBUFFER_SIZE);
-    if(err != OS_NO_ERR)
-    {
-        KERNEL_ERROR("Could not initialize VGA kernel driver\n");
-        KERNEL_PANIC(err);
-    }
+    VGA_ASSERT(err == OS_NO_ERR, "Could not initialize VGA kernel driver", err);
 
     /* Map the driver's memory */
-    memory_mmap_direct(vga_framebuffer, 
+    memory_mmap_direct(vga_framebuffer,
                        vga_framebuffer,
                        VGA_TEXT_FRAMEBUFFER_SIZE,
                        0,

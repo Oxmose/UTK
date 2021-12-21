@@ -8,7 +8,7 @@
 #include <string.h>
 
 /** @brief Kernel init ram disk memory address. */
-extern uint8_t _KERNEL_INITRD_MEM_ADDR;
+extern uint8_t _KERNEL_INITRD_MEM_BASE;
 /** @brief Kernel init ram disk memory size. */
 extern uint8_t _KERNEL_INITRD_MEM_SIZE;
 
@@ -69,7 +69,7 @@ void ustar_test(void)
         kill_qemu();
         return;
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Open file 1\n");
     }
@@ -80,7 +80,7 @@ void ustar_test(void)
         kill_qemu();
         return;
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Open file 2\n");
     }
@@ -91,7 +91,7 @@ void ustar_test(void)
         kill_qemu();
         return;
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Open file 3\n");
     }
@@ -102,7 +102,7 @@ void ustar_test(void)
         kill_qemu();
         return;
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Open file 4\n");
     }
@@ -115,7 +115,7 @@ void ustar_test(void)
         kill_qemu();
         return;
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Close file 1\n");
     }
@@ -126,7 +126,7 @@ void ustar_test(void)
         kill_qemu();
         return;
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Close file 2\n");
     }
@@ -140,13 +140,13 @@ void ustar_test(void)
         return;
     }
 
-    kernel_printf("[TESTMODE] %s, %s, %s, %d, %d, %d\n", 
-                  node.name, node.path, 
-                  node.short_name, node.size, 
+    kernel_printf("[TESTMODE] %s, %s, %s, %d, %d, %d\n",
+                  node.name, node.path,
+                  node.short_name, node.size,
                   node.type, node.access_rights);
-    kernel_printf("[TESTMODE MANUAL] %s, %s, %s, %d, %d, %d, %s, %s, %d\n", 
-                  node.name, node.path, 
-                  node.short_name, node.size, 
+    kernel_printf("[TESTMODE MANUAL] %s, %s, %s, %d, %d, %d, %s, %s, %d\n",
+                  node.name, node.path,
+                  node.short_name, node.size,
                   node.type, node.access_rights,
                   node.owner_name, node.group_name,
                   node.creation_datetime);
@@ -167,7 +167,7 @@ void ustar_test(void)
         kernel_printf("[TESTMODE] %s\n", buff + read_size);
         read_size += strlen(buff + read_size) + 1;
         --item_count;
-    } 
+    }
 
     kernel_printf("\n");
 
@@ -195,7 +195,7 @@ void ustar_test(void)
         kill_qemu();
         return;
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] Remove file 2\n");
     }
@@ -209,13 +209,13 @@ void ustar_test(void)
         return;
     }
 
-    kernel_printf("[TESTMODE] %s, %s, %s, %d, %d, %d\n", 
-                  node.name, node.path, 
-                  node.short_name, node.size, 
+    kernel_printf("[TESTMODE] %s, %s, %s, %d, %d, %d\n",
+                  node.name, node.path,
+                  node.short_name, node.size,
                   node.type, node.access_rights);
-    kernel_printf("[TESTMODE MANUAL] %s, %s, %s, %d, %d, %d, %s, %s, %d\n", 
-                  node.name, node.path, 
-                  node.short_name, node.size, 
+    kernel_printf("[TESTMODE MANUAL] %s, %s, %s, %d, %d, %d, %s, %s, %d\n",
+                  node.name, node.path,
+                  node.short_name, node.size,
                   node.type, node.access_rights,
                   node.owner_name, node.group_name,
                   node.creation_datetime);
@@ -236,7 +236,7 @@ void ustar_test(void)
         kernel_printf("[TESTMODE] %s\n", buff + read_size);
         read_size += strlen(buff + read_size) + 1;
         --item_count;
-    } 
+    }
 
     kernel_printf("\n");
 
@@ -260,13 +260,13 @@ void ustar_test(void)
         return;
     }
 
-    kernel_printf("[TESTMODE] %s, %s, %s, %d, %d, %d\n", 
-                  node.name, node.path, 
-                  node.short_name, node.size, 
+    kernel_printf("[TESTMODE] %s, %s, %s, %d, %d, %d\n",
+                  node.name, node.path,
+                  node.short_name, node.size,
                   node.type, node.access_rights);
-    kernel_printf("[TESTMODE MANUAL] %s, %s, %s, %d, %d, %d, %s, %s, %d\n", 
-                  node.name, node.path, 
-                  node.short_name, node.size, 
+    kernel_printf("[TESTMODE MANUAL] %s, %s, %s, %d, %d, %d, %s, %s, %d\n",
+                  node.name, node.path,
+                  node.short_name, node.size,
                   node.type, node.access_rights,
                   node.owner_name, node.group_name,
                   node.creation_datetime);
@@ -291,11 +291,11 @@ void ustar_test(void)
             {
                 kernel_printf("\n[TESTMODE] ");
             }
-            else 
+            else
             {
                 kernel_printf("%c", buff[i]);
             }
-        } 
+        }
     }while(read_size != 0);
 
     kernel_printf("\n====================================");
@@ -352,11 +352,11 @@ void ustar_test(void)
             {
                 kernel_printf("\n[TESTMODE] ");
             }
-            else 
+            else
             {
                 kernel_printf("%c", buff[i]);
             }
-        } 
+        }
     }while(read_size != 0);
 
     kernel_printf("\n");
@@ -394,7 +394,7 @@ void ustar_test(void)
         kernel_printf("[TESTMODE] %s\n", buff + read_size);
         read_size += strlen(buff + read_size) + 1;
         --item_count;
-    } 
+    }
 
     kernel_printf("\n");
 
@@ -421,7 +421,7 @@ void ustar_test(void)
         kernel_printf("[TESTMODE] %s\n", buff + read_size);
         read_size += strlen(buff + read_size) + 1;
         --item_count;
-    }  
+    }
 
     err = ustar_close_file(&node);
     if(err != OS_NO_ERR)
@@ -456,7 +456,7 @@ void ustar_test(void)
         kernel_printf("[TESTMODE] %s\n", buff + read_size);
         read_size += strlen(buff + read_size) + 1;
         --item_count;
-    }  
+    }
 
     kernel_printf("\n");
 
@@ -483,7 +483,7 @@ void ustar_test(void)
         kernel_printf("[TESTMODE] %s\n", buff + read_size);
         read_size += strlen(buff + read_size) + 1;
         --item_count;
-    } 
+    }
 
     kernel_printf("\n");
 
@@ -520,7 +520,7 @@ void ustar_test(void)
         kernel_printf("[TESTMODE] %s\n", buff + read_size);
         read_size += strlen(buff + read_size) + 1;
         --item_count;
-    } 
+    }
 
     kernel_printf("\n");
 
@@ -559,11 +559,11 @@ void ustar_test(void)
             {
                 kernel_printf("\n[TESTMODE] ");
             }
-            else 
+            else
             {
                 kernel_printf("%c", buff[i]);
             }
-        } 
+        }
     }while(read_size != 0);
     kernel_printf("\n[TESTMODE] ");
 
@@ -613,11 +613,11 @@ void ustar_test(void)
             {
                 kernel_printf("\n[TESTMODE] ");
             }
-            else 
+            else
             {
                 kernel_printf("%c", buff[i]);
             }
-        } 
+        }
     }while(read_size != 0);
 
     err = ustar_close_file(&node);
@@ -633,7 +633,7 @@ void ustar_test(void)
     kernel_printf("[TESTMODE] USTAR tests passed\n");
     kill_qemu();
 }
-#else 
+#else
 void ustar_test(void)
 {
 }

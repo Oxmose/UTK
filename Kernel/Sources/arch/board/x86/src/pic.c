@@ -29,9 +29,7 @@
 #include <config.h>
 
 /* Tests header file */
-#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
-#endif
 
 /* Header file */
 #include <pic.h>
@@ -121,6 +119,13 @@ static interrupt_driver_t pic_driver = {
  * FUNCTIONS
  ******************************************************************************/
 
+#define PIC_ASSERT(COND, MSG, ERROR) {                      \
+    if((COND) == FALSE)                                     \
+    {                                                       \
+        PANIC(ERROR, "PIC", MSG, TRUE);                     \
+    }                                                       \
+}
+
 void pic_init(void)
 {
     /* Initialize the master, remap IRQs */
@@ -145,11 +150,9 @@ void pic_init(void)
 
     KERNEL_DEBUG(PIC_DEBUG_ENABLED, "[PIC] Initialization end");
 
-#ifdef TEST_MODE_ENABLED
-    pic_test();
-    pic_test2();
-    pic_test3();
-#endif
+    KERNEL_TEST_POINT(pic_test);
+    KERNEL_TEST_POINT(pic_test2);
+    KERNEL_TEST_POINT(pic_test3);
 }
 
 void pic_set_irq_mask(const uint32_t irq_number, const bool_t enabled)
@@ -158,11 +161,9 @@ void pic_set_irq_mask(const uint32_t irq_number, const bool_t enabled)
     uint32_t int_state;
     uint32_t cascading_number;
 
-    if(irq_number > PIC_MAX_IRQ_LINE)
-    {
-        KERNEL_ERROR("Could not find PIC IRQ %d", irq_number);
-        KERNEL_PANIC(OS_ERR_NO_SUCH_IRQ);
-    }
+    PIC_ASSERT(irq_number <= PIC_MAX_IRQ_LINE,
+               "Could not find PIC IRQ",
+               OS_ERR_NO_SUCH_IRQ);
 
     ENTER_CRITICAL(int_state);
 
@@ -231,7 +232,7 @@ void pic_set_irq_mask(const uint32_t irq_number, const bool_t enabled)
         }
     }
 
-    KERNEL_DEBUG(PIC_DEBUG_ENABLED, 
+    KERNEL_DEBUG(PIC_DEBUG_ENABLED,
                  "[PIC] Mask M: 0x%02x S: 0x%02x",
                  cpu_inb(PIC_MASTER_DATA_PORT),
                  cpu_inb(PIC_SLAVE_DATA_PORT));
@@ -241,11 +242,9 @@ void pic_set_irq_mask(const uint32_t irq_number, const bool_t enabled)
 
 void pic_set_irq_eoi(const uint32_t irq_number)
 {
-    if(irq_number > PIC_MAX_IRQ_LINE)
-    {
-        KERNEL_ERROR("Could not find PIC IRQ %d", irq_number);
-        KERNEL_PANIC(OS_ERR_NO_SUCH_IRQ);
-    }
+    PIC_ASSERT(irq_number <= PIC_MAX_IRQ_LINE,
+               "Could not find PIC IRQ",
+               OS_ERR_NO_SUCH_IRQ);
 
     /* End of interrupt signal */
     if(irq_number > 7)
@@ -261,7 +260,7 @@ INTERRUPT_TYPE_E pic_handle_spurious_irq(const uint32_t int_number)
 {
     uint8_t  isr_val;
     uint32_t irq_number;
-    
+
     irq_number = int_number - INT_PIC_IRQ_OFFSET;
 
    KERNEL_DEBUG(PIC_DEBUG_ENABLED, "[PIC] Spurious handling %d", irq_number);

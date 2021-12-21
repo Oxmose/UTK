@@ -30,9 +30,7 @@
 #include <config.h>
 
 /* Tests header file */
-#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
-#endif
 
 /* Header file */
 #include <kheap.h>
@@ -56,7 +54,7 @@ struct list
     struct list* prev;
 };
 
-/** 
+/**
  * @brief Defines list_t type as a shorcut for struct list.
  */
 typedef struct list list_t;
@@ -80,7 +78,7 @@ struct mem_chunk
     };
 };
 
-/** 
+/**
  * @brief Defines mem_chunk_t type as a shorcut for struct mem_chunk.
  */
 typedef struct mem_chunk mem_chunk_t;
@@ -442,13 +440,11 @@ void kheap_init(void)
 
     init = TRUE;
 
-    KERNEL_DEBUG(KHEAP_DEBUG_ENABLED, 
-                 "[KHEAP] Kernel Heap Initialized at 0x%p", 
+    KERNEL_DEBUG(KHEAP_DEBUG_ENABLED,
+                 "[KHEAP] Kernel Heap Initialized at 0x%p",
                  mem_start);
 
-#ifdef TEST_MODE_ENABLED
-    kheap_test();
-#endif
+    KERNEL_TEST_POINT(kheap_test);
 }
 
 void* kmalloc(size_t size)
@@ -517,11 +513,11 @@ void* kmalloc(size_t size)
 
     mem_free -= size2;
 
-    KERNEL_DEBUG(KHEAP_DEBUG_ENABLED, 
+    KERNEL_DEBUG(KHEAP_DEBUG_ENABLED,
                  "[KHEAP] Kheap allocated 0x%p -> %uB (%uB free, %uB used)",
                  chunk->data,
                  size2 - len - HEADER_SIZE,
-                 mem_free, 
+                 mem_free,
                  kheap_init_free - mem_free);
 
     EXIT_CRITICAL(int_state);
@@ -575,9 +571,9 @@ void kfree(void* ptr)
         push_free(chunk);
     }
 
-    KERNEL_DEBUG(KHEAP_DEBUG_ENABLED, 
-                 "[KHEAP] Kheap freed 0x%p -> %uB", 
-                 ptr, 
+    KERNEL_DEBUG(KHEAP_DEBUG_ENABLED,
+                 "[KHEAP] Kheap freed 0x%p -> %uB",
+                 ptr,
                  used);
 
     EXIT_CRITICAL(int_state);

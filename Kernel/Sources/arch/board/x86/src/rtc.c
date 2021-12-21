@@ -33,9 +33,7 @@
 #include <config.h>
 
 /* Tests header file */
-#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
-#endif
 
 /* Header include */
 #include <rtc.h>
@@ -138,7 +136,7 @@ static kernel_timer_t rtc_driver = {
  * @param[in] int_id The interrupt line that called the handler.
  * @param[in, out] stack_state The stack state before the interrupt.
  */
-static void dummy_handler(cpu_state_t* cpu_state, 
+static void dummy_handler(cpu_state_t* cpu_state,
                           uintptr_t int_id,
                           stack_state_t* stack_state);
 
@@ -146,8 +144,14 @@ static void dummy_handler(cpu_state_t* cpu_state,
  * FUNCTIONS
  ******************************************************************************/
 
+#define RTC_ASSERT(COND, MSG, ERROR) {                      \
+    if((COND) == FALSE)                                     \
+    {                                                       \
+        PANIC(ERROR, "RTC", MSG, TRUE);                     \
+    }                                                       \
+}
 
-static void dummy_handler(cpu_state_t* cpu_state, 
+static void dummy_handler(cpu_state_t* cpu_state,
                           uintptr_t int_id,
                           stack_state_t* stack_state)
 {
@@ -190,11 +194,7 @@ void rtc_init(void)
 
     /* Set rtc clock interrupt handler */
     err = kernel_interrupt_register_irq_handler(RTC_IRQ_LINE, dummy_handler);
-    if(err != OS_NO_ERR)
-    {
-        KERNEL_ERROR("Could not register RTC handler\n");
-        KERNEL_PANIC(err);
-    }
+    RTC_ASSERT(err == OS_NO_ERR, "Could not register RTC handler", err);
 
     /* Set mask before setting IRQ */
     kernel_interrupt_set_irq_mask(RTC_IRQ_LINE, 1);
@@ -212,12 +212,11 @@ void rtc_init(void)
     rtc_update_time();
 
     err = time_register_rtc_manager(rtc_update_time);
+    RTC_ASSERT(err == OS_NO_ERR, "Could not register RTC manager", err);
 
-#ifdef TEST_MODE_ENABLED
-    rtc_test();
-    rtc_test2();
-    rtc_test3();
-#endif
+    KERNEL_TEST_POINT(rtc_test);
+    KERNEL_TEST_POINT(rtc_test2);
+    KERNEL_TEST_POINT(rtc_test3);
 
     KERNEL_DEBUG(RTC_DEBUG_ENABLED, "[RTC] Initialized");
 }
@@ -233,8 +232,8 @@ void rtc_enable(void)
         --disabled_nesting;
     }
 
-    KERNEL_DEBUG(RTC_DEBUG_ENABLED, 
-                 "[RTC] Enable RTC (nesting %d)", 
+    KERNEL_DEBUG(RTC_DEBUG_ENABLED,
+                 "[RTC] Enable RTC (nesting %d)",
                  disabled_nesting);
     if(disabled_nesting == 0)
     {
@@ -255,8 +254,8 @@ void rtc_disable(void)
         ++disabled_nesting;
     }
 
-    KERNEL_DEBUG(RTC_DEBUG_ENABLED, 
-                 "[RTC] Disable RTC (nesting %d)", 
+    KERNEL_DEBUG(RTC_DEBUG_ENABLED,
+                 "[RTC] Disable RTC (nesting %d)",
                  disabled_nesting);
     kernel_interrupt_set_irq_mask(RTC_IRQ_LINE, 0);
 
@@ -269,11 +268,9 @@ void rtc_set_frequency(const uint32_t frequency)
     uint32_t    rate;
     uint32_t    int_state;
 
-    if(frequency < RTC_MIN_FREQ || frequency > RTC_MAX_FREQ)
-    {
-        KERNEL_ERROR("Set RTC timer frequency out of bound: %d\n", frequency);
-        KERNEL_PANIC(OS_ERR_OUT_OF_BOUND);
-    }
+    RTC_ASSERT((frequency >= RTC_MIN_FREQ && frequency <= RTC_MAX_FREQ),
+               "RTC timer frequency out of bound",
+               OS_ERR_OUT_OF_BOUND);
 
     /* Choose the closest rate to the frequency */
     if(frequency < 4)
@@ -343,9 +340,9 @@ void rtc_set_frequency(const uint32_t frequency)
 
     rtc_frequency = (RTC_QUARTZ_FREQ >> (rate - 1));
 
-    KERNEL_DEBUG(RTC_DEBUG_ENABLED, 
-                 "[RTC] New RTC rate set (%d: %dHz)", 
-                 rate, 
+    KERNEL_DEBUG(RTC_DEBUG_ENABLED,
+                 "[RTC] New RTC rate set (%d: %dHz)",
+                 rate,
                  rtc_frequency);
 
     EXIT_CRITICAL(int_state);
@@ -393,8 +390,8 @@ OS_RETURN_E rtc_set_handler(void(*handler)(
         return err;
     }
 
-    KERNEL_DEBUG(RTC_DEBUG_ENABLED, 
-                 "[RTC] New RTC handler set (0x%p)", 
+    KERNEL_DEBUG(RTC_DEBUG_ENABLED,
+                 "[RTC] New RTC handler set (0x%p)",
                  handler);
 
     EXIT_CRITICAL(int_state);

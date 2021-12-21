@@ -25,9 +25,7 @@
 #include <config.h>
 
 /* Tests header file */
-#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
-#endif
 
 /* Header file */
 #include <bios_call.h>
@@ -60,12 +58,12 @@ extern uint8_t _KERNEL_BIOS_MEMORY_SIZE;
 
 /**
  * @brief Assembly bios call function.
- * 
+ *
  * @details Assembly bios call function. Get the interrupt parameter in the
  * register buffer and returns the values in the same buffer.
- * 
+ *
  * @param[in] intnum The interrupt line to call.
- * @param[int, out] regs The register buffer to get/set the call values and 
+ * @param[int, out] regs The register buffer to get/set the call values and
  * returns.
  */
 extern void __bios_call(uint8_t intnum, bios_int_regs_t* regs);
@@ -80,10 +78,10 @@ void bios_call(uint32_t intnum, bios_int_regs_t* regs)
 
 	ENTER_CRITICAL(int_state);
 	/* Map the RM core */
-	memory_mmap_direct((void*)&_KERNEL_BIOS_MEMORY_BASE, 
-					   (void*)&_KERNEL_BIOS_MEMORY_BASE, 
-					   (size_t)&_KERNEL_BIOS_MEMORY_SIZE, 
-					   0, 
+	memory_mmap_direct((void*)&_KERNEL_BIOS_MEMORY_BASE,
+					   (void*)&_KERNEL_BIOS_MEMORY_BASE,
+					   (size_t)&_KERNEL_BIOS_MEMORY_SIZE,
+					   0,
 					   1,
 					   1,
 					   1,
@@ -92,7 +90,7 @@ void bios_call(uint32_t intnum, bios_int_regs_t* regs)
 	__bios_call(intnum, regs);
 
 	/* Unmap RM core */
-	memory_munmap((void*)&_KERNEL_BIOS_MEMORY_BASE, 
+	memory_munmap((void*)&_KERNEL_BIOS_MEMORY_BASE,
 	              (size_t)&_KERNEL_BIOS_MEMORY_SIZE,
 				  NULL);
 

@@ -38,9 +38,9 @@ void lapic_timer_test(void)
     if((err = lapic_timer_set_handler(NULL)) != OS_ERR_NULL_POINTER)
     {
         kernel_error("TEST_LAPIC_TIMER 0\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_LAPIC_TIMER 0\n");
     }
@@ -49,9 +49,9 @@ void lapic_timer_test(void)
     if((err = lapic_timer_set_handler(lapic_timer_handler)) != OS_NO_ERR)
     {
         kernel_error("TEST_LAPIC_TIMER 1\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_LAPIC_TIMER 1\n");
     }
@@ -61,9 +61,9 @@ void lapic_timer_test(void)
     if((err = lapic_timer_remove_handler()) != OS_NO_ERR)
     {
         kernel_error("TEST_LAPIC_TIMER 2\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_LAPIC_TIMER 2\n");
     }
@@ -73,9 +73,9 @@ void lapic_timer_test(void)
     if((err = lapic_timer_set_handler(lapic_timer_handler)) != OS_NO_ERR)
     {
         kernel_error("TEST_LAPIC_TIMER 3\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_LAPIC_TIMER 3\n");
     }
@@ -92,9 +92,9 @@ void lapic_timer_test(void)
     if(counter == 0)
     {
         kernel_error("TEST_LAPIC_TIMER 4\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_LAPIC_TIMER 4\n");
     }
@@ -104,9 +104,9 @@ void lapic_timer_test(void)
     if(counter != cnt_val)
     {
         kernel_error("TEST_LAPIC_TIMER 5\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_LAPIC_TIMER 5\n");
     }
@@ -122,9 +122,9 @@ void lapic_timer_test(void)
     if(counter == 0)
     {
         kernel_error("TEST_LAPIC_TIMER 6\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_LAPIC_TIMER 6\n");
     }
@@ -134,9 +134,9 @@ void lapic_timer_test(void)
     if(counter != cnt_val)
     {
         kernel_error("TEST_LAPIC_TIMER 7\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_LAPIC_TIMER 7\n");
     }
@@ -151,9 +151,9 @@ void lapic_timer_test(void)
     if(counter != cnt_val)
     {
         kernel_error("TEST_LAPIC_TIMER 9\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_LAPIC_TIMER 9\n");
     }
@@ -163,9 +163,9 @@ void lapic_timer_test(void)
     if(lapic_timer_remove_handler() != OS_NO_ERR)
     {
         kernel_error("TEST_LAPIC_TIMER 10\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_LAPIC_TIMER 10\n");
     }
@@ -179,7 +179,7 @@ void lapic_timer_test(void)
     /* Kill QEMU */
     kill_qemu();
 }
-#else 
+#else
 void lapic_timer_test(void)
 {
 }

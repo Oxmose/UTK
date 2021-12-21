@@ -38,9 +38,9 @@ void exception_test(void)
      != OR_ERR_UNAUTHORIZED_INTERRUPT_LINE)
     {
         kernel_error("TEST_SW_EXC 0\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_EXC 0\n");
     }
@@ -50,9 +50,9 @@ void exception_test(void)
      != OR_ERR_UNAUTHORIZED_INTERRUPT_LINE)
     {
         kernel_error("TEST_SW_EXC 1\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_EXC 1\n");
     }
@@ -62,9 +62,9 @@ void exception_test(void)
      != OR_ERR_UNAUTHORIZED_INTERRUPT_LINE)
     {
         kernel_error("TEST_SW_EXC 2\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_EXC 2\n");
     }
@@ -74,9 +74,9 @@ void exception_test(void)
      != OR_ERR_UNAUTHORIZED_INTERRUPT_LINE)
     {
         kernel_error("TEST_SW_EXC 3\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_EXC 3\n");
     }
@@ -86,9 +86,9 @@ void exception_test(void)
      != OS_ERR_NULL_POINTER)
     {
         kernel_error("TEST_SW_EXC 4\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_EXC 4\n");
     }
@@ -98,9 +98,9 @@ void exception_test(void)
      != OS_NO_ERR)
     {
         kernel_error("TEST_SW_EXC 5\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_EXC 5\n");
     }
@@ -109,9 +109,9 @@ void exception_test(void)
      != OS_ERR_INTERRUPT_NOT_REGISTERED)
     {
         kernel_error("TEST_SW_EXC 7\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_EXC 7\n");
     }
@@ -121,9 +121,9 @@ void exception_test(void)
      != OS_NO_ERR)
     {
         kernel_error("TEST_SW_EXC 8\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_EXC 8\n");
     }
@@ -132,14 +132,14 @@ void exception_test(void)
      != OS_ERR_INTERRUPT_ALREADY_REGISTERED)
     {
         kernel_error("TEST_SW_EXC 9\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_SW_EXC 9\n");
     }
 
-    
+
     /* Test exception */
 
     volatile int i = 0;
@@ -150,7 +150,7 @@ void exception_test(void)
     /* Kill QEMU */
     kill_qemu();
 }
-#else 
+#else
 void exception_test(void)
 {
 }

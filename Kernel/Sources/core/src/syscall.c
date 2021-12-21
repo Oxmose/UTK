@@ -30,9 +30,7 @@
 #include <config.h>
 
 /* Tests header file */
-#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
-#endif
 
 /* Header file */
 #include <syscall.h>
@@ -60,8 +58,8 @@ static syscall_handler_t kernel_interrupt_handlers[SYSCALL_MAX_ID] = {
     {NULL},                           /* SYSCALL_EXIT */
     {futex_wait},                     /* SYSCALL_FUTEX_WAIT */
     {futex_wake},                     /* SYSCALL_FUTEX_WAKE */
-    {sched_get_process_params},       /* SYSCALL_SCHED_GET_PARAMS */
-    {sched_set_process_params},       /* SYSCALL_SCHED_SET_PARAMS */
+    {sched_get_thread_params},        /* SYSCALL_SCHED_GET_PARAMS */
+    {sched_set_thread_params},        /* SYSCALL_SCHED_SET_PARAMS */
     {memory_alloc_page},              /* SYSCALL_PAGE_ALLOC */
 };
 
@@ -88,6 +86,13 @@ static void syscall_handler(cpu_state_t *cpu_state,
  * FUNCTIONS
  ******************************************************************************/
 
+#define SYSCALL_ASSERT(COND, MSG, ERROR) {                    \
+    if((COND) == FALSE)                                       \
+    {                                                         \
+        PANIC(ERROR, "SYSCALL", MSG, TRUE);                   \
+    }                                                         \
+}
+
 static void syscall_handler(cpu_state_t *cpu_state,
                             uintptr_t int_id,
                             stack_state_t *stack_state)
@@ -107,11 +112,10 @@ static void syscall_handler(cpu_state_t *cpu_state,
 
     if(func < SYSCALL_MAX_ID)
     {
-        if(kernel_interrupt_handlers[func].handler == NULL)
-        {
-            KERNEL_ERROR("Tried to call un unknown SYSCALL: %d\n", func);
-            KERNEL_PANIC(OS_ERR_SYSCALL_UNKNOWN);
-        }
+        SYSCALL_ASSERT(kernel_interrupt_handlers[func].handler != NULL,
+                       "Tried to call un unknown SYSCALL",
+                       OS_ERR_SYSCALL_UNKNOWN);
+
         kernel_interrupt_handlers[func].handler(func, params);
     }
     else
@@ -126,9 +130,7 @@ void syscall_init(void)
     /* Init the system call handler */
     err = kernel_interrupt_register_int_handler(SYSCALL_INT_LINE,
                                                 syscall_handler);
-    if(err != OS_NO_ERR)
-    {
-        KERNEL_ERROR("Could not initialize system call manager\n");
-        KERNEL_PANIC(err);
-    }
+    SYSCALL_ASSERT(err == OS_NO_ERR,
+                   "Could not initialize system call manager",
+                   err);
 }

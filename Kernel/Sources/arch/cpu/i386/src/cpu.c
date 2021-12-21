@@ -31,9 +31,7 @@
 #include <config.h>
 
 /* Tests header file */
-#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
-#endif
 
 /* Header file */
 #include <cpu.h>
@@ -376,6 +374,13 @@
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
+
+#define CPU_ASSERT(COND, MSG, ERROR) {                      \
+    if((COND) == FALSE)                                     \
+    {                                                       \
+        PANIC(ERROR, "CPU", MSG, TRUE);                     \
+    }                                                       \
+}
 
 #define CONCAT_STR(buff, idx, str) \
     {                              \
@@ -1277,9 +1282,9 @@ void cpu_restore_context(cpu_state_t* cpu_state,
         "iret\n\t"
         : :"a"(thread->process->page_dir), "d"(thread->cpu_context.esp));
 
-
-    KERNEL_ERROR("Returned from context restore\n");
-    KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+    CPU_ASSERT(FALSE,
+               "Returned from context restore",
+               OS_ERR_UNAUTHORIZED_ACTION);
 }
 
 void cpu_set_next_thread_instruction(const cpu_state_t* cpu_state,
@@ -1365,31 +1370,28 @@ void validate_architecture(void)
 
     ret = cpu_cpuid(CPUID_GETVENDORSTRING, (uint32_t*)regs);
 
-    /* Check if CPUID return more that one available function */
-    if(ret != 0)
-    {
-#if KERNEL_LOG_LEVEL >= INFO_LOG_LEVEL
-        for(int8_t j = 0; j < 4; ++j)
-        {
-            vendor_str[12 + j] = (char)((regs[1] >> (j * 8)) & 0xFF);
-        }
-        for(int8_t j = 0; j < 4; ++j)
-        {
-            vendor_str[16 + j] = (char)((regs[3] >> (j * 8)) & 0xFF);
-        }
-        for(int8_t j = 0; j < 4; ++j)
-        {
-            vendor_str[20 + j] = (char)((regs[2] >> (j * 8)) & 0xFF);
-        }
+    CPU_ASSERT(ret != 0,
+               "CPU does not support CPUID",
+               OS_ERR_NOT_SUPPORTED);
 
-        KERNEL_INFO(vendor_str);
-#endif
-    }
-    else
+    /* Check if CPUID return more that one available function */
+
+#if KERNEL_LOG_LEVEL >= INFO_LOG_LEVEL
+    for(int8_t j = 0; j < 4; ++j)
     {
-        KERNEL_ERROR("Architecture does not support CPUID\n");
-        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
+        vendor_str[12 + j] = (char)((regs[1] >> (j * 8)) & 0xFF);
     }
+    for(int8_t j = 0; j < 4; ++j)
+    {
+        vendor_str[16 + j] = (char)((regs[3] >> (j * 8)) & 0xFF);
+    }
+    for(int8_t j = 0; j < 4; ++j)
+    {
+        vendor_str[20 + j] = (char)((regs[2] >> (j * 8)) & 0xFF);
+    }
+
+    KERNEL_INFO(vendor_str);
+#endif
 
     /* Get CPUID features */
     cpu_cpuid(CPUID_GETFEATURES, (uint32_t*)regs);
@@ -1602,47 +1604,33 @@ void validate_architecture(void)
 #endif
 
     /* Validate features */
-    if((regs[3] & EDX_SEP) != EDX_SEP)
-    {
-        KERNEL_ERROR("Architecture does not support SYSENTER\n");
-        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
-    }
-    if((regs[3] & EDX_FPU) != EDX_FPU)
-    {
-        KERNEL_ERROR("Architecture does not support FPU\n");
-        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
-    }
-    if((regs[3] & EDX_TSC) != EDX_TSC)
-    {
-        KERNEL_ERROR("Architecture does not support TSC\n");
-        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
-    }
-    if((regs[3] & EDX_APIC) != EDX_APIC)
-    {
-        KERNEL_ERROR("Architecture does not support APIC\n");
-        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
-    }
-    if((regs[3] & EDX_FXSR) != EDX_FXSR)
-    {
-        KERNEL_ERROR("Architecture does not support FX instructions\n");
-        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
-    }
-    if((regs[3] & EDX_SSE) != EDX_SSE)
-    {
-        KERNEL_ERROR("Architecture does not support SSE\n");
-        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
-    }
-    if((regs[3] & EDX_SSE2) != EDX_SSE2)
-    {
-        KERNEL_ERROR("Architecture does not support SSE2\n");
-        KERNEL_PANIC(OS_ERR_NOT_SUPPORTED);
-    }
+    CPU_ASSERT((regs[3] & EDX_SEP) == EDX_SEP,
+               "CPU does not support SYSENTER",
+               OS_ERR_NOT_SUPPORTED);
+    CPU_ASSERT((regs[3] & EDX_FPU) == EDX_FPU,
+               "CPU does not support FPU",
+               OS_ERR_NOT_SUPPORTED);
+    CPU_ASSERT((regs[3] & EDX_TSC) == EDX_TSC,
+               "CPU does not support TSC",
+               OS_ERR_NOT_SUPPORTED);
+    CPU_ASSERT((regs[3] & EDX_APIC) == EDX_APIC,
+               "CPU does not support APIC",
+               OS_ERR_NOT_SUPPORTED);
+    CPU_ASSERT((regs[3] & EDX_FXSR) == EDX_FXSR,
+               "CPU does not support FX instructions",
+               OS_ERR_NOT_SUPPORTED);
+    CPU_ASSERT((regs[3] & EDX_SSE) == EDX_SSE,
+               "CPU does not support SSE",
+               OS_ERR_NOT_SUPPORTED);
+    CPU_ASSERT((regs[3] & EDX_SSE2) == EDX_SSE2,
+               "CPU does not support SSE2",
+               OS_ERR_NOT_SUPPORTED);
 
     /* Might be used in future to check extended features */
     (void)regs_ext;
 
-    KERNEL_DEBUG(KICKSTART_DEBUG_ENABLED,
-                 "[KICKSTART] Validating architecture end");
+    KERNEL_DEBUG(CPU_DEBUG_ENABLED,
+                 "[CPU] Validating architecture end");
 }
 
 int32_t cpu_compare_and_swap(volatile int32_t* memory,

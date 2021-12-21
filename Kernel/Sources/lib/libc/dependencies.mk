@@ -5,4 +5,5 @@ DEP_INCLUDES += -I ../../arch/cpu/includes
 DEP_INCLUDES += -I ../../lib/libapi/includes
 DEP_INCLUDES += -I ../../lib/libstruct/includes
 DEP_INCLUDES += -I includes
+DEP_INCLUDES += -I ../../tests/includes
 DEP_LIBS=

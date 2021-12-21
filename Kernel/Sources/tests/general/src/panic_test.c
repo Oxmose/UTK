@@ -6,11 +6,11 @@
 
 void panic_test(void)
 {
-    KERNEL_PANIC(666);
+    PANIC(666, "TEST", "NONE", TRUE);
 
     kill_qemu();
 }
-#else 
+#else
 void panic_test(void)
 {
 }

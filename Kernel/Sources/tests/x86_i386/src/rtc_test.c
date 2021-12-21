@@ -42,9 +42,9 @@ void rtc_test(void)
     if((err = rtc_set_handler(NULL)) != OS_ERR_NULL_POINTER)
     {
         kernel_error("TEST_RTC 0\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_RTC 0\n");
     }
@@ -53,9 +53,9 @@ void rtc_test(void)
     if((err = rtc_set_handler(rtc_handler)) != OS_NO_ERR)
     {
         kernel_error("TEST_RTC 1\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_RTC 1\n");
     }
@@ -65,9 +65,9 @@ void rtc_test(void)
     if((err = rtc_remove_handler()) != OS_NO_ERR)
     {
         kernel_error("TEST_RTC 2\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_RTC 2\n");
     }
@@ -77,9 +77,9 @@ void rtc_test(void)
     if((err = rtc_set_handler(rtc_handler)) != OS_NO_ERR)
     {
         kernel_error("TEST_RTC 3\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_RTC 3\n");
     }
@@ -96,9 +96,9 @@ void rtc_test(void)
     if(counter == 0)
     {
         kernel_error("TEST_RTC 4\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_RTC 4\n");
     }
@@ -108,9 +108,9 @@ void rtc_test(void)
     if(counter != cnt_val)
     {
         kernel_error("TEST_RTC 5\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_RTC 5\n");
     }
@@ -126,9 +126,9 @@ void rtc_test(void)
     if(counter == 0)
     {
         kernel_error("TEST_RTC 6\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_RTC 6\n");
     }
@@ -138,9 +138,9 @@ void rtc_test(void)
     if(counter != cnt_val)
     {
         kernel_error("TEST_RTC 7\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_RTC 7\n");
     }
@@ -156,9 +156,9 @@ void rtc_test(void)
     if(counter != cnt_val)
     {
         kernel_error("TEST_RTC 11\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_RTC 11\n");
     }
@@ -168,9 +168,9 @@ void rtc_test(void)
     if(rtc_remove_handler() != OS_NO_ERR)
     {
         kernel_error("TEST_RTC 12\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_RTC 12\n");
     }
@@ -184,7 +184,7 @@ void rtc_test(void)
     /* Kill QEMU */
     kill_qemu();
 }
-#else 
+#else
 void rtc_test(void)
 {
 }

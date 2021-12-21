@@ -12,7 +12,7 @@
  * @warning At this point interrupts should be disabled.
  *
  * @details Kernel's booting sequence. Initializes the rest of the kernel and
- * performs GDT, IDT and TSS initialization. Initializes the hardware and 
+ * performs GDT, IDT and TSS initialization. Initializes the hardware and
  * software core of the kernel before calling the scheduler.
  *
  * @copyright Alexy Torres Aurora Dugo
@@ -48,9 +48,7 @@
 #include <config.h>
 
 /* Tests header file */
-#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
-#endif
 
 /*******************************************************************************
  * CONSTANTS
@@ -80,6 +78,13 @@
  * FUNCTIONS
  ******************************************************************************/
 
+#define KICKSTART_ASSERT(COND, MSG, ERROR) {                \
+    if((COND) == FALSE)                                     \
+    {                                                       \
+        PANIC(ERROR, "KICKSTRART", MSG, TRUE);              \
+    }                                                       \
+}
+
 /**
  * @brief Main boot sequence, C kernel entry point.
  *
@@ -103,10 +108,8 @@ void kernel_kickstart(void)
     cpu_setup_idt();
     cpu_setup_tss();
 
-#ifdef TEST_MODE_ENABLED
-    boot_test();
-    output_test();
-#endif
+    KERNEL_TEST_POINT(boot_test);
+    KERNEL_TEST_POINT(output_test);
 
     KERNEL_DEBUG(KICKSTART_DEBUG_ENABLED, "[KICKSTART] Kickstarting kernel");
 
@@ -116,11 +119,9 @@ void kernel_kickstart(void)
     kheap_init();
     KERNEL_SUCCESS("Kernel heap initialized\n");
 
-#ifdef TEST_MODE_ENABLED
-    queue_test();
-    vector_test();
-    uhashtable_test();
-#endif
+    KERNEL_TEST_POINT(queue_test);
+    KERNEL_TEST_POINT(vector_test);
+    KERNEL_TEST_POINT(uhashtable_test);
 
     kernel_interrupt_init();
     KERNEL_SUCCESS("Interrupt manager initialized\n");
@@ -130,14 +131,10 @@ void kernel_kickstart(void)
 
     memory_manager_init();
     KERNEL_SUCCESS("Memory manager initialized\n");
-    
+
     vga_init();
     err = graphic_set_selected_driver(vga_text_get_driver());
-    if(err != OS_NO_ERR)
-    {
-        KERNEL_ERROR("Could not set VGA driver\n");
-        KERNEL_PANIC(err);
-    }
+    KICKSTART_ASSERT(err == OS_NO_ERR, "Could not set VGA driver", err);
     KERNEL_SUCCESS("VGA driver initialized\n");
 
     acpi_init();
@@ -147,31 +144,18 @@ void kernel_kickstart(void)
     pic_init();
     KERNEL_SUCCESS("PIC initialized\n");
 
-    if(io_apic_capable() == 1)
-    {
-        pic_disable();
+    KICKSTART_ASSERT(io_apic_capable() == TRUE,
+                     "IO-APIC not supported",
+                     OS_ERR_NOT_SUPPORTED);
 
-        io_apic_init();
-        KERNEL_SUCCESS("IO-APIC initialized\n");
-        err = kernel_interrupt_set_driver(io_apic_get_driver());
-        if(err != OS_NO_ERR)
-        {
-            KERNEL_ERROR("Could not set IO-APIC driver\n");
-            KERNEL_PANIC(err);
-        }
+    pic_disable();
+    io_apic_init();
+    KERNEL_SUCCESS("IO-APIC initialized\n");
+    err = kernel_interrupt_set_driver(io_apic_get_driver());
+    KICKSTART_ASSERT(err == OS_NO_ERR, "Could not set IO-APIC driver", err);
 
-        lapic_init();
-        KERNEL_SUCCESS("LAPIC initialized\n");
-    }
-    else
-    {
-        err = kernel_interrupt_set_driver(pic_get_driver());
-        if(err != OS_NO_ERR)
-        {
-            KERNEL_ERROR("Could not set PIC driver\n");
-            KERNEL_PANIC(err);
-        }
-    }
+    lapic_init();
+    KERNEL_SUCCESS("LAPIC initialized\n");
 
     pit_init();
     KERNEL_SUCCESS("PIT initialized\n");
@@ -179,45 +163,29 @@ void kernel_kickstart(void)
     rtc_init();
     KERNEL_SUCCESS("RTC initialized\n");
 
-    if(io_apic_capable() == 1)
-    {
-        lapic_timer_init();
-        KERNEL_SUCCESS("LAPIC timer initialized\n");
+    lapic_timer_init();
+    KERNEL_SUCCESS("LAPIC timer initialized\n");
 
-        pit_disable();
-        
-        time_init(lapic_timer_get_driver(), rtc_get_driver());
-    
-        KERNEL_SUCCESS("Timer factory initialized\n");
-    }
-    else 
-    {
-        time_init(pit_get_driver(), rtc_get_driver());
-        KERNEL_SUCCESS("Timer factory initialized\n");
-    }    
+    time_init(lapic_timer_get_driver(), rtc_get_driver());
+    KERNEL_SUCCESS("Timer factory initialized\n");
 
     syscall_init();
     KERNEL_SUCCESS("System calls initialized\n");
 
-#ifdef TEST_MODE_ENABLED
-    bios_call_test();
-    panic_test();
-#endif
+    KERNEL_TEST_POINT(bios_call_test);
+    KERNEL_TEST_POINT(panic_test);
 
     futex_init();
     KERNEL_SUCCESS("Futex initialized\n");
 
     /* Initialize the init ram disk */
     err = initrd_init_device(&initrd_device);
-    if(err != OS_NO_ERR)
-    {
-        KERNEL_ERROR("Could not initialize init ram disk\n");
-        KERNEL_PANIC(err);
-    }
+    KICKSTART_ASSERT(err == OS_NO_ERR, "Could not init INITRD", err);
 
     /* First schedule, we should never return from here */
     sched_init();
 
-    KERNEL_ERROR("Kernel returned to kickstart\n");
-    KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+    KICKSTART_ASSERT(FALSE,
+                     "Kernel returned to kickstart",
+                     OS_ERR_UNAUTHORIZED_ACTION);
 }

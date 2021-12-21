@@ -22,6 +22,7 @@
 #include <scheduler.h>     /* Kernel scheduler */
 #include <panic.h>         /* Kernel panic */
 #include <cpu_api.h>       /* CPU API */
+#include <panic.h>         /* Kernel panic */
 
 #include <init_rd.h>
 #include <sys/process.h>
@@ -30,9 +31,7 @@
 /* UTK configuration file */
 #include <config.h>
 
-#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
-#endif
 
 /* Header file */
 #include <init.h>
@@ -66,6 +65,13 @@ static volatile uint64_t idle_sched_count = 0;
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
+
+#define INIT_ASSERT(COND, MSG, ERROR) {                     \
+    if((COND) == FALSE)                                     \
+    {                                                       \
+        PANIC(ERROR, "INIT", MSG, TRUE);                    \
+    }                                                       \
+}
 
 #if 0
 
@@ -139,20 +145,18 @@ void* init_sys(void* args)
                 sched_get_pid(),
                 sched_get_tid());
 
-#ifdef TEST_MODE_ENABLED
-    ustar_test();
-    fork_test();
-    user_heap_test();
-    memory_usage_test();
-    critical_test();
-    scheduler_load_test();
-    scheduler_preempt_test();
-    scheduler_sleep_test();
-    futex_test();
-    spinlock_test();
-    mutex_test();
-    semaphore_test();
-#endif
+    KERNEL_TEST_POINT(ustar_test);
+    KERNEL_TEST_POINT(fork_test);
+    KERNEL_TEST_POINT(user_heap_test);
+    KERNEL_TEST_POINT(memory_usage_test);
+    KERNEL_TEST_POINT(critical_test);
+    KERNEL_TEST_POINT(scheduler_load_test);
+    KERNEL_TEST_POINT(scheduler_preempt_test);
+    KERNEL_TEST_POINT(scheduler_sleep_test);
+    KERNEL_TEST_POINT(futex_test);
+    KERNEL_TEST_POINT(spinlock_test);
+    KERNEL_TEST_POINT(mutex_test);
+    KERNEL_TEST_POINT(semaphore_test);
 
     pid = fork();
 
@@ -167,11 +171,15 @@ void* init_sys(void* args)
         //init_shell();
         while(1)
         {
+            sched_sleep(1000);
+            INIT_ASSERT(FALSE,
+                        "No process to launch",
+                        OS_ERR_UNAUTHORIZED_ACTION);
         }
     }
 
     /* If we return better go away and cry in a corner */
-    KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+    INIT_ASSERT(FALSE, "INIT returned", OS_ERR_UNAUTHORIZED_ACTION);
     return NULL;
 }
 
@@ -192,8 +200,7 @@ void* idle_sys(void* args)
     }
 
     /* If we return better go away and cry in a corner */
-    KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
-
+    INIT_ASSERT(FALSE, "IDLE returned", OS_ERR_UNAUTHORIZED_ACTION);
     return NULL;
 }
 

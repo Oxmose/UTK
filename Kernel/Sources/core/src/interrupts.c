@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @file interrupts.c
- * 
+ *
  * @see interrupts.h
  *
  * @author Alexy Torres Aurora Dugo
@@ -10,11 +10,11 @@
  * @version 2
  *
  * @brief Interrupt manager.
- * 
+ *
  * @details Interrupt manager. Allows to attach ISR to interrupt lines and
- * manage IRQ used by the CPU. We also define the general interrupt handler 
+ * manage IRQ used by the CPU. We also define the general interrupt handler
  * here.
- * 
+ *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
@@ -34,9 +34,7 @@
 #include <config.h>
 
 /* Tests header file */
-#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
-#endif
 
 /* Header file */
 #include <interrupts.h>
@@ -57,7 +55,7 @@
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/** @brief Stores the handlers for each interrupt. not static because used 
+/** @brief Stores the handlers for each interrupt. not static because used
  * by the exceptions module.
  */
 custom_handler_t kernel_interrupt_handlers[INT_ENTRY_COUNT];
@@ -74,7 +72,7 @@ static uint32_t spurious_interrupt;
  * STATIC FUNCTIONS DECLARATION
  ******************************************************************************/
 
-static void init_driver_set_irq_mask(const uint32_t irq_number, 
+static void init_driver_set_irq_mask(const uint32_t irq_number,
                                      const bool_t enabled);
 
 static void init_driver_set_irq_eoi(const uint32_t irq_number);
@@ -96,7 +94,7 @@ static void spurious_handler(void);
  * FUNCTIONS
  ******************************************************************************/
 
-static void init_driver_set_irq_mask(const uint32_t irq_number, 
+static void init_driver_set_irq_mask(const uint32_t irq_number,
                                      const bool_t enabled)
 {
     (void)irq_number;
@@ -109,7 +107,7 @@ static void init_driver_set_irq_eoi(const uint32_t irq_number)
 }
 
 static INTERRUPT_TYPE_E init_driver_handle_spurious(const uint32_t int_number)
-{   
+{
     (void) int_number;
     return INTERRUPT_TYPE_REGULAR;
 }
@@ -122,8 +120,8 @@ static int32_t init_driver_get_irq_int_line(const uint32_t irq_number)
 
 static void spurious_handler(void)
 {
-    KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED, 
-                 "[INTERRUPTS] Spurious interrupt %d", 
+    KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED,
+                 "[INTERRUPTS] Spurious interrupt %d",
                  spurious_interrupt);
 
     ++spurious_interrupt;
@@ -137,7 +135,7 @@ static void spurious_handler(void)
  * @details Generic and global interrupt handler. This function should only be
  * called by an assembly interrupt handler. The function will dispatch the
  * interrupt to the desired function to handle the interrupt.
- * 
+ *
  * @warning Not declared static as it is called in an assembly file.
  *
  * @param[in, out] cpu_state The cpu registers structure.
@@ -164,19 +162,19 @@ void kernel_interrupt_handler(cpu_state_t cpu_state,
        int_id != SCHEDULER_SW_INT_LINE &&
        int_id >= MIN_INTERRUPT_LINE)
     {
-        KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED, 
-                     "[INTERRUPTS] Blocked interrupt %u", 
+        KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED,
+                     "[INTERRUPTS] Blocked interrupt %u",
                      int_id);
         return;
     }
 
     if(int_id == PANIC_INT_LINE)
     {
-        panic(&cpu_state, int_id, &stack_state);
+        panic_handler(&cpu_state, int_id, &stack_state);
     }
 
-    KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED, 
-                 "[INTERRUPTS] Interrupt %d", 
+    KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED,
+                 "[INTERRUPTS] Interrupt %d",
                  int_id);
 
     /* Check for spurious interrupt */
@@ -187,8 +185,8 @@ void kernel_interrupt_handler(cpu_state_t cpu_state,
         return;
     }
 
-    KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED, 
-                 "[INTERRUPTS] Non spurious %d", 
+    KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED,
+                 "[INTERRUPTS] Non spurious %d",
                  int_id);
 
     /* Select custom handlers */
@@ -200,7 +198,7 @@ void kernel_interrupt_handler(cpu_state_t cpu_state,
     }
     else
     {
-        handler = panic;
+        handler = panic_handler;
     }
 
     /* Execute the handler */
@@ -209,31 +207,29 @@ void kernel_interrupt_handler(cpu_state_t cpu_state,
 
 void kernel_interrupt_init(void)
 {
-    KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED, 
+    KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED,
                  "[INTERRUPTS] Initializing interrupt manager.");
 
     /* Blank custom interrupt handlers */
-    memset(kernel_interrupt_handlers, 
+    memset(kernel_interrupt_handlers,
            0,
            sizeof(custom_handler_t) * INT_ENTRY_COUNT);
 
     /* Attach the special PANIC interrupt for when we don't know what to do */
     kernel_interrupt_handlers[PANIC_INT_LINE].enabled = 1;
-    kernel_interrupt_handlers[PANIC_INT_LINE].handler = panic;
+    kernel_interrupt_handlers[PANIC_INT_LINE].handler = panic_handler;
 
     /* Init state */
     kernel_interrupt_disable();
     spurious_interrupt = 0;
 
-    /* Init driver */ 
+    /* Init driver */
     interrupt_driver.driver_get_irq_int_line = init_driver_get_irq_int_line;
     interrupt_driver.driver_handle_spurious  = init_driver_handle_spurious;
     interrupt_driver.driver_set_irq_eoi      = init_driver_set_irq_eoi;
     interrupt_driver.driver_set_irq_mask     = init_driver_set_irq_mask;
 
-#ifdef TEST_MODE_ENABLED 
-    interrupt_test();
-#endif
+    KERNEL_TEST_POINT(interrupt_test);
 }
 
 OS_RETURN_E kernel_interrupt_set_driver(const interrupt_driver_t* driver)
@@ -255,8 +251,8 @@ OS_RETURN_E kernel_interrupt_set_driver(const interrupt_driver_t* driver)
 
     EXIT_CRITICAL(int_state);
 
-    KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED, 
-                 "[INTERRUPTS] Set new interrupt driver at 0x%p.", 
+    KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED,
+                 "[INTERRUPTS] Set new interrupt driver at 0x%p.",
                  driver);
 
     return OS_NO_ERR;
@@ -294,9 +290,9 @@ OS_RETURN_E kernel_interrupt_register_int_handler(const uint32_t interrupt_line,
     kernel_interrupt_handlers[interrupt_line].handler = handler;
     kernel_interrupt_handlers[interrupt_line].enabled = 1;
 
-    KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED, 
-                 "[INTERRUPTS] Added INT %u handler at 0x%p", 
-                 interrupt_line, 
+    KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED,
+                 "[INTERRUPTS] Added INT %u handler at 0x%p",
+                 interrupt_line,
                  handler);
 
     EXIT_CRITICAL(int_state);
@@ -325,8 +321,8 @@ OS_RETURN_E kernel_interrupt_remove_int_handler(const uint32_t interrupt_line)
     kernel_interrupt_handlers[interrupt_line].handler = NULL;
     kernel_interrupt_handlers[interrupt_line].enabled = 0;
 
-    KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED, 
-                 "[INTERRUPTS] Removed INT %u handle", 
+    KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED,
+                 "[INTERRUPTS] Removed INT %u handle",
                  interrupt_line);
     EXIT_CRITICAL(int_state);
 
@@ -373,7 +369,7 @@ void kernel_interrupt_restore(const uint32_t prev_state)
 {
     if(prev_state != 0)
     {
-        KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED, 
+        KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED,
                      "[INTERRUPTS] --- Enabled HW INT ---");
         cpu_set_interrupt();
     }
@@ -390,7 +386,7 @@ uint32_t kernel_interrupt_disable(void)
 
     cpu_clear_interrupt();
 
-    KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED, 
+    KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED,
                  "[INTERRUPTS] --- Disabled HW INT ---");
 
     return old_state;
@@ -399,17 +395,17 @@ uint32_t kernel_interrupt_disable(void)
 void kernel_interrupt_set_irq_mask(const uint32_t irq_number,
                                    const uint32_t enabled)
 {
-    KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED, 
-                 "[INTERRUPTS] IRQ Mask change: %u %u", 
-                 irq_number, 
+    KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED,
+                 "[INTERRUPTS] IRQ Mask change: %u %u",
+                 irq_number,
                  enabled);
     interrupt_driver.driver_set_irq_mask(irq_number, enabled);
 }
 
 void kernel_interrupt_set_irq_eoi(const uint32_t irq_number)
 {
-    KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED, 
-                 "[INTERRUPTS] IRQ EOI: %u", 
+    KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED,
+                 "[INTERRUPTS] IRQ EOI: %u",
                  irq_number);
     interrupt_driver.driver_set_irq_eoi(irq_number);
 }

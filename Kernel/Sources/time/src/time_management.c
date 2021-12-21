@@ -34,9 +34,7 @@
 #include <config.h>
 
 /* Tests header file */
-#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
-#endif
 
 /* Header file */
 #include <time_management.h>
@@ -94,29 +92,29 @@ extern kernel_timer_t null_timer;
  ******************************************************************************/
 /**
  * @brief The kernel's main timer interrupt handler.
- * 
+ *
  * @details The kernel's main timer interrupt handler. This must be connected to
  * the main timer of the system.
- * 
+ *
  * @param[in, out] cpu_state The cpu registers before the interrupt.
  * @param[in] int_id The interrupt line that called the handler.
  * @param[in, out] stack The stack state before the interrupt.
  */
-static void time_main_timer_handler(cpu_state_t* cpu_state, 
+static void time_main_timer_handler(cpu_state_t* cpu_state,
                                     uintptr_t int_id,
                                     stack_state_t* stack);
 
 /**
  * @brief The kernel's RTC timer interrupt handler.
- * 
+ *
  * @details The kernel's RTC timer interrupt handler. This must be connected to
  * the RTC timer of the system.
- * 
+ *
  * @param[in, out] cpu_state The cpu registers before the interrupt.
  * @param[in] int_id The interrupt line that called the handler.
  * @param[in, out] stack The stack state before the interrupt.
  */
-static void time_rtc_timer_handler(cpu_state_t* cpu_state, 
+static void time_rtc_timer_handler(cpu_state_t* cpu_state,
                                    uintptr_t int_id,
                                    stack_state_t* stack);
 
@@ -124,7 +122,7 @@ static void time_rtc_timer_handler(cpu_state_t* cpu_state,
  * FUNCTIONS
  ******************************************************************************/
 
-static void time_main_timer_handler(cpu_state_t* cpu_state, 
+static void time_main_timer_handler(cpu_state_t* cpu_state,
                                     uintptr_t int_id,
                                     stack_state_t* stack)
 {
@@ -170,7 +168,7 @@ static void time_main_timer_handler(cpu_state_t* cpu_state,
     KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED, "[TIME] Time manager main handler");
 }
 
-static void time_rtc_timer_handler(cpu_state_t* cpu_state, 
+static void time_rtc_timer_handler(cpu_state_t* cpu_state,
                                    uintptr_t int_id,
                                    stack_state_t* stack)
 {
@@ -262,7 +260,7 @@ OS_RETURN_E time_init(const kernel_timer_t* main_timer,
     if(sys_rtc_timer.set_frequency != NULL)
     {
         sys_rtc_timer.set_frequency(KERNEL_RTC_TIMER_FREQ);
-        
+
         err = sys_rtc_timer.set_handler(time_rtc_timer_handler);
         if(err != OS_NO_ERR)
         {
@@ -281,9 +279,7 @@ OS_RETURN_E time_init(const kernel_timer_t* main_timer,
         sys_rtc_timer.enable();
     }
 
-#ifdef TEST_MODE_ENABLED
-    time_test();
-#endif
+    KERNEL_TEST_POINT(time_test);
 
     return OS_NO_ERR;
 }
@@ -348,8 +344,8 @@ OS_RETURN_E time_register_scheduler(void(*scheduler_call)(
     }
 
 
-    KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED, 
-                 "[TIME] Registered scheduler routine at 0x%p", 
+    KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED,
+                 "[TIME] Registered scheduler routine at 0x%p",
                  scheduler_call);
 
     schedule_routine = scheduler_call;
@@ -364,8 +360,8 @@ OS_RETURN_E time_register_rtc_manager(void (*rtc_manager)(void))
         return OS_ERR_NULL_POINTER;
     }
 
-    KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED, 
-                 "[TIME] Registered RTC routine at 0x%p", 
+    KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED,
+                 "[TIME] Registered RTC routine at 0x%p",
                  rtc_manager);
 
     rtc_int_manager = rtc_manager;

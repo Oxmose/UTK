@@ -33,9 +33,7 @@
 #include <config.h>
 
 /* Tests header file */
-#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
-#endif
 
 /* Header */
 #include <uart.h>
@@ -114,45 +112,45 @@
 /** @brief Serial fifo depth flag: 64 bits. */
 #define SERIAL_FIFO_DEPTH_64     0x10
 
-/** 
- * @brief Computes the data port for the serial port which base port ID is 
+/**
+ * @brief Computes the data port for the serial port which base port ID is
  * given as parameter.
- * 
+ *
  * @param[in] port The base port ID of the serial port.
  */
 #define SERIAL_DATA_PORT(port)          (port)
-/** 
- * @brief Computes the aux data port for the serial port which base port ID is 
+/**
+ * @brief Computes the aux data port for the serial port which base port ID is
  * given as parameter.
- * 
+ *
  * @param[in] port The base port ID of the serial port.
  */
 #define SERIAL_DATA_PORT_2(port)        (port + 1)
-/** 
- * @brief Computes the fifo command port for the serial port which base port ID 
+/**
+ * @brief Computes the fifo command port for the serial port which base port ID
  * is given as parameter.
- * 
+ *
  * @param[in] port The base port ID of the serial port.
  */
 #define SERIAL_FIFO_COMMAND_PORT(port)  (port + 2)
-/** 
- * @brief Computes the line command port for the serial port which base port ID 
+/**
+ * @brief Computes the line command port for the serial port which base port ID
  * is given as parameter.
- * 
+ *
  * @param[in] port The base port ID of the serial port.
  */
 #define SERIAL_LINE_COMMAND_PORT(port)  (port + 3)
-/** 
- * @brief Computes the modem command port for the serial port which base port ID 
+/**
+ * @brief Computes the modem command port for the serial port which base port ID
  * is given as parameter.
- * 
+ *
  * @param[in] port The base port ID of the serial port.
  */
 #define SERIAL_MODEM_COMMAND_PORT(port) (port + 4)
-/** 
- * @brief Computes the line status port for the serial port which base port ID 
+/**
+ * @brief Computes the line status port for the serial port which base port ID
  * is given as parameter.
- * 
+ *
  * @param[in] port The base port ID of the serial port.
  */
 #define SERIAL_LINE_STATUS_PORT(port)   (port + 5)
@@ -200,7 +198,7 @@ enum SERIAL_BAUDRATE
     BAUDRATE_115200 = 1,
 };
 
-/** 
+/**
  * @brief Defines SERIAL_BAUDRATE_E type as a shorcut for enum SERIAL_BAUDRATE.
  */
 typedef enum SERIAL_BAUDRATE SERIAL_BAUDRATE_E;
@@ -212,7 +210,7 @@ typedef enum SERIAL_BAUDRATE SERIAL_BAUDRATE_E;
 /**
  * @brief Serial text driver instance.
  */
-static kernel_graphic_driver_t uart_text_driver = 
+static kernel_graphic_driver_t uart_text_driver =
 {
     .clear_screen = uart_clear_screen,
     .put_cursor_at = NULL,
@@ -264,7 +262,7 @@ static void set_baudrate(SERIAL_BAUDRATE_E rate, const uint8_t com);
 
 /**
  * @brief Writes the data given as patameter on the desired port.
- * 
+ *
  * @details The function will output the data given as parameter on the selected
  * port. This call is blocking until the data has been sent to the uart port
  * controler.
@@ -283,7 +281,7 @@ static void set_line(const uint8_t attr, const uint8_t com)
     cpu_outb(attr, SERIAL_LINE_COMMAND_PORT(com));
 
     KERNEL_DEBUG(SERIAL_DEBUG_ENABLED,
-                 "[SERIAL] Set line attributes of port 0x%04x to %u", 
+                 "[SERIAL] Set line attributes of port 0x%04x to %u",
                  com, attr);
 }
 
@@ -292,7 +290,7 @@ static void set_buffer(const uint8_t attr, const uint8_t com)
     cpu_outb(attr, SERIAL_FIFO_COMMAND_PORT(com));
 
     KERNEL_DEBUG(SERIAL_DEBUG_ENABLED,
-                 "[SERIAL] Set buffer attributes of port 0x%04x to %u", 
+                 "[SERIAL] Set buffer attributes of port 0x%04x to %u",
                  com, attr);
 }
 
@@ -303,7 +301,7 @@ static void set_baudrate(SERIAL_BAUDRATE_E rate, const uint8_t com)
     cpu_outb(rate & 0x00FF, SERIAL_DATA_PORT_2(com));
 
     KERNEL_DEBUG(SERIAL_DEBUG_ENABLED,
-                 "[SERIAL] Set baud rate of port 0x%04x to %u", 
+                 "[SERIAL] Set baud rate of port 0x%04x to %u",
                  com, rate);
 }
 
@@ -380,9 +378,7 @@ OS_RETURN_E uart_init(void)
 
     KERNEL_DEBUG(SERIAL_DEBUG_ENABLED, "[SERIAL] Serial initialization end");
 
-#ifdef TEST_MODE_ENABLED
-    uart_test();
-#endif
+    KERNEL_TEST_POINT(uart_test);
 
     return OS_NO_ERR;
 }
@@ -410,7 +406,7 @@ void uart_scroll(const SCROLL_DIRECTION_E direction,
         {
             uart_write(SERIAL_OUTPUT_PORT, '\n');
         }
-    }    
+    }
 }
 
 void uart_console_write_keyboard(const char* str, const size_t len)
@@ -429,7 +425,7 @@ uint8_t uart_read(const uint32_t port)
     /* Wait for data to be received */
     ENTER_CRITICAL(int_state);
     while(uart_received(port) == 0){}
-    
+
 
     /* Read available data on port */
     uint8_t val = cpu_inb(SERIAL_DATA_PORT(port));

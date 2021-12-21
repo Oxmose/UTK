@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @file ustar_fs.c
- * 
+ *
  * @see ustar_fs.h
  *
  * @author Alexy Torres Aurora Dugo
@@ -10,10 +10,10 @@
  * @version 1.0
  *
  * @brief Kernel's USTAR filesystem driver.
- * 
- * @details Kernel's USTAR filesystem driver. Defines the functions and 
+ *
+ * @details Kernel's USTAR filesystem driver. Defines the functions and
  * structures used by the kernel to manage USTAR partitions.
- * 
+ *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
@@ -28,9 +28,7 @@
 #include <config.h>
 
 /* Tests header file */
-#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
-#endif
 
 /* Header file */
 #include <ustar_fs.h>
@@ -111,9 +109,16 @@ typedef enum USTAR_DEV_OP USTAR_DEV_OP_E;
  * FUNCTIONS
  ******************************************************************************/
 
+#define USTAR_ASSERT(COND, MSG, ERROR) {                      \
+    if((COND) == FALSE)                                       \
+    {                                                         \
+        PANIC(ERROR, "USTASR", MSG, TRUE);                    \
+    }                                                         \
+}
+
 inline static OS_RETURN_E ustar_access_blocks_from_device(
                                             const vfs_partition_t* partition,
-                                            void* buffer, 
+                                            void* buffer,
                                             const uint32_t inode,
                                             const size_t block_counts,
                                             const USTAR_DEV_OP_E operation)
@@ -125,46 +130,46 @@ inline static OS_RETURN_E ustar_access_blocks_from_device(
     phys_block_size = partition->device->block_size;
 
     /* Get the physical block on the device */
-    first_phys_block = partition->first_block + 
+    first_phys_block = partition->first_block +
                          (inode * USTAR_BLOCK_SIZE) / phys_block_size;
     if(phys_block_size > USTAR_BLOCK_SIZE)
     {
         first_phys_block_offset = inode % (phys_block_size / USTAR_BLOCK_SIZE);
     }
-    else 
+    else
     {
         first_phys_block_offset = 0;
     }
     first_phys_block_offset *= USTAR_BLOCK_SIZE;
 
-    KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "Reading blocks 0x%p, (%d blocks)", 
+    KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "Reading blocks 0x%p, (%d blocks)",
                  inode, block_counts);
 
     /* Read / Write blocks */
     if(operation == USTAR_DEV_OP_WRITE)
     {
-        return partition->device->write_blocks(partition->device, 
-                                               first_phys_block, 
+        return partition->device->write_blocks(partition->device,
+                                               first_phys_block,
                                                buffer,
-                                               block_counts * USTAR_BLOCK_SIZE, 
-                                               first_phys_block_offset); 
+                                               block_counts * USTAR_BLOCK_SIZE,
+                                               first_phys_block_offset);
     }
     else if(operation == USTAR_DEV_OP_READ)
     {
-        return partition->device->read_blocks(partition->device, 
-                                              first_phys_block, 
+        return partition->device->read_blocks(partition->device,
+                                              first_phys_block,
                                               buffer,
-                                              block_counts * USTAR_BLOCK_SIZE, 
-                                              first_phys_block_offset);   
+                                              block_counts * USTAR_BLOCK_SIZE,
+                                              first_phys_block_offset);
     }
     else if(operation == USTAR_DEV_OP_FLUSH)
     {
-        return partition->device->flush_blocks(partition->device, 
-                                               first_phys_block, 
-                                               block_counts * USTAR_BLOCK_SIZE, 
-                                               first_phys_block_offset);   
+        return partition->device->flush_blocks(partition->device,
+                                               first_phys_block,
+                                               block_counts * USTAR_BLOCK_SIZE,
+                                               first_phys_block_offset);
     }
-    else 
+    else
     {
         return OS_ERR_UNAUTHORIZED_ACTION;
     }
@@ -222,7 +227,7 @@ inline static void uint2oct(char* oct, uint32_t value, size_t size)
 }
 
 static void ustar_get_next_file(const vfs_partition_t* partition,
-                                ustar_block_t* block, 
+                                ustar_block_t* block,
                                 uint32_t* inode)
 {
     OS_RETURN_E err;
@@ -232,7 +237,7 @@ static void ustar_get_next_file(const vfs_partition_t* partition,
 
     /* We loop over all possible empty names (removed files) */
     do
-    {   
+    {
         err = ustar_check_block(block);
         if(err != OS_NO_ERR)
         {
@@ -252,13 +257,13 @@ static void ustar_get_next_file(const vfs_partition_t* partition,
         *inode = *inode + size / USTAR_BLOCK_SIZE;
 
         /* Read the first 512 bytes (USTAR block) */
-        err = ustar_access_blocks_from_device(partition, 
-                                            block, 
-                                            *inode, 
-                                            1, 
+        err = ustar_access_blocks_from_device(partition,
+                                            block,
+                                            *inode,
+                                            1,
                                             USTAR_DEV_OP_READ);
-        
- 
+
+
         if(err != OS_NO_ERR)
         {
             block->file_name[0] = 0;
@@ -287,7 +292,7 @@ inline static void ustar_get_filename(const char* path, char* buffer)
             ++len;
         }
     }
-    else 
+    else
     {
         len = 0;
     }
@@ -332,7 +337,7 @@ inline static bool_t is_root(const char* path, const char* file)
 
     ret_val = (len == strlen(buffer) &&
                strncmp(path, buffer, len) == 0);
-    
+
     kfree(buffer);
     return ret_val;
 }
@@ -382,8 +387,8 @@ inline static vfs_access_right_t ustar_to_vfs_rights(const char* mode)
     return rights;
 }
 
-static void ustar_set_vnode(vfs_vnode_t* vnode, 
-                            ustar_block_t* block, 
+static void ustar_set_vnode(vfs_vnode_t* vnode,
+                            ustar_block_t* block,
                             const uint32_t block_id,
                             const char* path)
 {
@@ -393,7 +398,7 @@ static void ustar_set_vnode(vfs_vnode_t* vnode,
     vnode->type = ustar_to_vfs_type(block->type);
 
     ustar_get_filename(path, filename);
-    
+
     strncpy(vnode->name, filename, VFS_FILE_NAME_LENGTH);
     strncpy(vnode->short_name, filename, VFS_FILE_NAME_LENGTH);
 
@@ -417,7 +422,7 @@ static void ustar_set_vnode(vfs_vnode_t* vnode,
 
     vnode->size = oct2uint(block->size, USTAR_FSIZE_FIELD_LENGTH);
 
-    vnode->creation_datetime = oct2uint(block->last_edited, 
+    vnode->creation_datetime = oct2uint(block->last_edited,
                                         USTAR_LEDIT_FIELD_LENGTH);
     vnode->last_access_datetime = vnode->creation_datetime;
     vnode->last_modification_datetime = vnode->creation_datetime;
@@ -441,10 +446,10 @@ static OS_RETURN_E ustar_search_file(const vfs_partition_t* partition,
     }
 
     /* Read the first 512 bytes (USTAR block) */
-    err = ustar_access_blocks_from_device(partition, 
+    err = ustar_access_blocks_from_device(partition,
                                           block,
-                                          0, 
-                                          1, 
+                                          0,
+                                          1,
                                           USTAR_DEV_OP_READ);
     if(err != OS_NO_ERR)
     {
@@ -460,13 +465,13 @@ static OS_RETURN_E ustar_search_file(const vfs_partition_t* partition,
     found    = FALSE;
     *block_id = 0;
 
-    /* Search for the file, if first filename character is NULL, we reached the 
-     * end of the search 
+    /* Search for the file, if first filename character is NULL, we reached the
+     * end of the search
      */
     while(block->file_name[0] != 0)
     {
-        if(strncmp(path, 
-                   block->file_name, 
+        if(strncmp(path,
+                   block->file_name,
                    USTAR_FILENAME_MAX_LENGTH) == 0)
         {
             found = TRUE;
@@ -485,7 +490,7 @@ static OS_RETURN_E ustar_search_file(const vfs_partition_t* partition,
         KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "Found file %s", path);
         return OS_NO_ERR;
     }
-    else 
+    else
     {
         KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "Did not find file %s", path);
         return OS_ERR_FILE_NOT_FOUND;
@@ -518,8 +523,8 @@ static OS_RETURN_E ustar_get_item_count(const vfs_partition_t* partition,
 
     dir_path_length = strlen(path);
 
-    /* Search for the file, if first filename character is NULL, we reached the 
-     * end of the search 
+    /* Search for the file, if first filename character is NULL, we reached the
+     * end of the search
      */
     while(block.file_name[0] != 0)
     {
@@ -528,10 +533,10 @@ static OS_RETURN_E ustar_get_item_count(const vfs_partition_t* partition,
         {
             return err;
         }
-        
+
         /* Is path is equal and is not the exact dir we are checking */
-        if(strncmp(block.file_name, 
-                   path, 
+        if(strncmp(block.file_name,
+                   path,
                    dir_path_length) == 0 &&
            strlen(block.file_name) != dir_path_length)
         {
@@ -566,16 +571,16 @@ OS_RETURN_E ustar_mount(vfs_partition_t* partition,
         return OS_ERR_ALIGN;
     }
 
-    /* First we need to check if the partition is of the correct format, for 
-     * the USART, this is pretty straight forward, we need to check if the 
-     * first block is of usart type. There might be previous entries but we 
+    /* First we need to check if the partition is of the correct format, for
+     * the USART, this is pretty straight forward, we need to check if the
+     * first block is of usart type. There might be previous entries but we
      * don't check them */
 
     /* Read the first 512 bytes (USTAR block) */
-    err = ustar_access_blocks_from_device(partition, 
+    err = ustar_access_blocks_from_device(partition,
                                           &block,
-                                          0, 
-                                          1, 
+                                          0,
+                                          1,
                                           USTAR_DEV_OP_READ);
     if(err != OS_NO_ERR)
     {
@@ -590,22 +595,22 @@ OS_RETURN_E ustar_umount(vfs_partition_t* partition)
     ustar_block_t block;
     OS_RETURN_E   err;
 
-    /* First we need to check if the partition is of the correct format, for 
-     * the USART, this is pretty straight forward, we need to check if the 
-     * first block is of usart type. There might be previous entries but we 
+    /* First we need to check if the partition is of the correct format, for
+     * the USART, this is pretty straight forward, we need to check if the
+     * first block is of usart type. There might be previous entries but we
      * don't check them */
 
     /* Read the first 512 bytes (USTAR block) */
-    err = ustar_access_blocks_from_device(partition, 
+    err = ustar_access_blocks_from_device(partition,
                                           &block,
-                                          0, 
-                                          1, 
+                                          0,
+                                          1,
                                           USTAR_DEV_OP_READ);
     if(err != OS_NO_ERR)
     {
         return err;
     }
-    
+
     err = ustar_check_block(&block);
     if(err != OS_NO_ERR)
     {
@@ -613,14 +618,14 @@ OS_RETURN_E ustar_umount(vfs_partition_t* partition)
     }
 
     /* Flush the partition */
-    return ustar_access_blocks_from_device(partition, 
+    return ustar_access_blocks_from_device(partition,
                                            &block,
-                                           0, 
-                                           1, 
+                                           0,
+                                           1,
                                            USTAR_DEV_OP_FLUSH);
 }
 
-OS_RETURN_E ustar_open_file(const char* path, 
+OS_RETURN_E ustar_open_file(const char* path,
                             vfs_vnode_t* vnode)
 {
     ustar_block_t current_block;
@@ -642,10 +647,10 @@ OS_RETURN_E ustar_open_file(const char* path,
     KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "Opening %s", path);
 
     /* Read the first 512 bytes (USTAR block) */
-    err = ustar_access_blocks_from_device(vnode->partition, 
+    err = ustar_access_blocks_from_device(vnode->partition,
                                           &current_block,
-                                          0, 
-                                          1, 
+                                          0,
+                                          1,
                                           USTAR_DEV_OP_READ);
     if(err != OS_NO_ERR)
     {
@@ -661,14 +666,14 @@ OS_RETURN_E ustar_open_file(const char* path,
     found    = FALSE;
     block_id = 0;
 
-    /* Search for the file, if first filename character is NULL, we reached the 
-     * end of the search 
+    /* Search for the file, if first filename character is NULL, we reached the
+     * end of the search
      */
     while(current_block.file_name[0] != 0)
     {
         KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "Checking %s", current_block.file_name);
-        if(strncmp(path, 
-                   current_block.file_name, 
+        if(strncmp(path,
+                   current_block.file_name,
                    USTAR_FILENAME_MAX_LENGTH) == 0)
         {
             found = TRUE;
@@ -678,7 +683,7 @@ OS_RETURN_E ustar_open_file(const char* path,
                 return err;
             }
 
-            /* For the USTAR, the inode is just the block id of the current 
+            /* For the USTAR, the inode is just the block id of the current
              * partition */
             ustar_set_vnode(vnode, &current_block, block_id, path);
             break;
@@ -690,7 +695,7 @@ OS_RETURN_E ustar_open_file(const char* path,
     {
         err = OS_NO_ERR;
     }
-    else 
+    else
     {
         err = OS_ERR_FILE_NOT_FOUND;
     }
@@ -710,16 +715,16 @@ OS_RETURN_E ustar_close_file(const vfs_vnode_t* vnode)
     }
 
     /* Check the inode format */
-    err = ustar_access_blocks_from_device(vnode->partition, 
+    err = ustar_access_blocks_from_device(vnode->partition,
                                           &block,
-                                          (const uint32_t)vnode->fs_inode, 
-                                          1, 
+                                          (const uint32_t)vnode->fs_inode,
+                                          1,
                                           USTAR_DEV_OP_READ);
     if(err != OS_NO_ERR)
     {
         return err;
     }
-    
+
     err = ustar_check_block(&block);
     if(err != OS_NO_ERR)
     {
@@ -732,20 +737,20 @@ OS_RETURN_E ustar_close_file(const vfs_vnode_t* vnode)
     {
         block_count = block_count / USTAR_BLOCK_SIZE + 1;
     }
-    else 
+    else
     {
         block_count = block_count / USTAR_BLOCK_SIZE;
     }
-    return ustar_access_blocks_from_device(vnode->partition, 
+    return ustar_access_blocks_from_device(vnode->partition,
                                            NULL,
-                                           (const uint32_t)vnode->fs_inode, 
-                                           block_count, 
+                                           (const uint32_t)vnode->fs_inode,
+                                           block_count,
                                            USTAR_DEV_OP_FLUSH);
 }
 
 OS_RETURN_E ustar_read_file(const vfs_vnode_t* vnode,
                             void* buffer,
-                            size_t size,                            
+                            size_t size,
                             size_t* actual_size)
 {
     ustar_block_t block;
@@ -762,16 +767,16 @@ OS_RETURN_E ustar_read_file(const vfs_vnode_t* vnode,
     }
 
     /* Check the inode format */
-    err =  ustar_access_blocks_from_device(vnode->partition, 
+    err =  ustar_access_blocks_from_device(vnode->partition,
                                            &block,
-                                           (const uint32_t)vnode->fs_inode, 
-                                           1, 
+                                           (const uint32_t)vnode->fs_inode,
+                                           1,
                                            USTAR_DEV_OP_READ);
     if(err != OS_NO_ERR)
     {
         return err;
     }
-    
+
     err = ustar_check_block(&block);
     if(err != OS_NO_ERR)
     {
@@ -826,10 +831,10 @@ OS_RETURN_E ustar_read_file(const vfs_vnode_t* vnode,
         return OS_ERR_MALLOC;
     }
 
-    err = ustar_access_blocks_from_device(vnode->partition, 
+    err = ustar_access_blocks_from_device(vnode->partition,
                                           block_buffer,
-                                          real_inode, 
-                                          blocks_to_read, 
+                                          real_inode,
+                                          blocks_to_read,
                                           USTAR_DEV_OP_READ);
     if(err != OS_NO_ERR)
     {
@@ -839,7 +844,7 @@ OS_RETURN_E ustar_read_file(const vfs_vnode_t* vnode,
 
     /* Move the data */
     memcpy(buffer, block_buffer + offset, size);
-    
+
     if(actual_size != NULL)
     {
         *actual_size = size;
@@ -851,7 +856,7 @@ OS_RETURN_E ustar_read_file(const vfs_vnode_t* vnode,
 
 OS_RETURN_E ustar_write_file(const vfs_vnode_t* vnode,
                              const void* buffer,
-                             size_t size,                            
+                             size_t size,
                              size_t* actual_size)
 {
     ustar_block_t block;
@@ -868,16 +873,16 @@ OS_RETURN_E ustar_write_file(const vfs_vnode_t* vnode,
     }
 
     /* Check the inode format */
-    err =  ustar_access_blocks_from_device(vnode->partition, 
+    err =  ustar_access_blocks_from_device(vnode->partition,
                                            &block,
-                                           (const uint32_t)vnode->fs_inode, 
-                                           1, 
+                                           (const uint32_t)vnode->fs_inode,
+                                           1,
                                            USTAR_DEV_OP_READ);
     if(err != OS_NO_ERR)
     {
         return err;
     }
-    
+
     err = ustar_check_block(&block);
     if(err != OS_NO_ERR)
     {
@@ -917,10 +922,10 @@ OS_RETURN_E ustar_write_file(const vfs_vnode_t* vnode,
     write = 0;
     if(offset != 0)
     {
-        err = ustar_access_blocks_from_device(vnode->partition, 
+        err = ustar_access_blocks_from_device(vnode->partition,
                                             &block,
-                                            real_inode, 
-                                            1, 
+                                            real_inode,
+                                            1,
                                             USTAR_DEV_OP_READ);
         if(err != OS_NO_ERR)
         {
@@ -931,10 +936,10 @@ OS_RETURN_E ustar_write_file(const vfs_vnode_t* vnode,
 
         memcpy(((char*)&block) + offset, buffer, write);
 
-        err = ustar_access_blocks_from_device(vnode->partition, 
+        err = ustar_access_blocks_from_device(vnode->partition,
                                             &block,
-                                            real_inode, 
-                                            1, 
+                                            real_inode,
+                                            1,
                                             USTAR_DEV_OP_WRITE);
         if(err != OS_NO_ERR)
         {
@@ -948,10 +953,10 @@ OS_RETURN_E ustar_write_file(const vfs_vnode_t* vnode,
     if(size > USTAR_BLOCK_SIZE)
     {
         blocks_to_write = size / USTAR_BLOCK_SIZE;
-        err = ustar_access_blocks_from_device(vnode->partition, 
+        err = ustar_access_blocks_from_device(vnode->partition,
                                             (char*)buffer + write,
-                                            real_inode, 
-                                            blocks_to_write, 
+                                            real_inode,
+                                            blocks_to_write,
                                             USTAR_DEV_OP_WRITE);
         if(err != OS_NO_ERR)
         {
@@ -969,10 +974,10 @@ OS_RETURN_E ustar_write_file(const vfs_vnode_t* vnode,
     /* Write last block if needed, we need to read it to edit it */
     if(size != 0)
     {
-        err = ustar_access_blocks_from_device(vnode->partition, 
+        err = ustar_access_blocks_from_device(vnode->partition,
                                               &block,
-                                              real_inode, 
-                                              1, 
+                                              real_inode,
+                                              1,
                                               USTAR_DEV_OP_READ);
         if(err != OS_NO_ERR)
         {
@@ -985,10 +990,10 @@ OS_RETURN_E ustar_write_file(const vfs_vnode_t* vnode,
 
         memcpy(&block, (char*)buffer + write, size);
 
-        err = ustar_access_blocks_from_device(vnode->partition, 
+        err = ustar_access_blocks_from_device(vnode->partition,
                                               &block,
-                                              real_inode, 
-                                              1, 
+                                              real_inode,
+                                              1,
                                               USTAR_DEV_OP_WRITE);
         if(err != OS_NO_ERR)
         {
@@ -1000,7 +1005,7 @@ OS_RETURN_E ustar_write_file(const vfs_vnode_t* vnode,
         }
         write += size;
     }
-    
+
     if(actual_size != NULL)
     {
         *actual_size = write;
@@ -1009,15 +1014,15 @@ OS_RETURN_E ustar_write_file(const vfs_vnode_t* vnode,
     if(write != 0)
     {
         /* Update last edited */
-        uint2oct(block.last_edited, 
-                 vnode->last_modification_datetime, 
+        uint2oct(block.last_edited,
+                 vnode->last_modification_datetime,
                  USTAR_LEDIT_FIELD_LENGTH);
     }
 
     return err;
 }
 
-OS_RETURN_E ustar_create_file(const char* path, 
+OS_RETURN_E ustar_create_file(const char* path,
                               const VFS_FILE_TYPE_E type,
                               const vfs_access_right_t access_rights,
                               const char* owner_name,
@@ -1044,7 +1049,7 @@ OS_RETURN_E ustar_remove_file(const vfs_partition_t* part, const char* path)
     }
 
     err = ustar_search_file(part, path, &current_block, &block_id);
-    KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "Deleteing file %s at %d", 
+    KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "Deleteing file %s at %d",
                  path, block_id);
 
     if(err == OS_NO_ERR)
@@ -1063,25 +1068,25 @@ OS_RETURN_E ustar_remove_file(const vfs_partition_t* part, const char* path)
                 return OS_ERR_DIR_NOT_EMPTY;
             }
         }
-        
+
         /* Set the first file block to NULL */
         memset(&current_block.file_name, 0, USTAR_FILENAME_MAX_LENGTH);
-        err = ustar_access_blocks_from_device(part, 
+        err = ustar_access_blocks_from_device(part,
                                               &current_block,
-                                              block_id, 
-                                              1, 
+                                              block_id,
+                                              1,
                                               USTAR_DEV_OP_WRITE);
         if(err != OS_NO_ERR)
         {
             return err;
         }
-        return ustar_access_blocks_from_device(part, 
+        return ustar_access_blocks_from_device(part,
                                                NULL,
-                                               block_id, 
-                                               1, 
+                                               block_id,
+                                               1,
                                                USTAR_DEV_OP_FLUSH);
     }
-    else 
+    else
     {
         return err;
     }
@@ -1122,20 +1127,20 @@ OS_RETURN_E ustar_rename_file(const vfs_partition_t* partition,
     ustar_get_path(new_path, short_path);
     if(strlen(short_path) != 0)
     {
-        err = ustar_search_file(partition, 
-                                short_path, 
-                                &current_block, 
+        err = ustar_search_file(partition,
+                                short_path,
+                                &current_block,
                                 &block_id);
-        if(err != OS_NO_ERR || 
+        if(err != OS_NO_ERR ||
         ustar_to_vfs_type(current_block.type) != VFS_FILE_TYPE_DIR)
         {
             return OS_ERR_FILE_NOT_FOUND;
         }
     }
 
-    err = ustar_search_file(partition, 
-                            old_path, 
-                            &current_block, 
+    err = ustar_search_file(partition,
+                            old_path,
+                            &current_block,
                             &block_id);
 
     if(err == OS_NO_ERR)
@@ -1159,10 +1164,10 @@ OS_RETURN_E ustar_rename_file(const vfs_partition_t* partition,
             {
                 return err;
             }
-            table_size = sizeof(char) * item_count * 
+            table_size = sizeof(char) * item_count *
                          (USTAR_FILENAME_MAX_LENGTH + 1);
             name_table = kmalloc(sizeof(char) * table_size);
-            err = ustar_list_directory(&node, &item_count, 
+            err = ustar_list_directory(&node, &item_count,
                                        name_table, table_size);
             if(err != OS_NO_ERR)
             {
@@ -1177,7 +1182,7 @@ OS_RETURN_E ustar_rename_file(const vfs_partition_t* partition,
                 table_size = item_count;
                 while(table_size > 0)
                 {
-                    if(path_len + strlen(name_table + i) > 
+                    if(path_len + strlen(name_table + i) >
                     USTAR_FILENAME_MAX_LENGTH)
                     {
                         kfree(name_table);
@@ -1187,16 +1192,16 @@ OS_RETURN_E ustar_rename_file(const vfs_partition_t* partition,
                     --table_size;
                 }
             }
-            
+
             /* Set the first file block names */
-            strncpy(current_block.file_name, 
-                    new_path, 
+            strncpy(current_block.file_name,
+                    new_path,
                     MIN(path_len, USTAR_FILENAME_MAX_LENGTH));
             current_block.file_name[path_len] = '\0';
-            err = ustar_access_blocks_from_device(partition, 
+            err = ustar_access_blocks_from_device(partition,
                                                 &current_block,
-                                                block_id, 
-                                                1, 
+                                                block_id,
+                                                1,
                                                 USTAR_DEV_OP_WRITE);
             if(err != OS_NO_ERR)
             {
@@ -1206,49 +1211,47 @@ OS_RETURN_E ustar_rename_file(const vfs_partition_t* partition,
             /* Rename all files */
             i = 0;
             table_size = item_count;
-            
+
             strncpy(short_path, new_path, path_len);
             strncpy(old_short_path, old_path, old_path_len);
-            
+
             while(table_size)
             {
-                
+
                 /* Concatenate the name with the new path */
-                memset(short_path + path_len, 0, 
+                memset(short_path + path_len, 0,
                        USTAR_FILENAME_MAX_LENGTH - path_len);
-                memset(old_short_path + old_path_len, 0, 
+                memset(old_short_path + old_path_len, 0,
                        USTAR_FILENAME_MAX_LENGTH - old_path_len);
-                strncpy(short_path + path_len, name_table + i, 
+                strncpy(short_path + path_len, name_table + i,
                         strlen(name_table + i) + 1);
-                strncpy(old_short_path + old_path_len, name_table + i, 
+                strncpy(old_short_path + old_path_len, name_table + i,
                         strlen(name_table + i) + 1);
 
                 KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "Renaming %s to %s", old_short_path, short_path);
 
                 err = ustar_rename_file(partition, old_short_path, short_path);
-                if(err != OS_NO_ERR)
-                {
-                    kernel_error("ERROR while renaming regular file: %d\n", err);
-                    KERNEL_PANIC(err);
-                }
-                
+                USTAR_ASSERT(err == OS_NO_ERR,
+                             "Error while renaming regular file.",
+                             err);
+
                 i += strlen(name_table + i) + 1;
                 --table_size;
             }
 
             kfree(name_table);
         }
-        else 
+        else
         {
             /* Set the first file block names */
-            strncpy(current_block.file_name, 
-                    new_path, 
+            strncpy(current_block.file_name,
+                    new_path,
                     MIN(path_len, USTAR_FILENAME_MAX_LENGTH));
             current_block.file_name[path_len] = '\0';
-            err = ustar_access_blocks_from_device(partition, 
+            err = ustar_access_blocks_from_device(partition,
                                                 &current_block,
-                                                block_id, 
-                                                1, 
+                                                block_id,
+                                                1,
                                                 USTAR_DEV_OP_WRITE);
             if(err != OS_NO_ERR)
             {
@@ -1256,13 +1259,13 @@ OS_RETURN_E ustar_rename_file(const vfs_partition_t* partition,
             }
         }
 
-        return ustar_access_blocks_from_device(partition, 
+        return ustar_access_blocks_from_device(partition,
                                                NULL,
-                                               block_id, 
-                                               1, 
+                                               block_id,
+                                               1,
                                                USTAR_DEV_OP_FLUSH);
     }
-    else 
+    else
     {
         return err;
     }
@@ -1300,21 +1303,21 @@ OS_RETURN_E ustar_truncate_file(const vfs_partition_t* partition,
         uint2oct(current_block.size, new_size, USTAR_FSIZE_FIELD_LENGTH);
         KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "Truncated file to %s", current_block.size);
 
-        return ustar_access_blocks_from_device(partition, 
+        return ustar_access_blocks_from_device(partition,
                                                &current_block,
-                                               block_id, 
-                                               1, 
+                                               block_id,
+                                               1,
                                                USTAR_DEV_OP_WRITE);
     }
-    else 
+    else
     {
         return err;
     }
 }
 
-OS_RETURN_E ustar_list_directory(const vfs_vnode_t* vnode, 
+OS_RETURN_E ustar_list_directory(const vfs_vnode_t* vnode,
                                  size_t* item_count,
-                                 char* buffer, 
+                                 char* buffer,
                                  const size_t buff_size)
 {
     OS_RETURN_E   err;
@@ -1333,16 +1336,16 @@ OS_RETURN_E ustar_list_directory(const vfs_vnode_t* vnode,
     *item_count  = 0;
 
     /* Read the first 512 bytes (USTAR block) */
-    err = ustar_access_blocks_from_device(vnode->partition, 
+    err = ustar_access_blocks_from_device(vnode->partition,
                                           &block,
-                                          (uint32_t)vnode->fs_inode, 
-                                          1, 
+                                          (uint32_t)vnode->fs_inode,
+                                          1,
                                           USTAR_DEV_OP_READ);
     if(err != OS_NO_ERR)
     {
         return err;
     }
-    
+
     err = ustar_check_block(&block);
     if(err != OS_NO_ERR)
     {
@@ -1358,8 +1361,8 @@ OS_RETURN_E ustar_list_directory(const vfs_vnode_t* vnode,
 
     dir_path_length = strlen(vnode->name);
 
-    /* Search for the file, if first filename character is NULL, we reached the 
-     * end of the search 
+    /* Search for the file, if first filename character is NULL, we reached the
+     * end of the search
      */
     while(block.file_name[0] != 0)
     {
@@ -1369,8 +1372,8 @@ OS_RETURN_E ustar_list_directory(const vfs_vnode_t* vnode,
             return err;
         }
         file_name_length = strlen(block.file_name);
-        if(strncmp(block.file_name, 
-                   vnode->name, 
+        if(strncmp(block.file_name,
+                   vnode->name,
                    dir_path_length) == 0)
         {
             /* If self or file in folder skip */
@@ -1379,8 +1382,8 @@ OS_RETURN_E ustar_list_directory(const vfs_vnode_t* vnode,
             {
                 if(size_left > file_name_length + 1)
                 {
-                    strncpy(&buffer[buff_size - size_left], 
-                            block.file_name + dir_path_length,  
+                    strncpy(&buffer[buff_size - size_left],
+                            block.file_name + dir_path_length,
                             file_name_length - dir_path_length);
 
                     size_left -= file_name_length - dir_path_length;
@@ -1388,7 +1391,7 @@ OS_RETURN_E ustar_list_directory(const vfs_vnode_t* vnode,
                     --size_left;
                     ++*item_count;
                 }
-                else 
+                else
                 {
                     buffer[size_left] = 0;
                     return OS_ERR_OUT_OF_BOUND;

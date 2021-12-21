@@ -35,7 +35,7 @@ void fork_test(void)
     {
         /* Here we cant return, this should be replaced in the future by the
          * exit syscall */
-        sched_terminate_self((void*)42);
+        sched_thread_terminate_self((void*)42);
     }
 
     kill_qemu();

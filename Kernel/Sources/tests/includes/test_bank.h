@@ -17,6 +17,12 @@
 
 #include <config.h>
 
+#ifdef TEST_MODE_ENABLED
+
+#define KERNEL_TEST_POINT(func) { \
+    func();                       \
+}
+
 void kill_qemu(void);
 
 #ifdef ARCH_I386
@@ -112,5 +118,9 @@ void futex_test(void);
 void mutex_test(void);
 void semaphore_test(void);
 void spinlock_test(void);
+
+#else
+#define KERNEL_TEST_POINT(func)
+#endif
 
 #endif /* __TEST_BANK_H_ */

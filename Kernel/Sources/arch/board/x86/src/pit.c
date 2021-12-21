@@ -31,9 +31,7 @@
 #include <config.h>
 
 /* Tests header file */
-#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
-#endif
 
 /* Header include */
 #include <pit.h>
@@ -100,7 +98,7 @@ static kernel_timer_t pit_driver = {
  * @param[in] int_id The interrupt line that called the handler.
  * @param[in, out] stack_state The stack state before the interrupt.
  */
-static void dummy_handler(cpu_state_t* cpu_state, 
+static void dummy_handler(cpu_state_t* cpu_state,
                           uintptr_t int_id,
                           stack_state_t* stack_state);
 
@@ -108,7 +106,14 @@ static void dummy_handler(cpu_state_t* cpu_state,
  * FUNCTIONS
  ******************************************************************************/
 
-static void dummy_handler(cpu_state_t* cpu_state, 
+#define PIT_ASSERT(COND, MSG, ERROR) {                      \
+    if((COND) == FALSE)                                     \
+    {                                                       \
+        PANIC(ERROR, "PIT", MSG, TRUE);                     \
+    }                                                       \
+}
+
+static void dummy_handler(cpu_state_t* cpu_state,
                           uintptr_t int_id,
                           stack_state_t* stack_state)
 {
@@ -132,19 +137,13 @@ void pit_init(void)
 
     /* Set PIT interrupt handler */
     err = kernel_interrupt_register_irq_handler(PIT_IRQ_LINE, dummy_handler);
-    if(err != OS_NO_ERR)
-    {
-        KERNEL_ERROR("Could not set PIT handler\n");
-        KERNEL_PANIC(err);
-    }
+    PIT_ASSERT(err == OS_NO_ERR, "Could not set PIT handler", err);
 
     KERNEL_DEBUG(PIT_DEBUG_ENABLED, "[PIT] Initialization end");
 
-#ifdef TEST_MODE_ENABLED
-    pit_test();
-    pit_test2();
-    pit_test3();
-#endif
+    KERNEL_TEST_POINT(pit_test);
+    KERNEL_TEST_POINT(pit_test2);
+    KERNEL_TEST_POINT(pit_test3);
 
     /* Enable PIT IRQ */
     pit_enable();
@@ -161,8 +160,8 @@ void pit_enable(void)
         --disabled_nesting;
     }
 
-    KERNEL_DEBUG(PIT_DEBUG_ENABLED, 
-                 "[PIT] Enable (nesting %d)", 
+    KERNEL_DEBUG(PIT_DEBUG_ENABLED,
+                 "[PIT] Enable (nesting %d)",
                  disabled_nesting);
 
     if(disabled_nesting == 0)
@@ -184,8 +183,8 @@ void pit_disable(void)
         ++disabled_nesting;
     }
 
-    KERNEL_DEBUG(PIT_DEBUG_ENABLED, 
-                 "[PIT] Disable (nesting %d)", 
+    KERNEL_DEBUG(PIT_DEBUG_ENABLED,
+                 "[PIT] Disable (nesting %d)",
                  disabled_nesting);
     kernel_interrupt_set_irq_mask(PIT_IRQ_LINE, 0);
 
@@ -194,13 +193,11 @@ void pit_disable(void)
 
 void pit_set_frequency(const uint32_t freq)
 {
-    uint32_t    int_state;
+    uint32_t int_state;
 
-    if(freq < PIT_MIN_FREQ || freq > PIT_MAX_FREQ)
-    {
-        KERNEL_ERROR("Set PIT timer frequency out of bound: %d\n", freq);
-        KERNEL_PANIC(OS_ERR_INCORRECT_VALUE);
-    }
+    PIT_ASSERT((freq >= PIT_MIN_FREQ && freq <= PIT_MAX_FREQ),
+               "PIT timer frequency out of bound",
+                OS_ERR_INCORRECT_VALUE);
 
     ENTER_CRITICAL(int_state);
 
@@ -215,10 +212,10 @@ void pit_set_frequency(const uint32_t freq)
     cpu_outb(tick_freq & 0x00FF, PIT_DATA_PORT);
     cpu_outb(tick_freq >> 8, PIT_DATA_PORT);
 
-    KERNEL_DEBUG(PIT_DEBUG_ENABLED, 
-                 "[PIT] New PIT frequency set (%d)", 
+    KERNEL_DEBUG(PIT_DEBUG_ENABLED,
+                 "[PIT] New PIT frequency set (%d)",
                  freq);
-    
+
     EXIT_CRITICAL(int_state);
 
     /* Enable PIT IRQ */
@@ -265,8 +262,8 @@ OS_RETURN_E pit_set_handler(void(*handler)(
         return err;
     }
 
-    KERNEL_DEBUG(PIT_DEBUG_ENABLED, 
-                 "[PIT] New PIT handler set at 0x%p", 
+    KERNEL_DEBUG(PIT_DEBUG_ENABLED,
+                 "[PIT] New PIT handler set at 0x%p",
                  handler);
 
     EXIT_CRITICAL(int_state);
@@ -277,8 +274,8 @@ OS_RETURN_E pit_set_handler(void(*handler)(
 
 OS_RETURN_E pit_remove_handler(void)
 {
-    KERNEL_DEBUG(PIT_DEBUG_ENABLED, 
-                 "[PIT] Default PIT handler set at 0x%p", 
+    KERNEL_DEBUG(PIT_DEBUG_ENABLED,
+                 "[PIT] Default PIT handler set at 0x%p",
                  dummy_handler);
 
     return pit_set_handler(dummy_handler);

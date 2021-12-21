@@ -38,19 +38,27 @@
  * GCONSTANTS
  ******************************************************************************/
 
-/**
- * @brief Defines the NMI Panic code.
- */
-#define PANIC_NMI_CODE 0xFFFFFFFF
+/** @brief Defines the stack trace size */
+#define STACK_TRACE_SIZE 6
 
-/** @brief Defines the maximal file name lenght for the panic */
-#define PANIC_MAX_FILE_NAME_LENGTH 256
+/* @brief Panic symbol maximum length */
+#define PANIC_SYM_LENGTH 50
 
 /*******************************************************************************
  * STRUCTURES
  ******************************************************************************/
 
-/* None */
+struct elf_symtab
+{
+        uint32_t      st_name;
+        uint32_t	  st_value;
+        uint32_t      st_size;
+        unsigned char st_info;
+        unsigned char st_other;
+        uint16_t	  st_shndx;
+};
+
+typedef struct elf_symtab elf_symtab_t;
 
 /*******************************************************************************
  * GLOBAL VARIABLES
@@ -59,14 +67,29 @@
 /** @brief Stores the current kernel panic error code. */
 static uint32_t panic_code = 0;
 
-/** @brief Stores the NMI panic code */
-static uint32_t nmi_panic_code = 0;
-
 /** @brief Stores the line at which the kernel panic was called. */
 static uint32_t panic_line;
 
-/** @brief Stores the file from which the panic was called */
-static char panic_file[PANIC_MAX_FILE_NAME_LENGTH];
+/** @brief Stores the file from which the panic was called. */
+static const char* panic_file;
+
+/** @brief Stores the module related to the panic. */
+static const char* panic_module;
+
+/** @brief Stores the message related to the panic. */
+static const char* panic_msg;
+
+/** @brief Address of the kernel symbol table */
+extern uintptr_t _KERNEL_SYMTAB_ADDR;
+
+/** @brief Size of the kernel symbol table */
+extern uintptr_t _KERNEL_SYMTAB_SIZE;
+
+/** @brief Address of the kernel string table */
+extern uintptr_t _KERNEL_STRTAB_ADDR;
+
+/** @brief Size of the kernel string table */
+extern uintptr_t _KERNEL_STRTAB_SIZE;
 
 /*******************************************************************************
  * STATIC FUNCTIONS DELCARATIONS
@@ -90,7 +113,6 @@ static void print_panic_header(uintptr_t int_id,
 {
     kernel_printf("##############################    KERNEL PANIC    ##########"
                     "####################\n");
-    kernel_printf("  ");
     switch(int_id)
     {
         case 0:
@@ -163,13 +185,11 @@ static void print_panic_header(uintptr_t int_id,
             kernel_printf("Unknown reason                          ");
     }
 
-    kernel_printf("        INT ID: 0x%02X                 \n", int_id);
-    kernel_printf("  Instruction [EIP]: 0x%p                   Error code: "
+    kernel_printf("          INT ID: 0x%02X                 \n", int_id);
+    kernel_printf("Instruction [EIP]: 0x%p                     Error code: "
                     "0x%p       \n", stack_state->eip, error_code);
     kernel_printf("                                                            "
                     "                   \n");
-    kernel_printf("---------------------------------- CPU STATE ---------------"
-                    "--------------------\n");
 }
 
 static void print_cpu_state(cpu_state_t* cpu_state, stack_state_t* stack_state)
@@ -193,22 +213,22 @@ static void print_cpu_state(cpu_state_t* cpu_state, stack_state_t* stack_state)
     : "%eax"
     );
 
-    kernel_printf("  EAX: 0x%p  |  EBX: 0x%p  |  ECX: 0x%p  |  EDX: "
+    kernel_printf("EAX: 0x%p | EBX: 0x%p | ECX: 0x%p | EDX: "
                     "0x%p  \n", cpu_state->eax, cpu_state->ebx,
                     cpu_state->ecx,  cpu_state->edx);
-    kernel_printf("  ESI: 0x%p  |  EDI: 0x%p  |  EBP: 0x%p  |  ESP: "
+    kernel_printf("ESI: 0x%p | EDI: 0x%p | EBP: 0x%p | ESP: "
                     "0x%p  \n", cpu_state->esi, cpu_state->edi,
                     cpu_state->ebp, cpu_state->esp);
-    kernel_printf("  CR0: 0x%p  |  CR2: 0x%p  |  CR3: 0x%p  |  CR4: "
-                    "0x%p  \n\n", CR0, CR2, CR3, CR4);
-    kernel_printf("  CS: 0x%04X  |  DS: 0x%04X  |  SS: 0x%04X                  "
-                    "                   \n", stack_state->cs & 0xFFFF,
-                    cpu_state->ds & 0xFFFF, cpu_state->ss & 0xFFFF);
-    kernel_printf("  ES: 0x%04X  |  FS: 0x%04X  |  GS: 0x%04X                  "
-                    "                   \n", cpu_state->es & 0xFFFF ,
-                    cpu_state->fs & 0xFFFF , cpu_state->gs & 0xFFFF);
-    kernel_printf("                                                            "
-                    "                   \n");
+    kernel_printf("CR0: 0x%p | CR2: 0x%p | CR3: 0x%p | CR4: "
+                    "0x%p  \n", CR0, CR2, CR3, CR4);
+    kernel_printf("CS: 0x%04X | DS: 0x%04X | SS: 0x%04X | ES: 0x%04X | "
+                  "FS: 0x%04X | GS: 0x%04X\n",
+                    stack_state->cs & 0xFFFF,
+                    cpu_state->ds & 0xFFFF,
+                    cpu_state->ss & 0xFFFF,
+                    cpu_state->es & 0xFFFF ,
+                    cpu_state->fs & 0xFFFF ,
+                    cpu_state->gs & 0xFFFF);
 }
 
 static void print_cpu_flags(stack_state_t* stack_state)
@@ -232,8 +252,7 @@ static void print_cpu_flags(stack_state_t* stack_state)
     int8_t vif_f = (stack_state->eflags & 0x8000) >> 19;
     int8_t vip_f = (stack_state->eflags & 0x100000) >> 20;
 
-
-    kernel_printf("  ");
+    kernel_printf("EFLAGS: 0x%p | ", stack_state->eflags);
 
     if(cf_f != 0)
     {
@@ -303,13 +322,73 @@ static void print_cpu_flags(stack_state_t* stack_state)
     {
         kernel_printf("IO: %d ", (iopl0_f | iopl1_f << 1));
     }
-    kernel_printf(" |  EFLAGS: 0x%p\n\n", stack_state->eflags);
+    kernel_printf("\n");
 }
 
-void panic(cpu_state_t* cpu_state, uintptr_t int_id, stack_state_t* stack_state)
+static void print_stack_trace(void)
 {
-    uint32_t      error_code;
+    size_t        i;
+    uintptr_t*    call_addr;
+    uintptr_t*    last_ebp;
+    elf_symtab_t* tab_entry;
+    uintptr_t     tab_end;
+    char*         symbol;
+    char          buff[PANIC_SYM_LENGTH + 1];
+
+    /* Get ebp */
+    __asm__ __volatile__ ("mov %%ebp, %0\n\t" : "=m" (last_ebp));
+
+    /* Get the return address */
+    call_addr = *(uintptr_t**)(last_ebp + 1);
+    for(i = 0; i < STACK_TRACE_SIZE && call_addr != NULL; ++i)
+    {
+        /* Get the associated symbol */
+        symbol = NULL;
+        tab_entry = (elf_symtab_t*)_KERNEL_SYMTAB_ADDR;
+        tab_end   = _KERNEL_SYMTAB_ADDR + _KERNEL_SYMTAB_SIZE;
+
+        while((uintptr_t)tab_entry < tab_end)
+        {
+            /* Check bounds */
+            if(tab_entry->st_value <= (uint32_t)call_addr &&
+               tab_entry->st_value + tab_entry->st_size > (uint32_t)call_addr)
+            {
+                symbol = (char*)_KERNEL_STRTAB_ADDR + tab_entry->st_name;
+
+                /* Check that we do not overflow the str tab */
+                if((uintptr_t)symbol >
+                   _KERNEL_STRTAB_ADDR + _KERNEL_STRTAB_SIZE)
+                {
+                    symbol = NULL;
+                }
+                break;
+            }
+            ++tab_entry;
+        }
+
+        if(symbol != NULL && strlen(symbol) > PANIC_SYM_LENGTH)
+        {
+            strncpy(buff, symbol, PANIC_SYM_LENGTH - 3);
+            buff[PANIC_SYM_LENGTH - 3] = '.';
+            buff[PANIC_SYM_LENGTH - 2] = '.';
+            buff[PANIC_SYM_LENGTH - 1] = '.';
+            buff[PANIC_SYM_LENGTH] = 0;
+            symbol = buff;
+        }
+
+        kernel_printf("[%u] 0x%p in %s\n", i, call_addr,
+                      symbol == NULL ? "[NO_SYMBOL]" : symbol);
+        last_ebp = (uintptr_t*)*last_ebp;
+        call_addr = *(uintptr_t**)(last_ebp + 1);
+    }
+}
+
+void panic_handler(cpu_state_t* cpu_state,
+                   uintptr_t int_id,
+                   stack_state_t* stack_state)
+{
     colorscheme_t panic_scheme;
+    cursor_t      panic_cursor;
 
     uint32_t cpu_id;
 
@@ -321,26 +400,12 @@ void panic(cpu_state_t* cpu_state, uintptr_t int_id, stack_state_t* stack_state)
     kernel_process_t* process;
     kernel_thread_t*  thread;
 
-    time = rtc_get_current_daytime();
-    hours = time / 3600;
+    time    = rtc_get_current_daytime();
+    hours   = time / 3600;
     minutes = (time / 60) % 60;
     seconds = time % 60;
 
     cpu_id = cpu_get_id();
-
-    /* If we received an NMI and the error code is NMI_PANIC, we just halt the
-     * CPU as the panic screen should have been displayed by the CPU or core
-     * that issued the NMI */
-    if(nmi_panic_code == PANIC_NMI_CODE)
-    {
-        while(1)
-        {
-            cpu_clear_interrupt();
-            cpu_hlt();
-        }
-    }
-
-    cpu_clear_interrupt();
 
     panic_scheme.background = BG_BLACK;
     panic_scheme.foreground = FG_CYAN;
@@ -348,50 +413,51 @@ void panic(cpu_state_t* cpu_state, uintptr_t int_id, stack_state_t* stack_state)
 
     graphic_set_color_scheme(panic_scheme);
 
-    /* If int is generated by the kernel, then the error code is contained in
-     * the error code memory address, otherwise we use the interrupt error code.
-     */
-    if(int_id == PANIC_INT_LINE)
-    {
-        error_code = panic_code;
-    }
-    else
-    {
-        error_code = stack_state->error_code;
-    }
-
 #ifdef TEST_MODE_ENABLED
-    kernel_printf("\n[TESTMODE] PANIC %d\n", error_code);
+    kernel_printf("\n[TESTMODE] PANIC %d\n", panic_code);
     kernel_printf("  File: %s at line %d\n", panic_file, panic_line);
     /* Kill QEMU */
     cpu_outw(0x2000, 0x604);
     while(1)
     {
-        __asm__ ("hlt");
+        cpu_clear_interrupt();
+        cpu_hlt();
     }
 #endif
 
+    /* Get the environment data */
     process = sched_get_current_process();
-    thread = sched_get_current_thread();
+    thread  = sched_get_current_thread();
 
-    print_panic_header(int_id, stack_state, error_code);
+    /* Clear screen */
+    graphic_clear_screen();
+    panic_cursor.x = 0;
+    panic_cursor.y = 0;
+    graphic_restore_cursor(panic_cursor);
+
+    print_panic_header(int_id, stack_state, panic_code);
     print_cpu_state(cpu_state, stack_state);
     print_cpu_flags(stack_state);
 
-    kernel_printf("------------------------------- ADDITIONAL INFO ------------"
+    kernel_printf("\n--------------------------------- INFORMATION --------------"
                     "--------------------\n");
-    kernel_printf("  Core ID: %u | TID:  %u | PID:  %u | Time of panic: "
-                  "%02u:%02u:%02u\n", cpu_id, sched_get_tid(), sched_get_pid(),
-                  hours, minutes, seconds);
-    kernel_printf("  Error: ");
-    perror(error_code);
-    kernel_printf(" (%d)\n", error_code);
-    kernel_printf("  Process: %s | Thread: %s\n",
+    kernel_printf("Core ID: %u | Time: %02u:%02u:%02u\n"
+                  "Thread: %s (%u) | Process: %s (%u)\n", cpu_id,
+                  hours, minutes, seconds,
+                  thread != NULL ? thread->name : "NO_THREAD",
+                  sched_get_tid(),
                   process != NULL ? process->name : "NO_PROCESS",
-                  thread != NULL ? thread->name : "NO_THREAD");
-    kernel_printf("  File: %s at line %d\n", panic_file, panic_line);
+                  sched_get_pid());
 
-    kernel_printf("\n\n\n\n\n");
+    kernel_printf("File: %s at line %d\n", panic_file, panic_line);
+
+    if(strlen(panic_module) != 0)
+    {
+        kernel_printf("[%s] | ", panic_module);
+    }
+    kernel_printf("%s (%d)\n\n", panic_msg, panic_code);
+
+    print_stack_trace();
 
     /* Hide cursor */
     panic_scheme.background = BG_BLACK;
@@ -409,19 +475,23 @@ void panic(cpu_state_t* cpu_state, uintptr_t int_id, stack_state_t* stack_state)
 }
 
 void kernel_panic(const uint32_t error_code,
+                  const char* module,
+                  const char* msg,
                   const char* file,
-                  const uint32_t line)
+                  const size_t line)
 {
-    /* Save the error code to memory */
-    panic_code = error_code;
-    strncpy(panic_file, file, PANIC_MAX_FILE_NAME_LENGTH);
-    panic_line = line;
+    /* We don't need interrupt anymore */
+    cpu_clear_interrupt();
 
-    /* Raise INT, sti ensure 1 cycle of execution where no interrupt occur,
-     * thus, letting int execute
-     */
-    __asm__ __volatile__("sti\n\t"
-                         "int %0" :: "i" (PANIC_INT_LINE));
+    /* Set the parameters */
+    panic_code   = error_code;
+    panic_module = module;
+    panic_msg    = msg;
+    panic_file   = file;
+    panic_line   = line;
+
+    /* Call the panic formater */
+    cpu_raise_interrupt(PANIC_INT_LINE);
 
     /* We should never get here, but just in case */
     while(1)

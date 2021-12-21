@@ -38,21 +38,7 @@
  * STRUCTURES
  ******************************************************************************/
 
-/** @brief System's state enumeration. */
-enum SYSTEM_STATE
-{
-    /** @brief System is booting. */
-    SYSTEM_STATE_BOOTING,
-    /** @brief System is running. */
-    SYSTEM_STATE_RUNNING,
-    /** @brief System is halted. */
-    SYSTEM_STATE_HALTED
-};
-
-/**
- * @brief Defines SYSTEM_STATE_E type as a shorcut for enum SYSTEM_STATE.
- */
-typedef enum SYSTEM_STATE SYSTEM_STATE_E;
+/* None */
 
 /*******************************************************************************
  * FUNCTIONS
@@ -94,15 +80,6 @@ void sched_schedule(void);
  * thread.
  */
 OS_RETURN_E sched_sleep(const uint32_t time_ms);
-
-/**
- * @brief Returns the current system's state.
- *
- * @details Returns the current system's state.
- *
- * @return The current system's state is returned.
- */
-SYSTEM_STATE_E sched_get_system_state(void);
 
 /**
  * @brief Returns the number of non dead threads.
@@ -149,29 +126,6 @@ int32_t sched_get_pid(void);
  */
 int32_t sched_get_ppid(void);
 
-/**
- * @brief Returns the priority of the current executing thread.
- *
- * @details Returns the priority of the current executing thread.
- *
- * @returns The priority of the current executing thread.
- */
-uint32_t sched_get_priority(void);
-
-/**
- * @brief Sets the new priority of the current executing thread.
- *
- * @details Set the new priority of the current executing thread. The value of
- * the new priority is chekced and set if not error is encountered.
- *
- * @param[in] priority The desired priority of the thread.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - OS_ERR_FORBIDEN_PRIORITY is returned if the desired priority cannot be
- * aplied to the thread.
- */
-OS_RETURN_E sched_set_priority(const uint32_t priority);
 
 /**
  * @brief Creates a new kernel thread in the thread table.
@@ -233,7 +187,7 @@ void sched_set_thread_termination_cause(const THREAD_TERMINATE_CAUSE_E
  * thread will be KILLED. The termination cause must be set before calling this
  * function.
  */
-void sched_terminate_self(void* ret_code);
+void sched_thread_terminate_self(void* ret_code);
 
 /**
  * @brief Returns the number of time the scheduler was called.
@@ -299,9 +253,9 @@ OS_RETURN_E sched_join_thread(kernel_thread_t* thread, void** ret_val,
 void sched_wait_process_pid(const SYSCALL_FUNCTION_E func, void* params);
 
 /**
- * @brief System call handler to get the current process parameters.
+ * @brief System call handler to get the current thread parameters.
  *
- * @details System call handler to get the current process parameters. This
+ * @details System call handler to get the current thread parameters. This
  * system call fills as sched_param_t sctructure given as parameter.
  *
  * @param[in] func The syscall function ID, must correspond to the get_params
@@ -309,12 +263,12 @@ void sched_wait_process_pid(const SYSCALL_FUNCTION_E func, void* params);
  * @param[in, out] params The parameters used by the function, must be of type
  * sched_param_t.
  */
-void sched_get_process_params(const SYSCALL_FUNCTION_E func, void* params);
+void sched_get_thread_params(const SYSCALL_FUNCTION_E func, void* params);
 
 /**
- * @brief System call handler to set the current process parameters.
+ * @brief System call handler to set the current thread parameters.
  *
- * @details System call handler to set the current process parameters. This
+ * @details System call handler to set the current thread parameters. This
  * system call uses as sched_param_t sctructure given as parameter.
  *
  * @param[in] func The syscall function ID, must correspond to the set_params
@@ -322,7 +276,7 @@ void sched_get_process_params(const SYSCALL_FUNCTION_E func, void* params);
  * @param[in, out] params The parameters used by the function, must be of type
  * sched_param_t.
  */
-void sched_set_process_params(const SYSCALL_FUNCTION_E func, void* params);
+void sched_set_thread_params(const SYSCALL_FUNCTION_E func, void* params);
 
 /**
  * @brief Locks a thread from being scheduled.

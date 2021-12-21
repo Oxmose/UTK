@@ -27,9 +27,7 @@
 #include <config.h>
 
 /* Tests header file */
-#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
-#endif
 
 /* Header file */
 #include <cpu_settings.h>
@@ -152,7 +150,7 @@
  * STRUCTURES
  ******************************************************************************/
 
-/** 
+/**
  * @brief Define the GDT pointer, contains the  address and limit of the GDT.
  */
 struct gdt_ptr
@@ -164,12 +162,12 @@ struct gdt_ptr
     uintptr_t base;
 }__attribute__((packed));
 
-/** 
- * @brief Defines the gdt_ptr_t type as a shortcut for struct  gdt_ptr. 
+/**
+ * @brief Defines the gdt_ptr_t type as a shortcut for struct  gdt_ptr.
  */
 typedef struct gdt_ptr gdt_ptr_t;
 
-/** 
+/**
  * @brief Define the IDT pointer, contains the  address and limit of the IDT.
  */
 struct idt_ptr
@@ -181,16 +179,16 @@ struct idt_ptr
     uintptr_t base;
 }__attribute__((packed));
 
-/** 
- * @brief Defines the idt_ptr_t type as a shortcut for struct idt_ptr. 
+/**
+ * @brief Defines the idt_ptr_t type as a shortcut for struct idt_ptr.
  */
 typedef struct idt_ptr idt_ptr_t;
 
-/**  
- * @brief CPU TSS abstraction structure. This is the representation the kernel 
+/**
+ * @brief CPU TSS abstraction structure. This is the representation the kernel
  * has of an intel's TSS entry.
  */
-struct cpu_tss_entry 
+struct cpu_tss_entry
 {
     uint32_t prev_tss;
     uint32_t esp0;
@@ -221,9 +219,9 @@ struct cpu_tss_entry
     uint16_t iomap_base;
 } __attribute__((__packed__));
 
-/** 
- * @brief Defines the cpu_tss_entry_t type as a shortcut for struct 
- * cpu_tss_entry. 
+/**
+ * @brief Defines the cpu_tss_entry_t type as a shortcut for struct
+ * cpu_tss_entry.
  */
 typedef struct cpu_tss_entry cpu_tss_entry_t;
 
@@ -984,7 +982,7 @@ void cpu_setup_gdt(void)
     format_gdt_entry(&cpu_gdt[KERNEL_DS_16 / 8],
                      KERNEL_DATA_SEGMENT_BASE_16, KERNEL_DATA_SEGMENT_LIMIT_16,
                      kernel_data_16_seg_type, kernel_data_16_seg_flags);
-    
+
     format_gdt_entry(&cpu_gdt[USER_CS_32 / 8],
                      USER_CODE_SEGMENT_BASE_32, USER_CODE_SEGMENT_LIMIT_32,
                      user_code_32_seg_type, user_code_32_seg_flags);
@@ -1018,9 +1016,7 @@ void cpu_setup_gdt(void)
 
     KERNEL_SUCCESS("GDT Initialized at 0x%p\n", cpu_gdt_ptr.base);
 
-#ifdef TEST_MODE_ENABLED
-    gdt_test();
-#endif
+    KERNEL_TEST_POINT(gdt_test);
 }
 
 void cpu_setup_idt(void)
@@ -1051,15 +1047,13 @@ void cpu_setup_idt(void)
 
     KERNEL_SUCCESS("IDT Initialized at 0x%p\n", cpu_idt_ptr.base);
 
-#ifdef TEST_MODE_ENABLED
-    idt_test();
-#endif
+    KERNEL_TEST_POINT(idt_test);
 }
 
 void cpu_setup_tss(void)
 {
     int32_t i;
-    
+
     KERNEL_DEBUG(CPU_DEBUG_ENABLED, "[CPU] Setting CPU TSS");
 
     /* Blank the TSS */
@@ -1069,7 +1063,7 @@ void cpu_setup_tss(void)
     for(i = 0; i < MAX_CPU_COUNT; ++i)
     {
         cpu_tss[i].ss0 = KERNEL_DS_32;
-        cpu_tss[i].esp0 = ((uintptr_t)&_KERNEL_STACKS_BASE) + 
+        cpu_tss[i].esp0 = ((uintptr_t)&_KERNEL_STACKS_BASE) +
                           KERNEL_STACK_SIZE * (i + 1) - sizeof(uint32_t);
         cpu_tss[i].es = KERNEL_DS_32;
         cpu_tss[i].cs = KERNEL_CS_32;
@@ -1086,7 +1080,5 @@ void cpu_setup_tss(void)
 
     KERNEL_SUCCESS("TSS Initialized at 0x%p\n", cpu_tss);
 
-#ifdef TEST_MODE_ENABLED
-    tss_test();
-#endif
+    KERNEL_TEST_POINT(tss_test);
 }

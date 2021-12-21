@@ -110,7 +110,7 @@ void memory_usage_test(void)
         sched_sleep(1000);
         /* Here we cant return, this should be replaced in the future by the
          * exit syscall */
-        sched_terminate_self((void*)42);
+        sched_thread_terminate_self((void*)42);
     }
 
     sched_sleep(500);
@@ -180,14 +180,14 @@ void memory_usage_test(void)
             }
             kernel_printf("[TESTMODE] Process %d returned %d, %d\n", pid, status, err);
 
-            sched_terminate_self((void*)22);
+            sched_thread_terminate_self((void*)22);
         }
         else 
         {
             sched_sleep(1000);
             /* Here we cant return, this should be replaced in the future by the
             * exit syscall */
-            sched_terminate_self((void*)666);
+            sched_thread_terminate_self((void*)666);
         }
     }
 

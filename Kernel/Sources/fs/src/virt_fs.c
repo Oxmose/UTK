@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @file virt_fs.c
- * 
+ *
  * @see virt_fs.h
  *
  * @author Alexy Torres Aurora Dugo
@@ -10,10 +10,10 @@
  * @version 1.0
  *
  * @brief Kernel's virtual filesystem driver.
- * 
- * @details Kernel's virtual filesystem driver. Defines the functions and 
+ *
+ * @details Kernel's virtual filesystem driver. Defines the functions and
  * structures used by the kernel to manage the virtual filesystem.
- * 
+ *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
@@ -27,9 +27,7 @@
 #include <config.h>
 
 /* Tests header file */
-#ifdef TEST_MODE_ENABLED
 #include <test_bank.h>
-#endif
 
 /* Header file */
 #include <virt_fs.h>

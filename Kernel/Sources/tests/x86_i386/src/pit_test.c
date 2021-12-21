@@ -36,9 +36,9 @@ void pit_test(void)
     if((err = pit_set_handler(NULL)) != OS_ERR_NULL_POINTER)
     {
         kernel_error("TEST_PIT 0\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_PIT 0\n");
     }
@@ -47,9 +47,9 @@ void pit_test(void)
     if((err = pit_set_handler(pit_handler)) != OS_NO_ERR)
     {
         kernel_error("TEST_PIT 1\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_PIT 1\n");
     }
@@ -59,9 +59,9 @@ void pit_test(void)
     if((err = pit_remove_handler()) != OS_NO_ERR)
     {
         kernel_error("TEST_PIT 2\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_PIT 2\n");
     }
@@ -71,9 +71,9 @@ void pit_test(void)
     if((err = pit_set_handler(pit_handler)) != OS_NO_ERR)
     {
         kernel_error("TEST_PIT 3\n");
-        KERNEL_PANIC(err);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_PIT 3\n");
     }
@@ -90,9 +90,9 @@ void pit_test(void)
     if(counter == 0)
     {
         kernel_error("TEST_PIT 4\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_PIT 4\n");
     }
@@ -102,9 +102,9 @@ void pit_test(void)
     if(counter != cnt_val)
     {
         kernel_error("TEST_PIT 5\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_PIT 5\n");
     }
@@ -120,9 +120,9 @@ void pit_test(void)
     if(counter == 0)
     {
         kernel_error("TEST_PIT 6\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_PIT 6\n");
     }
@@ -132,9 +132,9 @@ void pit_test(void)
     if(counter != cnt_val)
     {
         kernel_error("TEST_PIT 7\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_PIT 7\n");
     }
@@ -151,9 +151,9 @@ void pit_test(void)
     if(counter != cnt_val)
     {
         kernel_error("TEST_PIT 11\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_PIT 11\n");
     }
@@ -163,9 +163,9 @@ void pit_test(void)
     if(pit_remove_handler() != OS_NO_ERR)
     {
         kernel_error("TEST_PIT 12\n");
-        KERNEL_PANIC(OS_ERR_UNAUTHORIZED_ACTION);
+        kill_qemu();
     }
-    else 
+    else
     {
         kernel_printf("[TESTMODE] TEST_PIT 12\n");
     }
@@ -179,7 +179,7 @@ void pit_test(void)
     /* Kill QEMU */
     kill_qemu();
 }
-#else 
+#else
 void pit_test(void)
 {
 }
