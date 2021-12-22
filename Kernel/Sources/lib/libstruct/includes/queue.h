@@ -11,7 +11,7 @@
  *
  * @brief Queue structures.
  *
- * @details Queue structures. These queues are used as priority queue or regular 
+ * @details Queue structures. These queues are used as priority queue or regular
  * queues. A queue can virtually store every type of data and is just a wrapper.
  *
  * @warning This implementation is not thread safe.
@@ -43,19 +43,19 @@
 /** @brief Queue allocator structure. */
 struct queue_alloc
 {
-    /** 
+    /**
      * @brief The memory allocation function used by the allocator.
-     * 
+     *
      * @param[in] alloc_size The size in bytes to be allocated.
-     * 
+     *
      * @return A pointer to the allocated memory is returned. NULL is returned
      * if no memory was allocated.
      */
     void*(*malloc)(size_t alloc_size);
 
-    /** 
+    /**
      * @brief The memory free function used by the allocator.
-     * 
+     *
      * @param[out] ptr The start address of the memory to free.
      */
     void(*free)(void* ptr);
@@ -116,9 +116,9 @@ typedef struct queue queue_t;
  * FUNCTIONS
  ******************************************************************************/
 
-/** 
+/**
  * @brief Create an allocator structure.
- * 
+ *
  * @param[in] malloc The memory allocation function used by the allocator.
  * @param[in] free The memory free function used by the allocator.
  */
@@ -142,7 +142,7 @@ typedef struct queue queue_t;
  *
  * @returns The node pointer is returned. In case of error NULL is returned.
  */
-queue_node_t* queue_create_node(void* data, 
+queue_node_t* queue_create_node(void* data,
                                 queue_alloc_t allocator,
                                 OS_RETURN_E *error);
 
@@ -166,7 +166,7 @@ OS_RETURN_E queue_delete_node(queue_node_t** node);
  *
  * @details Creates and initializes a new queue. The returned queue is
  * ready to be used.
- * 
+ *
  * @param[in] allocator The allocator to be used when allocating and freeing the
  * queue.
  * @param[out] error A pointer to the variable that will contain the function
@@ -224,8 +224,8 @@ OS_RETURN_E queue_push(queue_node_t* node, queue_t* queue);
  * - OS_ERR_NULL_POINTER is returned if the pointer to the queue or the node is
  *   NULL.
  */
-OS_RETURN_E queue_push_prio(queue_node_t* node, 
-                            queue_t* queue, 
+OS_RETURN_E queue_push_prio(queue_node_t* node,
+                            queue_t* queue,
                             const uintptr_t priority);
 
 /**

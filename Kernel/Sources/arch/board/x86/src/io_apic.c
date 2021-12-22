@@ -30,7 +30,6 @@
 #include <memmgt.h>             /* Memory management */
 #include <critical.h>           /* Critical sections */
 #include <kheap.h>              /* Kernel heap */
-#include <queue.h>              /* Queue library */
 #include <panic.h>              /* Kernel panic */
 #include <kernel_error.h>       /* Kernel error codes */
 

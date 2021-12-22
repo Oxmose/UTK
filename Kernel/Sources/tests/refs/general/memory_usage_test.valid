@@ -3,10 +3,10 @@
 [TESTMODE] Getting free frames
 [TESTMODE] Getting free heap
 [TESTMODE] Page (0), KPage (0), Frame (0), KHeap (0)
-[TESTMODE] Page (0), KPage (0), Frame (20480), KHeap (464)
+[TESTMODE] Page (0), KPage (0), Frame (20480), KHeap (400)
 [TESTMODE] Process 1 returned 42, 0
 [TESTMODE] Page (0), KPage (0), Frame (0), KHeap (0)
-[TESTMODE] Page (0), KPage (0), Frame (40960), KHeap (748)
+[TESTMODE] Page (0), KPage (0), Frame (40960), KHeap (620)
 [TESTMODE] Process 3 returned 666, 0
 [TESTMODE] Process 2 returned 22, 0
 [TESTMODE] Page (0), KPage (0), Frame (0), KHeap (0)

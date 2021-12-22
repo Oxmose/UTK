@@ -289,7 +289,7 @@ void sched_set_thread_params(const SYSCALL_FUNCTION_E func, void* params);
  * @return The current thread system's node is returned on success. If the call
  * failed, NULL is returned.
  */
-queue_node_t* sched_lock_thread(const THREAD_WAIT_TYPE_E block_type);
+kqueue_node_t* sched_lock_thread(const THREAD_WAIT_TYPE_E block_type);
 
 /**
  * @brief Unlocks a thread from behing scheduled.
@@ -307,7 +307,7 @@ queue_node_t* sched_lock_thread(const THREAD_WAIT_TYPE_E block_type);
  * - OS_ERR_NULL_POINTER is returned if the thread handle is NULL.
  * - OS_ERR_NO_SUCH_ID is returned if thread cannot be found in the system.
  */
-OS_RETURN_E sched_unlock_thread(queue_node_t* node,
+OS_RETURN_E sched_unlock_thread(kqueue_node_t* node,
                                 const THREAD_WAIT_TYPE_E block_type,
                                 const bool_t do_schedule);
 
@@ -330,7 +330,7 @@ OS_RETURN_E sched_unlock_thread(queue_node_t* node,
 OS_RETURN_E sched_thread_add_resource(kernel_thread_t* thread,
                                       void* resource,
                                       void (*cleanup)(void* resource),
-                                      queue_node_t** resource_node);
+                                      kqueue_node_t** resource_node);
 
 /**
  * @brief Removes a resource from the thread's resource queue.
@@ -345,6 +345,6 @@ OS_RETURN_E sched_thread_add_resource(kernel_thread_t* thread,
  * @return The error status is returned.
  */
 OS_RETURN_E sched_thread_remove_resource(kernel_thread_t* thread,
-                                         queue_node_t** resource_node);
+                                         kqueue_node_t** resource_node);
 
 #endif /* #ifndef __CORE_SCHEDULER_H_ */

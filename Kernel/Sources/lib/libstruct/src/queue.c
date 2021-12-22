@@ -11,7 +11,7 @@
  *
  * @brief Queue structures.
  *
- * @details Queue structures. These queues are used as priority queue or regular 
+ * @details Queue structures. These queues are used as priority queue or regular
  * queues. A queue can virtually store every type of data and is just a wrapper.
  * This queue library is thread safe.
  *
@@ -59,7 +59,7 @@
  * FUNCTIONS
  ******************************************************************************/
 
-queue_node_t* queue_create_node(void* data, 
+queue_node_t* queue_create_node(void* data,
                                 queue_alloc_t allocator,
                                 OS_RETURN_E *error)
 {
@@ -154,9 +154,9 @@ OS_RETURN_E queue_delete_queue(queue_t** queue)
 
 OS_RETURN_E queue_push(queue_node_t* node, queue_t* queue)
 {
-    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED, 
-                 "[QUEUE] queue 0x%p in queue 0x%p", 
-                 node, 
+    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED,
+                 "[QUEUE] queue 0x%p in queue 0x%p",
+                 node,
                  queue);
 
     if(node == NULL || queue == NULL)
@@ -185,16 +185,16 @@ OS_RETURN_E queue_push(queue_node_t* node, queue_t* queue)
     ++queue->size;
     node->enlisted = 1;
 
-    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED, 
-                 "[QUEUE] Enqueue element 0x%p in queue 0x%p", 
-                 node, 
+    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED,
+                 "[QUEUE] Enqueue element 0x%p in queue 0x%p",
+                 node,
                  queue);
-    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED, 
+    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED,
                  "[QUEUE] Enqueue element 0x%p 0x%p 0x%p 0x%p 0x%p",
-                 node->next, 
-                 node->prev, 
-                 node->enlisted, 
-                 node->priority, 
+                 node->next,
+                 node->prev,
+                 node->enlisted,
+                 node->priority,
                  node->data);
 
     if(node->next != NULL && node->prev != NULL && node->next == node->prev)
@@ -206,15 +206,15 @@ OS_RETURN_E queue_push(queue_node_t* node, queue_t* queue)
 }
 
 
-OS_RETURN_E queue_push_prio(queue_node_t* node, 
-                            queue_t* queue, 
+OS_RETURN_E queue_push_prio(queue_node_t* node,
+                            queue_t* queue,
                             const uintptr_t priority)
 {
     queue_node_t* cursor;
 
-    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED, 
-                 "[QUEUE] Enqueue 0x%p in queue 0x%p", 
-                 node, 
+    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED,
+                 "[QUEUE] Enqueue 0x%p in queue 0x%p",
+                 node,
                  queue);
 
     if(node == NULL || queue == NULL)
@@ -268,16 +268,16 @@ OS_RETURN_E queue_push_prio(queue_node_t* node,
     ++queue->size;
     node->enlisted = 1;
 
-    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED, 
-                 "[QUEUE] Enqueue element 0x%p in queue 0x%p", 
-                 node, 
+    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED,
+                 "[QUEUE] Enqueue element 0x%p in queue 0x%p",
+                 node,
                  queue);
-    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED, 
+    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED,
                  "[QUEUE] Enqueue element 0x%p 0x%p 0x%p 0x%p 0x%p",
-                 node->next, 
-                 node->prev, 
-                 node->enlisted, 
-                 node->priority, 
+                 node->next,
+                 node->prev,
+                 node->enlisted,
+                 node->priority,
                  node->data);
 
     if(node->next != NULL && node->prev != NULL && node->next == node->prev)
@@ -292,8 +292,8 @@ queue_node_t* queue_pop(queue_t* queue, OS_RETURN_E* error)
 {
     queue_node_t* node;
 
-    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED, 
-                 "[QUEUE] Dequeue element in queue 0x%p", 
+    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED,
+                 "[QUEUE] Dequeue element in queue 0x%p",
                  queue);
 
     if(queue == NULL)
@@ -319,16 +319,16 @@ queue_node_t* queue_pop(queue_t* queue, OS_RETURN_E* error)
     /* Dequeue the last item */
     node = queue->tail;
 
-    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED, 
-                 "[QUEUE] Dequeue element 0x%p in queue 0x%p", 
-                 node, 
+    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED,
+                 "[QUEUE] Dequeue element 0x%p in queue 0x%p",
+                 node,
                  queue);
-    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED, 
+    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED,
                  "[QUEUE] Element 0x%p 0x%p 0x%p 0x%p 0x%p",
-                 node->next, 
-                 node->prev, 
-                 node->enlisted, 
-                 node->priority, 
+                 node->next,
+                 node->prev,
+                 node->enlisted,
+                 node->priority,
                  node->data);
 
     if(node->prev != NULL)
@@ -360,9 +360,9 @@ queue_node_t* queue_find(queue_t* queue, void* data, OS_RETURN_E *error)
 {
     queue_node_t* node;
 
-    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED, 
-                 "[QUEUE] Find data 0x%p in queue 0x%p", 
-                 data, 
+    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED,
+                 "[QUEUE] Find data 0x%p in queue 0x%p",
+                 data,
                  queue);
 
     /* If this queue is empty */
@@ -409,9 +409,9 @@ OS_RETURN_E queue_remove(queue_t* queue, queue_node_t* node)
         return OS_ERR_NULL_POINTER;
     }
 
-    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED, 
-                 "[QUEUE] Remove node node 0x%p in queue 0x%p", 
-                 node, 
+    KERNEL_DEBUG(QUEUE_DEBUG_ENABLED,
+                 "[QUEUE] Remove node node 0x%p in queue 0x%p",
+                 node,
                  queue);
 
     /* Search for node in the queue*/

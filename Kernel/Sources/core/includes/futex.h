@@ -23,7 +23,7 @@
 #include <stdint.h>       /* Standard int definitions */
 #include <kernel_error.h> /* Kernel error API */
 #include <syscall.h>      /* System call manager */
-#include <queue.h>        /* Kernel queues */
+#include <kqueue.h>       /* Kernel queues lib */
 /* UTK configuration file */
 #include <config.h>
 
@@ -61,35 +61,35 @@ typedef struct futex futex_t;
 
 /**
  * @brief Initializes the futex facility.
- * 
- * @details Initializes the futex facility. If the function was not able to 
- * alocate the necessary resources, a kernel panic is generated. 
+ *
+ * @details Initializes the futex facility. If the function was not able to
+ * alocate the necessary resources, a kernel panic is generated.
  */
 void futex_init(void);
 
 /**
  * @brief System call handler to wait on a given futex.
- * 
- * @details System call handler to wait on a given futex. This system call 
+ *
+ * @details System call handler to wait on a given futex. This system call
  * receive the futex to wait and the value to observe as parameters.
- * 
+ *
  * @param[in] func The syscall function ID, must correspond to the futex_wait
  * call.
- * @param[in, out] params The parameters used by the function, must be of type 
+ * @param[in, out] params The parameters used by the function, must be of type
  * futex_t.
  */
 void futex_wait(const SYSCALL_FUNCTION_E func, void* params);
 
 /**
  * @brief System call handler to wake on a given futex.
- * 
- * @details System call handler to wake on a given futex. This system call 
+ *
+ * @details System call handler to wake on a given futex. This system call
  * receive the futex to wake the threads on the value to observe. Wake can
  * wake multiple threads depending on the valu provided in parameters.
- * 
+ *
  * @param[in] func The syscall function ID, must correspond to the futex_wake
  * call.
- * @param[in, out] params The parameters used by the function, must be of type 
+ * @param[in, out] params The parameters used by the function, must be of type
  * futex_t.
  */
 void futex_wake(const SYSCALL_FUNCTION_E func, void* params);

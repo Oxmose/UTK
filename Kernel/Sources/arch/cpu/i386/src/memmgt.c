@@ -23,7 +23,7 @@
 #include <kernel_output.h>        /* Kernel output methods */
 #include <panic.h>                /* Kernel panic */
 #include <multiboot.h>            /* Multiboot specification */
-#include <queue.h>                /* Queue structures */
+#include <kqueue.h>               /* Kernel queue structures */
 #include <kheap.h>                /* Kernel heap allocator */
 #include <scheduler.h>            /* Scheduler */
 #include <arch_memmgt.h>          /* Paging information */
@@ -169,13 +169,13 @@ extern uint32_t _KERNEL_RECUR_PG_TABLE_BASE;
 extern uint8_t *_KERNEL_RECUR_PG_DIR_BASE;
 
 /** @brief Hardware memory map storage linked list. */
-static queue_t* hw_memory_map;
+static kqueue_t* hw_memory_map;
 
 /** @brief Free memory map storage linked list. */
-static queue_t* free_memory_map;
+static kqueue_t* free_memory_map;
 
 /** @brief Free kernel pages map storage linked list. */
-static queue_t* free_kernel_pages;
+static kqueue_t* free_kernel_pages;
 
 /** @brief Stores the total available memory */
 static uintptr_t available_memory;
@@ -239,7 +239,7 @@ static void memory_free_frames(void* frame_addr,
  * @return The address of the first page of the contiguous block is
  * returned.
  */
-static void* memory_alloc_pages_from(queue_t* page_table,
+static void* memory_alloc_pages_from(kqueue_t* page_table,
                                      const size_t page_count,
                                      const MEM_ALLOC_START_E start_pt,
                                      OS_RETURN_E* err);
@@ -256,7 +256,7 @@ static void* memory_alloc_pages_from(queue_t* page_table,
  * @param[out] err The error buffer to store the operation's result. If NULL,
  * the function will raise a kernel panic in case of error.
  */
-static void memory_free_pages_to(queue_t* page_table,
+static void memory_free_pages_to(kqueue_t* page_table,
                                  const uintptr_t* page_addr,
                                  const size_t page_count,
                                  OS_RETURN_E* err);
@@ -400,12 +400,12 @@ static void detect_memory(void);
 
 static void setup_mem_table(void);
 
-static void* get_block(queue_t* list,
+static void* get_block(kqueue_t* list,
                        const size_t length,
                        const MEM_ALLOC_START_E start_pt,
                        OS_RETURN_E* err);
 
-static void add_block(queue_t* list,
+static void add_block(kqueue_t* list,
                       uintptr_t first_frame,
                       const size_t length,
                       OS_RETURN_E* err);
@@ -459,12 +459,9 @@ static bool_t is_mapped(const uintptr_t start_addr, const size_t size);
  * copy. This function performs a deep copy of the table. Meaning that the two
  * instance to the table are totally independant.
  *
- * @param[out] err The error buffer to store the operation's result. If NULL,
- * the function will raise a kernel panic in case of error.
- *
- * @return A deep copy of the currentp process free page table is returned.
+ * @return A deep copy of the current process free page table is returned.
  */
-static queue_t* paging_copy_free_page_table(OS_RETURN_E* err);
+static kqueue_t* paging_copy_free_page_table(void);
 
 /**
  * @brief Maps a virtual address to the corresponding physical address.
@@ -507,7 +504,7 @@ static OS_RETURN_E memory_create_new_pagedir(mem_copy_self_data_t* data);
 static OS_RETURN_E memory_copy_self_clean(mem_copy_self_data_t* data,
                                           OS_RETURN_E past_err);
 
-static uint32_t get_free_mem(queue_t* mem_pool);
+static uint32_t get_free_mem(kqueue_t* mem_pool);
 
 /*******************************************************************************
  * FUNCTIONS
@@ -577,9 +574,9 @@ static void* memory_alloc_frames(const size_t frame_count, OS_RETURN_E* err)
     return address;
 }
 
-static uint32_t get_free_mem(queue_t* mem_pool)
+static uint32_t get_free_mem(kqueue_t* mem_pool)
 {
-    queue_node_t* head;
+    kqueue_node_t* head;
     mem_range_t*  range;
     uint32_t      total;
 
@@ -602,7 +599,7 @@ static void memory_free_frames(void* frame_addr,
                                OS_RETURN_E* err)
 {
     uint32_t      int_state;
-    queue_node_t* cursor;
+    kqueue_node_t* cursor;
     mem_range_t*  mem_range;
     OS_RETURN_E   internal_err;
     size_t        i;
@@ -683,7 +680,7 @@ static void memory_free_frames(void* frame_addr,
     EXIT_CRITICAL(int_state);
 }
 
-static void* memory_alloc_pages_from(queue_t* page_table,
+static void* memory_alloc_pages_from(kqueue_t* page_table,
                                      const size_t page_count,
                                      const MEM_ALLOC_START_E start_pt,
                                      OS_RETURN_E* err)
@@ -726,7 +723,7 @@ static void* memory_alloc_pages_from(queue_t* page_table,
     return address;
 }
 
-static void memory_free_pages_to(queue_t* page_table,
+static void memory_free_pages_to(kqueue_t* page_table,
                                  const uintptr_t* page_addr,
                                  const size_t page_count,
                                  OS_RETURN_E* err)
@@ -906,14 +903,14 @@ static void memory_set_ref_count(const uintptr_t phys_addr,
 
 static void init_frame_ref_table(uintptr_t next_free_mem)
 {
-    queue_node_t* cursor;
-    mem_range_t*  mem_range;
-    uintptr_t     current_addr;
-    uintptr_t     current_limit;
-    uintptr_t     flags;
-    uint16_t      dir_entry;
-    uint16_t      table_entry;
-    uintptr_t*    current_table;
+    kqueue_node_t* cursor;
+    mem_range_t*   mem_range;
+    uintptr_t      current_addr;
+    uintptr_t      current_limit;
+    uintptr_t      flags;
+    uint16_t       dir_entry;
+    uint16_t       table_entry;
+    uintptr_t*     current_table;
 
     /* Align next free meme to next frame */
     next_free_mem += KERNEL_FRAME_SIZE -
@@ -1191,24 +1188,14 @@ static void detect_memory(void)
     multiboot_memory_map_t* curr_entry;
     mem_range_t*            mem_range;
     mem_range_t*            mem_range2;
-    OS_RETURN_E             error;
-    queue_node_t*           node;
-    queue_node_t*           node2;
+    kqueue_node_t*          node;
+    kqueue_node_t*          node2;
     uint32_t                entry_size;
     uint32_t                i;
 
     /* Create memory tables */
-    hw_memory_map = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree),
-                                       &error);
-    MEMMGT_ASSERT(error == OS_NO_ERR,
-                  "Could not allocate HW memory map queue",
-                  error);
-
-    free_memory_map = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree),
-                                         &error);
-    MEMMGT_ASSERT(error == OS_NO_ERR,
-                  "Could not allocate free memory map queue",
-                  error);
+    hw_memory_map   = kqueue_create_queue();
+    free_memory_map = kqueue_create_queue();
 
     /* Update address to higher half kernel */
     KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED,
@@ -1263,12 +1250,7 @@ static void detect_memory(void)
                               "Could not allocate memory range structure",
                               OS_ERR_MALLOC);
 
-                node = queue_create_node(mem_range,
-                                        QUEUE_ALLOCATOR(kmalloc, kfree),
-                                        &error);
-                MEMMGT_ASSERT(error == OS_NO_ERR,
-                              "Could not allocate memory range node",
-                              error);
+                node = kqueue_create_node(mem_range);
 
                 mem_range->base  = (uintptr_t)curr_entry->addr;
                 mem_range->limit = (uintptr_t)curr_entry->addr +
@@ -1284,31 +1266,18 @@ static void detect_memory(void)
                                   "Could not allocate memory range structure",
                                   OS_ERR_MALLOC);
 
-                    node2 = queue_create_node(mem_range2,
-                                            QUEUE_ALLOCATOR(kmalloc, kfree),
-                                            &error);
-                    MEMMGT_ASSERT(error == OS_NO_ERR,
-                                  "Could not allocate memory range node",
-                                  error);
+                    node2 = kqueue_create_node(mem_range2);
 
                     mem_range2->base  = (uintptr_t)curr_entry->addr;
                     mem_range2->limit = (uintptr_t)curr_entry->addr +
                                         (uintptr_t)curr_entry->len;
                     mem_range2->type  = curr_entry->type;
 
-                    error = queue_push_prio(node2,
-                                            free_memory_map,
-                                            mem_range2->base);
-                    MEMMGT_ASSERT(error == OS_NO_ERR,
-                                  "Could not enqueue memory range node",
-                                  error);
+                    kqueue_push_prio(node2, free_memory_map, mem_range2->base);
                     available_memory += (uintptr_t)curr_entry->len;
                 }
 
-                error = queue_push_prio(node, hw_memory_map, mem_range->base);
-                MEMMGT_ASSERT(error == OS_NO_ERR,
-                              "Could not enqueue memory range node",
-                              error);
+                kqueue_push_prio(node, hw_memory_map, mem_range->base);
             }
 
         }
@@ -1319,11 +1288,10 @@ static void detect_memory(void)
 
 static void setup_mem_table(void)
 {
-    uintptr_t     free_mem_head;
-    mem_range_t*  mem_range;
-    queue_node_t* cursor;
-    OS_RETURN_E   error;
-    queue_node_t* node;
+    uintptr_t      free_mem_head;
+    mem_range_t*   mem_range;
+    kqueue_node_t* cursor;
+    kqueue_node_t* node;
 
     /* The first regions we should use is above 1MB (this is where the kernel
      * should be loaded). We should set this regions as active. We also set the
@@ -1365,32 +1333,20 @@ static void setup_mem_table(void)
     init_frame_ref_table(free_mem_head);
 
     /* Initialize kernel pages */
-    free_kernel_pages = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree),
-                                           &error);
-    MEMMGT_ASSERT(error == OS_NO_ERR,
-                  "Could not initialize free kernel pages queue",
-                  error);
+    free_kernel_pages = kqueue_create_queue();
 
     mem_range = kmalloc(sizeof(mem_range_t));
     MEMMGT_ASSERT(mem_range != NULL,
                   "Could not allocate kernel page range structure",
                   OS_ERR_MALLOC);
 
-    node = queue_create_node(mem_range,
-                                QUEUE_ALLOCATOR(kmalloc, kfree),
-                                &error);
-    MEMMGT_ASSERT(error == OS_NO_ERR,
-                  "Could not initialize free kernel pages node",
-                  error);
+    node = kqueue_create_node(mem_range);
 
     mem_range->base  = free_mem_head + KERNEL_MEM_OFFSET;
     mem_range->limit = (uintptr_t)&_KERNEL_RECUR_PG_TABLE_BASE;
     mem_range->type  = MULTIBOOT_MEMORY_AVAILABLE;
 
-    error = queue_push_prio(node, free_kernel_pages, free_mem_head);
-    MEMMGT_ASSERT(error == OS_NO_ERR,
-                  "Could not enqueue free kernel pages node",
-                  error);
+    kqueue_push_prio(node, free_kernel_pages, free_mem_head);
 
     /* Update free memory */
     KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED,
@@ -1403,16 +1359,15 @@ static void setup_mem_table(void)
     available_memory -= free_mem_head - KERNEL_MEM_START;
 }
 
-static void* get_block(queue_t* list,
+static void* get_block(kqueue_t* list,
                        const size_t length,
                        const MEM_ALLOC_START_E start_pt,
                        OS_RETURN_E* err)
 {
-    queue_node_t* cursor;
-    queue_node_t* selected;
-    mem_range_t*  range;
-    uintptr_t     address;
-    OS_RETURN_E   internal_err;
+    kqueue_node_t* cursor;
+    kqueue_node_t* selected;
+    mem_range_t*   range;
+    uintptr_t      address;
 
     if(start_pt == MEM_ALLOC_BEGINING)
     {
@@ -1482,12 +1437,8 @@ static void* get_block(queue_t* list,
     {
         /* Free node's data and delete node */
         kfree(selected->data);
-        internal_err = queue_remove(list, selected);
-        internal_err |= queue_delete_node(&selected);
-
-        MEMMGT_ASSERT(internal_err == OS_NO_ERR,
-                      "Could not get memory block",
-                      internal_err);
+        kqueue_remove(list, selected, TRUE);
+        kqueue_delete_node(&selected);
     }
 
     if(err != NULL)
@@ -1497,18 +1448,17 @@ static void* get_block(queue_t* list,
     return (void*)address;
 }
 
-static void add_block(queue_t* list,
+static void add_block(kqueue_t* list,
                       uintptr_t first_frame,
                       const size_t length,
                       OS_RETURN_E* err)
 {
-    queue_node_t* cursor;
-    queue_node_t* new_node;
-    queue_node_t* last_cursor;
-    queue_node_t* save_cursor;
-    mem_range_t*  range;
-    uintptr_t     limit;
-    OS_RETURN_E   internal_err;
+    kqueue_node_t* cursor;
+    kqueue_node_t* new_node;
+    kqueue_node_t* last_cursor;
+    kqueue_node_t* save_cursor;
+    mem_range_t*   range;
+    uintptr_t      limit;
 
     MEMMGT_ASSERT(list != NULL,
                   "Tried to add a memory block to a NULL list",
@@ -1535,12 +1485,8 @@ static void add_block(queue_t* list,
                 {
                     range->base = ((mem_range_t*)save_cursor->data)->base;
                     kfree(save_cursor->data);
-                    internal_err = queue_remove(list, save_cursor);
-                    internal_err |= queue_delete_node(&save_cursor);
-
-                    MEMMGT_ASSERT(internal_err == OS_NO_ERR,
-                                  "Could not add memory block",
-                                  internal_err);
+                    kqueue_remove(list, save_cursor, TRUE);
+                    kqueue_delete_node(&save_cursor);
                 }
             }
             cursor->priority = range->base;
@@ -1558,12 +1504,8 @@ static void add_block(queue_t* list,
                 {
                     range->limit = ((mem_range_t*)last_cursor->data)->limit;
                     kfree(last_cursor->data);
-                    internal_err = queue_remove(list, last_cursor);
-                    internal_err |= queue_delete_node(&last_cursor);
-
-                    MEMMGT_ASSERT(internal_err == OS_NO_ERR,
-                                  "Could not add memory block",
-                                  internal_err);
+                    kqueue_remove(list, last_cursor, TRUE);
+                    kqueue_delete_node(&last_cursor);
                 }
             }
 
@@ -1599,17 +1541,8 @@ static void add_block(queue_t* list,
         range->limit = limit;
         range->type  = MULTIBOOT_MEMORY_AVAILABLE;
 
-        new_node = queue_create_node(range,
-                                     QUEUE_ALLOCATOR(kmalloc, kfree),
-                                     &internal_err);
-        MEMMGT_ASSERT(internal_err == OS_NO_ERR,
-                      "Could not create queue node in memory manager",
-                      internal_err);
-
-        internal_err = queue_push_prio(new_node, list, first_frame);
-        MEMMGT_ASSERT(internal_err == OS_NO_ERR,
-                      "Could not add memory block",
-                      internal_err);
+        new_node = kqueue_create_node(range);
+        kqueue_push_prio(new_node, list, first_frame);
     }
 
     if(err != NULL)
@@ -1900,30 +1833,17 @@ static bool_t is_mapped(const uintptr_t start_addr, const size_t size)
     return found;
 }
 
-static queue_t* paging_copy_free_page_table(OS_RETURN_E* err)
+static kqueue_t* paging_copy_free_page_table(void)
 {
-    OS_RETURN_E   internal_err;
-    OS_RETURN_E   internal_err2;
-    queue_t*      new_table;
-    queue_t*      current_table;
-    queue_node_t* cursor;
-    queue_node_t* new_node;
+    kqueue_t*      new_table;
+    kqueue_t*      current_table;
+    kqueue_node_t* cursor;
+    kqueue_node_t* new_node;
     mem_range_t*  range;
     uint32_t      int_state;
 
     /* Create the new table */
-    new_table = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree),
-                                   &internal_err);
-
-    if(internal_err != OS_NO_ERR)
-    {
-        MEMMGT_ASSERT(err != NULL,
-                      "Could not create new free page table list",
-                      internal_err);
-
-        *err = internal_err;
-        return NULL;
-    }
+    new_table = kqueue_create_queue();
 
     ENTER_CRITICAL(int_state);
 
@@ -1933,87 +1853,21 @@ static queue_t* paging_copy_free_page_table(OS_RETURN_E* err)
     {
         /* Create range and node */
         range = kmalloc(sizeof(mem_range_t));
-        if(range == NULL)
-        {
-            MEMMGT_ASSERT(err != NULL,
-                          "Could not allocate new free page table range",
-                          OS_ERR_MALLOC);
+        MEMMGT_ASSERT(range != NULL,
+                      "Could not allocate new free page table range",
+                      OS_ERR_MALLOC);
 
-            *err = OS_ERR_MALLOC;
-            break;
-        }
         memcpy(range, cursor->data, sizeof(mem_range_t));
-        new_node = queue_create_node(range,
-                                     QUEUE_ALLOCATOR(kmalloc, kfree),
-                                     &internal_err);
-        if(internal_err != OS_NO_ERR)
-        {
-            kfree(range);
-
-            MEMMGT_ASSERT(err != NULL,
-                          "Could not create free page table node",
-                          internal_err);
-
-            *err = internal_err;
-            break;
-        }
+        new_node = kqueue_create_node(range);
 
         /* Add range to list */
-        internal_err = queue_push(new_node, new_table);
-        if(internal_err != OS_NO_ERR)
-        {
-            KERNEL_ERROR("Could not push free page table node[%d]\n",
-                         internal_err);
-
-            internal_err2 = queue_delete_node(&new_node);
-            MEMMGT_ASSERT(internal_err2 == OS_NO_ERR,
-                          "Free page internal error",
-                          internal_err2);
-
-            kfree(range);
-
-            MEMMGT_ASSERT(err != NULL,
-                          "Error while adding memory range",
-                          internal_err);
-
-            *err = internal_err;
-            break;
-        }
+        kqueue_push(new_node, new_table);
 
         /* Next entry */
         cursor = cursor->next;
     }
 
-    /* Revert changes */
-    if(internal_err != OS_NO_ERR)
-    {
-        cursor = queue_pop(new_table, &internal_err2);
-        MEMMGT_ASSERT(internal_err2 == OS_NO_ERR,
-                      "Free page internal error",
-                      internal_err2);
-
-        while (cursor != NULL)
-        {
-            kfree(cursor->data);
-            internal_err2 = queue_delete_node(&cursor);
-            MEMMGT_ASSERT(internal_err2 == OS_NO_ERR,
-                          "Free page internal error",
-                          internal_err2);
-        }
-        internal_err2 = queue_delete_queue(&new_table);
-        MEMMGT_ASSERT(internal_err2 == OS_NO_ERR,
-                      "Free page internal error",
-                      internal_err2);
-
-        return NULL;
-    }
-
     EXIT_CRITICAL(int_state);
-
-    if(err != NULL)
-    {
-        *err = OS_NO_ERR;
-    }
 
     return new_table;
 }
@@ -2744,8 +2598,8 @@ static OS_RETURN_E memory_copy_self_stack(mem_copy_self_data_t* data,
 
 void memory_manager_init(void)
 {
-    queue_node_t* cursor;
-    mem_range_t*  mem_range;
+    kqueue_node_t* cursor;
+    mem_range_t*   mem_range;
 
     /* Print inital memory mapping */
     print_kernel_map();
@@ -2786,67 +2640,26 @@ void memory_manager_init(void)
     paging_init();
 }
 
-queue_t* memory_create_free_page_table(OS_RETURN_E* err)
+kqueue_t* memory_create_free_page_table(void)
 {
-    queue_t*      new_queue;
-    queue_node_t* node;
-    mem_range_t*  mem_range;
-    OS_RETURN_E   internal_error;
-
-    if(err == NULL)
-    {
-        return NULL;
-    }
+    kqueue_t*      new_queue;
+    kqueue_node_t* node;
+    mem_range_t*   mem_range;
 
     /* Initialize kernel pages */
-    new_queue = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree),
-                                   err);
-
-    MEMMGT_ASSERT(*err == OS_NO_ERR,
-                  "Could not initialize free pages queue",
-                  *err);
-
+    new_queue = kqueue_create_queue();
     mem_range = kmalloc(sizeof(mem_range_t));
-    if(mem_range == NULL)
-    {
-        internal_error = queue_delete_queue(&new_queue);
-        MEMMGT_ASSERT(internal_error == OS_NO_ERR,
-                      "Internal error while creating new page table",
-                      internal_error);
+    MEMMGT_ASSERT(mem_range != NULL,
+                  "Could not allocated memory range while creating page table",
+                  OS_ERR_MALLOC);
 
-        *err = OS_ERR_MALLOC;
-        return NULL;
-    }
-    node = queue_create_node(mem_range,
-                             QUEUE_ALLOCATOR(kmalloc, kfree),
-                             err);
-    if(*err != OS_NO_ERR)
-    {
-        internal_error = queue_delete_queue(&new_queue);
-        MEMMGT_ASSERT(internal_error == OS_NO_ERR,
-                      "Internal error while creating new page table",
-                      internal_error);
+    node = kqueue_create_node(mem_range);
 
-        kfree(mem_range);
-        KERNEL_ERROR("Could not initialize free pages node\n");
-        return NULL;
-    }
     mem_range->base  = PROCESS_START_VIRT_SPACE;
     mem_range->limit = KERNEL_MEM_OFFSET;
     mem_range->type  = MULTIBOOT_MEMORY_AVAILABLE;
 
-    *err = queue_push_prio(node, new_queue, PROCESS_START_VIRT_SPACE);
-    if(*err != OS_NO_ERR)
-    {
-        internal_error = queue_delete_node(&node);
-        internal_error |= queue_delete_queue(&new_queue);
-        MEMMGT_ASSERT(internal_error == OS_NO_ERR,
-                      "Internal error while creating new page table",
-                      internal_error);
-        kfree(mem_range);
-        KERNEL_ERROR("Could not enqueue free pages node\n");
-        return NULL;
-    }
+    kqueue_push_prio(node, new_queue, PROCESS_START_VIRT_SPACE);
 
     return new_queue;
 }
@@ -3201,7 +3014,7 @@ OS_RETURN_E memory_copy_self_mapping(kernel_process_t* dst_process,
 
     /* Set the destination process data */
     dst_process->page_dir = (uintptr_t)data.new_pgdir_frame;
-    dst_process->free_page_table = paging_copy_free_page_table(&err);
+    dst_process->free_page_table = paging_copy_free_page_table();
     if(err != OS_NO_ERR)
     {
         return memory_copy_self_clean(&data, err);
@@ -3338,29 +3151,25 @@ OS_RETURN_E memory_declare_hw(const uintptr_t phys_addr, const size_t size)
     return err;
 }
 
-void memory_delete_free_page_table(queue_t* page_table)
+void memory_delete_free_page_table(kqueue_t* page_table)
 {
-    queue_node_t* mem_range;
-    OS_RETURN_E   err;
+    kqueue_node_t* mem_range;
 
     if(page_table == NULL)
     {
         return;
     }
-    mem_range = queue_pop(page_table, &err);
-    MEMMGT_ASSERT(err == OS_NO_ERR, "Error while cleaning page table", err);
+
+    mem_range = kqueue_pop(page_table);
     while(mem_range != NULL)
     {
         kfree(mem_range->data);
-        err = queue_delete_node(&mem_range);
-        MEMMGT_ASSERT(err == OS_NO_ERR, "Error while cleaning page table", err);
+        kqueue_delete_node(&mem_range);
 
-        mem_range = queue_pop(page_table, &err);
-        MEMMGT_ASSERT(err == OS_NO_ERR, "Error while cleaning page table", err);
+        mem_range = kqueue_pop(page_table);
     }
 
-    err = queue_delete_queue(&page_table);
-    MEMMGT_ASSERT(err == OS_NO_ERR, "Error while cleaning page table", err);
+    kqueue_delete_queue(&page_table);
 }
 
 void memory_clean_process_memory(uintptr_t pg_dir)

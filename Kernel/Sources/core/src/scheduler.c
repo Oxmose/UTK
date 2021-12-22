@@ -30,7 +30,7 @@
 #include <interrupt_settings.h> /* Interrupt settings */
 #include <kernel_output.h>      /* Kernel output methods */
 #include <graphic.h>            /* Graphic API */
-#include <queue.h>              /* Kernel queues */
+#include <kqueue.h>             /* Kernel queues lib */
 #include <critical.h>           /* Critical sections */
 #include <time_management.h>    /* Timers factory */
 #include <ctrl_block.h>         /* Threads and processes control block */
@@ -120,7 +120,7 @@ static kernel_process_t* main_kprocess = NULL;
 static kernel_thread_t* active_thread = NULL;
 
 /** @brief Current active thread queue node. */
-static queue_node_t* active_thread_node = NULL;
+static kqueue_node_t* active_thread_node = NULL;
 
 /** @brief Current active process handler. */
 static kernel_process_t* active_process = NULL;
@@ -139,12 +139,12 @@ static volatile uint64_t schedule_count;
  *
  *******************************************************/
 /** @brief Active threads tables. The array is sorted by priority. */
-static queue_t* active_threads_table[KERNEL_LOWEST_PRIORITY + 1];
+static kqueue_t* active_threads_table[KERNEL_LOWEST_PRIORITY + 1];
 
 /** @brief Sleeping threads table. The threads are sorted by their wakeup time
  * value.
  */
-static queue_t* sleeping_threads_table;
+static kqueue_t* sleeping_threads_table;
 
 /*******************************************************************************
  * STATIC FUNCTIONS DECLARATION
@@ -299,31 +299,17 @@ static void thread_wrapper(void)
 
 static void create_main_kprocess(void)
 {
-    OS_RETURN_E err;
-
     main_kprocess = kmalloc(sizeof(kernel_process_t));
 
     SCHED_ASSERT(main_kprocess != NULL,
                  "Could not allocate kernel main process",
                  OS_ERR_MALLOC);
 
-    main_kprocess->parent_process = NULL;
-    main_kprocess->pid            = last_given_pid++;
-    main_kprocess->children       = queue_create_queue(
-                                            QUEUE_ALLOCATOR(kmalloc, kfree),
-                                            &err);
-    SCHED_ASSERT(err == OS_NO_ERR,
-                 "Could not create main kernel process",
-                 err);
-    main_kprocess->threads = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree),
-                                                &err);
-    SCHED_ASSERT(err == OS_NO_ERR,
-                 "Could not create main kernel process",
-                 err);
-    main_kprocess->free_page_table = memory_create_free_page_table(&err);
-    SCHED_ASSERT(err == OS_NO_ERR,
-                 "Could not create main kernel process",
-                 err);
+    main_kprocess->parent_process  = NULL;
+    main_kprocess->pid             = last_given_pid++;
+    main_kprocess->children        = kqueue_create_queue();
+    main_kprocess->threads         = kqueue_create_queue();
+    main_kprocess->free_page_table = memory_create_free_page_table();
 
     main_kprocess->page_dir = cpu_get_current_pgdir();
     strncpy(main_kprocess->name, "UTK-Kernel\0", 11);
@@ -349,12 +335,11 @@ static void create_idle(void)
     /* Initializes the scheduler active thread */
     idle_thread->state = THREAD_STATE_READY;
     active_thread      = idle_thread;
-    active_thread_node = queue_find(
-        active_threads_table[idle_thread->priority],
-        idle_thread,
-        &err);
+    active_thread_node = kqueue_find(
+                                    active_threads_table[idle_thread->priority],
+                                    idle_thread);
 
-    SCHED_ASSERT(err == OS_NO_ERR,
+    SCHED_ASSERT(active_thread_node != NULL,
                  "Could not create IDLE thread",
                  err);
 }
@@ -380,44 +365,34 @@ static void create_init(void)
 
 static void select_thread(void)
 {
-    OS_RETURN_E      err;
-    queue_node_t*    sleeping_node;
+    kqueue_node_t*   sleeping_node;
     uint32_t         i;
     uint64_t         current_time;
     kernel_thread_t* sleeping;
 
     current_time = time_get_current_uptime();
 
-    /* If the thread was not locked */
+    /* If the thread was not locked, we put it in its queue */
     if(active_thread->state == THREAD_STATE_RUNNING)
     {
         active_thread->state = THREAD_STATE_READY;
-        err = queue_push(active_thread_node,
-                         active_threads_table[active_thread->priority]);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Could not enqueue old thread",
-                     err);
+        kqueue_push(active_thread_node,
+                    active_threads_table[active_thread->priority]);
     }
     else if(active_thread->state == THREAD_STATE_SLEEPING)
     {
-        err = queue_push_prio(active_thread_node,
-                              sleeping_threads_table,
-                              active_thread->wakeup_time);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Could not enqueue old thread in sleeping queue",
-                     err);
+        kqueue_push_prio(active_thread_node,
+                         sleeping_threads_table,
+                         active_thread->wakeup_time);
     }
 
     /* Wake up the sleeping threads */
     do
     {
-        sleeping_node = queue_pop(sleeping_threads_table, &err);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Could not dequeue sleeping thread",
-                     err);
-
         KERNEL_DEBUG(SCHED_ELECT_DEBUG_ENABLED,
                      "[SCHED] Checking threads to wakeup");
+
+        sleeping_node = kqueue_pop(sleeping_threads_table);
 
         /* If nothing to wakeup */
         if(sleeping_node == NULL)
@@ -435,48 +410,35 @@ static void select_thread(void)
                          sleeping->tid);
 
             sleeping->state = THREAD_STATE_READY;
-
-            err = queue_push(sleeping_node,
-                             active_threads_table[sleeping->priority]);
-            SCHED_ASSERT(err == OS_NO_ERR,
-                         "Could not enqueue sleeping thread",
-                         err);
+            kqueue_push(sleeping_node,
+                        active_threads_table[sleeping->priority]);
         }
         else if(sleeping != NULL)
         {
-            KERNEL_DEBUG(SCHED_ELECT_DEBUG_ENABLED,
-                         "[SCHED] Sleep %d",
-                         sleeping->tid);
-            err = queue_push_prio(sleeping_node,
-                                  sleeping_threads_table,
-                                  sleeping->wakeup_time);
-            SCHED_ASSERT(err == OS_NO_ERR,
-                         "Could not enqueue sleeping thread",
-                         err);
+            kqueue_push_prio(sleeping_node,
+                             sleeping_threads_table,
+                             sleeping->wakeup_time);
             break;
         }
     }while(sleeping_node != NULL);
 
     /* Get the new thread */
-    for(i = 0; i < KERNEL_LOWEST_PRIORITY + 1; ++i)
+    active_thread_node = NULL;
+    for(i = 0; i <= KERNEL_LOWEST_PRIORITY && active_thread_node == NULL; ++i)
     {
-        active_thread_node = queue_pop(active_threads_table[i], &err);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Could not dequeue next thread",
-                     err);
-
-        if(active_thread_node != NULL)
-        {
-            break;
-        }
+        active_thread_node = kqueue_pop(active_threads_table[i]);
     }
-    SCHED_ASSERT((active_thread_node != NULL && active_thread != NULL),
-                  "Could not dequeue valid next thread",
-                  err);
+    SCHED_ASSERT(active_thread_node != NULL,
+                 "Could not dequeue valid next thread",
+                 OS_ERR_NULL_POINTER);
 
-    active_thread        = (kernel_thread_t*)active_thread_node->data;
-    active_thread->state = THREAD_STATE_RUNNING;
+    active_thread = (kernel_thread_t*)active_thread_node->data;
+    SCHED_ASSERT(active_thread != NULL,
+                 "Could not dequeue valid next thread",
+                 OS_ERR_NULL_POINTER);
+
     active_process       = active_thread->process;
+    active_thread->state = THREAD_STATE_RUNNING;
 
     KERNEL_DEBUG(SCHED_ELECT_DEBUG_ENABLED,
                  "[SCHED] Elected new thread: %d",
@@ -526,26 +488,14 @@ void sched_init(void)
     /* Init scheduler settings */
     last_given_tid = 0;
     thread_count   = 0;
-
-    schedule_count   = 0;
+    schedule_count = 0;
 
     /* Init thread tables */
     for(i = 0; i < KERNEL_LOWEST_PRIORITY + 1; ++i)
     {
-        active_threads_table[i] = queue_create_queue(
-                                    QUEUE_ALLOCATOR(kmalloc, kfree),
-                                    &err);
-
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Could not create active threads_table",
-                     err);
+        active_threads_table[i] = kqueue_create_queue();
     }
-
-    sleeping_threads_table = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree),
-                                                &err);
-    SCHED_ASSERT(err == OS_NO_ERR,
-                     "Could not create sleeping threads_table",
-                     err);
+    sleeping_threads_table = kqueue_create_queue();
 
     /* Create main kernel process */
     create_main_kprocess();
@@ -652,10 +602,9 @@ kernel_process_t* sched_get_current_process(void)
 
 static void sched_clean_process(kernel_process_t* process)
 {
-    queue_node_t*     thread_process;
+    kqueue_node_t*    thread_process;
     kernel_process_t* child_process;
     uint32_t          int_state;
-    OS_RETURN_E       err;
 
     ENTER_CRITICAL(int_state);
 
@@ -675,24 +624,15 @@ static void sched_clean_process(kernel_process_t* process)
     KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "Cleaned process threads");
 
     /* Make all children process inherit INIT */
-    thread_process = queue_pop(process->children, &err);
-    SCHED_ASSERT(err == OS_NO_ERR,
-                 "Error while inheriting children",
-                 err);
+    thread_process = kqueue_pop(process->children);
 
     while(thread_process != NULL)
     {
         child_process = (kernel_process_t*)thread_process->data;
         child_process->parent_process = main_kprocess;
-        err = queue_push(thread_process, main_kprocess->children);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Error while inheriting children",
-                     err);
+        kqueue_push(thread_process, main_kprocess->children);
 
-        thread_process = queue_pop(process->children, &err);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Error while inheriting children",
-                     err);
+        thread_process = kqueue_pop(process->children);
     }
 
     /* Update the INIT wait process queue if needed with current wait queue*/
@@ -703,16 +643,8 @@ static void sched_clean_process(kernel_process_t* process)
     memory_clean_process_memory(process->page_dir);
 
     /* Clean process structures */
-    err = queue_delete_queue(&process->threads);
-    SCHED_ASSERT(err == OS_NO_ERR,
-                 "Error cleaning threads",
-                 err);
-
-    err = queue_delete_queue(&process->children);
-    SCHED_ASSERT(err == OS_NO_ERR,
-                 "Error cleaning threads",
-                 err);
-
+    kqueue_delete_queue(&process->threads);
+    kqueue_delete_queue(&process->children);
     kfree(process);
 
     EXIT_CRITICAL(int_state);
@@ -726,115 +658,39 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
 
     kernel_process_t* new_proc;
     kernel_thread_t*  main_thread;
-    queue_node_t*     main_thread_node;
-    queue_node_t*     main_thread_node_th;
-    queue_node_t*     new_proc_node;
+    kqueue_node_t*    main_thread_node;
+    kqueue_node_t*    main_thread_node_th;
+    kqueue_node_t*    new_proc_node;
     uint32_t          int_state;
     OS_RETURN_E       err;
 
+    SCHED_ASSERT(new_pid != NULL,
+                 "Internal error while forking process",
+                 OS_ERR_NULL_POINTER);
+
     if(func != SYSCALL_FORK)
     {
-        if(new_pid != NULL)
-        {
-            *(int32_t*)new_pid = -1;
-        }
+        *(int32_t*)new_pid = -1;
     }
 
     /* Allocate memory for the new process */
     new_proc = kmalloc(sizeof(kernel_process_t));
     if(new_proc == NULL)
     {
-        if(new_pid != NULL)
-        {
-            *(int32_t*)new_pid = -1;
-        }
-        return;
+        *(int32_t*)new_pid = -1;
     }
     memset(new_proc, 0, sizeof(kernel_process_t));
-
-    new_proc_node = queue_create_node(new_proc,
-                                      QUEUE_ALLOCATOR(kmalloc, kfree),
-                                      &err);
-    if(err != OS_NO_ERR)
-    {
-        kfree(new_proc);
-        if(new_pid != NULL)
-        {
-            *(int32_t*)new_pid = -1;
-        }
-        return;
-    }
+    new_proc_node = kqueue_create_node(new_proc);
 
     ENTER_CRITICAL(int_state);
 
-    err = queue_push(new_proc_node, active_process->children);
-    if(err != OS_NO_ERR)
-    {
-        err = queue_delete_node(&new_proc_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        EXIT_CRITICAL(int_state);
-
-        kfree(new_proc);
-        if(new_pid != NULL)
-        {
-            *(int32_t*)new_pid = -1;
-        }
-        return;
-    }
+    /* Push the node in the current process children */
+    kqueue_push(new_proc_node, active_process->children);
 
     /* Set the process control block */
-    new_proc->children = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree),
-                                            &err);
-    if(err != OS_NO_ERR)
-    {
-        err = queue_remove(active_process->children, new_proc_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-        err = queue_delete_node(&new_proc_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
+    new_proc->children = kqueue_create_queue();
+    new_proc->threads  = kqueue_create_queue();
 
-        EXIT_CRITICAL(int_state);
-
-        kfree(new_proc);
-        if(new_pid != NULL)
-        {
-            *(int32_t*)new_pid = -1;
-        }
-        return;
-    }
-    new_proc->threads = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree),
-                                            &err);
-    if(err != OS_NO_ERR)
-    {
-        err = queue_delete_queue(&new_proc->children);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_remove(active_process->children, new_proc_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-        err = queue_delete_node(&new_proc_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        EXIT_CRITICAL(int_state);
-
-        kfree(new_proc);
-        if(new_pid != NULL)
-        {
-            *(int32_t*)new_pid = -1;
-        }
-        return;
-    }
     strncpy(new_proc->name,
             active_process->name,
             THREAD_NAME_MAX_LENGTH);
@@ -843,244 +699,48 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
     main_thread = kmalloc(sizeof(kernel_thread_t));
     if(main_thread == NULL)
     {
-        err = queue_delete_queue(&new_proc->children);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-        err = queue_delete_queue(&new_proc->threads);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_remove(active_process->children, new_proc_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-        err = queue_delete_node(&new_proc_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
+        kqueue_remove(active_process->children, new_proc_node, TRUE);
 
         EXIT_CRITICAL(int_state);
 
+        kqueue_delete_queue(&new_proc->children);
+        kqueue_delete_queue(&new_proc->threads);
+        kqueue_delete_node(&new_proc_node);
         kfree(new_proc);
-        if(new_pid != NULL)
-        {
-            *(int32_t*)new_pid = -1;
-        }
+
+        *(int32_t*)new_pid = -1;
         return;
     }
+
     main_thread->state = THREAD_STATE_COPYING;
     err = sched_copy_kernel_thread(main_thread);
     if(err != OS_NO_ERR)
     {
-        err = queue_delete_queue(&new_proc->children);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_delete_queue(&new_proc->threads);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_remove(active_process->children, new_proc_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_delete_node(&new_proc_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
+        kqueue_remove(active_process->children, new_proc_node, TRUE);
 
         EXIT_CRITICAL(int_state);
 
+        kqueue_delete_queue(&new_proc->children);
+        kqueue_delete_queue(&new_proc->threads);
+        kqueue_delete_node(&new_proc_node);
         kfree(main_thread);
         kfree(new_proc);
-        if(new_pid != NULL)
-        {
-            *(int32_t*)new_pid = -1;
-        }
+
+        *(int32_t*)new_pid = -1;
         return;
     }
 
     main_thread->process = new_proc;
 
     /* Add the main process thread to the scheduler table and children table */
-    main_thread_node = queue_create_node(main_thread,
-                                         QUEUE_ALLOCATOR(kmalloc, kfree),
-                                         &err);
-    if(err != OS_NO_ERR)
-    {
-        sched_clean_thread_resources(main_thread);
+    main_thread_node = kqueue_create_node(main_thread);
+    kqueue_push(main_thread_node, new_proc->threads);
 
-        err = queue_delete_queue(&new_proc->children);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-        err = queue_delete_queue(&new_proc->threads);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_remove(active_process->children, new_proc_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_delete_node(&new_proc_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        EXIT_CRITICAL(int_state);
-
-        kfree(main_thread);
-        kfree(new_proc);
-        if(new_pid != NULL)
-        {
-            *(int32_t*)new_pid = -1;
-        }
-        return;
-    }
-    err = queue_push(main_thread_node, new_proc->threads);
-    if(err != OS_NO_ERR)
-    {
-        sched_clean_thread_resources(main_thread);
-        err = queue_delete_queue(&new_proc->children);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_delete_queue(&new_proc->threads);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_delete_node(&main_thread_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_remove(active_process->children, new_proc_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_delete_node(&new_proc_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        EXIT_CRITICAL(int_state);
-
-        kfree(main_thread);
-        kfree(new_proc);
-        if(new_pid != NULL)
-        {
-            *(int32_t*)new_pid = -1;
-        }
-        return;
-    }
-
-    main_thread_node_th = queue_create_node(main_thread,
-                                            QUEUE_ALLOCATOR(kmalloc, kfree),
-                                            &err);
-    if(err != OS_NO_ERR)
-    {
-        err = queue_remove(new_proc->threads, main_thread_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        sched_clean_thread_resources(main_thread);
-        err = queue_delete_queue(&new_proc->children);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-        err = queue_delete_queue(&new_proc->threads);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_delete_node(&main_thread_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_remove(active_process->children, new_proc_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_delete_node(&new_proc_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        EXIT_CRITICAL(int_state);
-
-        kfree(main_thread);
-        kfree(new_proc);
-        if(new_pid != NULL)
-        {
-            *(int32_t*)new_pid = -1;
-        }
-        return;
-    }
-
+    main_thread_node_th = kqueue_create_node(main_thread);
     main_thread->state = THREAD_STATE_READY;
-    err = queue_push(main_thread_node_th,
-                     active_threads_table[main_thread->priority]);
-    if(err != OS_NO_ERR)
-    {
-        err = queue_remove(new_proc->threads, main_thread_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
+    kqueue_push(main_thread_node_th,
+                active_threads_table[main_thread->priority]);
 
-        sched_clean_thread_resources(main_thread);
-        err = queue_delete_queue(&new_proc->children);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_delete_queue(&new_proc->threads);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_delete_node(&main_thread_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_delete_node(&main_thread_node_th);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_remove(active_process->children, new_proc_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_delete_node(&new_proc_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        EXIT_CRITICAL(int_state);
-
-        kfree(main_thread);
-        kfree(new_proc);
-        if(new_pid != NULL)
-        {
-            *(int32_t*)new_pid = -1;
-        }
-        return;
-    }
     /* Update the main thread */
     new_proc->main_thread = main_thread_node_th;
 
@@ -1090,59 +750,29 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
                                    active_thread->kstack_size);
     if(err != OS_NO_ERR)
     {
-        err = queue_remove(new_proc->threads, main_thread_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-        err = queue_remove(active_threads_table[main_thread->priority],
-                            main_thread_node_th);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
+        kqueue_remove(new_proc->threads, main_thread_node, TRUE);
+        kqueue_remove(active_threads_table[main_thread->priority],
+                      main_thread_node_th, TRUE);
 
         sched_clean_thread_resources(main_thread);
-        err = queue_delete_queue(&new_proc->children);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_delete_queue(&new_proc->threads);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_delete_node(&main_thread_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_delete_node(&main_thread_node_th);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_remove(active_process->children, new_proc_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
-
-        err = queue_delete_node(&new_proc_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Internal error while forking process",
-                     err);
+        kqueue_remove(active_process->children, new_proc_node, TRUE);
 
         EXIT_CRITICAL(int_state);
 
+        kqueue_delete_node(&main_thread_node);
+        kqueue_delete_node(&main_thread_node_th);
+
+        kqueue_delete_queue(&new_proc->children);
+        kqueue_delete_queue(&new_proc->threads);
+        kqueue_delete_node(&new_proc_node);
         kfree(main_thread);
         kfree(new_proc);
-        if(new_pid != NULL)
-        {
-            *(int32_t*)new_pid = -1;
-        }
+
+        *(int32_t*)new_pid = -1;
         return;
     }
 
-    new_proc->pid  = last_given_pid++;
+    new_proc->pid            = last_given_pid++;
     new_proc->parent_process = active_process;
 
     KERNEL_DEBUG(SCHED_DEBUG_ENABLED,
@@ -1152,16 +782,13 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
 
     EXIT_CRITICAL(int_state);
 
-    if(new_pid != NULL)
-    {
-        *(int32_t*)new_pid = new_proc->pid;
-    }
+    *(int32_t*)new_pid = new_proc->pid;
 }
 
 void sched_wait_process_pid(const SYSCALL_FUNCTION_E func, void* params)
 {
     uint32_t                 int_state;
-    queue_node_t*            child_node;
+    kqueue_node_t*           child_node;
     kernel_process_t*        child;
     THREAD_TERMINATE_CAUSE_E term_cause;
     int32_t                  status;
@@ -1233,19 +860,11 @@ void sched_wait_process_pid(const SYSCALL_FUNCTION_E func, void* params)
 
     sched_clean_process(child);
 
-    EXIT_CRITICAL(int_state);
-
-    err = queue_remove(active_process->children, child_node);
-    SCHED_ASSERT(err == OS_NO_ERR,
-                 "Could not unqueue child while waiting for PID",
-                 err);
+    kqueue_remove(active_process->children, child_node, TRUE);
 
     EXIT_CRITICAL(int_state);
 
-    err = queue_delete_node(&child_node);
-    SCHED_ASSERT(err == OS_NO_ERR,
-                 "Could not unqueue child while waiting for PID",
-                 err);
+    kqueue_delete_node(&child_node);
 }
 
 /******************************************************************************
@@ -1256,7 +875,6 @@ static void thread_exit(const THREAD_TERMINATE_CAUSE_E cause,
                         const THREAD_RETURN_STATE_E ret_state,
                         void* ret_val)
 {
-    OS_RETURN_E      err;
     kernel_thread_t* joining_thread;
     uint32_t         int_state;
 
@@ -1289,20 +907,14 @@ static void thread_exit(const THREAD_TERMINATE_CAUSE_E cause,
 
             joining_thread->state = THREAD_STATE_READY;
 
-            err = queue_push(active_thread->joining_thread,
-                             active_threads_table[joining_thread->priority]);
-            SCHED_ASSERT(err == OS_NO_ERR,
-                         "Could not enqueue joining thread",
-                         err);
+            kqueue_push(active_thread->joining_thread,
+                        active_threads_table[joining_thread->priority]);
         }
     }
 
     /* Clear the active thread node, it should not be in any queue at this point
      */
-    err = queue_delete_node(&active_thread_node);
-    SCHED_ASSERT(err == OS_NO_ERR,
-                 "Could not remove exiting thread node",
-                 err);
+    kqueue_delete_node(&active_thread_node);
 
     /* Set the thread's stats and state */
     active_thread->end_time     = time_get_current_uptime();
@@ -1323,39 +935,26 @@ static void thread_exit(const THREAD_TERMINATE_CAUSE_E cause,
 
 static void sched_clean_thread_resources(kernel_thread_t* thread)
 {
-    OS_RETURN_E        err;
-    queue_node_t*      node;
-    sched_resource_t*  resource;
+    kqueue_node_t*    node;
+    sched_resource_t* resource;
 
-    while((node = queue_pop(thread->resources, &err)) != NULL)
+    while((node = kqueue_pop(thread->resources)) != NULL)
     {
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Could clean thread's resources queue",
-                      err);
-
         /* Call the resource's cleanup */
         resource = (sched_resource_t*)node->data;
         resource->cleanup(resource->data);
 
         /* Clean the node */
-        err = queue_delete_node(&node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Could clean thread's resources queue",
-                      err);
+        kqueue_delete_node(&node);
     }
 
     /* Remove the resources queue */
-    err = queue_delete_queue(&thread->resources);
-    SCHED_ASSERT(err == OS_NO_ERR,
-                 "Could clean thread's resources queue",
-                 err);
+    kqueue_delete_queue(&thread->resources);
 }
 
 static OS_RETURN_E sched_copy_kernel_thread(kernel_thread_t* dst_thread)
 {
     uint32_t    int_state;
-    OS_RETURN_E err;
-
     SCHED_ASSERT(dst_thread != NULL,
                  "Tried to copy a NULL thread",
                  OS_ERR_NULL_POINTER);
@@ -1371,12 +970,7 @@ static OS_RETURN_E sched_copy_kernel_thread(kernel_thread_t* dst_thread)
     /* TODO: Maybe it will be usefull to change this and actually copy the
      * resources.
      */
-    dst_thread->resources = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree),
-                                               &err);
-    if(err != OS_NO_ERR)
-    {
-        return err;
-    }
+    dst_thread->resources = kqueue_create_queue();
 
     ENTER_CRITICAL(int_state);
 
@@ -1396,7 +990,7 @@ static OS_RETURN_E sched_copy_kernel_thread(kernel_thread_t* dst_thread)
 static void sched_clean_thread(kernel_thread_t* thread)
 {
     kernel_process_t* process;
-    queue_node_t*     thread_node;
+    kqueue_node_t*    thread_node;
     OS_RETURN_E       err;
     uint32_t          int_state;
 
@@ -1426,7 +1020,7 @@ static void sched_clean_thread(kernel_thread_t* thread)
         SCHED_ASSERT(err == OS_NO_ERR,
                      "Could not clean thread's stacks",
                      err);
-        err |= memory_free_stack((void*)thread->kstack, thread->kstack_size);
+        err = memory_free_stack((void*)thread->kstack, thread->kstack_size);
         SCHED_ASSERT(err == OS_NO_ERR,
                      "Could not clean thread's stacks",
                      err);
@@ -1435,66 +1029,33 @@ static void sched_clean_thread(kernel_thread_t* thread)
     KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "Cleaned thread stacks");
 
     /* Remove from active thread table */
-    thread_node = queue_find(active_threads_table[thread->priority],
-                             thread,
-                             &err);
-    if(err == OS_NO_ERR)
+    thread_node = kqueue_find(active_threads_table[thread->priority], thread);
+    if(thread_node != NULL)
     {
-        err = queue_remove(active_threads_table[thread->priority], thread_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Could not remove thread active threads table",
-                     err);
-
-        err = queue_delete_node(&thread_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Could not remove thread node",
-                     err);
-    }
-    else
-    {
-        SCHED_ASSERT(err == OS_ERR_NO_SUCH_ID,
-                     "Could not find thread in active threads table",
-                     err);
+        kqueue_remove(active_threads_table[thread->priority],
+                      thread_node,
+                      TRUE);
+        kqueue_delete_node(&thread_node);
     }
 
     /* Remove from sleeping table */
-    thread_node = queue_find(sleeping_threads_table,
-                             thread,
-                             &err);
-    if(err == OS_NO_ERR)
+    thread_node = kqueue_find(sleeping_threads_table, thread);
+    if(thread_node != NULL)
     {
-        err = queue_remove(active_threads_table[thread->priority], thread_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Could not remove thread sleeping threads table",
-                     err);
-
-        err = queue_delete_node(&thread_node);
-        SCHED_ASSERT(err == OS_NO_ERR,
-                     "Could not remove thread node",
-                     err);
-    }
-    else
-    {
-        SCHED_ASSERT(err == OS_ERR_NO_SUCH_ID,
-                     "Could not find thread in sleeping threads table",
-                     err);
+        kqueue_remove(active_threads_table[thread->priority],
+                      thread_node,
+                      TRUE);
+        kqueue_delete_node(&thread_node);
     }
 
     /* Remove from process table */
-    thread_node = queue_find(process->threads, thread, &err);
-    SCHED_ASSERT(err == OS_NO_ERR,
-                 "Could not find thread in process table",
-                 err);
+    thread_node = kqueue_find(process->threads, thread);
+    SCHED_ASSERT(thread_node != NULL,
+                 "Could not find thread in process threads table",
+                 OS_ERR_NO_SUCH_ID);
 
-    err = queue_remove(process->threads, thread_node);
-    SCHED_ASSERT(err == OS_NO_ERR,
-                 "Could not remove thread from process table",
-                 err);
-
-    err = queue_delete_node(&thread_node);
-    SCHED_ASSERT(err == OS_NO_ERR,
-                 "Could not remove thread node",
-                 err);
+    kqueue_remove(process->threads, thread_node, TRUE);
+    kqueue_delete_node(&thread_node);
 
     /* Clean thread structure */
     kfree(thread);
@@ -1502,9 +1063,9 @@ static void sched_clean_thread(kernel_thread_t* thread)
     EXIT_CRITICAL(int_state);
 }
 
-queue_node_t* sched_lock_thread(const THREAD_WAIT_TYPE_E block_type)
+kqueue_node_t* sched_lock_thread(const THREAD_WAIT_TYPE_E block_type)
 {
-    queue_node_t* current_thread_node;
+    kqueue_node_t* current_thread_node;
 
     /* Cant lock kernel thread */
     if(active_thread == idle_thread)
@@ -1524,11 +1085,10 @@ queue_node_t* sched_lock_thread(const THREAD_WAIT_TYPE_E block_type)
     return current_thread_node;
 }
 
-OS_RETURN_E sched_unlock_thread(queue_node_t* node,
+OS_RETURN_E sched_unlock_thread(kqueue_node_t* node,
                                 const THREAD_WAIT_TYPE_E block_type,
                                 const bool_t do_schedule)
 {
-    OS_RETURN_E      err;
     uint32_t         int_state;
     kernel_thread_t* thread;
 
@@ -1551,20 +1111,17 @@ OS_RETURN_E sched_unlock_thread(queue_node_t* node,
 
     /* Unlock thread state */
     thread->state = THREAD_STATE_READY;
-    err = queue_push(node, active_threads_table[thread->priority]);
-    SCHED_ASSERT(err == OS_NO_ERR,
-                 "Could not enqueue thread in active table",
-                 err);
+    kqueue_push(node, active_threads_table[thread->priority]);
 
     KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "Thread %d unlocked, reason: %d\n",
                  active_thread->tid, block_type);
-
-    EXIT_CRITICAL(int_state);
 
     if(do_schedule == TRUE)
     {
         sched_schedule();
     }
+
+    EXIT_CRITICAL(int_state);
 
     return OS_NO_ERR;
 }
@@ -1572,10 +1129,8 @@ OS_RETURN_E sched_unlock_thread(queue_node_t* node,
 OS_RETURN_E sched_thread_add_resource(kernel_thread_t* thread,
                                       void* resource,
                                       void (*cleanup)(void* resource),
-                                      queue_node_t** resource_node)
+                                      kqueue_node_t** resource_node)
 {
-    OS_RETURN_E       err;
-    OS_RETURN_E       err2;
     sched_resource_t* res_node;
 
     if(thread == NULL || resource_node == NULL)
@@ -1593,60 +1148,26 @@ OS_RETURN_E sched_thread_add_resource(kernel_thread_t* thread,
     res_node->data    = resource;
 
     /* Create the resource node */
-    *resource_node = queue_create_node(res_node,
-                                       QUEUE_ALLOCATOR(kmalloc, kfree),
-                                       &err);
-    if(*resource_node == NULL || err != OS_NO_ERR)
-    {
-        kfree(res_node);
-        return err;
-    }
+    *resource_node = kqueue_create_node(res_node);
 
     /* Add the node to the queue */
-    err = queue_push(*resource_node, thread->resources);
-    if(err != OS_NO_ERR)
-    {
-        err2 = queue_delete_node(resource_node);
-        SCHED_ASSERT(err2 == OS_NO_ERR,
-                     "Could not add thread resources in queue",
-                     err2);
-        kfree(res_node);
-        return err;
-    }
+    kqueue_push(*resource_node, thread->resources);
 
     return OS_NO_ERR;
 }
 
 OS_RETURN_E sched_thread_remove_resource(kernel_thread_t* thread,
-                                         queue_node_t** resource_node)
+                                         kqueue_node_t** resource_node)
 {
-    OS_RETURN_E err;
-    OS_RETURN_E err2;
-
     if(thread == NULL || resource_node == NULL)
     {
         return OS_ERR_NULL_POINTER;
     }
 
-    err = queue_remove(thread->resources, *resource_node);
-    if(err != OS_NO_ERR)
-    {
-        return err;
-    }
-
     /* Free the resource node data */
+    kqueue_remove(thread->resources, *resource_node, TRUE);
     kfree((*resource_node)->data);
-
-    err = queue_delete_node(resource_node);
-    if(err != OS_NO_ERR)
-    {
-        /* We should push back */
-        err2 = queue_push(*resource_node, thread->resources);
-        SCHED_ASSERT(err2 == OS_NO_ERR,
-                     "Could not remove thread resources in queue",
-                     err2);
-        return err;
-    }
+    kqueue_delete_node(resource_node);
 
     return OS_NO_ERR;
 }
@@ -1714,8 +1235,8 @@ OS_RETURN_E sched_create_kernel_thread(kernel_thread_t** thread,
     OS_RETURN_E      err;
     OS_RETURN_E      internal_err;
     kernel_thread_t* new_thread;
-    queue_node_t*    new_thread_node;
-    queue_node_t*    new_thread_node_table;
+    kqueue_node_t*   new_thread_node;
+    kqueue_node_t*   new_thread_node_table;
     uint32_t         int_state;
 
     /* Check if priority is valid */
@@ -1739,28 +1260,8 @@ OS_RETURN_E sched_create_kernel_thread(kernel_thread_t** thread,
         KERNEL_ERROR("Could not allocate thread structure\n");
         return OS_ERR_MALLOC;
     }
-    new_thread_node = queue_create_node(new_thread,
-                                        QUEUE_ALLOCATOR(kmalloc, kfree),
-                                        &err);
-    if(err != OS_NO_ERR)
-    {
-        kfree(new_thread);
-        return err;
-    }
-
-    new_thread_node_table = queue_create_node(new_thread,
-                                              QUEUE_ALLOCATOR(kmalloc, kfree),
-                                              &err);
-    if(err != OS_NO_ERR)
-    {
-        internal_err = queue_delete_node(&new_thread_node);
-        SCHED_ASSERT(internal_err == OS_NO_ERR,
-                     "Internal error while creating thread",
-                     internal_err);
-
-        kfree(new_thread);
-        return err;
-    }
+    new_thread_node       = kqueue_create_node(new_thread);
+    new_thread_node_table = kqueue_create_node(new_thread);
 
     memset(new_thread, 0, sizeof(kernel_thread_t));
 
@@ -1783,18 +1284,11 @@ OS_RETURN_E sched_create_kernel_thread(kernel_thread_t** thread,
     if(new_thread->kstack == (uintptr_t)NULL || err != OS_NO_ERR)
     {
         KERNEL_ERROR("Could not allocate kernel stack structure\n");
-        internal_err = queue_delete_node(&new_thread_node);
-        SCHED_ASSERT(internal_err == OS_NO_ERR,
-                     "Internal error while creating thread",
-                     internal_err);
-
-        internal_err = queue_delete_node(&new_thread_node_table);
-        SCHED_ASSERT(internal_err == OS_NO_ERR,
-                     "Internal error while creating thread",
-                     internal_err);
+        kqueue_delete_node(&new_thread_node);
+        kqueue_delete_node(&new_thread_node_table);
 
         kfree(new_thread);
-        return OS_ERR_MALLOC;
+        return err;
     }
 
     new_thread->stack = (uintptr_t)memory_alloc_stack(new_thread->stack_size,
@@ -1803,14 +1297,9 @@ OS_RETURN_E sched_create_kernel_thread(kernel_thread_t** thread,
     if(new_thread->stack == (uintptr_t)NULL || err != OS_NO_ERR)
     {
         KERNEL_ERROR("Could not allocate stack structure\n");
-        internal_err = queue_delete_node(&new_thread_node);
-        SCHED_ASSERT(internal_err == OS_NO_ERR,
-                     "Internal error while creating thread",
-                     internal_err);
-        internal_err = queue_delete_node(&new_thread_node_table);
-        SCHED_ASSERT(internal_err == OS_NO_ERR,
-                     "Internal error while creating thread",
-                     internal_err);
+        kqueue_delete_node(&new_thread_node);
+        kqueue_delete_node(&new_thread_node_table);
+
         internal_err = memory_free_stack((void*)new_thread->kstack,
                                           new_thread->kstack_size);
         SCHED_ASSERT(internal_err == OS_NO_ERR,
@@ -1818,111 +1307,20 @@ OS_RETURN_E sched_create_kernel_thread(kernel_thread_t** thread,
                      internal_err);
 
         kfree(new_thread);
-        return OS_ERR_MALLOC;
+        return err;
     }
 
     /* Initialize thread's resource queue */
-    new_thread->resources = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree),
-                                               &err);
-    if(new_thread->resources == NULL || err != OS_NO_ERR)
-    {
-        internal_err = queue_delete_node(&new_thread_node);
-        SCHED_ASSERT(internal_err == OS_NO_ERR,
-                     "Internal error while creating thread",
-                     internal_err);
-        internal_err = queue_delete_node(&new_thread_node_table);
-        SCHED_ASSERT(internal_err == OS_NO_ERR,
-                     "Internal error while creating thread",
-                     internal_err);
-        internal_err = memory_free_stack((void*)new_thread->kstack,
-                                          new_thread->kstack_size);
-        SCHED_ASSERT(internal_err == OS_NO_ERR,
-                     "Internal error while creating thread",
-                     internal_err);
-        internal_err = memory_free_stack((void*)new_thread->stack,
-                                          new_thread->stack_size);
-        SCHED_ASSERT(internal_err == OS_NO_ERR,
-                     "Internal error while creating thread",
-                     internal_err);
-
-        kfree(new_thread);
-        KERNEL_ERROR("Could not add thread to process\n");
-        return err;
-    }
+    new_thread->resources = kqueue_create_queue();
 
     cpu_init_thread_context(thread_wrapper, new_thread);
 
     ENTER_CRITICAL(int_state);
 
     /* Add the thread to the main kernel process. */
-    err = queue_push(new_thread_node, active_process->threads);
-    if(err != OS_NO_ERR)
-    {
-        internal_err = queue_delete_node(&new_thread_node);
-        SCHED_ASSERT(internal_err == OS_NO_ERR,
-                     "Internal error while creating thread",
-                     internal_err);
-        internal_err = queue_delete_node(&new_thread_node_table);
-        SCHED_ASSERT(internal_err == OS_NO_ERR,
-                     "Internal error while creating thread",
-                     internal_err);
-        internal_err = memory_free_stack((void*)new_thread->kstack,
-                                          new_thread->kstack_size);
-        SCHED_ASSERT(internal_err == OS_NO_ERR,
-                     "Internal error while creating thread",
-                     internal_err);
-        internal_err = memory_free_stack((void*)new_thread->stack,
-                                          new_thread->stack_size);
-        SCHED_ASSERT(internal_err == OS_NO_ERR,
-                     "Internal error while creating thread",
-                     internal_err);
-        internal_err = queue_delete_queue(&new_thread->resources);
-        SCHED_ASSERT(internal_err == OS_NO_ERR,
-                     "Internal error while creating thread",
-                     internal_err);
-
-        kfree(new_thread);
-        KERNEL_ERROR("Could not add thread to process\n");
-
-        EXIT_CRITICAL(int_state);
-        return err;
-    }
-    err = queue_push(new_thread_node_table,
-                     active_threads_table[new_thread->priority]);
-    if(err != OS_NO_ERR)
-    {
-        internal_err = queue_remove(active_process->threads, new_thread_node);
-        SCHED_ASSERT(internal_err == OS_NO_ERR,
-                     "Internal error while creating thread",
-                     internal_err);
-        internal_err = queue_delete_node(&new_thread_node);
-        SCHED_ASSERT(internal_err == OS_NO_ERR,
-                     "Internal error while creating thread",
-                     internal_err);
-        internal_err = queue_delete_node(&new_thread_node_table);
-        SCHED_ASSERT(internal_err == OS_NO_ERR,
-                     "Internal error while creating thread",
-                     internal_err);
-        internal_err = memory_free_stack((void*)new_thread->kstack,
-                                          new_thread->kstack_size);
-        SCHED_ASSERT(internal_err == OS_NO_ERR,
-                     "Internal error while creating thread",
-                     internal_err);
-        internal_err = memory_free_stack((void*)new_thread->stack,
-                                          new_thread->stack_size);
-        SCHED_ASSERT(internal_err == OS_NO_ERR,
-                     "Internal error while creating thread",
-                     internal_err);
-        internal_err = queue_delete_queue(&new_thread->resources);
-        SCHED_ASSERT(internal_err == OS_NO_ERR,
-                     "Internal error while creating thread",
-                     internal_err);
-
-        kfree(new_thread);
-        KERNEL_ERROR("Could add thread to process\n");
-        EXIT_CRITICAL(int_state);
-        return err;
-    }
+    kqueue_push(new_thread_node, active_process->threads);
+    kqueue_push(new_thread_node_table,
+                active_threads_table[new_thread->priority]);
 
     KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "[SCHED] Kernel thread created");
 

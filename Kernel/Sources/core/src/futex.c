@@ -18,7 +18,7 @@
  ******************************************************************************/
 
 #include <stdint.h>        /* Generic int types */
-#include <queue.h>         /* Queues */
+#include <kqueue.h>        /* Kernel queues lib */
 #include <uhashtable.h>    /* Hash tables */
 #include <kheap.h>         /* Kernel heap */
 #include <scheduler.h>     /* Scheduler API */
@@ -53,13 +53,13 @@ struct futex_data
     uint32_t wait;
 
     /** @brief The thread's node waiting on the futex */
-    queue_node_t* waiting_thread;
+    kqueue_node_t* waiting_thread;
 
     /** @brief Tells if the futex was released after the owner died. */
     bool_t owner_died;
 
     /** @brief Contains the resource node in the resource list */
-    queue_node_t* resource_node;
+    kqueue_node_t* resource_node;
 };
 
 /**
@@ -86,22 +86,22 @@ typedef struct futex_resource futex_resource_t;
 struct recover_data
 {
     /** @brief Created futex queue, NULL is none was created. */
-    queue_t* created_futex_queue;
+    kqueue_t* created_futex_queue;
 
     /** @brief Contains the futex table that was modified, NULL is none. */
     uhashtable_t* futex_table;
 
     /** @brief Contains the node of the locked thread, NULL is not locked. */
-    queue_node_t* locked_thread;
+    kqueue_node_t* locked_thread;
 
     /** @brief Contains the wait node created, NULL if not created. */
-    queue_node_t* created_wait_node;
+    kqueue_node_t* created_wait_node;
 
     /** @brief Contains the wait queue, NULL if nothing was pushed. */
-    queue_t* pushed_wait_queue;
+    kqueue_t* pushed_wait_queue;
 
     /** @brief Contains the res node created, NULL if not created. */
-    queue_node_t* created_res_node;
+    kqueue_node_t* created_res_node;
 };
 
 /**
@@ -193,19 +193,14 @@ static void futex_recover(futex_t* futex,
     if(recover_data->pushed_wait_queue != NULL)
     {
         /* Here created wait node should always be non NULL. */
-        err = queue_remove(recover_data->pushed_wait_queue,
-                           recover_data->created_wait_node);
-        FUTEX_ASSERT(err == OS_NO_ERR,
-                     "Could not recover from failed futex",
-                     err);
+        kqueue_remove(recover_data->pushed_wait_queue,
+                      recover_data->created_wait_node,
+                      TRUE);
     }
 
     if(recover_data->created_wait_node != NULL)
     {
-        err = queue_delete_node(&recover_data->created_wait_node);
-        FUTEX_ASSERT(err == OS_NO_ERR,
-                     "Could not recover from failed futex",
-                     err);
+        kqueue_delete_node(&recover_data->created_wait_node);
     }
 
     if(recover_data->locked_thread != NULL)
@@ -230,19 +225,16 @@ static void futex_recover(futex_t* futex,
 
     if(recover_data->created_futex_queue != NULL)
     {
-        err = queue_delete_queue(&recover_data->created_futex_queue);
-        FUTEX_ASSERT(err == OS_NO_ERR,
-                     "Could not recover from failed futex",
-                     err);
+        kqueue_delete_queue(&recover_data->created_futex_queue);
     }
 }
 
 static void futex_cleanup(void* futex_resource)
 {
-    OS_RETURN_E      err;
-    queue_t*         wait_queue;
-    queue_node_t*    wait_node;
-    uint32_t         int_state;
+    OS_RETURN_E    err;
+    kqueue_t*      wait_queue;
+    kqueue_node_t* wait_node;
+    uint32_t       int_state;
 
     futex_resource_t* resource;
 
@@ -264,14 +256,12 @@ static void futex_cleanup(void* futex_resource)
     FUTEX_ASSERT(err == OS_NO_ERR, "Could not cleanup futex", err);
 
     /* Get the node */
-    wait_node = queue_find(wait_queue, (void*)resource->associated_data, &err);
-    FUTEX_ASSERT(err == OS_NO_ERR, "Could not cleanup futex", err);
+    wait_node = kqueue_find(wait_queue, (void*)resource->associated_data);
+    FUTEX_ASSERT(wait_node != NULL, "Could not cleanup futex", err);
 
     /* Delete the table node */
-    err = queue_remove(wait_queue, wait_node);
-    FUTEX_ASSERT(err == OS_NO_ERR, "Could not cleanup futex", err);
-    err = queue_delete_node(&wait_node);
-    FUTEX_ASSERT(err == OS_NO_ERR, "Could not cleanup futex", err);
+    kqueue_remove(wait_queue, wait_node, TRUE);
+    kqueue_delete_node(&wait_node);
 
     /* If this was the last entry in the queue, delete the queue */
     if(wait_queue->size == 0)
@@ -283,8 +273,7 @@ static void futex_cleanup(void* futex_resource)
         FUTEX_ASSERT(err == OS_NO_ERR, "Could not cleanup futex", err);
 
         /* Delete the queue */
-        err = queue_delete_queue(&wait_queue);
-        FUTEX_ASSERT(err == OS_NO_ERR, "Could not cleanup futex", err);
+        kqueue_delete_queue(&wait_queue);
     }
 
     EXIT_CRITICAL(int_state);
@@ -304,8 +293,8 @@ void futex_init(void)
 void futex_wait(const SYSCALL_FUNCTION_E func, void* params)
 {
     OS_RETURN_E      err;
-    queue_t*         wait_queue;
-    queue_node_t*    wait_node;
+    kqueue_t*        wait_queue;
+    kqueue_node_t*   wait_node;
     futex_t*         func_params;
     futex_data_t     data_info;
     futex_resource_t resource;
@@ -355,9 +344,7 @@ void futex_wait(const SYSCALL_FUNCTION_E func, void* params)
         /* No futex existed at this address, create it */
         if(err == OS_ERR_NO_SUCH_ID)
         {
-            wait_queue = queue_create_queue(QUEUE_ALLOCATOR(kmalloc, kfree),
-                                            &err);
-            CHECK_ERROR_STATE(err, wait_queue == NULL);
+            wait_queue = kqueue_create_queue();
             recover_data.created_futex_queue = wait_queue;
 
             err = uhashtable_set(futex_table,
@@ -384,14 +371,10 @@ void futex_wait(const SYSCALL_FUNCTION_E func, void* params)
     thread = (kernel_thread_t*)data_info.waiting_thread->data;
 
     /* Add the current thread to the waiting list */
-    wait_node = queue_create_node(&data_info,
-                                  QUEUE_ALLOCATOR(kmalloc, kfree),
-                                  &err);
-    CHECK_ERROR_STATE(err, wait_node == NULL);
+    wait_node = kqueue_create_node(&data_info);
     recover_data.created_wait_node = wait_node;
 
-    err = queue_push(wait_node, wait_queue);
-    CHECK_ERROR_STATE(err, FALSE);
+    kqueue_push(wait_node, wait_queue);
     recover_data.pushed_wait_queue = wait_queue;
 
     /* Add the resource to the thread */
@@ -422,17 +405,17 @@ void futex_wait(const SYSCALL_FUNCTION_E func, void* params)
 
 void futex_wake(const SYSCALL_FUNCTION_E func, void* params)
 {
-    OS_RETURN_E      err;
-    futex_t*         func_params;
-    queue_t*         wait_queue;
-    queue_node_t*    wait_node;
-    queue_node_t*    save_node;
-    futex_data_t*    data_info;
-    uint32_t         int_state;
-    size_t           i;
-    recover_data_t   recover_data;
-    kernel_thread_t* thread;
-    uintptr_t        futex_phys;
+    OS_RETURN_E       err;
+    futex_t*          func_params;
+    kqueue_t*         wait_queue;
+    kqueue_node_t*    wait_node;
+    kqueue_node_t*    save_node;
+    futex_data_t*     data_info;
+    uint32_t          int_state;
+    size_t            i;
+    recover_data_t    recover_data;
+    kernel_thread_t*  thread;
+    uintptr_t         futex_phys;
 
     func_params = (futex_t*)params;
 
@@ -506,10 +489,8 @@ void futex_wake(const SYSCALL_FUNCTION_E func, void* params)
         FUTEX_ASSERT(err == OS_NO_ERR, "Unlock futex thread", err);
 
         /* Delete the node */
-        err = queue_remove(wait_queue, save_node);
-        FUTEX_ASSERT(err == OS_NO_ERR, "Could not remove futex resource", err);
-        err = queue_delete_node(&save_node);
-        FUTEX_ASSERT(err == OS_NO_ERR, "Could not remove futex resource", err);
+        kqueue_remove(wait_queue, save_node, TRUE);
+        kqueue_delete_node(&save_node);
 
         /* If this was the last entry in the queue, delete the queue */
         if(wait_queue->size == 0)
@@ -521,8 +502,7 @@ void futex_wake(const SYSCALL_FUNCTION_E func, void* params)
             FUTEX_ASSERT(err == OS_NO_ERR, "Could not remove futex", err);
 
             /* Delete the queue */
-            err = queue_delete_queue(&wait_queue);
-            FUTEX_ASSERT(err == OS_NO_ERR, "Could not remove futex", err);
+            kqueue_delete_queue(&wait_queue);
 
             /* Nothing more to wake up */
             break;

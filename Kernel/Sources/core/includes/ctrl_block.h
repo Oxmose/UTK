@@ -20,7 +20,7 @@
 #define __CORE_CTRL_BLOCK_H_
 
 #include <stdint.h>       /* Generic int types */
-#include <queue.h>        /* Queues lib */
+#include <kqueue.h>       /* Kernel queues lib */
 #include <cpu_settings.h> /* CPU structures */
 #include <critical.h>     /* Critical sections */
 
@@ -130,16 +130,16 @@ struct kernel_process
     struct kernel_process* parent_process;
 
     /** @brief Process main thread. */
-    queue_node_t* main_thread;
+    kqueue_node_t* main_thread;
 
     /** @brief List of the process threads. */
-    queue_t* threads;
+    kqueue_t* threads;
 
     /** @brief Process children list. */
-    queue_t* children;
+    kqueue_t* children;
 
     /** @brief Process free page table queue. */
-    queue_t* free_page_table;
+    kqueue_t* free_page_table;
 
     /** @brief The process page directory pointer. */
     uintptr_t page_dir;
@@ -222,7 +222,7 @@ struct kernel_thread
     uint64_t wakeup_time;
 
     /** @brief Pointer to the joining thread's node in the threads list. */
-    queue_node_t* joining_thread;
+    kqueue_node_t* joining_thread;
 
     /** @brief Thread's start time. */
     uint64_t start_time;
@@ -231,7 +231,7 @@ struct kernel_thread
     uint64_t end_time;
 
     /** @brief Thread's resource queue. */
-    queue_t* resources;
+    kqueue_t* resources;
 };
 
 /**

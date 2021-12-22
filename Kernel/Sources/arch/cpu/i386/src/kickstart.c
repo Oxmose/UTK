@@ -120,6 +120,7 @@ void kernel_kickstart(void)
     KERNEL_SUCCESS("Kernel heap initialized\n");
 
     KERNEL_TEST_POINT(queue_test);
+    KERNEL_TEST_POINT(kqueue_test);
     KERNEL_TEST_POINT(vector_test);
     KERNEL_TEST_POINT(uhashtable_test);
 
