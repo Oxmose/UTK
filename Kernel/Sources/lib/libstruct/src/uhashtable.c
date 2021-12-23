@@ -11,8 +11,8 @@
  *
  * @brief Unsigned hash table structures.
  *
- * @details Unsigned hash table structures. Hash table are used to dynamically 
- * store data, while growing when needed. This type of hash table can store data 
+ * @details Unsigned hash table structures. Hash table are used to dynamically
+ * store data, while growing when needed. This type of hash table can store data
  * pointers and values of the size of a pointer.
  *
  * @copyright Alexy Torres Aurora Dugo
@@ -33,9 +33,9 @@
  * CONSTANTS
  ******************************************************************************/
 
-/** 
+/**
  * @brief Initial capacity and size of the hashtable.
- * 
+ *
  * @warning Must be a power of 2.
  */
 #define HT_INITIAL_SIZE 16
@@ -43,8 +43,8 @@
 /** @brief Maximal factor size of the graveyard. */
 #define HT_MAX_GRAVEYARD_FACTOR 0.3f
 
-/** @brief Maximal load factor (including graveyard). 
- * 
+/** @brief Maximal load factor (including graveyard).
+ *
  * @warning: Must always be strictly less than 1.0
 */
 #define HT_MAX_LOAD_FACTOR 0.7f
@@ -57,7 +57,7 @@
 
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /* None */
@@ -74,10 +74,10 @@
 
 /**
  * @brief 64 bits hash function for uintptr_t keys.
- * 
+ *
  * @details This function computes the 64 bits hash function for uintptr_t keys.
  * The algorithm used is the FNV-1a hash algorithm.
- * 
+ *
  * @param[in] key The key to hash.
  * @return The computed hash is returned.
  */
@@ -85,13 +85,13 @@ inline static uint64_t uhash_64(const uintptr_t key);
 
 /**
  * @brief Sets the data for a given entry in the unsigned hash table.
- * 
- * @details Sets the data for a given entry in the unsigned hash table. If the 
- * entry does not exist it is created. 
- * 
+ *
+ * @details Sets the data for a given entry in the unsigned hash table. If the
+ * entry does not exist it is created.
+ *
  * @warning This function does not perform any check on the data, the key or the
  * table itself.
- * 
+ *
  * @param table The table to set the value.
  * @param key The key to associate the data with.
  * @param data The data to set.
@@ -104,24 +104,24 @@ static OS_RETURN_E uhashtable_set_entry(uhashtable_t* table,
 
 /**
  * @brief Replaces an entry in the table, without allocating the entry.
- * 
- * @details Replaces an entry in the table, without allocating the entry. The 
+ *
+ * @details Replaces an entry in the table, without allocating the entry. The
  * entry beging used it the one given as parameter.
- * 
+ *
  * @param[out] table The table to use.
  * @param[in] entry The entry to place.
  */
-static void uhashtable_rehash_entry(uhashtable_t* table, 
+static void uhashtable_rehash_entry(uhashtable_t* table,
                                     uhashtable_entry_t* entry);
 
 /**
  * @brief Rehashes the table and grows the table by a certain factor.
- * 
+ *
  * @details Rehash the table and grows the table by a certain factor. The growth
  * factor must be greater or equal to 1. In the latter case, only the rehashing
  * is done.
- * 
- * @param[out] table The table to grow. 
+ *
+ * @param[out] table The table to grow.
  * @param[in] growth The growth factor to use.
  *
  * @return The error status is returned.
@@ -180,7 +180,7 @@ static OS_RETURN_E uhashtable_set_entry(uhashtable_t* table,
     /* If we are here, we did not find the data, allocate if needed */
     if(table->entries[entry_index] == NULL)
     {
-        table->entries[entry_index] = 
+        table->entries[entry_index] =
             table->allocator.malloc(sizeof(uhashtable_entry_t));
         if(table->entries[entry_index] == NULL)
         {
@@ -189,12 +189,12 @@ static OS_RETURN_E uhashtable_set_entry(uhashtable_t* table,
 
         ++table->size;
     }
-    else 
+    else
     {
         /* We found an entry from the graveyard, remove it */
         --table->graveyard_size;
     }
-    
+
     /* Set the data */
     table->entries[entry_index]->key     = key;
     table->entries[entry_index]->data    = data;
@@ -229,7 +229,7 @@ static void uhashtable_rehash_entry(uhashtable_t* table,
         /* Increment the index */
         entry_index = (entry_index + 1) % table->capacity;
     }
-    
+
     /* Set the data */
     table->entries[entry_index] = entry;
 }
@@ -244,11 +244,11 @@ static OS_RETURN_E uhashtable_rehash(uhashtable_t* table, const float growth)
 
     new_capacity = (size_t)((float)table->capacity * growth);
 
-    /* Check if did not overflow on the size */                         
-    if(new_capacity <= table->capacity)                                     
-    {                                                                   
-        return OS_ERR_OUT_OF_BOUND;                                     
-    }                                                                   
+    /* Check if did not overflow on the size */
+    if(new_capacity <= table->capacity)
+    {
+        return OS_ERR_OUT_OF_BOUND;
+    }
 
     /* Save old entries */
     old_entries  = table->entries;
@@ -276,7 +276,7 @@ static OS_RETURN_E uhashtable_rehash(uhashtable_t* table, const float growth)
             {
                 uhashtable_rehash_entry(table, old_entries[i]);
             }
-            else 
+            else
             {
                 /* The entry was not used, we can free it */
                 table->allocator.free(old_entries[i]);
@@ -291,7 +291,7 @@ static OS_RETURN_E uhashtable_rehash(uhashtable_t* table, const float growth)
     return OS_NO_ERR;
 }
 
-uhashtable_t* uhashtable_create(uhashtable_alloc_t allocator, 
+uhashtable_t* uhashtable_create(uhashtable_alloc_t allocator,
                                 OS_RETURN_E* error)
 {
     uhashtable_t* table;
@@ -374,7 +374,7 @@ OS_RETURN_E uhashtable_destroy(uhashtable_t* table)
     return OS_NO_ERR;
 }
 
-OS_RETURN_E uhashtable_get(const uhashtable_t* table, 
+OS_RETURN_E uhashtable_get(const uhashtable_t* table,
                            const uintptr_t key,
                            void** data)
 {
@@ -410,7 +410,7 @@ OS_RETURN_E uhashtable_get(const uhashtable_t* table,
     return OS_ERR_NO_SUCH_ID;
 }
 
-OS_RETURN_E uhashtable_set(uhashtable_t* table, 
+OS_RETURN_E uhashtable_set(uhashtable_t* table,
                            const uintptr_t key,
                            void* data)
 {
@@ -422,7 +422,7 @@ OS_RETURN_E uhashtable_set(uhashtable_t* table,
     }
 
     /* Check if the current load is under the threshold, double the size */
-    if((float)table->capacity * HT_MAX_LOAD_FACTOR < 
+    if((float)table->capacity * HT_MAX_LOAD_FACTOR <
        table->size + table->graveyard_size)
     {
         err = uhashtable_rehash(table, 2);
@@ -436,7 +436,7 @@ OS_RETURN_E uhashtable_set(uhashtable_t* table,
     return uhashtable_set_entry(table, key, data);
 }
 
-OS_RETURN_E uhashtable_remove(uhashtable_t* table, 
+OS_RETURN_E uhashtable_remove(uhashtable_t* table,
                               const uintptr_t key,
                               void** data)
 {

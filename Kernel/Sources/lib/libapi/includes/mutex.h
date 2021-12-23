@@ -27,9 +27,14 @@
 #ifndef __LIB_MUTEX_H_
 #define __LIB_MUTEX_H_
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
 #include <stddef.h>       /* Standard definitions */
 #include <stdint.h>       /* Generic int types */
 #include <kernel_error.h> /* Kernel error API */
+
 /*******************************************************************************
  * CONSTANTS
  ******************************************************************************/
@@ -46,7 +51,7 @@
  ******************************************************************************/
 
 /** @brief Mutex structure definition. */
-struct mutex
+typedef struct
 {
     /**
      * @brief Mutex lock state
@@ -70,12 +75,26 @@ struct mutex
 
     /** @brief TID of the owner thread */
     int32_t owner;
-};
+} mutex_t;
 
-/**
- * @brief Defines mutex_t type as a shorcut for struct mutex.
- */
-typedef struct mutex mutex_t;
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
+/* None */
 
 /*******************************************************************************
  * FUNCTIONS
@@ -172,3 +191,5 @@ OS_RETURN_E mutex_unlock(mutex_t* mutex);
 OS_RETURN_E mutex_trylock(mutex_t* mutex, int32_t* value);
 
 #endif /* #ifndef __LIB_MUTEX_H_ */
+
+/* EOF */

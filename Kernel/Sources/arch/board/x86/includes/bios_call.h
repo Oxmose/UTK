@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @file bios_call.h
- * 
+ *
  * @see bios_call.c, bios_call_asm.S
  *
  * @author Alexy Torres Aurora Dugo
@@ -10,15 +10,19 @@
  * @version 1.0
  *
  * @brief BIOS call manager.
- * 
+ *
  * @details BIOS call manager, allowing the CPU in protected mode to switch back
  * to real mode and issue an interrupt handled by the BIOS IVT.
- * 
+ *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
 #ifndef __X86_BIOS_CALL_H_
 #define __X86_BIOS_CALL_H_
+
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
 
 #include <stdint.h> /* Generic int types */
 
@@ -29,11 +33,11 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /** @brief BIOS call CPU abstraction. Used to store the CPU registers value. */
-struct bios_int_regs
+typedef struct
 {
     /** @brief CPU di register */
     uint16_t di;
@@ -61,12 +65,26 @@ struct bios_int_regs
     uint16_t ds;
     /** @brief CPU eflags register */
     uint16_t eflags;
-} __attribute__((__packed__));
+} __attribute__((__packed__)) bios_int_regs_t;
 
-/** 
- * @brief Defines bios_int_regs_t type as a shorcut for struct bios_int_regs.
- */
-typedef struct bios_int_regs bios_int_regs_t;
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
+/* None */
 
 /*******************************************************************************
  * FUNCTIONS
@@ -77,10 +95,12 @@ typedef struct bios_int_regs bios_int_regs_t;
  *
  * @details Switch the CPU to real mode and raise an interrupt. This interrupt
  * should be handled by the BIOS IVT.
- * 
+ *
  * @param[in] intnum The interrupt number to raise.
  * @param[in] regs The array containing the registers values for the call.
  */
 void bios_call(const uint32_t intnum, bios_int_regs_t* regs);
 
-#endif /* #ifndef __X86_BIOS_CALL_H_  */
+#endif /* #ifndef __X86_BIOS_CALL_H_ */
+
+/* EOF */

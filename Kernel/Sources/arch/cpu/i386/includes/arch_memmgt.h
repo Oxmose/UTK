@@ -10,7 +10,7 @@
  * @brief i386 kernel memory paging informations.
  *
  * @details i386 kernel memory paging informations and structures.
- * 
+ *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
@@ -18,9 +18,22 @@
 #define __I386_ARCH_MEMMGT_H_
 
 /*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
  * CONSTANTS
  ******************************************************************************/
 
+/** @brief Defines the kernel frame size */
+#define KERNEL_FRAME_SIZE 0x1000
+
+/** @brief Defines the kernel page size */
+#define KERNEL_PAGE_SIZE KERNEL_FRAME_SIZE
+
+/** @brief Page alignement bitmask */
 #define PAGE_ALIGN_MASK (~(KERNEL_PAGE_SIZE - 1))
 
 /** @brief Kernel's page directory entry count. */
@@ -121,9 +134,28 @@
 #define FRAME_REF_COUNT_MASK 0x0000FFFF
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
+/* None */
+
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
 /* None */
 
 /*******************************************************************************
@@ -133,3 +165,5 @@
 /* None */
 
 #endif /* #ifndef __I386_ARCH_MEMMGT_H_ */
+
+/* EOF */

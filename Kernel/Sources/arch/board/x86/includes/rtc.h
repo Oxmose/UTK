@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @file rtc.h
- * 
+ *
  * @see rtc.c
  *
  * @author Alexy Torres Aurora Dugo
@@ -10,15 +10,19 @@
  * @version 1.0
  *
  * @brief RTC (Real Time Clock) driver.
- * 
+ *
  * @details RTC (Real Time Clock) driver. Used as the kernel's time base. Timer
  * source in the kernel. This driver provides basic access to the RTC.
- * 
+ *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
 #ifndef __X86_RTC_H_
 #define __X86_RTC_H_
+
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
 
 #include <stdint.h> /* Generic int types */
 
@@ -29,9 +33,28 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
+/* None */
+
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
 /* None */
 
 /*******************************************************************************
@@ -40,11 +63,13 @@
 
 /**
  * @brief Returns the RTC IRQ number.
- * 
+ *
  * @details Returns the RTC IRQ number.
- * 
+ *
  * @return The RTC IRQ number.
  */
 uint32_t rtc_get_irq(void);
 
 #endif /* #ifndef __X86_RTC_H_ */
+
+/* EOF */

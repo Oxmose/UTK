@@ -20,12 +20,13 @@
 #ifndef __CORE_FUTEX_H_
 #define __CORE_FUTEX_H_
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
 #include <stdint.h>       /* Standard int definitions */
 #include <kernel_error.h> /* Kernel error API */
 #include <syscall.h>      /* System call manager */
-#include <kqueue.h>       /* Kernel queues lib */
-/* UTK configuration file */
-#include <config.h>
 
 /*******************************************************************************
  * CONSTANTS
@@ -34,11 +35,11 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /** @brief Futex structure definition. */
-struct futex
+typedef struct
 {
     /** @brief Futex atomic memory region */
     uint32_t* addr;
@@ -48,12 +49,26 @@ struct futex
 
     /** @brief The futex's error state */
     OS_RETURN_E error;
-};
+} futex_t;
 
-/**
- * @brief Defines futex_t type as a shorcut for struct futex.
- */
-typedef struct futex futex_t;
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
+/* None */
 
 /*******************************************************************************
  * FUNCTIONS
@@ -95,3 +110,5 @@ void futex_wait(const SYSCALL_FUNCTION_E func, void* params);
 void futex_wake(const SYSCALL_FUNCTION_E func, void* params);
 
 #endif /* #ifndef __CORE_FUTEX_H_ */
+
+/* EOF */

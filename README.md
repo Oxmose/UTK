@@ -56,7 +56,7 @@
 
 * PIC and IO-APIC support (PIC is used as a fallback when IO-APIC is disabled or not present).
 * Local APIC support (can be disabled manually of is disabled if not detected or IO-APIC is disabled),
-* PIT support (may be used as fallback for scheduler timer when LAPIC is disabled, is not, the PIT can be used as an auxiliary timer source).
+* PIT support (can be used as an auxiliary timer source).
 * RTC support.
 * Basic ACPI support (simple parsing used to enable multicore features).
 * SMBIOS support.

@@ -24,6 +24,10 @@
 #ifndef __LIB_SEMAPHORE_H_
 #define __LIB_SEMAPHORE_H_
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
 #include <stddef.h> /* Standard definitions */
 #include <stdint.h> /* Generic int types */
 #include <atomic.h> /* Spinlock */
@@ -35,11 +39,11 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /** @brief Semaphore structure definition. */
-struct semaphore
+typedef struct
 {
     /** @brief Semaphore level counter */
     volatile int32_t level;
@@ -51,13 +55,27 @@ struct semaphore
     spinlock_t lock;
 
     /** @brief Semaphore initialization state. */
-    uint32_t init;
-};
+    bool_t init;
+} semaphore_t;
 
-/**
- * @brief Defines semaphore_t type as a shortcut for struct semaphore.
- */
-typedef struct semaphore semaphore_t;
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
+/* None */
 
 /*******************************************************************************
  * FUNCTIONS
@@ -148,3 +166,5 @@ OS_RETURN_E sem_post(semaphore_t* sem);
 OS_RETURN_E sem_trypend(semaphore_t* sem, int32_t* value);
 
 #endif /* #ifndef __LIB_SEMAPHORE_H_ */
+
+/* EOF */

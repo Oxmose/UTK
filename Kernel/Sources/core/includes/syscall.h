@@ -20,6 +20,10 @@
 #ifndef __CORE_SYSCALL_H_
 #define __CORE_SYSCALL_H_
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
 #include <stdint.h>       /* Generic int types */
 #include <stddef.h>       /* Standard definitions */
 #include <kernel_error.h> /* Kernel error codes */
@@ -31,11 +35,11 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /** @brief Defines the ID for each system call */
-enum SYSCALL_FUNCTION
+typedef enum
 {
     SYSCALL_FORK = 0,
     SYSCALL_WAITPID,
@@ -47,23 +51,34 @@ enum SYSCALL_FUNCTION
     SYSCALL_PAGE_ALLOC,
     /* 7 */
     SYSCALL_MAX_ID
-};
-
-/** @brief Short name for enum SYSCALL_FUNCTION */
-typedef enum SYSCALL_FUNCTION SYSCALL_FUNCTION_E;
+} SYSCALL_FUNCTION_E;
 
 /** @brief Defines the system call handler structure. */
-struct syscall_handler
+typedef struct
 {
     /** @brief System call handler routine. */
     void(*handler)(SYSCALL_FUNCTION_E, void*);
-};
+} syscall_handler_t;
 
-/**
- * @brief Defines syscall_handler_t type as a shorcut for
- * struct syscall_handler.
- */
-typedef struct syscall_handler syscall_handler_t;
+
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
+/* None */
 
 /*******************************************************************************
  * FUNCTIONS
@@ -78,3 +93,5 @@ typedef struct syscall_handler syscall_handler_t;
 void syscall_init(void);
 
 #endif /* #ifndef __CORE_SYSCALL_H_ */
+
+/* EOF */

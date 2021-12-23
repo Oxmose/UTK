@@ -20,6 +20,10 @@
 #ifndef __CORE_SCHEDULER_H_
 #define __CORE_SCHEDULER_H_
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
 #include <stddef.h>     /* Standard definitions */
 #include <stdint.h>     /* Generic int types */
 #include <ctrl_block.h> /* Threads and processes control block */
@@ -35,9 +39,28 @@
 #define KERNEL_HIGHEST_PRIORITY 0
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
+/* None */
+
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
 /* None */
 
 /*******************************************************************************
@@ -348,3 +371,5 @@ OS_RETURN_E sched_thread_remove_resource(kernel_thread_t* thread,
                                          kqueue_node_t** resource_node);
 
 #endif /* #ifndef __CORE_SCHEDULER_H_ */
+
+/* EOF */

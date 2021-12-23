@@ -8,9 +8,9 @@
  * @version 1.0
  *
  * @brief Kernel's basic types.
- * 
+ *
  * @details Define basics int types for the kernel.
- * 
+ *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
@@ -18,48 +18,15 @@
 #ifndef __LIB_STDINT_H_
 #define __LIB_STDINT_H_
 
+
 /*******************************************************************************
- * CONSTANTS
+ * INCLUDES
  ******************************************************************************/
 
-/** 
- * @brief Defines int8_t type as an exact width 8 bits integer.
- */
-typedef signed char        int8_t;
-/** 
- * @brief Defines uint8_t type as an exact width 8 bits integer.
- */
-typedef unsigned char      uint8_t;
-/** 
- * @brief Defines int16_t type as an exact width 16 bits integer.
- */
-typedef short              int16_t;
-/** 
- * @brief Defines uint16_t type as an exact width 16 bits integer.
- */
-typedef unsigned short     uint16_t;
-/** 
- * @brief Defines int32_t type as an exact width 32 bits integer.
- */
-typedef int                int32_t;
-/** 
- * @brief Defines uint32_t type as an exact width 32 bits integer.
- */
-typedef unsigned           uint32_t;
-/** 
- * @brief Defines int64_t type as an exact width 64 bits integer.
- */
-typedef signed long long   int64_t;
-/** 
- * @brief Defines uint64_t type as an exact width 64 bits integer.
- */
-typedef unsigned long long uint64_t;
-
-/** @brief Defines the boot_t type. */
-typedef uint8_t bool_t;
+/* None */
 
 /*******************************************************************************
- * STRUCTURES 
+ * CONSTANTS
  ******************************************************************************/
 
 /** @brief Defines the TRUE value. */
@@ -89,7 +56,7 @@ typedef uint8_t bool_t;
 
 /** @brief uint8_t maximal value. */
 #define UINT8_MAX  0xff
-/** @brief uint16_t maximal value. */                       
+/** @brief uint16_t maximal value. */
 #define UINT16_MAX 0xffff
 /** @brief uint32_t maximal value. */
 #define UINT32_MAX 0xffffffff
@@ -97,9 +64,70 @@ typedef uint8_t bool_t;
 #define UINT64_MAX 0xffffffffffffffffULL
 
 /*******************************************************************************
+ * STRUCTURES AND TYPES
+ ******************************************************************************/
+
+/**
+ * @brief Defines int8_t type as an exact width 8 bits integer.
+ */
+typedef signed char        int8_t;
+/**
+ * @brief Defines uint8_t type as an exact width 8 bits integer.
+ */
+typedef unsigned char      uint8_t;
+/**
+ * @brief Defines int16_t type as an exact width 16 bits integer.
+ */
+typedef short              int16_t;
+/**
+ * @brief Defines uint16_t type as an exact width 16 bits integer.
+ */
+typedef unsigned short     uint16_t;
+/**
+ * @brief Defines int32_t type as an exact width 32 bits integer.
+ */
+typedef int                int32_t;
+/**
+ * @brief Defines uint32_t type as an exact width 32 bits integer.
+ */
+typedef unsigned           uint32_t;
+/**
+ * @brief Defines int64_t type as an exact width 64 bits integer.
+ */
+typedef signed long long   int64_t;
+/**
+ * @brief Defines uint64_t type as an exact width 64 bits integer.
+ */
+typedef unsigned long long uint64_t;
+
+/** @brief Defines the boot_t type. */
+typedef uint8_t bool_t;
+
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
+/* None */
+
+/*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
 
 /* None */
 
-#endif /* __LIB_STDINT_H_ */
+#endif /* #ifndef __LIB_STDINT_H_ */
+
+/* EOF */

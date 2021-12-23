@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @file kernel_output.c
- * 
+ *
  * @see kernel_output.h
  *
  * @author Alexy Torres Aurora Dugo
@@ -10,12 +10,12 @@
  * @version 2.0
  *
  * @brief Kernel's output methods.
- * 
- * @details Simple output functions to print messages to screen. These are 
- * really basic output too allow early kernel boot output and debug. These 
+ *
+ * @details Simple output functions to print messages to screen. These are
+ * really basic output too allow early kernel boot output and debug. These
  * functions can be used in interrupts handlers since no lock is required to use
  * them. This also makes them non thread safe.
- * 
+ *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
@@ -23,6 +23,7 @@
 #include <stdlib.h>   /* uitoa, itoa */
 #include <uart.h>     /* UART driver */
 #include <graphic.h>  /* Graphic definitions */
+#include <vga_text.h> /* Kernel VGA text driver */
 
 /* UTK configuration file */
 #include <config.h>
@@ -37,19 +38,19 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /** @brief Output descriptor, used to define the handlers that manage outputs */
 struct output
 {
 	/** @brief The handler used to print character. */
-	void (*putc)(const char);  
+	void (*putc)(const char);
 	/** @brief The handler used to print string. */
-	void (*puts)(const char*); 
+	void (*puts)(const char*);
 };
 
-/** 
+/**
  * @brief Defines output_t type as a shorcut for struct output.
  */
 typedef struct output output_t;
@@ -67,44 +68,44 @@ static output_t current_output;
 
 /**
  * @brief Converts a string to upper case characters.
- * 
- * @details Transforms all lowercase character of a NULL terminated string to 
+ *
+ * @details Transforms all lowercase character of a NULL terminated string to
  * uppercase characters.
- * 
+ *
  * @param[in,out] string The string to tranform.
  */
 static void toupper(char* string);
 
 /**
  * @brief Converts a string to upper case characters.
- * 
- * @details Transforms all uppercase character of a NULL terminated string to 
+ *
+ * @details Transforms all uppercase character of a NULL terminated string to
  * lowercase characters.
- * 
+ *
  * @param[in,out] string The string to tranform.
  */
 static void tolower(char* string);
 
 /**
  * @brief Prints a formated string.
- * 
- * @details Prints a formated string to the output and managing the formated 
+ *
+ * @details Prints a formated string to the output and managing the formated
  * string arguments.
- * 
+ *
  * @param[in] str The formated string to output.
  * @param[in] args The arguments to use with the formated string.
  * @param[in] used_output The output to use.
  */
-static void formater(const char* str, 
-                     __builtin_va_list args, 
+static void formater(const char* str,
+                     __builtin_va_list args,
                      output_t used_output);
 
 /**
  * @brief Prints a formated string.
- * 
- * @details Prints a formated string to the output and managing the formated 
+ *
+ * @details Prints a formated string to the output and managing the formated
  * string arguments.
- * 
+ *
  * @param[in] str The formated string to output.
  * @param[in] args The arguments to use with the formated string.
  */
@@ -112,10 +113,10 @@ static void kprint_fmt(const char* str, __builtin_va_list args);
 
 /**
  * @brief Prints a formated string to UART output.
- * 
- * @details Prints a formated string to the UART output and managing the 
+ *
+ * @details Prints a formated string to the UART output and managing the
  * formated string arguments.
- * 
+ *
  * @param[in] str The formated string to output.
  * @param[in] args The arguments to use with the formated string.
  */
@@ -123,9 +124,9 @@ static void kprint_fmt_uart(const char* str, __builtin_va_list args);
 
 /**
  * @brief Prints the tag for kernel output functions.
- * 
+ *
  * @details Prints the tag for kernel output functions.
- * 
+ *
  * @param[in] fmt The formated string to print.
  * @param[in] ... The associated arguments to the formated string.
  */
@@ -203,8 +204,8 @@ static void tolower(char* string)
     }
 }
 
-static void formater(const char* str, 
-                     __builtin_va_list args, 
+static void formater(const char* str,
+                     __builtin_va_list args,
                      output_t used_output)
 {
     size_t   pos;
@@ -212,7 +213,7 @@ static void formater(const char* str,
     uint64_t seq_val;
     size_t   str_size;
 
-   
+
     uint8_t  modifier;
 
     uint8_t  length_mod;
@@ -235,7 +236,7 @@ static void formater(const char* str,
     {
         if(str[pos] == '%')
         {
-            /* If we encouter this character in a modifier sequence, it was 
+            /* If we encouter this character in a modifier sequence, it was
              * just an escape one.
              */
             modifier = !modifier;
@@ -243,17 +244,17 @@ static void formater(const char* str,
             {
                 continue;
             }
-            else 
+            else
             {
                 used_output.putc(str[pos]);
             }
         }
         else if(modifier)
         {
-            switch(str[pos]) 
+            switch(str[pos])
             {
                 /* Length mods */
-                case 'h': 
+                case 'h':
                     length_mod /= 2;
                     continue;
                 case 'l':
@@ -280,7 +281,7 @@ static void formater(const char* str,
                     PAD_SEQ
 					used_output.puts(tmp_seq);
                     break;
-                case 'X': 
+                case 'X':
                     upper_mod = 1;
                     __attribute__ ((fallthrough));
                 case 'x':
@@ -292,13 +293,13 @@ static void formater(const char* str,
                     {
                         toupper(tmp_seq);
                     }
-                    else 
+                    else
                     {
                         tolower(tmp_seq);
                     }
 					used_output.puts(tmp_seq);
-                    break;                    
-                case 'P': 
+                    break;
+                case 'P':
                     upper_mod = 1;
                     __attribute__ ((fallthrough));
                 case 'p':
@@ -313,7 +314,7 @@ static void formater(const char* str,
                     {
                         toupper(tmp_seq);
                     }
-                    else 
+                    else
                     {
                         tolower(tmp_seq);
                     }
@@ -331,7 +332,7 @@ static void formater(const char* str,
                     {
                         pad_char_mod = '0';
                     }
-                    else 
+                    else
                     {
                         padding_mod *= 10;
                     }
@@ -367,7 +368,7 @@ static void formater(const char* str,
                     continue;
             }
         }
-        else 
+        else
         {
             used_output.putc(str[pos]);
         }
@@ -378,7 +379,7 @@ static void formater(const char* str,
         upper_mod    = 0;
         pad_char_mod = ' ';
         modifier     = 0;
-        
+
     }
 }
 
@@ -441,7 +442,7 @@ void kernel_error(const char* fmt, ...)
 
     new_scheme.foreground = FG_RED;
     new_scheme.background = BG_BLACK;
-    new_scheme.vga_color  = 1;
+    new_scheme.vga_color  = TRUE;
 
     current_output.putc = graphic_put_char;
     current_output.puts = graphic_put_string;
@@ -477,7 +478,7 @@ void kernel_success(const char* fmt, ...)
 
     new_scheme.foreground = FG_GREEN;
     new_scheme.background = BG_BLACK;
-    new_scheme.vga_color  = 1;
+    new_scheme.vga_color  = TRUE;
 
     current_output.putc = graphic_put_char;
     current_output.puts = graphic_put_string;
@@ -513,7 +514,7 @@ void kernel_info(const char* fmt, ...)
 
     new_scheme.foreground = FG_CYAN;
     new_scheme.background = BG_BLACK;
-    new_scheme.vga_color  = 1;
+    new_scheme.vga_color  = TRUE;
 
     current_output.putc = graphic_put_char;
     current_output.puts = graphic_put_string;

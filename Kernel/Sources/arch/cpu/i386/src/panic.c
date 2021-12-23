@@ -19,7 +19,7 @@
 
 #include <interrupts.h>           /* Interrupt management */
 #include <interrupt_settings.h>   /* Interrupt settings */
-#include <graphic.h>              /* Graphic API */
+#include <vga_text.h>             /* Kernel VGA text driver */
 #include <kernel_output.h>        /* Kernel output methods */
 #include <stdint.h>               /* Generic int types */
 #include <stdio.h>                /* Error string */
@@ -45,7 +45,7 @@
 #define PANIC_SYM_LENGTH 50
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 struct elf_symtab
@@ -409,7 +409,7 @@ void panic_handler(cpu_state_t* cpu_state,
 
     panic_scheme.background = BG_BLACK;
     panic_scheme.foreground = FG_CYAN;
-    panic_scheme.vga_color  = 1;
+    panic_scheme.vga_color  = TRUE;
 
     graphic_set_color_scheme(panic_scheme);
 
@@ -462,7 +462,7 @@ void panic_handler(cpu_state_t* cpu_state,
     /* Hide cursor */
     panic_scheme.background = BG_BLACK;
     panic_scheme.foreground = FG_BLACK;
-    panic_scheme.vga_color  = 1;
+    panic_scheme.vga_color  = TRUE;
 
     graphic_set_color_scheme(panic_scheme);
 

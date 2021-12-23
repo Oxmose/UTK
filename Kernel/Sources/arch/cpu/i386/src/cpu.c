@@ -24,8 +24,7 @@
 #include <interrupt_settings.h> /* Interrupt settings */
 #include <panic.h>              /* Kernel panic */
 #include <cpu_settings.h>       /* CPU structures */
-#include <interrupts.h>         /* INterrupt manager */
-#include <thread.h>             /* CPU thread structures */
+#include <interrupts.h>         /* Interrupt manager */
 
 /* UTK configuration file */
 #include <config.h>
@@ -360,7 +359,7 @@
 #define SIG_VORTEX_EDX    0x36387865
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /* None */

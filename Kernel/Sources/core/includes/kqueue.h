@@ -23,12 +23,12 @@
 #ifndef __CORE_KQUEUE_H_
 #define __CORE_KQUEUE_H_
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
 #include <stddef.h>    /* Standard definitons */
 #include <stdint.h>    /* Generic int types */
-#include <critical.h>  /* Critical sections */
-
-/* UTK configuration file */
-#include <config.h>
 
 /*******************************************************************************
  * CONSTANTS
@@ -37,11 +37,11 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /** @brief Queue node structure. */
-struct kqueue_node
+typedef struct kqueue_node
 {
     /** @brief Next node in the queue. */
     struct kqueue_node* next;
@@ -56,15 +56,10 @@ struct kqueue_node
 
     /** @brief Node's data pointer. Store the address of the contained data. */
     void* data;
-};
-
-/**
- * @brief Defines kqueue_node_t type as a shorcut for struct kqueue_node.
- */
-typedef struct kqueue_node kqueue_node_t;
+} kqueue_node_t;
 
 /** @brief Queue structure. */
-struct kqueue
+typedef struct
 {
     /** @brief Head of the queue. */
     struct kqueue_node* head;
@@ -73,12 +68,26 @@ struct kqueue
 
     /** @brief Current queue's size. */
     size_t size;
-};
+} kqueue_t;
 
-/**
- * @brief Defines queue_t type as a shorcut for struct queue.
- */
-typedef struct kqueue kqueue_t;
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
+/* None */
 
 /*******************************************************************************
  * FUNCTIONS
@@ -189,4 +198,7 @@ kqueue_node_t* kqueue_find(kqueue_t* queue, void* data);
  */
 void kqueue_remove(kqueue_t* queue, kqueue_node_t* node, const bool_t panic);
 
+
 #endif /* #ifndef __CORE_KQUEUE_H_ */
+
+/* EOF */

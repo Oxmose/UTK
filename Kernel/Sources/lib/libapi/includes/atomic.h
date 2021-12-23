@@ -20,11 +20,12 @@
 #ifndef __LIB_ATOMIC_H_
 #define __LIB_ATOMIC_H_
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
 #include <stdint.h>    /* Standard int definitons */
 #include <cpu_api.h>   /* CPU API for atomic */
-
-/* UTK configuration file */
-#include <config.h>
 
 /*******************************************************************************
  * CONSTANTS
@@ -33,17 +34,8 @@
 /** @brief Initial spinlock value */
 #define SPINLOCK_INIT_VALUE 0
 
-/**
- * @brief Initialize a spinlock.
- *
- * @details Initialize the spinlock to the start value.
- */
-#define SPINLOCK_INIT(lock) {    \
-    *lock = SPINLOCK_INIT_VALUE; \
-}
-
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /**
@@ -53,8 +45,17 @@
 typedef volatile uint32_t spinlock_t;
 
 /*******************************************************************************
- * FUNCTIONS
+ * MACROS
  ******************************************************************************/
+
+/**
+ * @brief Initialize a spinlock.
+ *
+ * @details Initialize the spinlock to the start value.
+ */
+#define SPINLOCK_INIT(lock) {    \
+    *lock = SPINLOCK_INIT_VALUE; \
+}
 
 /**
  * @brief Lock the spinlock.
@@ -121,4 +122,25 @@ typedef volatile uint32_t spinlock_t;
  */
 #define ATOMIC_STORE(memory, val) cpu_atomic_store(memory, val)
 
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
+/* None */
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
+
+/* None */
+
 #endif /* #ifndef __LIB_ATOMIC_H_ */
+
+/* EOF */

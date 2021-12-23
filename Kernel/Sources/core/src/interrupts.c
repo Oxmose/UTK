@@ -46,7 +46,7 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /* None */
@@ -191,7 +191,7 @@ void kernel_interrupt_handler(cpu_state_t cpu_state,
 
     /* Select custom handlers */
     if(int_id < INT_ENTRY_COUNT &&
-       kernel_interrupt_handlers[int_id].enabled == 1 &&
+       kernel_interrupt_handlers[int_id].enabled == TRUE &&
        kernel_interrupt_handlers[int_id].handler != NULL)
     {
         handler = kernel_interrupt_handlers[int_id].handler;
@@ -216,7 +216,7 @@ void kernel_interrupt_init(void)
            sizeof(custom_handler_t) * INT_ENTRY_COUNT);
 
     /* Attach the special PANIC interrupt for when we don't know what to do */
-    kernel_interrupt_handlers[PANIC_INT_LINE].enabled = 1;
+    kernel_interrupt_handlers[PANIC_INT_LINE].enabled = TRUE;
     kernel_interrupt_handlers[PANIC_INT_LINE].handler = panic_handler;
 
     /* Init state */
@@ -288,7 +288,7 @@ OS_RETURN_E kernel_interrupt_register_int_handler(const uint32_t interrupt_line,
     }
 
     kernel_interrupt_handlers[interrupt_line].handler = handler;
-    kernel_interrupt_handlers[interrupt_line].enabled = 1;
+    kernel_interrupt_handlers[interrupt_line].enabled = TRUE;
 
     KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED,
                  "[INTERRUPTS] Added INT %u handler at 0x%p",
@@ -319,7 +319,7 @@ OS_RETURN_E kernel_interrupt_remove_int_handler(const uint32_t interrupt_line)
     }
 
     kernel_interrupt_handlers[interrupt_line].handler = NULL;
-    kernel_interrupt_handlers[interrupt_line].enabled = 0;
+    kernel_interrupt_handlers[interrupt_line].enabled = FALSE;
 
     KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED,
                  "[INTERRUPTS] Removed INT %u handle",

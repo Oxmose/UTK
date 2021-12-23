@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @file exceptions.h
- * 
+ *
  * @see exceptions.c
  *
  * @author Alexy Torres Aurora Dugo
@@ -9,23 +9,27 @@
  *
  * @version 2.0
  *
- * @brief Exceptions manager. 
- * 
- * @warning These functions must be called during or after the interrupts are 
+ * @brief Exceptions manager.
+ *
+ * @warning These functions must be called during or after the interrupts are
  * set.
- * 
+ *
  * @details Exception manager. Allows to attach ISR to exceptions lines.
- * 
+ *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
 #ifndef __CORE_EXCEPTIONS_H_
 #define __CORE_EXCEPTIONS_H_
 
-#include <stdint.h>         /* Generic int types */
-#include <stddef.h>         /* Standard definitions */
-#include <cpu_settings.h>   /* CPU structures */
-#include <kernel_error.h>   /* Kernel errors */
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+#include <stdint.h>       /* Generic int types */
+#include <stddef.h>       /* Standard definitions */
+#include <cpu_settings.h> /* CPU structures */
+#include <kernel_error.h> /* Kernel errors */
 
 /*******************************************************************************
  * CONSTANTS
@@ -34,9 +38,28 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
+/* None */
+
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
 /* None */
 
 /*******************************************************************************
@@ -45,29 +68,29 @@
 
 /**
  * @brief Initializes the exception manager.
- * 
+ *
  * @details Blanks the handlers memory and initialize the first 32 exceptions to
- * catch exceptions. 
+ * catch exceptions.
  */
 void kernel_exception_init(void);
 
 /**
  * @brief Registers a new exception handler for the desired exception line.
- * 
- * @details Registers a custom exception handler to be executed. The exception 
- * line must be greater or equal to the minimal authorized custom exception line 
+ *
+ * @details Registers a custom exception handler to be executed. The exception
+ * line must be greater or equal to the minimal authorized custom exception line
  * and less than the maximal one.
  *
  * @param[in] exception_line The exception line to attach the handler to.
  * @param[in] handler The handler for the desired exception.
- * 
- * @return The success state or the error code. 
- * - OS_NO_ERR is returned if no error is encountered. 
+ *
+ * @return The success state or the error code.
+ * - OS_NO_ERR is returned if no error is encountered.
  * - OR_ERR_UNAUTHORIZED_INTERRUPT_LINE is returned if the desired
- * exception line is not allowed. 
+ * exception line is not allowed.
  * - OS_ERR_NULL_POINTER is returned if the pointer
- * to the handler is NULL. 
- * - OS_ERR_INTERRUPT_ALREADY_REGISTERED is returned if a 
+ * to the handler is NULL.
+ * - OS_ERR_INTERRUPT_ALREADY_REGISTERED is returned if a
  * handler is already registered for this exception line.
  */
 OS_RETURN_E kernel_exception_register_handler(const uint32_t exception_line,
@@ -80,15 +103,15 @@ OS_RETURN_E kernel_exception_register_handler(const uint32_t exception_line,
 
 /**
  * @brief Unregisters a new exception handler for the desired exception line.
- * 
- * @details Unregisters a custom exception handler to be executed. The exception 
- * line must be greater or equal to the minimal authorized custom exception line 
+ *
+ * @details Unregisters a custom exception handler to be executed. The exception
+ * line must be greater or equal to the minimal authorized custom exception line
  * and less than the maximal one.
  *
  * @param[in] exception_line The exception line to deattach the handler from.
- * 
- * @return The success state or the error code. 
- * - OS_NO_ERR is returned if no error is encountered. 
+ *
+ * @return The success state or the error code.
+ * - OS_NO_ERR is returned if no error is encountered.
  * - OR_ERR_UNAUTHORIZED_INTERRUPT_LINE is returned if the desired
  * exception line is not allowed.
  * - OS_ERR_INTERRUPT_NOT_REGISTERED is returned if the exception line has no
@@ -97,3 +120,5 @@ OS_RETURN_E kernel_exception_register_handler(const uint32_t exception_line,
 OS_RETURN_E kernel_exception_remove_handler(const uint32_t exception_line);
 
 #endif /* #ifndef __CORE_EXCEPTIONS_H_ */
+
+/* EOF */

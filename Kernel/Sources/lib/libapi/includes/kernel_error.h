@@ -17,8 +17,11 @@
 #ifndef __LIB_KERNEL_ERROR_H_
 #define __LIB_KERNEL_ERROR_H_
 
-#include <config.h> /* Kernel configuration */
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
 
+/* None */
 
 /*******************************************************************************
  * CONSTANTS
@@ -27,11 +30,11 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /** @brief System return states enumeration. */
-enum OS_RETURN
+typedef enum
 {
     /** @brief No error occured. */
     OS_NO_ERR                              = 0,
@@ -89,11 +92,34 @@ enum OS_RETURN
     OS_ERR_OWNER_DIED                      = 26,
     /** @brief Division by zero was detected. */
     OS_ERR_DIV_BY_ZERO                     = 27,
-};
+} OS_RETURN_E;
 
-/**
- * @brief Defines OS_RETURN_E type as a shorcut for enum OS_RETURN.
- */
-typedef enum OS_RETURN OS_RETURN_E;
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
 
-#endif /* __LIB_KERNEL_ERROR_H_ */
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
+/* None */
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
+
+/* None */
+
+#endif /* #ifndef __LIB_KERNEL_ERROR_H_ */
+
+/* EOF */
+

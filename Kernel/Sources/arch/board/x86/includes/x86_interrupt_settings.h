@@ -8,26 +8,30 @@
  * @version 2.0
  *
  * @brief X86 interrupt settings.
- * 
+ *
  * @details X86 interrupt settings. Stores the interrupt settings such as the
  * interrupt lines.
- * 
+ *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
 #ifndef __X86_INTERRUPT_SETTINGS_
 #define __X86_INTERRUPT_SETTINGS_
 
-#include <cpu_settings.h> /* CPU structures */
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+#include <cpu_settings.h> /* CPU constants */
 
 /*******************************************************************************
  * CONSTANTS
  ******************************************************************************/
 
 /** @brief Minimal customizable accepted interrupt line. */
-#define MIN_INTERRUPT_LINE     0x20
+#define MIN_INTERRUPT_LINE 0x20
 /** @brief Maximal customizable accepted interrupt line. */
-#define MAX_INTERRUPT_LINE     (IDT_ENTRY_COUNT - 1)
+#define MAX_INTERRUPT_LINE (IDT_ENTRY_COUNT - 1)
 
 /** @brief Defines the number of possible interrupt on the i386 processor. */
 #define INT_ENTRY_COUNT IDT_ENTRY_COUNT
@@ -84,9 +88,28 @@
 #define LAPIC_SPURIOUS_INT_LINE MAX_INTERRUPT_LINE
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
+/* None */
+
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
 /* None */
 
 /*******************************************************************************
@@ -96,3 +119,5 @@
 /* None */
 
 #endif /* #ifndef __X86_INTERRUPT_SETTINGS_ */
+
+/* EOF */

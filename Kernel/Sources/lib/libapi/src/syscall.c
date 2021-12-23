@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @file syscall.c
- * 
+ *
  * @see syscall.h
  *
  * @author Alexy Torres Aurora Dugo
@@ -10,10 +10,10 @@
  * @version 1.0
  *
  * @brief System call management.
- * 
+ *
  * @details System call management. This modules defines the functions used to
  * perform system calls as well as their management.
- * 
+ *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
@@ -38,7 +38,7 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /* None */

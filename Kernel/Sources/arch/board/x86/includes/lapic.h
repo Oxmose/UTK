@@ -22,9 +22,12 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-
 #ifndef __X86_LAPIC_H_
 #define __X86_LAPIC_H_
+
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
 
 #include <stdint.h>          /* Generic int types */
 #include <kernel_error.h>    /* Kernel error codes */
@@ -37,9 +40,28 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
+/* None */
+
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
 /* None */
 
 /*******************************************************************************
@@ -179,11 +201,13 @@ uint32_t lapic_timer_get_irq(void);
 
 /**
  * @brief Returns the LAPIC timer driver.
- * 
+ *
  * @details Returns a constant handle to the LAPIC timer driver.
- * 
+ *
  * @return A constant handle to the LAPIC timer driver is returned.
  */
 const kernel_timer_t* lapic_timer_get_driver(void);
 
 #endif /* #ifndef __X86_LAPIC_H_ */
+
+/* EOF */

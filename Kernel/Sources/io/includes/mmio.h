@@ -8,35 +8,59 @@
  * @version 2.0
  *
  * @brief Kernel's memory mapped IO functions.
- * 
- * @details Kernel's memory mapped IO functions. Memory mapped IOs, avoids 
+ *
+ * @details Kernel's memory mapped IO functions. Memory mapped IOs, avoids
  * compilers to reorganize memory access.
  * So instead of doing : *addr = value, do
  * mapped_io_write(addr, value)
- * 
+ *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
 #ifndef __IO_MMIO_H_
 #define __IO_MMIO_H_
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
 #include <stdint.h> /* Generic types */
 
 /*******************************************************************************
- * DEFINITIONS
+ * CONSTANTS
  ******************************************************************************/
 
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
+/* None */
+
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
 /* None */
 
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
+
 /**
  * @brief Memory mapped IO byte write access.
  *
@@ -158,3 +182,5 @@ inline static uint64_t mapped_io_read_64(const volatile void* addr)
 }
 
 #endif /* #ifndef __IO_MMIO_H_ */
+
+/* EOF */

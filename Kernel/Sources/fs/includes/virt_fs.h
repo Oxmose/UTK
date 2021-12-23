@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @file virt_fs.h
- * 
+ *
  * @see virt_fs.c
  *
  * @author Alexy Torres Aurora Dugo
@@ -10,15 +10,19 @@
  * @version 1.0
  *
  * @brief Kernel's virtual filesystem driver.
- * 
- * @details Kernel's virtual filesystem driver. Defines the functions and 
+ *
+ * @details Kernel's virtual filesystem driver. Defines the functions and
  * structures used by the kernel to manage the virtual filesystem.
- * 
+ *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#ifndef __DRIVERS_VIRT_FS_H_
-#define __DRIVERS_VIRT_FS_H_
+#ifndef __FS_VIRT_FS_H_
+#define __FS_VIRT_FS_H_
+
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
 
 #include <kernel_error.h> /* Kernel error codes */
 #include <stdint.h>       /* Generic int types */
@@ -49,7 +53,7 @@
 #define VFS_RIGHTS_OEXEC  0x001
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 enum VFS_FILE_TYPE
@@ -76,21 +80,21 @@ typedef struct vfs_fs_driver vfs_fs_driver_t;
 
 struct vfs_device
 {
-    OS_RETURN_E (*read_blocks)(const struct vfs_device* device, 
+    OS_RETURN_E (*read_blocks)(const struct vfs_device* device,
                                const uint32_t block_id,
-	                           void* buffer, 
+	                           void* buffer,
                                const size_t size,
                                const size_t offset);
-    OS_RETURN_E (*write_blocks)(const struct vfs_device* device, 
+    OS_RETURN_E (*write_blocks)(const struct vfs_device* device,
                                 const uint32_t block_id,
-	                            const void* buffer, 
+	                            const void* buffer,
                                 const size_t size,
                                 const size_t offset);
-    OS_RETURN_E (*flush_blocks)(const struct vfs_device* device, 
+    OS_RETURN_E (*flush_blocks)(const struct vfs_device* device,
                                 const uint32_t block_id,
                                 const size_t size,
                                 const size_t offset);
-    
+
     size_t block_size;
 
     void* device_data;
@@ -163,6 +167,25 @@ typedef struct vfs_ftable_entry
 } vfs_ftable_entry_t;
 
 /*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
+/* None */
+
+/*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
 
@@ -186,7 +209,7 @@ OS_RETURN_E vfs_write_file(const vfs_ftable_entry_t* file_descriptor,
                            const void* buffer,
                            size_t* actual_size);
 
-OS_RETURN_E vfs_create_file(const char* path, 
+OS_RETURN_E vfs_create_file(const char* path,
                             const VFS_FILE_TYPE_E type,
                             const vfs_access_right_t access_rights,
                             const char* owner_name,
@@ -202,4 +225,6 @@ OS_RETURN_E vfs_truncate_file(const char* path,
 
 OS_RETURN_E vfs_list_directory(const char* path);
 
-#endif /* #ifndef __DRIVERS_VIRT_FS_H_ */
+#endif /* #ifndef __FS_VIRT_FS_H_ */
+
+/* EOF */

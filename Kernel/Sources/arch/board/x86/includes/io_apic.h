@@ -23,6 +23,10 @@
 #ifndef __X86_IO_APIC_H_
 #define __X86_IO_APIC_H_
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
 #include <stdint.h>       /* Generic int types */
 #include <interrupts.h>   /* Interrupt management */
 #include <kernel_error.h> /* Kernel error codes */
@@ -34,9 +38,28 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
+/* None */
+
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
 /* None */
 
 /*******************************************************************************
@@ -57,7 +80,7 @@ void io_apic_init(void);
  * @details Sets the IRQ mask for the IRQ number given as parameter.
  *
  * @param[in] irq_number The irq number to enable/disable.
- * @param[in] enabled Must be set to TRUE to enable the IRQ or FALSE to disable 
+ * @param[in] enabled Must be set to TRUE to enable the IRQ or FALSE to disable
  * the IRQ.
  */
 void io_apic_set_irq_mask(const uint32_t irq_number, const bool_t enabled);
@@ -97,22 +120,24 @@ INTERRUPT_TYPE_E io_apic_handle_spurious_irq(const uint32_t int_number);
  */
 int32_t io_apic_get_irq_int_line(const uint32_t irq_number);
 
-/** 
+/**
  * @brief Returns the IO-APIC availability.
- * 
+ *
  * @details Returns is the IO APIC is available (TRUE) or not (FALSE).
- * 
+ *
  * @return Returns is the IO APIC is available (TRUE) or not (FALSE).
  */
 bool_t io_apic_capable(void);
 
 /**
  * @brief Returns the IO APIC interrupt driver.
- * 
+ *
  * @details Returns a constant handle to the IO APIC interrupt driver.
- * 
+ *
  * @return A constant handle to the IO APIC interrupt driver is returned.
  */
 const interrupt_driver_t* io_apic_get_driver(void);
 
 #endif /* #ifndef __X86_IO_APIC_H_ */
+
+/* EOF */

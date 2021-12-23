@@ -26,6 +26,7 @@
 #include <panic.h>         /* Kernel panic */
 #include <kernel_output.h> /* Kernel output methods */
 #include <kheap.h>         /* Kernel heap */
+#include <kernel_error.h>  /* Kernel errors definitions */
 
 /* UTK configuration file */
 #include <config.h>
@@ -40,7 +41,7 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /* None */

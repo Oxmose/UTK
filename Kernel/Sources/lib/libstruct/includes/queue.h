@@ -22,12 +22,13 @@
 #ifndef __LIB_QUEUE_H_
 #define __LIB_QUEUE_H_
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
 #include <stddef.h>    /* Standard definitons */
 #include <stdint.h>    /* Generic int types */
 #include <critical.h>  /* Critical sections */
-
-/* UTK configuration file */
-#include <config.h>
 
 /*******************************************************************************
  * CONSTANTS
@@ -36,12 +37,11 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
-
 /** @brief Queue allocator structure. */
-struct queue_alloc
+typedef struct
 {
     /**
      * @brief The memory allocation function used by the allocator.
@@ -59,15 +59,10 @@ struct queue_alloc
      * @param[out] ptr The start address of the memory to free.
      */
     void(*free)(void* ptr);
-};
-
-/**
- * @brief Defines queue_alloc_t type as a shorcut for struct queue_alloc.
- */
-typedef struct queue_alloc queue_alloc_t;
+} queue_alloc_t;
 
 /** @brief Queue node structure. */
-struct queue_node
+typedef struct queue_node
 {
     /** @brief The allocator used by this node. */
     queue_alloc_t allocator;
@@ -78,42 +73,32 @@ struct queue_node
     struct queue_node* prev;
 
     /** @brief Tell if the node is present in a queue or stands alone. */
-    uint16_t enlisted;
+    bool_t enlisted;
 
     /** @brief Node's priority, used when the queue is a priority queue. */
-    uint32_t priority;
+    uintptr_t priority;
 
     /** @brief Node's data pointer. Store the address of the contained data. */
     void* data;
-};
-
-/**
- * @brief Defines queue_node_t type as a shorcut for struct queue_node.
- */
-typedef struct queue_node queue_node_t;
+} queue_node_t;
 
 /** @brief Queue structure. */
-struct queue
+typedef struct
 {
     /** @brief The allocator used by this queue. */
     queue_alloc_t allocator;
 
     /** @brief Head of the queue. */
-    struct queue_node* head;
+    queue_node_t* head;
     /** @brief Tail of the queue. */
-    struct queue_node* tail;
+    queue_node_t* tail;
 
     /** @brief Current queue's size. */
-    uint32_t size;
-};
-
-/**
- * @brief Defines queue_t type as a shorcut for struct queue.
- */
-typedef struct queue queue_t;
+    size_t size;
+} queue_t;
 
 /*******************************************************************************
- * FUNCTIONS
+ * MACROS
  ******************************************************************************/
 
 /**
@@ -123,6 +108,23 @@ typedef struct queue queue_t;
  * @param[in] free The memory free function used by the allocator.
  */
 #define QUEUE_ALLOCATOR(malloc, free) (queue_alloc_t){malloc, free}
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
+/* None */
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
 
 /**
  * @brief Creates a new queue node.
@@ -282,3 +284,5 @@ queue_node_t* queue_find(queue_t* queue, void* data, OS_RETURN_E *error);
 OS_RETURN_E queue_remove(queue_t* queue, queue_node_t* node);
 
 #endif /* #ifndef __LIB_QUEUE_H_ */
+
+/* EOF */

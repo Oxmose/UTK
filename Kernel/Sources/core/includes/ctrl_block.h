@@ -19,26 +19,28 @@
 #ifndef __CORE_CTRL_BLOCK_H_
 #define __CORE_CTRL_BLOCK_H_
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
 #include <stdint.h>       /* Generic int types */
 #include <kqueue.h>       /* Kernel queues lib */
 #include <cpu_settings.h> /* CPU structures */
 #include <critical.h>     /* Critical sections */
 
-/* UTK configuration file */
-#include <config.h>
-
 /*******************************************************************************
  * CONSTANTS
  ******************************************************************************/
 
+/** @brief Maximal thead's name length. */
 #define THREAD_NAME_MAX_LENGTH 32
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /** @brief Thread's scheduling state. */
-enum THREAD_STATE
+typedef enum
 {
     /** @brief Thread's scheduling state: running. */
     THREAD_STATE_RUNNING,
@@ -54,45 +56,28 @@ enum THREAD_STATE
     THREAD_STATE_COPYING,
     /** @brief Thread's scheduling state: waiting. */
     THREAD_STATE_WAITING,
-};
-
-/**
- * @brief Defines THREAD_STATE_E type as a shorcut for enum THREAD_STATE.
- */
-typedef enum THREAD_STATE THREAD_STATE_E;
+} THREAD_STATE_E;
 
 /** @brief Thread waiting types. */
-enum THREAD_WAIT_TYPE
+typedef enum
 {
     /** @brief The thread is waiting to acquire a resource (e.g mutex, sem). */
     THREAD_WAIT_TYPE_RESOURCE,
     /** @brief The thread is waiting to acquire an IO entry. */
     THREAD_WAIT_TYPE_IO
-};
-
-/**
- * @brief Defines THREAD_WAIT_TYPE_E type as a shorcut for enum
- * THREAD_WAIT_TYPE.
- */
-typedef enum THREAD_WAIT_TYPE THREAD_WAIT_TYPE_E;
+} THREAD_WAIT_TYPE_E;
 
 /** @brief Defines the possitble return state of a thread. */
-enum THREAD_RETURN_STATE
+typedef enum
 {
     /** @brief The thread returned normally. */
     THREAD_RETURN_STATE_RETURNED,
     /** @brief The thread was killed before exiting normally. */
     THREAD_RETURN_STATE_KILLED,
-};
-
-/**
- * @brief Defines THREAD_RETURN_STATE_E type as a shorcut for enum
- * THREAD_RETURN_STATE.
- */
-typedef enum THREAD_RETURN_STATE THREAD_RETURN_STATE_E;
+} THREAD_RETURN_STATE_E;
 
 /** @brief Thread's abnomarl exit cause. */
-enum THREAD_TERMINATE_CAUSE
+typedef enum
 {
     /** @brief The thread returned normally.  */
     THREAD_TERMINATE_CORRECTLY,
@@ -100,28 +85,21 @@ enum THREAD_TERMINATE_CAUSE
     THREAD_TERMINATE_CAUSE_DIV_BY_ZERO,
     /** @brief The thread was killed by a panic condition. */
     THREAD_TERMINATE_CAUSE_PANIC
-};
-
-/**
- * @brief Defines THREAD_TERMINATE_CAUSE_E type as a shorcut for enum
- * THREAD_TERMINATE_CAUSE.
- */
-typedef enum THREAD_TERMINATE_CAUSE THREAD_TERMINATE_CAUSE_E;
+} THREAD_TERMINATE_CAUSE_E;
 
 /**
  * @brief Define the thread's types in the kernel.
  */
-enum THREAD_TYPE
+typedef enum
 {
     /** @brief Kernel thread type, create by and for the kernel. */
     THREAD_TYPE_KERNEL,
-
     /** @brief User thread type, created by the kernel for the user. */
     THREAD_TYPE_USER
-};
+} THREAD_TYPE_E;
 
 /** @brief Kernel process structure. */
-struct kernel_process
+typedef struct kernel_process
 {
     /** @brief Process identifier. */
     int32_t pid;
@@ -146,20 +124,10 @@ struct kernel_process
 
     /** @brief Process's name. */
     char name[THREAD_NAME_MAX_LENGTH];
-};
-
-/**
- * @brief Defines kernel_process_t type as a shorcut for struct kernel_process.
- */
-typedef struct kernel_process kernel_process_t;
-
-/**
- * @brief Defines THREAD_TYPE_e type as a shorcut for enum THREAD_TYPE.
- */
-typedef enum THREAD_TYPE THREAD_TYPE_E;
+} kernel_process_t;
 
 /** @brief This is the representation of the thread for the kernel. */
-struct kernel_thread
+typedef struct
 {
     /** @brief Thread's identifier. */
     int32_t tid;
@@ -232,15 +200,10 @@ struct kernel_thread
 
     /** @brief Thread's resource queue. */
     kqueue_t* resources;
-};
-
-/**
- * @brief Defines kernel_thread_t type as a shorcut for struct kernel_thread.
- */
-typedef struct kernel_thread kernel_thread_t;
+} kernel_thread_t;
 
 /** @brief This is the representation of a thread's resource. */
-struct thread_resource
+typedef struct
 {
     /** @brief The data used to represent the resource, can vary depending on
      * the resource. */
@@ -254,7 +217,26 @@ struct thread_resource
      * dynamically, it should be freed by this function.
      */
     void (*cleanup)(void* data);
-};
+} thread_resource_t;
+
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
+/* None */
 
 /*******************************************************************************
  * FUNCTIONS
@@ -263,3 +245,5 @@ struct thread_resource
 /* None */
 
 #endif /* #ifndef __CORE_CTRL_BLOCK_H_ */
+
+/* EOF */

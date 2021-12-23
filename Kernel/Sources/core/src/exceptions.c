@@ -47,7 +47,7 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /* None */
@@ -158,7 +158,7 @@ OS_RETURN_E kernel_exception_register_handler(const uint32_t exception_line,
     }
 
     kernel_interrupt_handlers[exception_line].handler = handler;
-    kernel_interrupt_handlers[exception_line].enabled = 1;
+    kernel_interrupt_handlers[exception_line].enabled = TRUE;
 
     KERNEL_DEBUG(EXCEPTIONS_DEBUG_ENABLED,
                  "[EXCEPTIONS] Added exception %u handler at 0x%p",
@@ -188,7 +188,7 @@ OS_RETURN_E kernel_exception_remove_handler(const uint32_t exception_line)
     }
 
     kernel_interrupt_handlers[exception_line].handler = NULL;
-    kernel_interrupt_handlers[exception_line].enabled = 0;
+    kernel_interrupt_handlers[exception_line].enabled = FALSE;
 
     KERNEL_DEBUG(EXCEPTIONS_DEBUG_ENABLED,
                  "[EXCEPTIONS] Removed exception %u handle",

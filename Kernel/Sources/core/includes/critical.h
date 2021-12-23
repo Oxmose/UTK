@@ -20,11 +20,11 @@
 #ifndef __CORE_CRITICAL_H_
 #define __CORE_CRITICAL_H_
 
-#include <stdint.h>     /* Generic int types */
-#include <interrupts.h> /* Interrupts management */
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
 
-/* UTK configuration file */
-#include <config.h>
+#include <interrupts.h> /* Interrupts management */
 
 /*******************************************************************************
  * CONSTANTS
@@ -33,20 +33,20 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /* None */
 
 /*******************************************************************************
- * FUNCTIONS
+ * MACROS
  ******************************************************************************/
 
 /**
  * @brief Enters a critical section in the kernel.
  *
  * @param[out] x The critical state at section's entrance.
- * 
+ *
  * @details Enters a critical section in the kernel. Save interrupt state and
  * disables interrupts.
  */
@@ -56,7 +56,7 @@
 
 /**
  * @brief Exits a critical section in the kernel.
- * 
+ *
  * @param[in] x The critical state at section's entrance.
  *
  * @details Exits a critical section in the kernel. Restore the previous
@@ -66,4 +66,25 @@
     kernel_interrupt_restore(x);     \
 }
 
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
+/* None */
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
+
+/* None */
+
 #endif /* #ifndef __CORE_CRITICAL_H_ */
+
+/* EOF */

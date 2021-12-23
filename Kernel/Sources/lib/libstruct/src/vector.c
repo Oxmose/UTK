@@ -33,15 +33,15 @@
  * CONSTANTS
  ******************************************************************************/
 
-/** 
+/**
  * @brief Growth factor used when the vector has not space left.
- * 
+ *
  * @warning This value must be greater than 1.
 */
 #define VECTOR_GROWTH_FACTOR 2
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /* None */
@@ -63,10 +63,10 @@
  * FUNCTIONS
  ******************************************************************************/
 
-/** 
- * @brief Used to grow the size of a vector. The new vector is filled with 
+/**
+ * @brief Used to grow the size of a vector. The new vector is filled with
  * previous data.
- * 
+ *
  * @param[out] vector The vector to update.
  * @param[out] new_size The new size to be computed.
  * @param[out] new_array The array to receive the created memory region.
@@ -262,14 +262,14 @@ OS_RETURN_E vector_shrink_to_fit(vector_t* vector)
             vector->array    = new_array;
             vector->capacity = vector->size;
         }
-        else 
+        else
         {
             /* Free all memory */
             vector->allocator.free(vector->array);
             vector->array    = NULL;
             vector->capacity = 0;
         }
-    }    
+    }
 
     return OS_NO_ERR;
 }
@@ -296,8 +296,8 @@ OS_RETURN_E vector_resize(vector_t* vector, const size_t size)
             }
 
             /* Copy array */
-            memcpy(new_array, 
-                vector->array, 
+            memcpy(new_array,
+                vector->array,
                 MAX(vector->size, size) * sizeof(void*));
 
             /* Free old array */
@@ -306,7 +306,7 @@ OS_RETURN_E vector_resize(vector_t* vector, const size_t size)
             vector->capacity = size;
             vector->size     = size;
         }
-        else 
+        else
         {
             /* Free all memory */
             vector->allocator.free(vector->array);
@@ -314,8 +314,8 @@ OS_RETURN_E vector_resize(vector_t* vector, const size_t size)
             vector->capacity = 0;
             vector->size     = 0;
         }
-    }    
-    else 
+    }
+    else
     {
         vector->size = size;
     }
@@ -323,8 +323,8 @@ OS_RETURN_E vector_resize(vector_t* vector, const size_t size)
     return OS_NO_ERR;
 }
 
-OS_RETURN_E vector_insert(vector_t* vector, 
-                          void* data, 
+OS_RETURN_E vector_insert(vector_t* vector,
+                          void* data,
                           const size_t position)
 {
     size_t new_size;
@@ -343,15 +343,15 @@ OS_RETURN_E vector_insert(vector_t* vector,
 
     /* First, check if we should update the capacity of the vector */
     GROW_VECTOR_SIZE(vector, new_size, new_array);
-    
-    /* Move the old data and insert the new data */    
+
+    /* Move the old data and insert the new data */
     for(i = vector->size; i > position; --i)
     {
         vector->array[i] = vector->array[i - 1];
     }
     vector->array[position] = data;
     ++vector->size;
-    
+
     return OS_NO_ERR;
 }
 
@@ -367,8 +367,8 @@ OS_RETURN_E vector_push(vector_t* vector, void* data)
 
     /* First, check if we should update the capacity of the vector */
     GROW_VECTOR_SIZE(vector, new_size, new_array);
-    
-    /* Insert the new data */    
+
+    /* Insert the new data */
     vector->array[vector->size++] = data;
 
     return OS_NO_ERR;
@@ -385,15 +385,15 @@ OS_RETURN_E vector_pop(vector_t* vector, void** data)
     {
         return OS_ERR_OUT_OF_BOUND;
     }
-    
-    /* Return the last data */    
+
+    /* Return the last data */
     *data = vector->array[--vector->size];
 
     return OS_NO_ERR;
 }
 
-OS_RETURN_E vector_get(const vector_t* vector, 
-                       const size_t position, 
+OS_RETURN_E vector_get(const vector_t* vector,
+                       const size_t position,
                        void** data)
 {
     if(vector == NULL || data == NULL)
@@ -406,8 +406,8 @@ OS_RETURN_E vector_get(const vector_t* vector,
         return OS_ERR_OUT_OF_BOUND;
     }
 
-    /* Return the data */    
-    *data = vector->array[position]; 
+    /* Return the data */
+    *data = vector->array[position];
 
     return OS_NO_ERR;
 }
@@ -424,8 +424,8 @@ OS_RETURN_E vector_set(vector_t* vector, const size_t position, void* data)
         return OS_ERR_OUT_OF_BOUND;
     }
 
-    /* Sets the data */    
-    vector->array[position] = data; 
+    /* Sets the data */
+    vector->array[position] = data;
 
     return OS_NO_ERR;
 }

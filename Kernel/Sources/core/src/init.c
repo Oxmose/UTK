@@ -44,7 +44,7 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /* None */
@@ -93,7 +93,7 @@ UTK - Shell v0.1            00:00:00 Wed 01/02/2022                   CPU: 100%
     /* Draw the top line */
     scheme.background = BG_CYAN;
     scheme.foreground = FG_BLACK;
-    scheme.vga_color  = 0;
+    scheme.vga_color  = FALSE;
     graphic_set_color_scheme(scheme);
     graphic_put_cursor_at(0, 0);
     kernel_printf(" UTK - Shell v0.1               ");

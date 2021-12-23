@@ -62,7 +62,7 @@
 #define SCHEDULER_MAIN_STACK_SIZE KERNEL_STACK_SIZE
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /** @brief Resource structure used by the scheduler to store the threads'

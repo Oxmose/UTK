@@ -17,9 +17,12 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-
 #ifndef __X86_PIC_H_
 #define __X86_PIC_H_
+
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
 
 #include <stdint.h>       /* Generic int types */
 #include <interrupts.h>   /* Interrupt management */
@@ -32,9 +35,28 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
+/* None */
+
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
 /* None */
 
 /*******************************************************************************
@@ -104,11 +126,13 @@ int32_t pic_get_irq_int_line(const uint32_t irq_number);
 
 /**
  * @brief Returns the PIC interrupt driver.
- * 
+ *
  * @details Returns a constant handle to the PIC interrupt driver.
- * 
+ *
  * @return A constant handle to the PIC interrupt driver is returned.
  */
 const interrupt_driver_t* pic_get_driver(void);
 
 #endif /* #ifndef __X86_PIC_H_ */
+
+/* EOF */

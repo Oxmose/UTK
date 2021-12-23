@@ -8,16 +8,20 @@
  * @version 1.0
  *
  * @brief Kernel's strings and memory manipulation functions.
- * 
+ *
  * @details Strings and memory manipulation functions.
- * 
+ *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
 #ifndef __LIB_STRING_H_
 #define __LIB_STRING_H_
 
-#include <stddef.h> /* size_t */
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+#include <stddef.h> /* Standard integer definitions */
 
 /*******************************************************************************
  * CONSTANTS
@@ -26,9 +30,28 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
+/* None */
+
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
 /* None */
 
 /*******************************************************************************
@@ -70,4 +93,6 @@ extern char *strstr(const char *, const char *);
 extern char *strtok(char *, const char *);
 extern size_t __strxspn(const char *s, const char *map, int parity);
 
-#endif /* __STRING_H_ */
+#endif /* #ifndef __LIB_STRING_H_ */
+
+/* EOF */

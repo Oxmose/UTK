@@ -156,7 +156,7 @@
 #define SERIAL_LINE_STATUS_PORT(port)   (port + 5)
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /** @brief Serial baudrate enumation. Enumerates all the supported baudrates.
@@ -323,7 +323,7 @@ void uart_write(const uint32_t port, const uint8_t data)
     EXIT_CRITICAL(int_state);
 }
 
-OS_RETURN_E uart_init(void)
+void uart_init(void)
 {
     uint8_t i;
 
@@ -379,8 +379,6 @@ OS_RETURN_E uart_init(void)
     KERNEL_DEBUG(SERIAL_DEBUG_ENABLED, "[SERIAL] Serial initialization end");
 
     KERNEL_TEST_POINT(uart_test);
-
-    return OS_NO_ERR;
 }
 
 void uart_clear_screen(void)

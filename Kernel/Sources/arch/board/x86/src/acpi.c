@@ -71,7 +71,7 @@
 #define MAX_IO_APIC_COUNT 1
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /** @brief ACPI structure header.
@@ -707,13 +707,10 @@ static void acpi_parse_apic(acpi_madt_t* madt_ptr)
             {
                 /* Add CPU info to the lapic table */
                 err = vector_push(cpu_lapics, (void*)madt_entry);
-                if(err != OS_NO_ERR)
-                {
-                    KERNEL_ERROR(
-                    "Could not allocate node for new lapic %d\n",
-                    err);
-                    continue;
-                }
+                ACPI_ASSERT(err == OS_NO_ERR,
+                            "Could not allocate node for new lapic",
+                            err);
+
                 ++cpu_count;
             }
             else
@@ -736,12 +733,10 @@ static void acpi_parse_apic(acpi_madt_t* madt_ptr)
             if(io_apic_count < MAX_IO_APIC_COUNT)
             {
                 err = vector_push(io_apics, (void*)madt_entry);
-                if(err != OS_NO_ERR)
-                {
-                    KERNEL_ERROR(
-                    "Could not add node for new IO APIC\n");
-                    continue;
-                }
+                ACPI_ASSERT(err == OS_NO_ERR,
+                            "Could not allocate node for new IO-APIC",
+                            err);
+
                 ++io_apic_count;
             }
             else
@@ -1146,6 +1141,7 @@ int32_t acpi_get_remaped_irq(const uint32_t irq_number)
     return irq_number;
 }
 
+
 const void* acpi_get_io_apic_address(const uint32_t io_apic_id)
 {
     size_t i;
@@ -1196,10 +1192,6 @@ OS_RETURN_E acpi_check_lapic_id(const uint32_t lapic_id)
     return OS_ERR_NO_SUCH_ID;
 }
 
-const vector_t* acpi_get_io_apics(void)
-{
-    return io_apics;
-}
 
 int32_t get_cpu_count(void)
 {
@@ -1232,4 +1224,9 @@ int32_t cpu_get_id(void)
     }
 
     return 0;
+}
+
+const vector_t* acpi_get_io_apics(void)
+{
+    return io_apics;
 }

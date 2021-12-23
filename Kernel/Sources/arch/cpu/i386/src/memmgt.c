@@ -49,7 +49,7 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /** @brief Defines a memory range with its type as defined by the multiboot
@@ -1403,10 +1403,10 @@ static void* get_block(kqueue_t* list,
     }
     if(selected == NULL)
     {
-        KERNEL_ERROR("No mode free memory\n");
+        KERNEL_ERROR("No more free memory\n");
 
         MEMMGT_ASSERT(err != NULL,
-                      "No mode free memory",
+                      "No more free memory",
                       OS_ERR_NO_MORE_FREE_MEM);
 
         *err = OS_ERR_NO_MORE_FREE_MEM;

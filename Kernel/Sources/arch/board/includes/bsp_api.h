@@ -9,12 +9,16 @@
  *
  * @brief BSP API declarations.
  *
- * @details BSP API declarations.. This file contains all the routines 
+ * @details BSP API declarations.. This file contains all the routines
  * aivailable for the system to manipulate the BSP.
  ******************************************************************************/
 
 #ifndef __BOARD_BSP_API_H_
 #define __BOARD_BSP_API_H_
+
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
 
 #include <stdint.h> /* Generic types */
 
@@ -25,9 +29,28 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
+/* None */
+
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
 /* None */
 
 /*******************************************************************************
@@ -35,13 +58,17 @@
  ******************************************************************************/
 
 /**
- * @brief Returns the number of CPU detected on the system. 
- * 
- * @details Returns the number of CPU detected on the system. This function must 
- * be called after the init_acpi function.
+ * @brief Returns the number of CPU detected in the system.
+ *
+ * @details Returns the number of CPU detected in the system. This function is
+ * based on the ACPI CPU detection.
+ *
+ * @warning This function must be used once the ACPI is initialized.
  *
  * @return The number of CPU detected in the system, -1 is returned on error.
  */
 int32_t get_cpu_count(void);
 
 #endif /* #ifndef __BOARD_BSP_API_H_ */
+
+/* EOF */

@@ -11,7 +11,7 @@
  *
  * @brief i386 CPU management functions
  *
- * @details i386 CPU manipulation functions. Wraps inline assembly calls for 
+ * @details i386 CPU manipulation functions. Wraps inline assembly calls for
  * ease of development.
  *
  * @copyright Alexy Torres Aurora Dugo
@@ -19,6 +19,10 @@
 
 #ifndef __I386_CPU_H_
 #define __I386_CPU_H_
+
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
 
 #include <stdint.h>       /* Generic int types */
 #include <stddef.h>       /* Standard definition */
@@ -32,9 +36,28 @@
 /* None */
 
 /*******************************************************************************
- * STRUCTURES
+ * STRUCTURES AND TYPES
  ******************************************************************************/
 
+/* None */
+
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/* Imported global variables */
+/* None */
+
+/* Exported global variables */
+/* None */
+
+/* Static global variables */
 /* None */
 
 /*******************************************************************************
@@ -58,7 +81,7 @@ inline static uint32_t cpu_get_cpuid_max (const uint32_t ext)
 {
     uint32_t regs[4];
 
-    /* Host supports CPUID.  Return highest supported CPUID input value. */
+    /* Host supports CPUID. Return highest supported CPUID input value. */
     __asm__ __volatile__("cpuid":"=a"(*regs),"=b"(*(regs+1)),
                          "=c"(*(regs+2)),"=d"(*(regs+3)):"a"(ext));
 
@@ -241,9 +264,11 @@ inline static uint64_t cpu_rdtsc(void)
 /**
  * @brief Checks the architecture's feature and requirements for UTK.
  *
- * @details Checks the architecture's feature and requirements for UTK. If a 
+ * @details Checks the architecture's feature and requirements for UTK. If a
  * requirement is not met, a kernel panic is raised.
  */
 void validate_architecture(void);
 
 #endif /* #ifndef __I386_CPU_H_ */
+
+/* EOF */
