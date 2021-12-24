@@ -24,6 +24,12 @@ static semaphore_t sem_end;
 
 static volatile uint32_t lock_res;
 
+void *sem_thread_1(void *args);
+void *sem_thread_2(void *args);
+void *sem_thread_3(void *args);
+void *sem_thread_4(void *args);
+void *sem_thread_5(void *args);
+
 void *sem_thread_1(void *args)
 {
     for(int i = 0; i < 3; ++i)

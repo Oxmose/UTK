@@ -7,6 +7,8 @@
 #include <memmgt.h>
 #include <kheap.h>
 
+void* throutine(void* args);
+
 void* throutine(void* args)
 {
     (void)args;
@@ -105,7 +107,7 @@ void memory_usage_test(void)
         }
         kernel_printf("[TESTMODE] Process %d returned %d, %d\n", pid, status, err);
     }
-    else 
+    else
     {
         sched_sleep(1000);
         /* Here we cant return, this should be replaced in the future by the
@@ -114,7 +116,7 @@ void memory_usage_test(void)
     }
 
     sched_sleep(500);
-    
+
     new_page_free = memory_get_free_pages();
     new_kpage_free = memory_get_free_kpages();
     new_frame_free = memory_get_free_frames();
@@ -125,7 +127,7 @@ void memory_usage_test(void)
         kpage_free - new_kpage_free,
         frame_free - new_frame_free,
        (kheap_free > new_kheap_free ? kheap_free - new_kheap_free : 0));
-    
+
     pid = fork();
     if(pid < 0)
     {
@@ -157,7 +159,7 @@ void memory_usage_test(void)
         }
         kernel_printf("[TESTMODE] Process %d returned %d, %d\n", pid, status, err);
     }
-    else 
+    else
     {
 
         sched_sleep(500);
@@ -182,7 +184,7 @@ void memory_usage_test(void)
 
             sched_thread_terminate_self((void*)22);
         }
-        else 
+        else
         {
             sched_sleep(1000);
             /* Here we cant return, this should be replaced in the future by the
@@ -207,7 +209,7 @@ void memory_usage_test(void)
 
     kill_qemu();
 }
-#else 
+#else
 void memory_usage_test(void)
 {
 }

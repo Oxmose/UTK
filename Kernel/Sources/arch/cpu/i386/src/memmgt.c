@@ -778,7 +778,7 @@ static void memory_acquire_ref(uintptr_t phys_addr)
 
     current_table = (uintptr_t*)frame_ref_dir[dir_entry];
 
-    MEMMGT_ASSERT((current_table != NULL ||
+    MEMMGT_ASSERT((current_table != NULL &&
                    current_table[table_entry] != (uintptr_t)NULL),
                   "Tried to acquire reference on non existing memory",
                   OS_ERR_UNAUTHORIZED_ACTION);

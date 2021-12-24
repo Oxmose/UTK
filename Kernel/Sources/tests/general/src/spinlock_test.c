@@ -16,6 +16,7 @@ static spinlock_t lock = SPINLOCK_INIT_VALUE;
 
 static volatile uint32_t lock_res;
 
+void* spin_thread_1(void *args);
 
 void* spin_thread_1(void *args)
 {

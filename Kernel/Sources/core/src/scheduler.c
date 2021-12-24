@@ -683,6 +683,7 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
     if(new_proc == NULL)
     {
         *(int32_t*)new_pid = -1;
+        return;
     }
     memset(new_proc, 0, sizeof(kernel_process_t));
     new_proc_node = kqueue_create_node(new_proc);

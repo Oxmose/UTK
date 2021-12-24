@@ -388,7 +388,7 @@ static void copy_symbols(struct multiboot_tag_elf_sections* elf_tag)
         if(header->sh_type == SHT_STRTAB && i == symtab_link)
         {
             *strtab_addr = (uintptr_t)copy_addr;
-            *strtab_size = *strtab_size;
+            *strtab_size = *strtab_addr;
             src_addr = (uint8_t*)header->sh_addr;
 
             printf_vga("Copy symbols 0x", 15);

@@ -18,6 +18,12 @@ static mutex_t mutex2;
 
 static volatile uint32_t lock_res;
 
+void* test_inherit(void*args);
+void* test_rec(void* args);
+void *mutex_thread_1(void *args);
+void *mutex_thread_2(void *args);
+void *mutex_thread_3(void *args);
+
 void* test_inherit(void*args)
 {
     OS_RETURN_E err;
@@ -369,7 +375,7 @@ void mutex_test(void)
     }
     else
     {
-        printf("[TESTMODE] Error, lock_res has wrong value: %d\n", lock_res);
+        printf("[TESTMODE] Error, lock_res has wrong value: %u\n", lock_res);
     }
 
     /* Kill QEMU */

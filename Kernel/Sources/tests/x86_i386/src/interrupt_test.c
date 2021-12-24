@@ -12,6 +12,8 @@
 
 static volatile uint32_t counter = 0;
 
+void test_sw_interupts(void);
+
 static void incrementer_handler(cpu_state_t* cpu,  uint32_t int_id,
                                 stack_state_t* stack)
 {

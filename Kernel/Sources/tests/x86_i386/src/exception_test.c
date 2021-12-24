@@ -11,6 +11,8 @@
 #include <cpu_settings.h>
 #include <kernel_error.h>
 
+void end(void);
+
 void end(void)
 {
     kernel_printf("[TESTMODE] Software exception tests passed\n");
