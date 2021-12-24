@@ -297,7 +297,8 @@ static void ustar_get_next_file(const vfs_partition_t* partition,
         }
 
         /* Next block is current block + file size / block_size */
-        size = oct2uint(block->size, USTAR_FSIZE_FIELD_LENGTH - 1) + USTAR_BLOCK_SIZE;
+        size = oct2uint(block->size, USTAR_FSIZE_FIELD_LENGTH - 1) +
+               USTAR_BLOCK_SIZE;
 
         if(size % USTAR_BLOCK_SIZE != 0)
         {
@@ -720,7 +721,10 @@ OS_RETURN_E ustar_open_file(const char* path,
      */
     while(current_block.file_name[0] != 0)
     {
-        KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "Checking %s", current_block.file_name);
+        KERNEL_DEBUG(USTAR_DEBUG_ENABLED,
+                     "Checking %s",
+                     current_block.file_name);
+
         if(strncmp(path,
                    current_block.file_name,
                    USTAR_FILENAME_MAX_LENGTH) == 0)
@@ -1277,7 +1281,10 @@ OS_RETURN_E ustar_rename_file(const vfs_partition_t* partition,
                 strncpy(old_short_path + old_path_len, name_table + i,
                         strlen(name_table + i) + 1);
 
-                KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "Renaming %s to %s", old_short_path, short_path);
+                KERNEL_DEBUG(USTAR_DEBUG_ENABLED,
+                             "Renaming %s to %s",
+                             old_short_path,
+                             short_path);
 
                 err = ustar_rename_file(partition, old_short_path, short_path);
                 USTAR_ASSERT(err == OS_NO_ERR,
@@ -1348,9 +1355,10 @@ OS_RETURN_E ustar_truncate_file(const vfs_partition_t* partition,
             return OS_ERR_UNAUTHORIZED_ACTION;
         }
         /* Set the new size */
-        KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "Truncated file from %s", current_block.size);
         uint2oct(current_block.size, new_size, USTAR_FSIZE_FIELD_LENGTH);
-        KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "Truncated file to %s", current_block.size);
+        KERNEL_DEBUG(USTAR_DEBUG_ENABLED,
+                     "Truncated file to %s",
+                     current_block.size);
 
         return ustar_access_blocks_from_device(partition,
                                                &current_block,

@@ -160,8 +160,8 @@ OS_RETURN_E mutex_lock(mutex_t* mutex);
 /**
  * @brief Unlocks the mutex given as parameter.
  *
- * @details Unlocks the mutex given as parameter. The function might schedule to a
- * nest prioritary thread.
+ * @details Unlocks the mutex given as parameter. The function might schedule
+ * a more prioritary thread.
  *
  * @param[in] mutex The mutex to unlock.
  *

@@ -81,7 +81,8 @@ union uu {
 /*
  * Extract high and low shortwords from longword, and move low shortword of
  * longword to upper half of long, i.e., produce the upper longword of
- * ((int64_t)(x) << (number_of_bits_in_int/2)).  (`x' must actually be uint32_t.)
+ * ((int64_t)(x) << (number_of_bits_in_int/2)).
+ * (`x' must actually be uint32_t.)
  *
  * These are used in the multiply code, to split a longword into upper
  * and lower halves, and to reassemble a product as a int64_t, shifted left

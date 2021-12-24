@@ -1002,7 +1002,8 @@ void cpu_setup_gdt(void)
     cpu_gdt_ptr.base = (uintptr_t)&cpu_gdt;
 
     /* Load the GDT */
-    __asm__ __volatile__("lgdt %0" :: "m" (cpu_gdt_ptr.size), "m" (cpu_gdt_ptr.base));
+    __asm__ __volatile__("lgdt %0" :: "m" (cpu_gdt_ptr.size),
+                                      "m" (cpu_gdt_ptr.base));
 
     /* Load segment selectors with a far jump for CS */
     __asm__ __volatile__("movw %w0,%%ds\n\t"
@@ -1010,7 +1011,8 @@ void cpu_setup_gdt(void)
                          "movw %w0,%%fs\n\t"
                          "movw %w0,%%gs\n\t"
                          "movw %w0,%%ss\n\t" :: "r" (KERNEL_DS_32));
-    __asm__ __volatile__("ljmp %0, $new_gdt \n\t new_gdt: \n\t" :: "i" (KERNEL_CS_32));
+    __asm__ __volatile__("ljmp %0, $new_gdt \n\t new_gdt: \n\t" ::
+                         "i" (KERNEL_CS_32));
 
     KERNEL_SUCCESS("GDT Initialized at 0x%p\n", cpu_gdt_ptr.base);
 
@@ -1041,7 +1043,8 @@ void cpu_setup_idt(void)
     cpu_idt_ptr.base = (uintptr_t)&cpu_idt;
 
     /* Load the GDT */
-    __asm__ __volatile__("lidt %0" :: "m" (cpu_idt_ptr.size), "m" (cpu_idt_ptr.base));
+    __asm__ __volatile__("lidt %0" :: "m" (cpu_idt_ptr.size),
+                                      "m" (cpu_idt_ptr.base));
 
     KERNEL_SUCCESS("IDT Initialized at 0x%p\n", cpu_idt_ptr.base);
 

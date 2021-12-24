@@ -400,7 +400,8 @@ void kheap_init(void)
 
     void* mem = &_KERNEL_HEAP_BASE;
     uint32_t size = (uint32_t)&_KERNEL_HEAP_SIZE;
-    int8_t* mem_start = (int8_t*)(((uintptr_t)mem + ALIGN - 1) & (~(ALIGN - 1)));
+    int8_t* mem_start = (int8_t*)
+                        (((uintptr_t)mem + ALIGN - 1) & (~(ALIGN - 1)));
     int8_t* mem_end = (int8_t*)(((uintptr_t)mem + size) & (~(ALIGN - 1)));
 
     mem_free = 0;

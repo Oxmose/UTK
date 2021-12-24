@@ -454,8 +454,8 @@ void panic_handler(cpu_state_t* cpu_state,
     print_cpu_state(cpu_state, stack_state);
     print_cpu_flags(stack_state);
 
-    kernel_printf("\n--------------------------------- INFORMATION --------------"
-                    "--------------------\n");
+    kernel_printf("\n--------------------------------- INFORMATION ------------"
+                    "----------------------\n");
     kernel_printf("Core ID: %u | Time: %02u:%02u:%02u\n"
                   "Thread: %s (%u) | Process: %s (%u)\n", cpu_id,
                   hours, minutes, seconds,

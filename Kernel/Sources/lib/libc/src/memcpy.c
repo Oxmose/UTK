@@ -77,7 +77,8 @@ void *memcpy(void *dst, const void *src, size_t n)
     char *q = dst;
 #if defined(__i386__)
     size_t nl = n >> 2;
-    __asm__ __volatile__ ("cld ; rep ; movsl ; movl %3,%0 ; rep ; movsb":"+c" (nl),
+    __asm__ __volatile__ ("cld ; rep ; movsl ; movl %3,%0 ; rep ; movsb":"+c"
+              (nl),
               "+S"(p), "+D"(q)
               :"r"(n & 3));
 #elif defined(__x86_64__)

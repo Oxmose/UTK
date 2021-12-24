@@ -1796,7 +1796,8 @@ static bool_t is_mapped(const uintptr_t start_addr, const size_t size)
     {
         /* Get entries */
         pgdir_entry   = (start_align >> PG_DIR_ENTRY_OFFSET);
-        pgtable_entry = (start_align >> PG_TABLE_ENTRY_OFFSET) & PG_TABLE_ENTRY_OFFSET_MASK;
+        pgtable_entry = (start_align >> PG_TABLE_ENTRY_OFFSET) &
+                        PG_TABLE_ENTRY_OFFSET_MASK;
 
         /* Check page directory presence and allocate if not present */
         pgdir_rec_addr = (uintptr_t*)&_KERNEL_RECUR_PG_DIR_BASE;
@@ -2148,7 +2149,10 @@ static OS_RETURN_E memory_copy_self_clean(mem_copy_self_data_t* data,
 
     if(data->new_pgtable_page != NULL)
     {
-        memory_free_pages_to(free_kernel_pages, data->new_pgtable_page, 1, &err);
+        memory_free_pages_to(free_kernel_pages,
+                             data->new_pgtable_page,
+                             1,
+                             &err);
         data->new_pgtable_page = NULL;
         MEMMGT_ASSERT(err == OS_NO_ERR,
                       "Error while recovering from faulted process copy.",
@@ -2206,10 +2210,11 @@ static OS_RETURN_E memory_create_new_pagedir(mem_copy_self_data_t* data)
     memory_acquire_ref((uintptr_t)data->new_pgdir_frame);
     data->acquired_ref_pgdir = TRUE;
 
-    data->new_pgdir_page = (uintptr_t*)memory_alloc_pages_from(free_kernel_pages,
-                                                         1,
-                                                         MEM_ALLOC_BEGINING,
-                                                         &err);
+    data->new_pgdir_page = (uintptr_t*)
+                           memory_alloc_pages_from(free_kernel_pages,
+                                                   1,
+                                                   MEM_ALLOC_BEGINING,
+                                                   &err);
     if(err != OS_NO_ERR)
     {
         return memory_copy_self_clean(data, err);
@@ -2262,9 +2267,10 @@ static OS_RETURN_E memory_copy_self_pgtable(mem_copy_self_data_t* data)
         if((current_pgdir[i] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
         {
             /* Get recursive virtual address */
-            current_pgtable = (uintptr_t*)(((uintptr_t)&_KERNEL_RECUR_PG_TABLE_BASE) +
-                                           KERNEL_PAGE_SIZE *
-                                           i);
+            current_pgtable = (uintptr_t*)
+                              (((uintptr_t)&_KERNEL_RECUR_PG_TABLE_BASE) +
+                               KERNEL_PAGE_SIZE *
+                               i);
 
             /* Create new page table */
             new_pgtable_frame = memory_alloc_frames(1, &err);
@@ -2356,12 +2362,13 @@ static OS_RETURN_E memory_copy_self_pgtable(mem_copy_self_data_t* data)
             if((current_pgdir[i] & PG_DIR_FLAG_PAGE_PRESENT) != 0)
             {
                 /* Get recursive virtual address */
-                current_pgtable = (uintptr_t*)(((uintptr_t)&_KERNEL_RECUR_PG_TABLE_BASE) +
-                                            KERNEL_PAGE_SIZE *
-                                            i);
+                current_pgtable = (uintptr_t*)
+                                  (((uintptr_t)&_KERNEL_RECUR_PG_TABLE_BASE) +
+                                   KERNEL_PAGE_SIZE *
+                                   i);
 
                 new_pgtable_frame = (uintptr_t*)
-                                    (data->new_pgdir_page[i] & PG_ENTRY_ADDR_MASK);
+                                (data->new_pgdir_page[i] & PG_ENTRY_ADDR_MASK);
 
                 memory_mmap_direct(data->new_pgtable_page,
                                    new_pgtable_frame,
@@ -2433,7 +2440,7 @@ static OS_RETURN_E memory_copy_self_stack(mem_copy_self_data_t* data,
                         PG_TABLE_ENTRY_OFFSET_MASK;
 
         new_pgtable_frame = (uintptr_t*)
-                            data->new_pgdir_page[curr_addr >> PG_DIR_ENTRY_OFFSET];
+                        data->new_pgdir_page[curr_addr >> PG_DIR_ENTRY_OFFSET];
         if(((uintptr_t)new_pgtable_frame & PG_DIR_FLAG_PAGE_PRESENT) == 0)
         {
             new_pgtable_frame = memory_alloc_frames(1, &err);
@@ -2547,7 +2554,7 @@ static OS_RETURN_E memory_copy_self_stack(mem_copy_self_data_t* data,
                             PG_TABLE_ENTRY_OFFSET_MASK;
 
             new_pgtable_frame = (uintptr_t*)
-                            data->new_pgdir_page[curr_addr >> PG_DIR_ENTRY_OFFSET];
+                        data->new_pgdir_page[curr_addr >> PG_DIR_ENTRY_OFFSET];
 
             memory_mmap_direct(data->new_pgtable_page,
                                new_pgtable_frame,
@@ -2562,8 +2569,9 @@ static OS_RETURN_E memory_copy_self_stack(mem_copy_self_data_t* data,
                           err);
 
             /* Deallocate the new frame */
-            new_data_frame = (uintptr_t*)(data->new_pgtable_page[pgtable_entry] &
-                                         PG_ENTRY_ADDR_MASK);
+            new_data_frame = (uintptr_t*)
+                             (data->new_pgtable_page[pgtable_entry] &
+                              PG_ENTRY_ADDR_MASK);
             memory_free_frames(new_data_frame, 1, &err);
             MEMMGT_ASSERT(err == OS_NO_ERR,
                           "Error copying process stack.",
@@ -3028,7 +3036,8 @@ uintptr_t memory_get_phys_addr(const uintptr_t virt_addr)
 
     /* Get entries */
     pgdir_entry   = (virt_addr >> PG_DIR_ENTRY_OFFSET);
-    pgtable_entry = (virt_addr >> PG_TABLE_ENTRY_OFFSET) & PG_TABLE_ENTRY_OFFSET_MASK;
+    pgtable_entry = (virt_addr >> PG_TABLE_ENTRY_OFFSET) &
+                    PG_TABLE_ENTRY_OFFSET_MASK;
 
     /* Check page directory presence and allocate if not present */
     pgdir_rec_addr = (uint32_t*)&_KERNEL_RECUR_PG_DIR_BASE;
@@ -3203,7 +3212,8 @@ void memory_clean_process_memory(uintptr_t pg_dir)
         }
 
         memory_mmap_direct(pgtable_page,
-                           (void*)(pgdir_page[pgdir_entry] & PG_ENTRY_ADDR_MASK),
+                           (void*)(pgdir_page[pgdir_entry] &
+                                   PG_ENTRY_ADDR_MASK),
                            KERNEL_PAGE_SIZE,
                            0,
                            0,
@@ -3224,8 +3234,9 @@ void memory_clean_process_memory(uintptr_t pg_dir)
         }
 
         memory_munmap(pgtable_page, KERNEL_PAGE_SIZE, NULL);
-        memory_release_ref((uintptr_t)(pgdir_page[pgdir_entry] & PG_ENTRY_ADDR_MASK) &
-                                   PG_ENTRY_ADDR_MASK);
+        memory_release_ref((uintptr_t)(pgdir_page[pgdir_entry] &
+                                       PG_ENTRY_ADDR_MASK) &
+                           PG_ENTRY_ADDR_MASK);
     }
 
     memory_munmap(pgdir_page, KERNEL_PAGE_SIZE, NULL);
@@ -3299,7 +3310,8 @@ void memory_free_process_data(const void* virt_addr,
                       OS_ERR_UNAUTHORIZED_ACTION);
 
         memory_mmap_direct(pgtable_page,
-                           (void*)(pgdir_page[pgdir_entry] & PG_ENTRY_ADDR_MASK),
+                           (void*)(pgdir_page[pgdir_entry] &
+                                   PG_ENTRY_ADDR_MASK),
                            KERNEL_PAGE_SIZE,
                            0,
                            0,

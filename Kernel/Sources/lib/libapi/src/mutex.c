@@ -339,7 +339,7 @@ OS_RETURN_E mutex_unlock(mutex_t* mutex)
     /* If other threads wait for the mutex */
     if(mutex_state != MUTEX_STATE_LOCKED)
     {
-        ATOMIC_STORE(&mutex->state, MUTEX_STATE_UNLOCKED);        /* Wake only one thread */
+        ATOMIC_STORE(&mutex->state, MUTEX_STATE_UNLOCKED);
         futex.addr = (uint32_t*)&mutex->state;
         futex.val  = 1;
         syscall_do(SYSCALL_FUTEX_WAKE, &futex);

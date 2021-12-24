@@ -341,7 +341,8 @@ static void copy_symbols(struct multiboot_tag_elf_sections* elf_tag)
         if(header->sh_type == SHT_SYMTAB)
         {
             symtab_link = header->sh_link;
-            copy_addr = ((uint8_t*)&_KERNEL_SYMTAB_FREE_START) - KERNEL_MEM_OFFSET;
+            copy_addr = ((uint8_t*)&_KERNEL_SYMTAB_FREE_START) -
+                        KERNEL_MEM_OFFSET;
             *symtab_addr = (uintptr_t)copy_addr;
             *symtab_size = *symtab_addr;
             src_addr = (uint8_t*)header->sh_addr;
@@ -374,7 +375,8 @@ static void copy_symbols(struct multiboot_tag_elf_sections* elf_tag)
     /* Align table */
     if((uintptr_t)copy_addr % sizeof(uintptr_t) != 0)
     {
-        copy_addr += sizeof(uintptr_t) - ((uintptr_t)copy_addr % sizeof(uintptr_t));
+        copy_addr += sizeof(uintptr_t) -
+                     ((uintptr_t)copy_addr % sizeof(uintptr_t));
     }
 
     /* Get the tring table */
