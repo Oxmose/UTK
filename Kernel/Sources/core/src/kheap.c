@@ -74,7 +74,7 @@ typedef struct
     list_t all;
 
     /** @brief Used flag. */
-    int8_t used;
+    bool_t used;
 
     /** @brief If used, the union contains the chunk's data, else a list of free
      * mem.
@@ -328,7 +328,7 @@ inline static void remove_from(list_t** list, list_t* node)
 inline static void memory_chunk_init(mem_chunk_t* chunk)
 {
     LIST_INIT(chunk, all);
-    chunk->used = 0;
+    chunk->used = FALSE;
     LIST_INIT(chunk, free);
 }
 
@@ -422,8 +422,8 @@ void kheap_init(void)
     insert_after(&first_chunk->all, &second->all);
     insert_after(&second->all, &last_chunk->all);
 
-    first_chunk->used = 1;
-    last_chunk->used = 1;
+    first_chunk->used = TRUE;
+    last_chunk->used = TRUE;
 
     len = memory_chunk_size(second);
     n   = memory_chunk_slot(len);
@@ -504,7 +504,7 @@ void* kmalloc(size_t size)
         mem_free += len;
     }
 
-    chunk->used = 1;
+    chunk->used = TRUE;
 
     mem_free -= size2;
 
@@ -541,7 +541,7 @@ void kfree(void* ptr)
 
     used = memory_chunk_size(chunk);
 
-    if (next->used == 0)
+    if (next->used == FALSE)
     {
         remove_free(next);
         remove(&next->all);
@@ -550,7 +550,7 @@ void kfree(void* ptr)
         mem_free += HEADER_SIZE;
     }
 
-    if (prev->used == 0)
+    if (prev->used == FALSE)
     {
         remove_free(prev);
         remove(&chunk->all);
@@ -561,7 +561,7 @@ void kfree(void* ptr)
     }
     else
     {
-        chunk->used = 0;
+        chunk->used = FALSE;
         LIST_INIT(chunk, free);
         push_free(chunk);
     }

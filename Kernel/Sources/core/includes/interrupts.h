@@ -148,6 +148,21 @@ typedef struct
 void kernel_interrupt_init(void);
 
 /**
+ * @brief Kernel's main interrupt handler.
+ *
+ * @details Generic and global interrupt handler. This function should only be
+ * called by an assembly interrupt handler. The function will dispatch the
+ * interrupt to the desired function to handle the interrupt.
+ *
+ * @param[in, out] cpu_state The cpu registers structure.
+ * @param[in] int_id The interrupt number.
+ * @param[in, out] stack_state The stack state before the interrupt.
+ */
+void kernel_interrupt_handler(cpu_state_t cpu_state,
+                              uintptr_t int_id,
+                              stack_state_t stack_state);
+
+/**
  * @brief Set the driver to be used by the kernel to manage interrupts.
  *
  * @details Changes the current interrupt manager by the new driver given as

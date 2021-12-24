@@ -1,7 +1,7 @@
 /*******************************************************************************
  * @file udivmoddi4.c
  *
- * @see string.h
+ * @see stdlib.h
  *
  * @author Alexy Torres Aurora Dugo
  *
@@ -9,9 +9,9 @@
  *
  * @version 1.0
  *
- * @brief __udivmoddi4 function. To be used with string.h header.
+ * @brief __udivmoddi4 function. To be used with stdlib.h header.
  *
- * @details __udivmoddi4 function. To be used with string.h header.
+ * @details __udivmoddi4 function. To be used with stdlib.h header.
  *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
@@ -28,7 +28,7 @@
 #include <test_bank.h>
 
 /* Header file */
-#include <string.h>
+#include <stdlib.h>
 
 /*******************************************************************************
  * CONSTANTS

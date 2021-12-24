@@ -368,6 +368,7 @@ int32_t lapic_get_id(void)
     return (lapic_read(LAPIC_ID) >> 24);
 }
 
+#if 0
 OS_RETURN_E lapic_send_ipi_init(const uint32_t lapic_id)
 {
     OS_RETURN_E err;
@@ -472,6 +473,7 @@ OS_RETURN_E lapic_send_ipi(const uint32_t lapic_id, const uint32_t vector)
 
     return err;
 }
+#endif
 
 void lapic_set_int_eoi(const uint32_t interrupt_line)
 {
@@ -483,7 +485,6 @@ void lapic_set_int_eoi(const uint32_t interrupt_line)
 
     KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "[LAPIC] EOI %d", interrupt_line);
 }
-
 
 void lapic_timer_init(void)
 {

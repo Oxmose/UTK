@@ -1,21 +1,21 @@
 /*******************************************************************************
  * @file uiota.c
  *
- * @see string.h
+ * @see stdlib.h
  *
  * @author Alexy Torres Aurora Dugo
  *
- * @date 22/12/2021
+ * @date 08/01/2018
  *
  * @version 1.0
  *
- * @brief Source file template.
+ * @brief uitoa function. To be used with stdlib.h header.
  *
- * @details Source file template. Defines the source files structure and
- * requirements.
+ * @details uitoa function. To be used with stdlib.h header.
  *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
+
 
 /*******************************************************************************
  * INCLUDES
@@ -29,7 +29,7 @@
 #include <test_bank.h>
 
 /* Header file */
-#include <string.h>
+#include <stdlib.h>
 
 /*******************************************************************************
  * CONSTANTS

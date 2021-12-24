@@ -94,20 +94,4 @@ int printf(const char *fmt, ...)
     return err;
 }
 
-int putchar(int c)
-{
-    graphic_put_char((char)c);
-    return (unsigned char)c;
-}
-
-int puts(const char *s)
-{
-    while (*s)
-    {
-        putchar(*s++);
-    }
-    putchar('\n');
-    return 0;
-}
-
 /************************************ EOF *************************************/

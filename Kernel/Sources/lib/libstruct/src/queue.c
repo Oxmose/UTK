@@ -113,7 +113,7 @@ OS_RETURN_E queue_delete_node(queue_node_t** node)
     }
 
     /* Check queue chaining */
-    if((*node)->enlisted != 0)
+    if((*node)->enlisted != FALSE)
     {
         return OS_ERR_UNAUTHORIZED_ACTION;
     }
@@ -201,7 +201,7 @@ OS_RETURN_E queue_push(queue_node_t* node, queue_t* queue)
     }
 
     ++queue->size;
-    node->enlisted = 1;
+    node->enlisted = TRUE;
 
     KERNEL_DEBUG(QUEUE_DEBUG_ENABLED,
                  "[QUEUE] Enqueue element 0x%p in queue 0x%p",
@@ -284,7 +284,7 @@ OS_RETURN_E queue_push_prio(queue_node_t* node,
         }
     }
     ++queue->size;
-    node->enlisted = 1;
+    node->enlisted = TRUE;
 
     KERNEL_DEBUG(QUEUE_DEBUG_ENABLED,
                  "[QUEUE] Enqueue element 0x%p in queue 0x%p",
@@ -364,7 +364,7 @@ queue_node_t* queue_pop(queue_t* queue, OS_RETURN_E* error)
 
     node->next = NULL;
     node->prev = NULL;
-    node->enlisted = 0;
+    node->enlisted = FALSE;
 
     if(error != NULL)
     {
@@ -469,7 +469,7 @@ OS_RETURN_E queue_remove(queue_t* queue, queue_node_t* node)
     node->next = NULL;
     node->prev = NULL;
 
-    node->enlisted = 0;
+    node->enlisted = FALSE;
 
     return OS_NO_ERR;
 }

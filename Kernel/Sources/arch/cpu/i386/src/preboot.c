@@ -117,6 +117,8 @@ static void clear_vga(void);
 
 static uint8_t cmp_str(const char* str1, const char* str2, uint32_t size);
 
+void kernel_preboot(void);
+
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/

@@ -36,7 +36,7 @@
 #include <test_bank.h>
 
 /* Header file */
-#include <init_rd.h>
+#include <init.h>
 
 /*******************************************************************************
  * CONSTANTS
@@ -85,7 +85,7 @@ static volatile uint64_t idle_sched_count = 0;
  * FUNCTIONS
  ******************************************************************************/
 
-#if 1
+#if 0
 
 #include <graphic.h>
 #include <string.h>
@@ -179,7 +179,6 @@ void* init_sys(void* args)
     else
     {
         /* Here we should load an elf and start another program */
-        init_shell();
         while(1)
         {
             kernel_printf("\n");

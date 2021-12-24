@@ -96,12 +96,6 @@
  * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
-/* None */
-
-/*******************************************************************************
- * FUNCTIONS
- ******************************************************************************/
-
 /**
  * @brief Main boot sequence, C kernel entry point.
  *
@@ -111,6 +105,12 @@
  * @warning This function should never return. In case of return, the kernel
  * should be able to catch the return as an error.
  */
+void kernel_kickstart(void);
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
+
 void kernel_kickstart(void)
 {
     OS_RETURN_E     err;

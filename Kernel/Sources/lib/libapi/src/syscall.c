@@ -29,13 +29,14 @@
 #include <scheduler.h>          /* Scheduler */
 #include <kernel_error.h>       /* Kernel error codes */
 #include <panic.h>              /* Kernel panic */
+#include <panic.h>              /* Kernel panic */
 
 /* Configuration files */
 #include <config.h>
 #include <test_bank.h>
 
 /* Header file */
-#include <syscall.h>
+#include <sys/syscall_api.h>
 
 /*******************************************************************************
  * CONSTANTS

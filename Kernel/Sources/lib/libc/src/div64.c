@@ -33,6 +33,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #define	B	((int)1 << HALF_BITS)	/* digit base */
 

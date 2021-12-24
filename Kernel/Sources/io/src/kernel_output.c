@@ -230,7 +230,7 @@ static void formater(const char* str,
 
     uint8_t  length_mod;
     uint8_t  padding_mod;
-    uint8_t  upper_mod;
+    bool_t   upper_mod;
     char     pad_char_mod;
 
     char tmp_seq[128];
@@ -240,7 +240,7 @@ static void formater(const char* str,
     modifier     = 0;
     length_mod   = 4;
     padding_mod  = 0;
-    upper_mod    = 0;
+    upper_mod    = FALSE;
     pad_char_mod = ' ';
     str_length   = strlen(str);
 
@@ -294,14 +294,14 @@ static void formater(const char* str,
 					used_output.puts(tmp_seq);
                     break;
                 case 'X':
-                    upper_mod = 1;
+                    upper_mod = TRUE;
                     __attribute__ ((fallthrough));
                 case 'x':
                     GET_SEQ_VAL(seq_val, args, length_mod);
 					memset(tmp_seq, 0, sizeof(tmp_seq));
 					uitoa(seq_val, tmp_seq, 16);
                     PAD_SEQ
-                    if(upper_mod)
+                    if(upper_mod == TRUE)
                     {
                         toupper(tmp_seq);
                     }
@@ -312,7 +312,7 @@ static void formater(const char* str,
 					used_output.puts(tmp_seq);
                     break;
                 case 'P':
-                    upper_mod = 1;
+                    upper_mod = TRUE;
                     __attribute__ ((fallthrough));
                 case 'p':
                     padding_mod  = 2 * sizeof(uintptr_t);
@@ -322,7 +322,7 @@ static void formater(const char* str,
 					memset(tmp_seq, 0, sizeof(tmp_seq));
 					uitoa(seq_val, tmp_seq, 16);
                     PAD_SEQ
-                    if(upper_mod)
+                    if(upper_mod == TRUE)
                     {
                         toupper(tmp_seq);
                     }
@@ -388,7 +388,7 @@ static void formater(const char* str,
         /* Reinit mods */
         length_mod   = 4;
         padding_mod  = 0;
-        upper_mod    = 0;
+        upper_mod    = FALSE;
         pad_char_mod = ' ';
         modifier     = 0;
 

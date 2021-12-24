@@ -32,6 +32,8 @@
 #include <arch_memmgt.h>   /* Atcihtecture memory management */
 #include <lapic.h>         /* LAPIC driver */
 #include <stddef.h>        /* Standard definitions */
+#include <bsp_api.h>       /* BSP API */
+#include <cpu_api.h>       /* CPU API */
 
 /* Configuration files */
 #include <config.h>
@@ -397,15 +399,6 @@ static bool_t is_page_mapped(const uintptr_t addr);
  * @param[in] addr The address of the mapped page to add.
  */
 static void add_acpi_tree(acpi_page_tree_t* node, const uintptr_t addr);
-
-/**
- * @brief Adds a mapped page to the ACPI page tree.
- *
- * @details Adds a mapped page to the ACPI page tree.
- *
- * @param[in] addr The address of the mapped page to add.
- */
-static void add_mapped_page(uintptr_t addr);
 
 /**
  * @brief Adds a mapped page to the ACPI page tree.

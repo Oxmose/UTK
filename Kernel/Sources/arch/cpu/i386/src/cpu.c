@@ -30,6 +30,7 @@
 #include <panic.h>              /* Kernel panic */
 #include <cpu_settings.h>       /* CPU structures */
 #include <interrupts.h>         /* Interrupt manager */
+#include <cpu_api.h>            /* CPU API */
 
 /* Configuration files */
 #include <config.h>
@@ -1304,15 +1305,6 @@ void cpu_restore_context(cpu_state_t* cpu_state,
     CPU_ASSERT(FALSE,
                "Returned from context restore",
                OS_ERR_UNAUTHORIZED_ACTION);
-}
-
-void cpu_set_next_thread_instruction(const cpu_state_t* cpu_state,
-                                     stack_state_t* stack_state,
-                                     const uintptr_t next_inst)
-{
-    (void) cpu_state;
-    /* Set next instruction */
-    stack_state->eip = next_inst;
 }
 
 void cpu_syscall(uint32_t syscall_id, void* params)

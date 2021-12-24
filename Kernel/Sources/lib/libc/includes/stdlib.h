@@ -106,6 +106,14 @@ void* malloc(const size_t size);
  */
 void free(void* ptr);
 
+uint64_t __qdivrem(uint64_t uq, uint64_t vq, uint64_t *arq);
+
+uint64_t __umoddi3(uint64_t a, uint64_t b);
+
+uint64_t __udivdi3(uint64_t a, uint64_t b);
+
+uint64_t __udivmoddi4(uint64_t num, uint64_t den, uint64_t* rem_p);
+
 #endif /* #ifndef __LIB_STDLIB_H_ */
 
 /************************************ EOF *************************************/
