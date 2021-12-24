@@ -47,13 +47,13 @@
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -99,4 +99,4 @@ uint64_t sched_get_idle_schedule_count(void);
 
 #endif /* #ifndef __CORE_INIT_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

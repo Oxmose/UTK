@@ -51,13 +51,13 @@
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -107,4 +107,4 @@ OS_RETURN_E ustar_list_directory(const vfs_vnode_t* vnode,
 
 #endif /* #ifndef __FS_USTAR_FS_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

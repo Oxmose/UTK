@@ -18,6 +18,11 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <cpu_settings.h>          /* CPU management */
 #include <cpu.h>                   /* CPU management */
 #include <graphic.h>               /* Output manager */
@@ -44,11 +49,12 @@
 #include <init_rd.h>               /* Init ram disk */
 #include <futex.h>                 /* FUtex API */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
-
-/* Tests header file */
 #include <test_bank.h>
+
+/* Header file */
+/* None */
 
 /*******************************************************************************
  * CONSTANTS
@@ -63,9 +69,27 @@
 /* None */
 
 /*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+#define KICKSTART_ASSERT(COND, MSG, ERROR) {                \
+    if((COND) == FALSE)                                     \
+    {                                                       \
+        PANIC(ERROR, "KICKSTRART", MSG, TRUE);              \
+    }                                                       \
+}
+
+/*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -77,13 +101,6 @@
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
-
-#define KICKSTART_ASSERT(COND, MSG, ERROR) {                \
-    if((COND) == FALSE)                                     \
-    {                                                       \
-        PANIC(ERROR, "KICKSTRART", MSG, TRUE);              \
-    }                                                       \
-}
 
 /**
  * @brief Main boot sequence, C kernel entry point.
@@ -190,3 +207,5 @@ void kernel_kickstart(void)
                      "Kernel returned to kickstart",
                      OS_ERR_UNAUTHORIZED_ACTION);
 }
+
+/************************************ EOF *************************************/

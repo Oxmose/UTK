@@ -6,7 +6,4 @@ DEP_INCLUDES += -I ../../arch/board/includes
 DEP_INCLUDES += -I ../libc/includes
 DEP_INCLUDES += -I ../libstruct/includes
 DEP_INCLUDES += -I includes
-
-ifeq ($(TESTS), TRUE)
-DEP_INCLUDES += -I ../tests/includes
-endif
+DEP_INCLUDES += -I ../../tests/includes

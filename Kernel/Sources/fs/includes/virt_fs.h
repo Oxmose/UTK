@@ -176,13 +176,13 @@ typedef struct vfs_ftable_entry
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -227,4 +227,4 @@ OS_RETURN_E vfs_list_directory(const char* path);
 
 #endif /* #ifndef __FS_VIRT_FS_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

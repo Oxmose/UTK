@@ -104,13 +104,13 @@ typedef enum
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -121,5 +121,5 @@ typedef enum
 
 #endif /* #ifndef __LIB_KERNEL_ERROR_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/
 

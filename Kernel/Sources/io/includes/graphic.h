@@ -202,13 +202,13 @@ typedef struct
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -336,4 +336,4 @@ void graphic_console_write_keyboard(const char* str, const size_t len);
 
 #endif /* #ifndef __IO_GRAPHIC_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

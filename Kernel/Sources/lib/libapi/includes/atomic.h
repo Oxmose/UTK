@@ -126,13 +126,13 @@ typedef volatile uint32_t spinlock_t;
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -143,4 +143,4 @@ typedef volatile uint32_t spinlock_t;
 
 #endif /* #ifndef __LIB_ATOMIC_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

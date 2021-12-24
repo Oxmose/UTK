@@ -17,14 +17,17 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <stdint.h>   /* Generic int types */
 #include <memmgt.h>   /* Memory management */
 #include <critical.h> /* Critical sections */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
-
-/* Tests header file */
 #include <test_bank.h>
 
 /* Header file */
@@ -43,14 +46,27 @@
 /* None */
 
 /*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
 /** @brief BIOS call memory region */
 extern uint8_t _KERNEL_BIOS_MEMORY_BASE;
 
 /** @brief BIOS call memory region size */
 extern uint8_t _KERNEL_BIOS_MEMORY_SIZE;
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
+/* None */
 
 /*******************************************************************************
  * STATIC FUNCTIONS DECLARATIONS
@@ -63,7 +79,7 @@ extern uint8_t _KERNEL_BIOS_MEMORY_SIZE;
  * register buffer and returns the values in the same buffer.
  *
  * @param[in] intnum The interrupt line to call.
- * @param[int, out] regs The register buffer to get/set the call values and
+ * @param[in, out] regs The register buffer to get/set the call values and
  * returns.
  */
 extern void __bios_call(uint8_t intnum, bios_int_regs_t* regs);
@@ -72,11 +88,12 @@ extern void __bios_call(uint8_t intnum, bios_int_regs_t* regs);
  * FUNCTIONS
  ******************************************************************************/
 
-void bios_call(uint32_t intnum, bios_int_regs_t* regs)
+void bios_call(uint8_t intnum, bios_int_regs_t* regs)
 {
-	uint32_t    int_state;
+	uint32_t int_state;
 
 	ENTER_CRITICAL(int_state);
+
 	/* Map the RM core */
 	memory_mmap_direct((void*)&_KERNEL_BIOS_MEMORY_BASE,
 					   (void*)&_KERNEL_BIOS_MEMORY_BASE,
@@ -96,3 +113,5 @@ void bios_call(uint32_t intnum, bios_int_regs_t* regs)
 
 	EXIT_CRITICAL(int_state);
 }
+
+/************************************ EOF *************************************/

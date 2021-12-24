@@ -1,21 +1,75 @@
 /*******************************************************************************
+ * @file memmem.c
  *
- * File: memmem.c
+ * @see string.h
  *
- * Author: Alexy Torres Aurora Dugo
+ * @author Alexy Torres Aurora Dugo
  *
- * Date: 03/10/2017
+ * @date 03/10/2017
  *
- * Version: 1.0
+ * @version 1.0
  *
- * memmem function. To be used with string.h header.
+ * @brief memmem function. To be used with string.h header.
  *
+ * @details memmem function. To be used with string.h header.
+ *
+ * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#include <stddef.h> /* size_t */
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
+#include <stddef.h> /* Standard definitions */
+
+/* Configuration files */
+#include <config.h>
+#include <test_bank.h>
 
 /* Header file */
 #include <string.h>
+
+/*******************************************************************************
+ * CONSTANTS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * STRUCTURES AND TYPES
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
+/* None */
+
+/*******************************************************************************
+ * STATIC FUNCTIONS DECLARATIONS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
 
 void *memmem(const void *haystack, size_t n, const void *needle, size_t m)
 {
@@ -27,7 +81,7 @@ void *memmem(const void *haystack, size_t n, const void *needle, size_t m)
 
     if (1 != m) {
         size_t j, k, l;
-        
+
         if (x[0] == x[1]) {
             k = 2;
             l = 1;
@@ -56,3 +110,5 @@ void *memmem(const void *haystack, size_t n, const void *needle, size_t m)
 
     return NULL;
 }
+
+/************************************ EOF *************************************/

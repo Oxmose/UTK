@@ -18,14 +18,20 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <stddef.h>        /* Standard definitions */
 #include <stdint.h>        /* Generic int types */
 #include <string.h>        /* String manipulation */
 #include <panic.h>         /* Kernel panic */
 #include <kernel_output.h> /* Kernel output methods */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
+#include <test_bank.h>
 
 /* Header file */
 #include <queue.h>
@@ -43,17 +49,29 @@
 /* None */
 
 /*******************************************************************************
- * GLOBAL VARIABLES
+ * MACROS
  ******************************************************************************/
 
 /* None */
 
 /*******************************************************************************
- * STATIC FUNCTIONS DECLARATION
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
+/* None */
+
+/*******************************************************************************
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
 /* None */
-
 
 /*******************************************************************************
  * FUNCTIONS
@@ -455,3 +473,5 @@ OS_RETURN_E queue_remove(queue_t* queue, queue_node_t* node)
 
     return OS_NO_ERR;
 }
+
+/************************************ EOF *************************************/

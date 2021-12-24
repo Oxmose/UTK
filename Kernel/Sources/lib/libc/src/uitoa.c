@@ -1,29 +1,73 @@
 /*******************************************************************************
+ * @file uiota.c
  *
- * File: uiota.c
+ * @see string.h
  *
- * Author: Alexy Torres Aurora Dugo
+ * @author Alexy Torres Aurora Dugo
  *
- * Date: 08/01/2018
+ * @date 22/12/2021
  *
- * Version: 1.0
+ * @version 1.0
  *
- * uitoa function. To be used with stdlib.h header.
+ * @brief Source file template.
  *
+ * @details Source file template. Defines the source files structure and
+ * requirements.
+ *
+ * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
+
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
+#include <stdint.h> /* Generic integer types */
+
+/* Configuration files */
+#include <config.h>
+#include <test_bank.h>
 
 /* Header file */
 #include <string.h>
 
-/* Header include */
-#include <stdlib.h>
+/*******************************************************************************
+ * CONSTANTS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * STRUCTURES AND TYPES
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
 static char hex_table[] =
      {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+
+/*******************************************************************************
+ * STATIC FUNCTIONS DECLARATIONS
+ ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * FUNCTIONS
@@ -31,34 +75,35 @@ static char hex_table[] =
 
 void uitoa(uint64_t i, char* buf, uint32_t base)
 {
-
     char tmp[128];
 
     uint32_t pos  = 0;
- 	uint32_t opos = 0;
- 	uint32_t top  = 0;
+    uint32_t opos = 0;
+    uint32_t top  = 0;
 
- 	if (i == 0 || base > 16)
+    if (i == 0 || base > 16)
     {
- 		*buf++ = '0';
- 		*buf = '\0';
- 		return;
- 	}
+        *buf++ = '0';
+        *buf = '\0';
+        return;
+    }
 
     /* Fill temp buffer */
- 	while (i != 0)
+    while (i != 0)
     {
- 		tmp[pos++] = hex_table[i % base];
- 		i /= base;
- 	}
+        tmp[pos++] = hex_table[i % base];
+        i /= base;
+    }
 
- 	top = pos--;
+    top = pos--;
     /* Fill buffer */
- 	for (opos = 0; opos < top; --pos, ++opos)
+    for (opos = 0; opos < top; --pos, ++opos)
     {
- 		buf[opos] = tmp[pos];
+        buf[opos] = tmp[pos];
     }
 
     /* Null termitate */
- 	buf[opos] = 0;
+    buf[opos] = 0;
 }
+
+/************************************ EOF *************************************/

@@ -45,13 +45,13 @@
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -95,4 +95,4 @@ extern size_t __strxspn(const char *s, const char *map, int parity);
 
 #endif /* #ifndef __LIB_STRING_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

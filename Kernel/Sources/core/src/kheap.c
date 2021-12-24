@@ -20,16 +20,19 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <stdint.h>        /* Generic int types */
 #include <stdlib.h>        /* atoi */
 #include <string.h>        /* memset */
 #include <kernel_output.h> /* Kernel output manager */
 #include <critical.h>      /* Critical section manager */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
-
-/* Tests header file */
 #include <test_bank.h>
 
 /* Header file */
@@ -39,76 +42,137 @@
  * CONSTANTS
  ******************************************************************************/
 
-/* None */
+/** @brief Num size. */
+#define NUM_SIZES 32
+
+/** @brief Memory chunk alignement. */
+#define ALIGN 4
+
+/** @brief Chink minimal size. */
+#define MIN_SIZE sizeof(list_t)
+
+    /** @brief Header size. */
+#define HEADER_SIZE __builtin_offsetof(mem_chunk_t, data)
 
 /*******************************************************************************
  * STRUCTURES AND TYPES
  ******************************************************************************/
 
 /** @brief Kernel's heap allocator list node. */
-struct list
+typedef struct list
 {
     /** @brief Next node of the list. */
     struct list* next;
     /** @brief Previous node of the list. */
     struct list* prev;
-};
-
-/**
- * @brief Defines list_t type as a shorcut for struct list.
- */
-typedef struct list list_t;
+} list_t;
 
 /** @brief Kernel's heap allocator memory chunk representation. */
-struct mem_chunk
+typedef struct
 {
     /** @brief Memory chunk list. */
     list_t all;
 
     /** @brief Used flag. */
     int8_t used;
-    union
 
     /** @brief If used, the union contains the chunk's data, else a list of free
      * mem.
      */
-    {
+    union {
 	       uint8_t* data;
 	       list_t   free;
     };
-};
+} mem_chunk_t;
 
-/**
- * @brief Defines mem_chunk_t type as a shorcut for struct mem_chunk.
- */
-typedef struct mem_chunk mem_chunk_t;
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
 
-/** @brief Kernel's heap allocator settings. */
-enum heap_enum
-{
-    /** @brief Num size. */
-    NUM_SIZES   = 32,
+#define CONTAINER(C, l, v) ((C*)(((char*)v) - (uintptr_t)&(((C*)0)->l)))
 
-    /** @brief Memory chunk alignement. */
-    ALIGN       = 4,
+#define LIST_INIT(v, l) list_init(&v->l)
 
-    /** @brief Chink minimal size. */
-    MIN_SIZE    = sizeof(list_t),
+#define LIST_REMOVE_FROM(h, d, l)                           \
+{                                                           \
+    __typeof__(**h) **h_ = h, *d_ = d;                      \
+    list_t* head = &(*h_)->l;                               \
+    remove_from(&head, &d_->l);                             \
+    if (head == NULL)                                       \
+    {                                                       \
+          *h_ = NULL;                                       \
+    }                                                       \
+    else                                                    \
+    {                                                       \
+        *h_ = CONTAINER(__typeof__(**h), l, head);          \
+    }                                                       \
+}
 
-    /** @brief Header size. */
-    HEADER_SIZE = __builtin_offsetof(mem_chunk_t, data),
-};
+#define LIST_PUSH(h, v, l)                          \
+{                                                   \
+    __typeof__(*v) **h_ = h, *v_ = v;               \
+    list_t* head = &(*h_)->l;                       \
+    if (*h_ == NULL)                                \
+    {                                               \
+        head = NULL;                                \
+    }                                               \
+    push(&head, &v_->l);                            \
+    *h_ = CONTAINER(__typeof__(*v), l, head);       \
+}
+
+#define LIST_POP(h, l)                                  \
+__extension__                                           \
+({                                                      \
+    __typeof__(**h) **h_ = h;                           \
+    list_t* head = &(*h_)->l;                           \
+    list_t* res = pop(&head);                           \
+    if (head == NULL)                                   \
+    {                                                   \
+           *h_ = NULL;                                  \
+    }                                                   \
+    else                                                \
+    {                                                   \
+          *h_ = CONTAINER(__typeof__(**h), l, head);    \
+    }                                                   \
+    CONTAINER(__typeof__(**h), l, res);                 \
+})
+
+#define LIST_ITERATOR_BEGIN(h, l, it)                                       \
+{                                                                           \
+    __typeof__(*h) *h_ = h;                                                 \
+      list_t* last_##it = h_->l.prev, *iter_##it = &h_->l, *next_##it;      \
+    do                                                                      \
+    {                                                                       \
+           if (iter_##it == last_##it)                                      \
+         {                                                                  \
+             next_##it = NULL;                                              \
+           }                                                                \
+         else                                                               \
+         {                                                                  \
+             next_##it = iter_##it->next;                                   \
+         }                                                                  \
+         __typeof__(*h)* it = CONTAINER(__typeof__(*h), l, iter_##it);      \
+
+#define LIST_ITERATOR_END(it)                       \
+    }while((iter_##it = next_##it));                \
+}
+
+#define LIST_ITERATOR_REMOVE_FROM(h, it, l) LIST_REMOVE_FROM(h, iter_##it, l)
 
 /*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Heap position in memory */
+/************************* Imported global variables **************************/
 /** @brief Start address of the kernel's heap. */
 extern uint8_t _KERNEL_HEAP_BASE;
 /** @brief End address of the kernel's heap. */
 extern uint8_t _KERNEL_HEAP_SIZE;
 
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
 /** @brief Kernel's heap initialization state. */
 static bool_t init = FALSE;
 
@@ -128,7 +192,7 @@ static uint32_t kheap_init_free;
 static uint32_t mem_meta;
 
 /*******************************************************************************
- * STATIC FUNCTIONS DECLARATION
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
 inline static void list_init(list_t* node);
@@ -181,76 +245,6 @@ inline static void push_free(mem_chunk_t *chunk);
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
-
-#define CONTAINER(C, l, v) ((C*)(((char*)v) - (uintptr_t)&(((C*)0)->l)))
-
-#define LIST_INIT(v, l) list_init(&v->l)
-
-#define LIST_REMOVE_FROM(h, d, l)                        \
-{                                                        \
-    __typeof__(**h) **h_ = h, *d_ = d;                    \
-      list_t* head = &(*h_)->l;                            \
-      remove_from(&head, &d_->l);                            \
-      if (head == NULL)                                   \
-    {                                                    \
-          *h_ = NULL;                                        \
-      }                                                   \
-    else                                                \
-    {                                                    \
-        *h_ = CONTAINER(__typeof__(**h), l, head);        \
-    }                                                    \
-}
-
-#define LIST_PUSH(h, v, l)                      \
-{                                              \
-      __typeof__(*v) **h_ = h, *v_ = v;          \
-      list_t* head = &(*h_)->l;                  \
-    if (*h_ == NULL)                          \
-    {                                         \
-         head = NULL;                             \
-    }                                         \
-      push(&head, &v_->l);                      \
-      *h_ = CONTAINER(__typeof__(*v), l, head); \
-}
-
-#define LIST_POP(h, l)                               \
-__extension__                                      \
-({                                                   \
-    __typeof__(**h) **h_ = h;                       \
-      list_t* head = &(*h_)->l;                       \
-      list_t* res = pop(&head);                       \
-      if (head == NULL)                              \
-    {                                               \
-           *h_ = NULL;                               \
-      }                                              \
-    else                                           \
-    {                                               \
-          *h_ = CONTAINER(__typeof__(**h), l, head); \
-      }                                               \
-      CONTAINER(__typeof__(**h), l, res);               \
-})
-
-#define LIST_ITERATOR_BEGIN(h, l, it)                                    \
-{                                                                        \
-    __typeof__(*h) *h_ = h;                                                \
-      list_t* last_##it = h_->l.prev, *iter_##it = &h_->l, *next_##it;    \
-    do                                                                  \
-    {                                                                    \
-           if (iter_##it == last_##it)                                    \
-         {                                                                \
-             next_##it = NULL;                                            \
-           }                                                              \
-         else                                                           \
-         {                                                                \
-             next_##it = iter_##it->next;                                \
-         }                                                                \
-         __typeof__(*h)* it = CONTAINER(__typeof__(*h), l, iter_##it);  \
-
-#define LIST_ITERATOR_END(it)                        \
-    }while((iter_##it = next_##it));                \
-}
-
-#define LIST_ITERATOR_REMOVE_FROM(h, it, l) LIST_REMOVE_FROM(h, iter_##it, l)
 
 inline static void list_init(list_t* node)
 {
@@ -583,3 +577,5 @@ uint32_t kheap_get_free(void)
 {
     return mem_free;
 }
+
+/************************************ EOF *************************************/

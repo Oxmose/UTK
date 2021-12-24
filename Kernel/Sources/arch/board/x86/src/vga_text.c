@@ -18,6 +18,11 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <stdint.h>          /* Generic int types */
 #include <string.h>          /* String manipualtion */
 #include <cpu.h>             /* CPU port manipulation */
@@ -27,10 +32,8 @@
 #include <graphic.h>         /* Graphic driver manager */
 #include <panic.h>           /* Kernel panic */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
-
-/* Tests header file */
 #include <test_bank.h>
 
 /* Header file */
@@ -67,9 +70,27 @@
 /* None */
 
 /*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+#define VGA_ASSERT(COND, MSG, ERROR) {                      \
+    if((COND) == FALSE)                                     \
+    {                                                       \
+        PANIC(ERROR, "VGA", MSG, TRUE);                     \
+    }                                                       \
+}
+
+/*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
 /* Screen runtime parameters */
 /** @brief Stores the curent screen's color scheme. */
 static colorscheme_t screen_scheme = {
@@ -78,12 +99,12 @@ static colorscheme_t screen_scheme = {
 };
 
 /** @brief Stores the curent screen's cursor settings. */
-static cursor_t      screen_cursor;
+static cursor_t screen_cursor;
 /**
  * @brief Stores the curent screen's cursor settings ofthe last printed
  * character.
  */
-static cursor_t      last_printed_cursor;
+static cursor_t last_printed_cursor;
 
 /* Set the last column printed with a char */
 /**
@@ -112,7 +133,7 @@ static kernel_graphic_driver_t vga_text_driver = {
 };
 
 /*******************************************************************************
- * STATIC FUNCTIONS DEFINITIONS
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
 /**
@@ -130,17 +151,6 @@ inline static void vga_print_char(const uint32_t line,
                                   const char character);
 
 /**
- * @brief Processes the character in parameters.
- *
- * @details Check the character nature and code. Corresponding to the
- * character's code, an action is taken. A regular character will be printed
- * whereas \n will create a line feed.
- *
- * @param[in] character The character to process.
- */
-static void vga_process_char(const char character);
-
-/**
  * @brief Returns the VGA frame buffer virtual address.
  *
  * @details Returns the VGA frame buffer virtual address correponding to a
@@ -155,16 +165,20 @@ static void vga_process_char(const char character);
 inline static uint16_t* vga_get_framebuffer(const uint32_t line,
                                             const uint32_t column);
 
+/**
+ * @brief Processes the character in parameters.
+ *
+ * @details Check the character nature and code. Corresponding to the
+ * character's code, an action is taken. A regular character will be printed
+ * whereas \n will create a line feed.
+ *
+ * @param[in] character The character to process.
+ */
+static void vga_process_char(const char character);
+
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
-
-#define VGA_ASSERT(COND, MSG, ERROR) {                      \
-    if((COND) == FALSE)                                     \
-    {                                                       \
-        PANIC(ERROR, "VGA", MSG, TRUE);                     \
-    }                                                       \
-}
 
 inline static void vga_print_char(const uint32_t line,
                                   const uint32_t column,
@@ -189,7 +203,7 @@ inline static void vga_print_char(const uint32_t line,
 
 static void vga_process_char(const char character)
 {
-#if KERNEL_LOG_LEVEL >= DEBUG_LOG_LEVEL
+#if DEBUG_LOG_UART
     /* Write on serial */
     uart_put_char(character);
 #endif
@@ -514,3 +528,5 @@ const kernel_graphic_driver_t* vga_text_get_driver(void)
 {
     return &vga_text_driver;
 }
+
+/************************************ EOF *************************************/

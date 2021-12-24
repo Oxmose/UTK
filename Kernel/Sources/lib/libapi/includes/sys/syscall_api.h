@@ -97,13 +97,13 @@ typedef struct
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -126,4 +126,4 @@ OS_RETURN_E syscall_do(const SYSCALL_FUNCTION_E func, void* params);
 
 #endif /* #ifndef __LIB_SYSCALL_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

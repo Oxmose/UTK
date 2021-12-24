@@ -46,13 +46,13 @@
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -131,4 +131,4 @@ int vsnprintf(char *__dest, unsigned int __size, const char *__format,
 
 #endif /* #ifndef __LIB_STDIO_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

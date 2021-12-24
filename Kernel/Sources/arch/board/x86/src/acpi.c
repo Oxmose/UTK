@@ -16,6 +16,11 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <stdint.h>        /* Generic int types */
 #include <string.h>        /* String manipualtion */
 #include <kernel_output.h> /* Kernel output methods */
@@ -28,10 +33,8 @@
 #include <lapic.h>         /* LAPIC driver */
 #include <stddef.h>        /* Standard definitions */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
-
-/* Tests header file */
 #include <test_bank.h>
 
 /* Header file */
@@ -296,7 +299,7 @@ typedef struct local_apic_nmi
 } __attribute__((__packed__)) local_apic_nmi_t;
 
 /** @brief ACPI mapping tree node. */
-struct acpi_page_tree
+typedef struct acpi_page_tree
 {
     /** @brief Left node. */
     struct acpi_page_tree* left;
@@ -305,31 +308,46 @@ struct acpi_page_tree
 
     /** @brief Address storedi n this node. */
     uintptr_t address;
-};
+} acpi_page_tree_t;
 
-/** @brief Short name for struct acpi_page_tree. */
-typedef struct acpi_page_tree acpi_page_tree_t;
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+#define ACPI_ASSERT(COND, MSG, ERROR) {                     \
+    if((COND) == FALSE)                                     \
+    {                                                       \
+        PANIC(ERROR, "ACPI", MSG, TRUE);                    \
+    }                                                       \
+}
 
 /*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* CPU informations */
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
+
 /** @brief Stores the number of detected CPU. */
 static uint32_t cpu_count;
 
 /** @brief Stores the detected CPUs' lapics. */
 static vector_t* cpu_lapics;
 
-/* IO APIC */
 /** @brief Stores the number of detected IO APIC. */
 static uint32_t io_apic_count;
+
 /** @brief Stores the detected IO APICs' information table. */
 static vector_t* io_apics;
 
-/* ACPI Tables pointers */
 /** @brief Stores the MADT descriptor's address in memory. */
 static acpi_madt_t* madt;
+
 /** @brief Stores the DSDT descriptor's address in memory. */
 static acpi_dsdt_t* dsdt;
 
@@ -486,13 +504,6 @@ static void acpi_parse_rsdp(rsdp_descriptor_t* rsdp_desc);
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
-
-#define ACPI_ASSERT(COND, MSG, ERROR) {                     \
-    if((COND) == FALSE)                                     \
-    {                                                       \
-        PANIC(ERROR, "ACPI", MSG, TRUE);                    \
-    }                                                       \
-}
 
 static bool_t walk_acpi_tree(acpi_page_tree_t* node, const uintptr_t addr)
 {
@@ -1230,3 +1241,5 @@ const vector_t* acpi_get_io_apics(void)
 {
     return io_apics;
 }
+
+/************************************ EOF *************************************/

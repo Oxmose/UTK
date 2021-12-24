@@ -126,13 +126,13 @@ typedef struct
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -296,4 +296,4 @@ void kernel_interrupt_set_irq_eoi(const uint32_t irq_number);
 
 #endif /* #ifndef __CORE_INTERRUPTS_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

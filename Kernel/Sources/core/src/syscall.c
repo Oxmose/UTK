@@ -17,6 +17,11 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <stdint.h>             /* Generic int types */
 #include <interrupt_settings.h> /* Interrupt settings */
 #include <cpu_api.h>            /* CPU API */
@@ -26,10 +31,9 @@
 #include <panic.h>              /* Kernel panic */
 #include <memmgt.h>             /* Memory management API */
 #include <futex.h>              /* Futex API */
-/* UTK configuration file */
-#include <config.h>
 
-/* Tests header file */
+/* Configuration files */
+#include <config.h>
 #include <test_bank.h>
 
 /* Header file */
@@ -48,9 +52,27 @@
 /* None */
 
 /*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+#define SYSCALL_ASSERT(COND, MSG, ERROR) {                    \
+    if((COND) == FALSE)                                       \
+    {                                                         \
+        PANIC(ERROR, "SYSCALL", MSG, TRUE);                   \
+    }                                                         \
+}
+
+/*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
 /** @brief Stores the handlers for each system call. */
 static syscall_handler_t kernel_interrupt_handlers[SYSCALL_MAX_ID] = {
     {sched_fork_process},             /* SYSCALL_FORK */
@@ -64,7 +86,7 @@ static syscall_handler_t kernel_interrupt_handlers[SYSCALL_MAX_ID] = {
 };
 
 /*******************************************************************************
- * STATIC FUNCTIONS DECLARATION
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
 /**
@@ -85,13 +107,6 @@ static void syscall_handler(cpu_state_t *cpu_state,
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
-
-#define SYSCALL_ASSERT(COND, MSG, ERROR) {                    \
-    if((COND) == FALSE)                                       \
-    {                                                         \
-        PANIC(ERROR, "SYSCALL", MSG, TRUE);                   \
-    }                                                         \
-}
 
 static void syscall_handler(cpu_state_t *cpu_state,
                             uintptr_t int_id,
@@ -134,3 +149,5 @@ void syscall_init(void)
                    "Could not initialize system call manager",
                    err);
 }
+
+/************************************ EOF *************************************/

@@ -17,7 +17,11 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
 
+/* Included headers */
 #include <stdint.h>             /* Generic int types */
 #include <stddef.h>             /* Standard definitions */
 #include <string.h>             /* String manipulation */
@@ -38,10 +42,8 @@
 #include <syscall.h>            /* System call manager */
 #include <kernel_error.h>       /* Kernel error codes */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
-
-/* Test header */
 #include <test_bank.h>
 
 /* Header file */
@@ -68,7 +70,7 @@
 /** @brief Resource structure used by the scheduler to store the threads'
  * resources.
  */
-struct sched_resource
+typedef struct
 {
     /** @brief The data representing the resource. Its type depends on the
      * manager that uses the resource.
@@ -85,17 +87,30 @@ struct sched_resource
      * parameter to the cleanup function.
      */
     void (*cleanup)(void* data);
-};
+} sched_resource_t;
 
-/**
- * @brief Defines sched_resource_t type as a shorcut for struct sched_resource.
- */
-typedef struct sched_resource sched_resource_t;
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+#define SCHED_ASSERT(COND, MSG, ERROR) {                    \
+    if((COND) == FALSE)                                     \
+    {                                                       \
+        PANIC(ERROR, "SCHED", MSG, TRUE);                   \
+    }                                                       \
+}
 
 /*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
 /** @brief The last TID given by the kernel. */
 static volatile uint32_t last_given_tid;
 
@@ -130,13 +145,10 @@ static volatile uint64_t schedule_count;
 
 /*******************************************************
  * THREAD TABLES
+ * FIFO:
+ *     - active_threads_table
  * Sorted by priority:
  *     - sleeping_threads: thread wakeup time
- *
- * Global thread table used to browse the threads, even those
- * kept in a mutex / semaphore or other structure and that do
- * not appear in the three other tables.
- *
  *******************************************************/
 /** @brief Active threads tables. The array is sorted by priority. */
 static kqueue_t* active_threads_table[KERNEL_LOWEST_PRIORITY + 1];
@@ -147,7 +159,7 @@ static kqueue_t* active_threads_table[KERNEL_LOWEST_PRIORITY + 1];
 static kqueue_t* sleeping_threads_table;
 
 /*******************************************************************************
- * STATIC FUNCTIONS DECLARATION
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
 /**
@@ -270,13 +282,6 @@ static void schedule_int(cpu_state_t* cpu_state,
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
-
-#define SCHED_ASSERT(COND, MSG, ERROR) {                    \
-    if((COND) == FALSE)                                     \
-    {                                                       \
-        PANIC(ERROR, "SCHED", MSG, TRUE);                   \
-    }                                                       \
-}
 
 static void thread_wrapper(void)
 {
@@ -1440,3 +1445,5 @@ void sched_set_thread_params(const SYSCALL_FUNCTION_E func, void* params)
         func_params->error = OS_ERR_FORBIDEN_PRIORITY;
     }
 }
+
+/************************************ EOF *************************************/

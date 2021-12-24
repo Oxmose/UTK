@@ -120,13 +120,13 @@
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -258,4 +258,4 @@ const kernel_graphic_driver_t* vga_text_get_driver(void);
 
 #endif /* #ifndef __X86_VGA_TEXT_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

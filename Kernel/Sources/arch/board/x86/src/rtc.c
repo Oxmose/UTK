@@ -17,6 +17,11 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <cpu.h>                /* CPU manipulation */
 #include <kernel_output.h>      /* Kernel output methods */
 #include <interrupts.h>         /* Interrupts management */
@@ -29,13 +34,11 @@
 #include <kernel_error.h>       /* Kernel error codes */
 #include <rt_clock.h>           /* BSP RTC declarations */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
-
-/* Tests header file */
 #include <test_bank.h>
 
-/* Header include */
+/* Header file */
 #include <rtc.h>
 
 /*******************************************************************************
@@ -49,7 +52,6 @@
 #define RTC_MIN_FREQ 2
 /** @brief RTC maximal frequency. */
 #define RTC_MAX_FREQ 8192
-
 /** @brief RTC quartz frequency. */
 #define RTC_QUARTZ_FREQ 32768
 
@@ -95,9 +97,27 @@
 /* None */
 
 /*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+#define RTC_ASSERT(COND, MSG, ERROR) {                      \
+    if((COND) == FALSE)                                     \
+    {                                                       \
+        PANIC(ERROR, "RTC", MSG, TRUE);                     \
+    }                                                       \
+}
+
+/*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
 /** @brief Stores the real day time in seconds. */
 static uint32_t day_time;
 
@@ -123,7 +143,7 @@ static kernel_timer_t rtc_driver = {
 };
 
 /*******************************************************************************
- * STATIC FUNCTIONS DEFINITIONS
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
 /**
@@ -143,13 +163,6 @@ static void dummy_handler(cpu_state_t* cpu_state,
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
-
-#define RTC_ASSERT(COND, MSG, ERROR) {                      \
-    if((COND) == FALSE)                                     \
-    {                                                       \
-        PANIC(ERROR, "RTC", MSG, TRUE);                     \
-    }                                                       \
-}
 
 static void dummy_handler(cpu_state_t* cpu_state,
                           uintptr_t int_id,
@@ -522,3 +535,5 @@ const kernel_timer_t* rtc_get_driver(void)
 {
     return &rtc_driver;
 }
+
+/************************************ EOF *************************************/

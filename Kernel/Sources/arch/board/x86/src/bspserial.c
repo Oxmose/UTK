@@ -21,6 +21,11 @@
  * @warning Only COM1 and COM2 are initialized for input.
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <stdint.h>        /* Generic int types */
 #include <string.h>        /* String manipulation */
 #include <cpu.h>           /* CPU manipulation */
@@ -29,13 +34,11 @@
 #include <uart.h>          /* UART main header */
 #include <graphic.h>       /* Graphic driver manager */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
-
-/* Tests header file */
 #include <test_bank.h>
 
-/* Header */
+/* Header file */
 #include <uart.h>
 
 /*******************************************************************************
@@ -162,7 +165,7 @@
 /** @brief Serial baudrate enumation. Enumerates all the supported baudrates.
  * The value of the enumeration is the transmission rate divider.
  */
-enum SERIAL_BAUDRATE
+typedef enum
 {
     /** @brief Baudrate 50Bd. */
     BAURDATE_50     = 2304,
@@ -196,17 +199,25 @@ enum SERIAL_BAUDRATE
     BAUDRATE_57600  = 2,
     /** @brief Baudrate 115200Bd. */
     BAUDRATE_115200 = 1,
-};
+} SERIAL_BAUDRATE_E;
 
-/**
- * @brief Defines SERIAL_BAUDRATE_E type as a shorcut for enum SERIAL_BAUDRATE.
- */
-typedef enum SERIAL_BAUDRATE SERIAL_BAUDRATE_E;
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
 /**
  * @brief Serial text driver instance.
  */
@@ -225,7 +236,7 @@ static kernel_graphic_driver_t uart_text_driver =
 };
 
 /*******************************************************************************
- * STATIC FUNCTIONS DECLARATION
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
 /**
@@ -463,3 +474,5 @@ const kernel_graphic_driver_t* uart_get_driver(void)
 {
     return &uart_text_driver;
 }
+
+/************************************ EOF *************************************/

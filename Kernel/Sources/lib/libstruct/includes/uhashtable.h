@@ -112,13 +112,13 @@ typedef struct
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -207,4 +207,4 @@ OS_RETURN_E uhashtable_remove(uhashtable_t* table,
 
 #endif /* #ifndef __LIB_UHASHTABLE_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

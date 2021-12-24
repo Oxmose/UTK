@@ -6,4 +6,4 @@ DEP_INCLUDES += -I ../../arch/board/includes
 DEP_INCLUDES += -I ../libc/includes
 DEP_INCLUDES += -I ../libapi/includes
 DEP_INCLUDES += -I includes
-DEP_INCLUDES += -I ../tests/includes
+DEP_INCLUDES += -I ../../tests/includes

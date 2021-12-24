@@ -1,45 +1,93 @@
 /*******************************************************************************
+ * @file iota.c
  *
- * File: iota.c
+ * @see stdlib.h
  *
- * Author: Alexy Torres Aurora Dugo
+ * @author Alexy Torres Aurora Dugo
  *
- * Date: 08/01/2018
+ * @date 08/01/2018
  *
- * Version: 1.0
+ * @version 1.0
  *
- * itoa function. To be used with stdlib.h header.
+ * @brief itoa function. To be used with stdlib.h header.
  *
+ * @details itoa function. To be used with stdlib.h header.
+ *
+ * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
-#include <stddef.h> /* size_t */
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
 
-/* Header include */
+/* Included headers */
+#include <stdint.h> /* Generic integer definitions */
+
+/* Configuration files */
+#include <config.h>
+#include <test_bank.h>
+
+/* Header file */
 #include <stdlib.h>
+
+/*******************************************************************************
+ * CONSTANTS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * STRUCTURES AND TYPES
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
+/* None */
+
+/*******************************************************************************
+ * STATIC FUNCTIONS DECLARATIONS
+ ******************************************************************************/
+
+/* None */
+
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
 
- void itoa(int64_t i, char* buf, uint32_t base)
- {
-     /* If base is unknown just return */
-     if (base > 16)
-     {
-         return;
-     }
+void itoa(int64_t i, char* buf, uint32_t base)
+{
+    /* If base is unknown just return */
+    if (base > 16)
+    {
+        return;
+    }
 
-     /* Check sign */
-     if (base == 10 && i < 0)
-     {
+    /* Check sign */
+    if (base == 10 && i < 0)
+    {
         *buf++ = '-';
         i *= -1;
-     }
+    }
 
-     /* To the job */
-     uitoa(i, buf, base);
- }
+    /* To the job */
+    uitoa(i, buf, base);
+}
+
+/************************************ EOF *************************************/

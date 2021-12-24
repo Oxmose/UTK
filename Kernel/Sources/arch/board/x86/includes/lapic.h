@@ -55,13 +55,13 @@
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -210,4 +210,4 @@ const kernel_timer_t* lapic_timer_get_driver(void);
 
 #endif /* #ifndef __X86_LAPIC_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

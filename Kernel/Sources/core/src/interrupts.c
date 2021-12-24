@@ -17,7 +17,11 @@
  *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
 
+/* Included headers */
 #include <stdint.h>             /* Generic int types */
 #include <stddef.h>             /* Standard definitions */
 #include <string.h>             /* String manipulation */
@@ -30,10 +34,8 @@
 #include <critical.h>           /* Critical sections */
 #include <scheduler.h>          /* Kernel scheduler */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
-
-/* Tests header file */
 #include <test_bank.h>
 
 /* Header file */
@@ -52,14 +54,25 @@
 /* None */
 
 /*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
 /** @brief Stores the handlers for each interrupt. not static because used
  * by the exceptions module.
  */
 custom_handler_t kernel_interrupt_handlers[INT_ENTRY_COUNT];
 
+/************************** Static global variables ***************************/
 /** @brief The current interrupt driver to be used by the kernel. */
 static interrupt_driver_t interrupt_driver;
 
@@ -69,7 +82,7 @@ static interrupt_driver_t interrupt_driver;
 static uint32_t spurious_interrupt;
 
 /*******************************************************************************
- * STATIC FUNCTIONS DECLARATION
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
 static void init_driver_set_irq_mask(const uint32_t irq_number,
@@ -410,4 +423,4 @@ void kernel_interrupt_set_irq_eoi(const uint32_t irq_number)
     interrupt_driver.driver_set_irq_eoi(irq_number);
 }
 
-
+/************************************ EOF *************************************/

@@ -18,18 +18,21 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <stdint.h>    /* Generic int types */
 #include <stddef.h>    /* Standard definitions */
 #include <multiboot.h> /* Multiboot definitions */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
-
-/* Tests header file */
 #include <test_bank.h>
 
-#pragma GCC push_options
-#pragma GCC optimize ("O0")
+/* Header file */
+/* None */
 
 /*******************************************************************************
  * CONSTANTS
@@ -38,19 +41,39 @@
 /** @brief VGA frame buffer base physical address. */
 #define VGA_TEXT_FRAMEBUFFER 0xB8000
 
+#define SHT_SYMTAB 2
+#define SHT_STRTAB 3
+
 /*******************************************************************************
  * STRUCTURES AND TYPES
  ******************************************************************************/
 
-/* None. */
+/* TODO: Remove thins once the ELF loader is implemented */
+typedef struct
+{
+    uint32_t sh_name;
+    uint32_t sh_type;
+    uint32_t sh_flags;
+    uint32_t sh_addr;
+    uint32_t sh_offset;
+    uint32_t sh_size;
+    uint32_t sh_link;
+    uint32_t sh_info;
+    uint32_t sh_addralign;
+    uint32_t sh_entsize;
+} elf_section_header_t;
+
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-static char hex_table[] =
-     {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
-
+/************************* Imported global variables **************************/
 extern uintptr_t _kernel_multiboot_ptr;
 
 extern uint8_t* _KERNEL_MULTIBOOT_MEM_BASE;
@@ -70,6 +93,12 @@ extern uintptr_t _KERNEL_STRTAB_SIZE;
 
 extern uint8_t* _KERNEL_SYMTAB_FREE_START;
 
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
+static char hex_table[] =
+     {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 
 static uint16_t* current_framebuffer_addr = (uint16_t*)VGA_TEXT_FRAMEBUFFER;
 
@@ -78,7 +107,6 @@ static bool_t initrd_found;
 /*******************************************************************************
  * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
-
 static void uitoa(uint32_t i, char* buf, uint32_t base);
 
 static void copy_multiboot(void);
@@ -92,6 +120,10 @@ static uint8_t cmp_str(const char* str1, const char* str2, uint32_t size);
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
+
+/* This file should not be optimized */
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
 
 static uint8_t cmp_str(const char* str1, const char* str2, uint32_t size)
 {
@@ -272,28 +304,10 @@ static void copy_module(struct multiboot_tag_module* module_tag,
     }
 }
 
-
-struct elf_section_header
-{
-    uint32_t sh_name;
-    uint32_t sh_type;
-    uint32_t sh_flags;
-    uint32_t sh_addr;
-    uint32_t sh_offset;
-    uint32_t sh_size;
-    uint32_t sh_link;
-    uint32_t sh_info;
-    uint32_t sh_addralign;
-    uint32_t sh_entsize;
-};
-
-#define SHT_SYMTAB 2
-#define SHT_STRTAB 3
-
 static void copy_symbols(struct multiboot_tag_elf_sections* elf_tag)
 {
     char buff[32] = {0};
-    struct elf_section_header* header;
+    elf_section_header_t* header;
     uint32_t i;
     uint32_t j;
     uint8_t* copy_addr;
@@ -322,7 +336,7 @@ static void copy_symbols(struct multiboot_tag_elf_sections* elf_tag)
     copy_addr = ((uint8_t*)&_KERNEL_SYMTAB_FREE_START) - KERNEL_MEM_OFFSET;
     for(i = 0; i < elf_tag->num; ++i)
     {
-        header = ((struct elf_section_header*)elf_tag->sections) + i;
+        header = ((elf_section_header_t*)elf_tag->sections) + i;
         /* We copy the symbols only */
         if(header->sh_type == SHT_SYMTAB)
         {
@@ -366,7 +380,7 @@ static void copy_symbols(struct multiboot_tag_elf_sections* elf_tag)
     /* Get the tring table */
     for(i = 0; i < elf_tag->num; ++i)
     {
-        header = ((struct elf_section_header*)elf_tag->sections) + i;
+        header = ((elf_section_header_t*)elf_tag->sections) + i;
         if(header->sh_type == SHT_STRTAB && i == symtab_link)
         {
             *strtab_addr = (uintptr_t)copy_addr;
@@ -502,3 +516,5 @@ void kernel_preboot(void)
 }
 
 #pragma GCC pop_options
+
+/************************************ EOF *************************************/

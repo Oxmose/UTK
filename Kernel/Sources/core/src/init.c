@@ -16,26 +16,27 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <stdint.h>        /* Generic int types */
 #include <stddef.h>        /* Standard definitions */
 #include <kernel_output.h> /* Kernel output methods */
-#include <scheduler.h>     /* Kernel scheduler */
 #include <panic.h>         /* Kernel panic */
+#include <sys/process.h>   /* Fork API */
+#include <rt_clock.h>      /* RTC API */
+#include <vga_text.h>      /* VGA colors */
+#include <scheduler.h>     /* Scheduler API */
 #include <cpu_api.h>       /* CPU API */
-#include <panic.h>         /* Kernel panic */
 
-#include <init_rd.h>
-#include <sys/process.h>
-#include <rt_clock.h>
-
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
-
 #include <test_bank.h>
 
 /* Header file */
-#include <init.h>
-
+#include <init_rd.h>
 
 /*******************************************************************************
  * CONSTANTS
@@ -50,20 +51,7 @@
 /* None */
 
 /*******************************************************************************
- * GLOBAL VARIABLES
- ******************************************************************************/
-
-/** @brief Count of the number of times the idle thread was scheduled. */
-static volatile uint64_t idle_sched_count = 0;
-
-/*******************************************************************************
- * STATIC FUNCTIONS DECLARATION
- ******************************************************************************/
-
-/* None */
-
-/*******************************************************************************
- * FUNCTIONS
+ * MACROS
  ******************************************************************************/
 
 #define INIT_ASSERT(COND, MSG, ERROR) {                     \
@@ -73,7 +61,31 @@ static volatile uint64_t idle_sched_count = 0;
     }                                                       \
 }
 
-#if 0
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
+/** @brief Count of the number of times the idle thread was scheduled. */
+static volatile uint64_t idle_sched_count = 0;
+
+/*******************************************************************************
+ * STATIC FUNCTIONS DECLARATIONS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
+
+#if 1
 
 #include <graphic.h>
 #include <string.h>
@@ -124,13 +136,12 @@ void init_shell(void)
     /* Wait in loop */
     while(1)
     {
-        update_shell(5);
-        sched_sleep(200);
+        update_shell(2);
+        sched_sleep(500);
     }
 }
 
 #endif
-
 
 void* init_sys(void* args)
 {
@@ -168,9 +179,15 @@ void* init_sys(void* args)
     else
     {
         /* Here we should load an elf and start another program */
-        //init_shell();
+        init_shell();
         while(1)
         {
+            kernel_printf("\n");
+            kernel_printf("\rCannot find any process panic in 3");
+            sched_sleep(1000);
+            kernel_printf("\rCannot find any process panic in 2");
+            sched_sleep(1000);
+            kernel_printf("\rCannot find any process panic in 1");
             sched_sleep(1000);
             INIT_ASSERT(FALSE,
                         "No process to launch",
@@ -208,3 +225,5 @@ uint64_t sched_get_idle_schedule_count(void)
 {
     return idle_sched_count;
 }
+
+/************************************ EOF *************************************/

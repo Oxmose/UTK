@@ -48,13 +48,13 @@
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -183,4 +183,4 @@ inline static uint64_t mapped_io_read_64(const volatile void* addr)
 
 #endif /* #ifndef __IO_MMIO_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

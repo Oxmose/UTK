@@ -50,13 +50,13 @@
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -135,4 +135,4 @@ const interrupt_driver_t* pic_get_driver(void);
 
 #endif /* #ifndef __X86_PIC_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

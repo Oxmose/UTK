@@ -53,13 +53,13 @@
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -140,4 +140,4 @@ const interrupt_driver_t* io_apic_get_driver(void);
 
 #endif /* #ifndef __X86_IO_APIC_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

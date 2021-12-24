@@ -17,6 +17,14 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
+/* None */
+
+/* Configuration files */
 #include <stdint.h>        /* Generic int types */
 #include <kqueue.h>        /* Kernel queues lib */
 #include <uhashtable.h>    /* Hash tables */
@@ -26,12 +34,6 @@
 #include <memmgt.h>        /* Memory management API */
 #include <kernel_output.h> /* Kernel error output */
 #include <string.h>        /* Memory manipualtion */
-
-/* UTK configuration file */
-#include <config.h>
-
-/* Tests header file */
-#include <test_bank.h>
 
 /* Header file */
 #include <futex.h>
@@ -47,7 +49,7 @@
  ******************************************************************************/
 
 /** @brief Futex data structure definition. */
-struct futex_data
+typedef struct
 {
     /** @brief Futex waiting value */
     uint32_t wait;
@@ -60,30 +62,20 @@ struct futex_data
 
     /** @brief Contains the resource node in the resource list */
     kqueue_node_t* resource_node;
-};
-
-/**
- * @brief Defines futex_data_t type as a shorcut for struct futex_data.
- */
-typedef struct futex_data futex_data_t;
+} futex_data_t;
 
 /** @brief Futex thread resource structure, used for cleanup. */
-struct futex_resource
+typedef struct
 {
     /** @brief The futex Id */
     uintptr_t futex_id;
 
     /** @brief The futex data create when the futex was used. */
     futex_data_t* associated_data;
-};
-
-/**
- * @brief Defines futex_data_t type as a shorcut for struct futex_data.
- */
-typedef struct futex_resource futex_resource_t;
+} futex_resource_t;
 
 /** @brief Futex recover data structure, used for cleanup. */
-struct recover_data
+typedef struct
 {
     /** @brief Created futex queue, NULL is none was created. */
     kqueue_t* created_futex_queue;
@@ -102,26 +94,47 @@ struct recover_data
 
     /** @brief Contains the res node created, NULL if not created. */
     kqueue_node_t* created_res_node;
-};
+} recover_data_t;
 
-/**
- * @brief Defines recover_data_t type as a shorcut for struct recover_data.
- */
-typedef struct recover_data recover_data_t;
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
 
+#define FUTEX_ASSERT(COND, MSG, ERROR) {                    \
+    if((COND) == FALSE)                                     \
+    {                                                       \
+        PANIC(ERROR, "FUTEX", MSG, TRUE);                   \
+    }                                                       \
+}
+
+#define CHECK_ERROR_STATE(err, condition) {                         \
+    if(err != OS_NO_ERR || (condition))                             \
+    {                                                               \
+        futex_recover(func_params, &recover_data, err);             \
+        EXIT_CRITICAL(int_state)                                    \
+        return;                                                     \
+    }                                                               \
+}
 
 /*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
 /** @brief Futex initialization status. */
-bool_t is_init = FALSE;
+static bool_t is_init = FALSE;
 
 /** @brief Futex hashtable that contains the lists of waiting threads. */
-uhashtable_t* futex_table;
+static uhashtable_t* futex_table;
 
 /*******************************************************************************
- * STATIC FUNCTIONS DECLARATION
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
 /**
@@ -152,22 +165,6 @@ static void futex_cleanup(void* futex_resource);
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
-
-#define FUTEX_ASSERT(COND, MSG, ERROR) {                    \
-    if((COND) == FALSE)                                     \
-    {                                                       \
-        PANIC(ERROR, "FUTEX", MSG, TRUE);                   \
-    }                                                       \
-}
-
-#define CHECK_ERROR_STATE(err, condition) {                         \
-    if(err != OS_NO_ERR || (condition))                             \
-    {                                                               \
-        futex_recover(func_params, &recover_data, err);             \
-        EXIT_CRITICAL(int_state)                                    \
-        return;                                                     \
-    }                                                               \
-}
 
 static void futex_recover(futex_t* futex,
                           recover_data_t* recover_data,
@@ -511,3 +508,5 @@ void futex_wake(const SYSCALL_FUNCTION_E func, void* params)
 
     EXIT_CRITICAL(int_state);
 }
+
+/************************************ EOF *************************************/

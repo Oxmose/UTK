@@ -3,6 +3,7 @@
 #if FORK_TEST  == 1
 #include <kernel_output.h>
 #include <sys/process.h>
+#include <scheduler.h>
 
 void fork_test(void)
 {
@@ -31,7 +32,7 @@ void fork_test(void)
         }
         kernel_printf("[TESTMODE] Process %d returned %d, %d\n", pid, status, err);
     }
-    else 
+    else
     {
         /* Here we cant return, this should be replaced in the future by the
          * exit syscall */
@@ -40,7 +41,7 @@ void fork_test(void)
 
     kill_qemu();
 }
-#else 
+#else
 void fork_test(void)
 {
 }

@@ -24,6 +24,11 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <scheduler.h>       /* Scheduler constants */
 #include <atomic.h>          /* Spinlock API */
 #include <kernel_output.h>   /* Kernel outputs */
@@ -33,8 +38,9 @@
 #include <sys/process.h>     /* Process and threads management API */
 #include <sys/syscall_api.h> /* System calls API */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
+#include <test_bank.h>
 
 /* Header file */
 #include <mutex.h>
@@ -64,13 +70,26 @@
 /* None */
 
 /*******************************************************************************
- * GLOBAL VARIABLES
+ * MACROS
  ******************************************************************************/
 
 /* None */
 
 /*******************************************************************************
- * STATIC FUNCTIONS DECLARATION
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
+/* None */
+
+/*******************************************************************************
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
 /* None */
@@ -429,3 +448,5 @@ OS_RETURN_E mutex_trylock(mutex_t* mutex, int32_t* value)
 
     return OS_NO_ERR;
 }
+
+/************************************ EOF *************************************/

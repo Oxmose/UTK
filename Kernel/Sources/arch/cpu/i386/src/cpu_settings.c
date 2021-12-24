@@ -18,15 +18,17 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <string.h>        /* String manipulation */
 #include <stdint.h>        /* Generic int types */
 #include <kernel_output.h> /* Kernel output methods */
-#include <cpu_settings.h>  /* CPU related structures */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
-
-/* Tests header file */
 #include <test_bank.h>
 
 /* Header file */
@@ -153,42 +155,33 @@
 /**
  * @brief Define the GDT pointer, contains the  address and limit of the GDT.
  */
-struct gdt_ptr
+typedef struct
 {
     /** @brief The GDT size. */
     uint16_t size;
 
     /** @brief The GDT address. */
     uintptr_t base;
-}__attribute__((packed));
-
-/**
- * @brief Defines the gdt_ptr_t type as a shortcut for struct  gdt_ptr.
- */
-typedef struct gdt_ptr gdt_ptr_t;
+}__attribute__((packed)) gdt_ptr_t;
 
 /**
  * @brief Define the IDT pointer, contains the  address and limit of the IDT.
  */
-struct idt_ptr
+typedef struct
 {
     /** @brief The IDT size. */
     uint16_t size;
 
     /** @brief The IDT address. */
     uintptr_t base;
-}__attribute__((packed));
+}__attribute__((packed)) idt_ptr_t;
 
-/**
- * @brief Defines the idt_ptr_t type as a shortcut for struct idt_ptr.
- */
-typedef struct idt_ptr idt_ptr_t;
 
 /**
  * @brief CPU TSS abstraction structure. This is the representation the kernel
  * has of an intel's TSS entry.
  */
-struct cpu_tss_entry
+typedef struct
 {
     uint32_t prev_tss;
     uint32_t esp0;
@@ -217,36 +210,41 @@ struct cpu_tss_entry
     uint32_t ldt;
     uint16_t trap;
     uint16_t iomap_base;
-} __attribute__((__packed__));
+} __attribute__((__packed__)) cpu_tss_entry_t;
 
-/**
- * @brief Defines the cpu_tss_entry_t type as a shortcut for struct
- * cpu_tss_entry.
- */
-typedef struct cpu_tss_entry cpu_tss_entry_t;
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
 /** @brief Kernel stacks base symbol. */
 extern int8_t _KERNEL_STACKS_BASE;
 
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
 /** @brief CPU GDT space in memory. */
-uint64_t cpu_gdt[GDT_ENTRY_COUNT] __attribute__((aligned(8)));
+static uint64_t cpu_gdt[GDT_ENTRY_COUNT] __attribute__((aligned(8)));
 /** @brief Kernel GDT structure */
-gdt_ptr_t cpu_gdt_ptr __attribute__((aligned(8)));
+static gdt_ptr_t cpu_gdt_ptr __attribute__((aligned(8)));
 
 /** @brief CPU IDT space in memory. */
-uint64_t cpu_idt[IDT_ENTRY_COUNT] __attribute__((aligned(8)));
+static uint64_t cpu_idt[IDT_ENTRY_COUNT] __attribute__((aligned(8)));
 /** @brief Kernel IDT structure */
-idt_ptr_t cpu_idt_ptr __attribute__((aligned(8)));
+static idt_ptr_t cpu_idt_ptr __attribute__((aligned(8)));
 
 /** @brief CPU TSS structures */
-cpu_tss_entry_t cpu_tss[MAX_CPU_COUNT] __attribute__((aligned(8)));
+static cpu_tss_entry_t cpu_tss[MAX_CPU_COUNT] __attribute__((aligned(8)));
 
 /*******************************************************************************
- * STATIC FUNCTIONS DECLARATION
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
 /**
@@ -1082,3 +1080,5 @@ void cpu_setup_tss(void)
 
     KERNEL_TEST_POINT(tss_test);
 }
+
+/************************************ EOF *************************************/

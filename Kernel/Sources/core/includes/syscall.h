@@ -71,13 +71,13 @@ typedef struct
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -94,4 +94,4 @@ void syscall_init(void);
 
 #endif /* #ifndef __CORE_SYSCALL_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

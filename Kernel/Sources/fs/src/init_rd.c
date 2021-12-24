@@ -17,16 +17,19 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <kernel_error.h>  /* Kernel error codes */
 #include <stdint.h>        /* Generic int types */
 #include <stddef.h>        /* Standard definitions */
 #include <string.h>        /* Memory manipulation */
 #include <kernel_output.h> /* Kernel output mathods */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
-
-/* Tests header file */
 #include <test_bank.h>
 
 /* Header file */
@@ -36,35 +39,45 @@
  * CONSTANTS
  ******************************************************************************/
 
-#define UTK_INITRD_MAGIC 0x4452494E494B5455ULL /* UTKINIRD */
+/** @brief UTK INITRD Magic number */
+#define UTK_INITRD_MAGIC 0x4452494E494B5455ULL
 
 /*******************************************************************************
  * STRUCTURES AND TYPES
  ******************************************************************************/
 
-struct initrd_master_block
+typedef struct
 {
     uint64_t magic;
 
     uint32_t size;
 
     uint8_t padding[500];
-};
+} initrd_master_block_t;
 
-typedef struct initrd_master_block initrd_master_block_t;
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
 extern initrd_master_block_t _KERNEL_INITRD_MEM_BASE;
 
 extern uint32_t _KERNEL_INITRD_MEM_SIZE;
 
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
 static initrd_device_t current_dev;
 
 /*******************************************************************************
- * STATIC FUNCTIONS DECLARATION
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
 /* None */
@@ -236,3 +249,5 @@ OS_RETURN_E initrd_flush(const vfs_device_t* device,
     /* INIT Ram has no flush method */
     return OS_NO_ERR;
 }
+
+/************************************ EOF *************************************/

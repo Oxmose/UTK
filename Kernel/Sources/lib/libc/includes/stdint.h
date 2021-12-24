@@ -113,13 +113,13 @@ typedef uint8_t bool_t;
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -130,4 +130,4 @@ typedef uint8_t bool_t;
 
 #endif /* #ifndef __LIB_STDINT_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

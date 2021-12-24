@@ -94,13 +94,13 @@ typedef struct
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -273,4 +273,4 @@ OS_RETURN_E vector_set(vector_t* vector, const size_t position, void* data);
 
 #endif /* #ifndef __LIB_VECTOR_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

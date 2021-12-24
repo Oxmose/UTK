@@ -87,13 +87,13 @@ typedef struct
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -192,4 +192,4 @@ OS_RETURN_E mutex_trylock(mutex_t* mutex, int32_t* value);
 
 #endif /* #ifndef __LIB_MUTEX_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

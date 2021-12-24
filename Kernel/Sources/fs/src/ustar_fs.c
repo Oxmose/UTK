@@ -17,6 +17,11 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <kernel_error.h>  /* Kernel error codes */
 #include <stdint.h>        /* Generic int types */
 #include <string.h>        /* String and momeory anipulation */
@@ -24,10 +29,8 @@
 #include <kheap.h>         /* Kernel heap */
 #include <panic.h>         /* Kernel panic */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
-
-/* Tests header file */
 #include <test_bank.h>
 
 /* Header file */
@@ -58,12 +61,18 @@
 #define T_OWRITE 0x002
 #define T_OEXEC  0x001
 
-
 /*******************************************************************************
  * STRUCTURES AND TYPES
  ******************************************************************************/
 
-struct ustar_block
+typedef enum
+{
+    USTAR_DEV_OP_WRITE,
+    USTAR_DEV_OP_READ,
+    USTAR_DEV_OP_FLUSH
+} USTAR_DEV_OP_E;
+
+typedef struct
 {
     char file_name[USTAR_FILENAME_MAX_LENGTH];
     char mode[8];
@@ -82,31 +91,10 @@ struct ustar_block
     char dev_minor[8];
     char prefix[USTAR_PREFIX_NAME_LENGTH];
     char padding[12];
-};
-typedef struct ustar_block ustar_block_t;
-
-enum USTAR_DEV_OP
-{
-    USTAR_DEV_OP_WRITE,
-    USTAR_DEV_OP_READ,
-    USTAR_DEV_OP_FLUSH
-};
-
-typedef enum USTAR_DEV_OP USTAR_DEV_OP_E;
-/*******************************************************************************
- * GLOBAL VARIABLES
- ******************************************************************************/
-
-/* None */
+} ustar_block_t;
 
 /*******************************************************************************
- * STATIC FUNCTIONS DECLARATION
- ******************************************************************************/
-
-/* None */
-
-/*******************************************************************************
- * FUNCTIONS
+ * MACROS
  ******************************************************************************/
 
 #define USTAR_ASSERT(COND, MSG, ERROR) {                      \
@@ -115,6 +103,68 @@ typedef enum USTAR_DEV_OP USTAR_DEV_OP_E;
         PANIC(ERROR, "USTASR", MSG, TRUE);                    \
     }                                                         \
 }
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
+/* None */
+
+/*******************************************************************************
+ * STATIC FUNCTIONS DECLARATIONS
+ ******************************************************************************/
+
+static OS_RETURN_E ustar_get_item_count(const vfs_partition_t* partition,
+                                        const char* path,
+                                        size_t* item_count);
+
+static OS_RETURN_E ustar_search_file(const vfs_partition_t* partition,
+                                     const char* path,
+                                     ustar_block_t* block,
+                                     uint32_t* block_id);
+
+static void ustar_set_vnode(vfs_vnode_t* vnode,
+                            ustar_block_t* block,
+                            const uint32_t block_id,
+                            const char* path);
+
+inline static vfs_access_right_t ustar_to_vfs_rights(const char* mode);
+
+inline static VFS_FILE_TYPE_E ustar_to_vfs_type(const char type);
+
+inline static bool_t is_root(const char* path, const char* file);
+
+inline static void ustar_get_path(const char* path, char* buffer);
+
+inline static void ustar_get_filename(const char* path, char* buffer);
+
+static void ustar_get_next_file(const vfs_partition_t* partition,
+                                ustar_block_t* block,
+                                uint32_t* inode);
+
+inline static void uint2oct(char* oct, uint32_t value, size_t size);
+
+inline static uint32_t oct2uint(const char* oct, size_t size);
+
+inline static OS_RETURN_E ustar_check_block(const ustar_block_t* block);
+
+inline static OS_RETURN_E ustar_access_blocks_from_device(
+                                            const vfs_partition_t* partition,
+                                            void* buffer,
+                                            const uint32_t inode,
+                                            const size_t block_counts,
+                                            const USTAR_DEV_OP_E operation);
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
 
 inline static OS_RETURN_E ustar_access_blocks_from_device(
                                             const vfs_partition_t* partition,
@@ -341,7 +391,6 @@ inline static bool_t is_root(const char* path, const char* file)
     kfree(buffer);
     return ret_val;
 }
-
 
 inline static VFS_FILE_TYPE_E ustar_to_vfs_type(const char type)
 {
@@ -1408,3 +1457,5 @@ OS_RETURN_E ustar_list_directory(const vfs_vnode_t* vnode,
 
     return OS_NO_ERR;
 }
+
+/************************************ EOF *************************************/

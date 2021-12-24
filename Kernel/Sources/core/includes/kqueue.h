@@ -80,13 +80,13 @@ typedef struct
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -201,4 +201,4 @@ void kqueue_remove(kqueue_t* queue, kqueue_node_t* node, const bool_t panic);
 
 #endif /* #ifndef __CORE_KQUEUE_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

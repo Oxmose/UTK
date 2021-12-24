@@ -100,13 +100,13 @@ typedef struct local_apic
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -218,4 +218,4 @@ const vector_t* acpi_get_io_apics(void);
 
 #endif /* #ifndef __X86_ACPI_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

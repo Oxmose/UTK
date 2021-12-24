@@ -18,13 +18,19 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <stddef.h>        /* Standard definitions */
 #include <stdint.h>        /* Generic int types */
 #include <string.h>        /* String manipulation */
 #include <kernel_error.h>  /* Kernel errors */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
+#include <test_bank.h>
 
 /* Header file */
 #include <vector.h>
@@ -47,21 +53,9 @@
 /* None */
 
 /*******************************************************************************
- * GLOBAL VARIABLES
+ * MACROS
  ******************************************************************************/
 
-/* None */
-
-/*******************************************************************************
- * STATIC FUNCTIONS DECLARATION
- ******************************************************************************/
-
-/* None */
-
-
-/*******************************************************************************
- * FUNCTIONS
- ******************************************************************************/
 
 /**
  * @brief Used to grow the size of a vector. The new vector is filled with
@@ -71,7 +65,6 @@
  * @param[out] new_size The new size to be computed.
  * @param[out] new_array The array to receive the created memory region.
 */
-
 #define GROW_VECTOR_SIZE(vector, new_size, new_array) {                     \
     if(vector->capacity == vector->size)                                    \
     {                                                                       \
@@ -103,6 +96,34 @@
         vector->capacity = new_size;                                        \
     }                                                                       \
 }
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
+/* None */
+
+/*******************************************************************************
+ * STATIC FUNCTIONS DECLARATIONS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
+
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
 
 vector_t* vector_create(vector_alloc_t allocator,
                         void* init_data,
@@ -429,3 +450,5 @@ OS_RETURN_E vector_set(vector_t* vector, const size_t position, void* data)
 
     return OS_NO_ERR;
 }
+
+/************************************ EOF *************************************/

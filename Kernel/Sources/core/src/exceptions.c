@@ -19,7 +19,11 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
 
+/* Included headers */
 #include <stdint.h>             /* Generic int types */
 #include <stddef.h>             /* Standard definitions */
 #include <panic.h>              /* Kernel panic */
@@ -31,10 +35,8 @@
 #include <critical.h>           /* Critical sections */
 #include <scheduler.h>          /* Scheduler API */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
-
-/* Tests header file */
 #include <test_bank.h>
 
 /* Header file */
@@ -53,14 +55,32 @@
 /* None */
 
 /*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+#define EXC_ASSERT(COND, MSG, ERROR) {                      \
+    if((COND) == FALSE)                                     \
+    {                                                       \
+        PANIC(ERROR, "EXCEPTION", MSG, TRUE);               \
+    }                                                       \
+}
+
+/*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
 /** @brief Stores the handlers for each exception, defined in exceptions.h */
 extern custom_handler_t kernel_interrupt_handlers[INT_ENTRY_COUNT];
 
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
+/* None */
+
 /*******************************************************************************
- * STATIC FUNCTIONS DECLARATION
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
 /**
@@ -80,13 +100,6 @@ static void div_by_zero_handler(cpu_state_t* cpu_state, uintptr_t int_id,
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
-
-#define EXC_ASSERT(COND, MSG, ERROR) {                      \
-    if((COND) == FALSE)                                     \
-    {                                                       \
-        PANIC(ERROR, "EXCEPTION", MSG, TRUE);               \
-    }                                                       \
-}
 
 static void div_by_zero_handler(cpu_state_t* cpu_state,
                                 uintptr_t int_id,
@@ -197,3 +210,5 @@ OS_RETURN_E kernel_exception_remove_handler(const uint32_t exception_line)
 
     return OS_NO_ERR;
 }
+
+/************************************ EOF *************************************/

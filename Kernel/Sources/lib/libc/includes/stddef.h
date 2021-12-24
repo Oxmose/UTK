@@ -99,13 +99,13 @@ typedef uint32_t uintptr_t;
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -116,4 +116,4 @@ typedef uint32_t uintptr_t;
 
 #endif /* #ifndef __LIB_STDDEF_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

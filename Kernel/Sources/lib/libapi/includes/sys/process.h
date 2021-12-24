@@ -50,13 +50,13 @@
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -96,4 +96,4 @@ int32_t waitpid(const int32_t pid,
 
 #endif /* #ifndef __LIB_PROCESS_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

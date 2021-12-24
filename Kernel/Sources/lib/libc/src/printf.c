@@ -1,35 +1,80 @@
 /*******************************************************************************
+ * @file printf.c
  *
- * File: printf.c
+ * @see string.h
  *
- * Author: Alexy Torres Aurora Dugo
+ * @author Alexy Torres Aurora Dugo
  *
- * Date: 03/10/2017
+ * @date 03/10/2017
  *
- * Version: 1.0
+ * @version 1.0
  *
- * printf function and derivatives . To be used with stdio.h header.
+ * @brief printf function and derivatives . To be used with stdio.h header.
  *
+ * @details printf function and derivatives . To be used with stdio.h header.
+ *
+ * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
- #include <stddef.h> /* size_t */
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
+#include <stddef.h>        /* Standard definitions */
+#include <kernel_output.h> /* Kernel output API */
+#include <graphic.h>       /* Kernel graphic API */
+
+/* Configuration files */
+#include <config.h>
+#include <test_bank.h>
 
 /* Header file */
 #include <stdio.h>
 
 /*******************************************************************************
+ * CONSTANTS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * STRUCTURES AND TYPES
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
+
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
+/* None */
+
+/*******************************************************************************
+ * STATIC FUNCTIONS DECLARATIONS
+ ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
 
-extern void kernel_doprint(const char* str, __builtin_va_list args);
-extern void graphic_put_char(const char character);
-
 int vprintf(const char *fmt, __builtin_va_list args)
-{    
+{
     kernel_doprint(fmt, args);
 
     return 0;
@@ -64,3 +109,5 @@ int puts(const char *s)
     putchar('\n');
     return 0;
 }
+
+/************************************ EOF *************************************/

@@ -18,13 +18,19 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <stddef.h>        /* Standard definitions */
 #include <stdint.h>        /* Generic int types */
 #include <string.h>        /* String manipulation */
 #include <kernel_error.h>  /* Kernel error codes */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
+#include <test_bank.h>
 
 /* Header file */
 #include <uhashtable.h>
@@ -55,9 +61,14 @@
 /** @brief Prime used in the FNV hash. */
 #define FNV_PRIME 1099511628211UL
 
-
 /*******************************************************************************
  * STRUCTURES AND TYPES
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * MACROS
  ******************************************************************************/
 
 /* None */
@@ -66,10 +77,17 @@
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
- * STATIC FUNCTIONS DECLARATION
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
 /**
@@ -491,3 +509,5 @@ OS_RETURN_E uhashtable_remove(uhashtable_t* table,
 
     return OS_ERR_NO_SUCH_ID;
 }
+
+/************************************ EOF *************************************/

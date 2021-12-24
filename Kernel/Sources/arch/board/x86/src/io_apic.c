@@ -20,6 +20,12 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
+
 #include <mmio.h>               /* Memory mapped IOs */
 #include <interrupt_settings.h> /* Interrupts settings */
 #include <stdint.h>             /* Generic int types */
@@ -33,10 +39,8 @@
 #include <panic.h>              /* Kernel panic */
 #include <kernel_error.h>       /* Kernel error codes */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
-
-/* Tests header file */
 #include <test_bank.h>
 
 /* Header file */
@@ -65,7 +69,7 @@
  ******************************************************************************/
 
 /** @brief Stores the OS IO-APIC structure data. */
-struct io_apic_data
+typedef struct
 {
     /** @brief IO APIC identifier */
     uint32_t id;
@@ -78,18 +82,30 @@ struct io_apic_data
 
     /** @brief First IRQ handled by the IO APIC */
     uint32_t gsib;
-};
+} io_apic_data_t;
 
-/**
- * @brief Defines io_apic_data_t type as a shorcut for struct io_apic_data.
- */
-typedef struct io_apic_data io_apic_data_t;
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
 
+#define IOAPIC_ASSERT(COND, MSG, ERROR) {                   \
+    if((COND) == FALSE)                                     \
+    {                                                       \
+        PANIC(ERROR, "IO-APIC", MSG, TRUE);                 \
+    }                                                       \
+}
 
 /*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
 /** @brief Stores the IO APICS structures */
 static io_apic_data_t*  io_apics;
 
@@ -133,16 +149,10 @@ inline static void io_apic_write(const uintptr_t base_addr,
  */
 inline static uint32_t io_apic_read(const uintptr_t base_addr,
                                         const uint32_t reg);
+
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
-
-#define IOAPIC_ASSERT(COND, MSG, ERROR) {                   \
-    if((COND) == FALSE)                                     \
-    {                                                       \
-        PANIC(ERROR, "IO-APIC", MSG, TRUE);                 \
-    }                                                       \
-}
 
 inline static void io_apic_write(const uintptr_t base_addr,
                                      const uint32_t reg,
@@ -315,6 +325,7 @@ INTERRUPT_TYPE_E io_apic_handle_spurious_irq(const uint32_t int_number)
 int32_t io_apic_get_irq_int_line(const uint32_t irq_number)
 {
     uint32_t i;
+
     for(i = 0; i < io_apic_count; ++i)
     {
         if(io_apics[i].gsib <= irq_number &&
@@ -329,11 +340,12 @@ int32_t io_apic_get_irq_int_line(const uint32_t irq_number)
 
 bool_t io_apic_capable(void)
 {
-    return (acpi_get_io_apic_count() != 0 && acpi_get_lapic_count() != 0) ?
-           TRUE : FALSE;
+    return (acpi_get_io_apic_count() != 0 && acpi_get_lapic_count() != 0);
 }
 
 const interrupt_driver_t* io_apic_get_driver(void)
 {
     return &io_apic_driver;
 }
+
+/************************************ EOF *************************************/

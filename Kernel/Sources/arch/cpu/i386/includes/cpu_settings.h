@@ -182,13 +182,13 @@ typedef struct
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -1506,4 +1506,4 @@ void cpu_setup_tss(void);
 
 #endif /* #ifndef __I386_CPU_SETTINGS_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

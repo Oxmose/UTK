@@ -1,40 +1,97 @@
 /*******************************************************************************
+ * @file udivmoddi4.c
  *
- * File: udivmoddi4.c
+ * @see string.h
  *
- * Author: Alexy Torres Aurora Dugo
+ * @author Alexy Torres Aurora Dugo
  *
- * Date: 08/01/2018
+ * @date 03/10/2017
  *
- * Version: 1.0
+ * @version 1.0
  *
- * __udivmoddi4 function. To be used with stdlib.h header.
+ * @brief __udivmoddi4 function. To be used with string.h header.
  *
+ * @details __udivmoddi4 function. To be used with string.h header.
+ *
+ * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <stdint.h> /* Generic int types */
 
-uint64_t __udivmoddi4 (uint64_t num, uint64_t den, uint64_t* rem_p)
+/* Configuration files */
+#include <config.h>
+#include <test_bank.h>
+
+/* Header file */
+#include <string.h>
+
+/*******************************************************************************
+ * CONSTANTS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * STRUCTURES AND TYPES
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
+/* None */
+
+/*******************************************************************************
+ * STATIC FUNCTIONS DECLARATIONS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
+
+uint64_t __udivmoddi4(uint64_t num, uint64_t den, uint64_t* rem_p)
 {
     uint64_t quot = 0;
     uint64_t qbit = 1;
- 
-    if(den == 0) 
+
+    if(den == 0)
     {
         /* Force divide by 0 */
         return 1 / ((unsigned)den);
     }
- 
+
     /* Left-justify denominator and count shift */
-    while((int64_t)den >= 0) 
+    while((int64_t)den >= 0)
     {
         den <<= 1;
         qbit <<= 1;
     }
- 
-    while(qbit) 
+
+    while(qbit)
     {
-        if(den <= num) 
+        if(den <= num)
         {
             num -= den;
             quot += qbit;
@@ -42,11 +99,13 @@ uint64_t __udivmoddi4 (uint64_t num, uint64_t den, uint64_t* rem_p)
         den >>= 1;
         qbit >>= 1;
     }
- 
+
     if(rem_p)
     {
         *rem_p = num;
     }
- 
+
     return quot;
 }
+
+/************************************ EOF *************************************/

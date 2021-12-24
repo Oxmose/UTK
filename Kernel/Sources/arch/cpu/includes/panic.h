@@ -70,13 +70,13 @@
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -121,4 +121,4 @@ void kernel_panic(const uint32_t error_code,
 
 #endif /* #ifndef __CPU_PANIC_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

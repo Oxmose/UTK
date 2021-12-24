@@ -17,13 +17,19 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <stddef.h>          /* Standard definitions */
 #include <stdint.h>          /* Generic int types */
 #include <scheduler.h>       /* Scheduler */
 #include <sys/syscall_api.h> /* Syscall API */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
+#include <test_bank.h>
 
 /* Header file */
 #include <sys/process.h>
@@ -41,13 +47,26 @@
 /* None */
 
 /*******************************************************************************
- * GLOBAL VARIABLES
+ * MACROS
  ******************************************************************************/
 
 /* None */
 
 /*******************************************************************************
- * STATIC FUNCTIONS DECLARATION
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
+/* None */
+
+/*******************************************************************************
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
 /* None */
@@ -93,3 +112,5 @@ int32_t waitpid(const int32_t pid,
 
     return params.pid;
 }
+
+/************************************ EOF *************************************/

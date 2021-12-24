@@ -44,13 +44,13 @@
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -71,4 +71,4 @@ int32_t get_cpu_count(void);
 
 #endif /* #ifndef __BOARD_BSP_API_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

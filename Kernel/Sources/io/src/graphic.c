@@ -18,13 +18,19 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <stdint.h>       /* Generic int types */
 #include <kernel_error.h> /* Kernel error codes */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
+#include <test_bank.h>
 
-/* Header */
+/* Header file */
 #include <graphic.h>
 
 /*******************************************************************************
@@ -40,14 +46,27 @@
 /* None */
 
 /*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
 /** @brief Stores the currently selected driver */
 static kernel_graphic_driver_t graphic_driver = {NULL};
 
 /*******************************************************************************
- * STATIC FUNCTIONS DECLARATION
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
 /* None */
@@ -155,3 +174,5 @@ void graphic_console_write_keyboard(const char* str, const size_t len)
 	    graphic_driver.console_write_keyboard(str, len);
     }
 }
+
+/************************************ EOF *************************************/

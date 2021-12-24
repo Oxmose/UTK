@@ -19,14 +19,20 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <string.h>   /* memset, strlen */
 #include <stdlib.h>   /* uitoa, itoa */
 #include <uart.h>     /* UART driver */
 #include <graphic.h>  /* Graphic definitions */
-#include <vga_text.h> /* Kernel VGA text driver */
+#include <vga_text.h> /* VGA colors */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
+#include <test_bank.h>
 
 /* Header file */
 #include <kernel_output.h>
@@ -42,28 +48,74 @@
  ******************************************************************************/
 
 /** @brief Output descriptor, used to define the handlers that manage outputs */
-struct output
+typedef struct
 {
 	/** @brief The handler used to print character. */
 	void (*putc)(const char);
 	/** @brief The handler used to print string. */
 	void (*puts)(const char*);
-};
+} output_t;
 
-/**
- * @brief Defines output_t type as a shorcut for struct output.
- */
-typedef struct output output_t;
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+#define PAD_SEQ                         \
+{                                       \
+    str_size = strlen(tmp_seq);         \
+                                        \
+    while(padding_mod > str_size)       \
+    {                                   \
+        used_output.putc(pad_char_mod); \
+        --padding_mod;                  \
+    }                                   \
+}
+
+#define GET_SEQ_VAL(val, args, length_mod)                     \
+{                                                              \
+                                                               \
+    /* Harmonize length */                                     \
+    if(length_mod > 8)                                         \
+    {                                                          \
+        length_mod = 8;                                        \
+    }                                                          \
+                                                               \
+    switch(length_mod)                                         \
+    {                                                          \
+        case 1:                                                \
+            val = (__builtin_va_arg(args, uint32_t) & 0xFF);   \
+            break;                                             \
+        case 2:                                                \
+            val = (__builtin_va_arg(args, uint32_t) & 0xFFFF); \
+            break;                                             \
+        case 4:                                                \
+            val = __builtin_va_arg(args, uint32_t);            \
+            break;                                             \
+        case 8:                                                \
+            val = __builtin_va_arg(args, uint64_t);            \
+            break;                                             \
+        default:                                               \
+           val = __builtin_va_arg(args, uint32_t);             \
+    }                                                          \
+                                                               \
+}
 
 /*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
 /** @brief Stores the current output type. */
 static output_t current_output;
 
 /*******************************************************************************
- * STATIC FUNCTIONS DECLARATION
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
 /**
@@ -135,46 +187,6 @@ static void tag_printf(const char* fmt, ...);
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
-
-#define PAD_SEQ                         \
-{                                       \
-    str_size = strlen(tmp_seq);         \
-                                        \
-    while(padding_mod > str_size)       \
-    {                                   \
-        used_output.putc(pad_char_mod); \
-        --padding_mod;                  \
-    }                                   \
-}
-
-#define GET_SEQ_VAL(val, args, length_mod)                     \
-{                                                              \
-                                                               \
-    /* Harmonize length */                                     \
-    if(length_mod > 8)                                         \
-    {                                                          \
-        length_mod = 8;                                        \
-    }                                                          \
-                                                               \
-    switch(length_mod)                                         \
-    {                                                          \
-        case 1:                                                \
-            val = (__builtin_va_arg(args, uint32_t) & 0xFF);   \
-            break;                                             \
-        case 2:                                                \
-            val = (__builtin_va_arg(args, uint32_t) & 0xFFFF); \
-            break;                                             \
-        case 4:                                                \
-            val = __builtin_va_arg(args, uint32_t);            \
-            break;                                             \
-        case 8:                                                \
-            val = __builtin_va_arg(args, uint64_t);            \
-            break;                                             \
-        default:                                               \
-           val = __builtin_va_arg(args, uint32_t);             \
-    }                                                          \
-                                                               \
-}
 
 static void toupper(char* string)
 {
@@ -565,3 +577,5 @@ void kernel_doprint(const char* str, __builtin_va_list args)
     current_output.puts = graphic_put_string;
     kprint_fmt(str, args);
 }
+
+/************************************ EOF *************************************/

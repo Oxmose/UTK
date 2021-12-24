@@ -62,13 +62,13 @@ typedef struct
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -199,4 +199,4 @@ const kernel_timer_t* rtc_get_driver(void);
 
 #endif /* #ifndef __BOARD_RT_CLOCK_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

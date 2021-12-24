@@ -53,13 +53,13 @@
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -333,4 +333,4 @@ uint32_t memory_get_free_frames(void);
 
 #endif /* #ifndef __CPU_MEMMGT_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

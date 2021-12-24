@@ -17,6 +17,11 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <interrupts.h>           /* Interrupt management */
 #include <interrupt_settings.h>   /* Interrupt settings */
 #include <vga_text.h>             /* Kernel VGA text driver */
@@ -28,14 +33,15 @@
 #include <rt_clock.h>             /* RTC driver */
 #include <scheduler.h>            /* Scheduler */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
+#include <test_bank.h>
 
 /* Header file */
 #include <panic.h>
 
 /*******************************************************************************
- * GCONSTANTS
+ * CONSTANTS
  ******************************************************************************/
 
 /** @brief Defines the stack trace size */
@@ -48,7 +54,7 @@
  * STRUCTURES AND TYPES
  ******************************************************************************/
 
-struct elf_symtab
+typedef struct
 {
         uint32_t      st_name;
         uint32_t	  st_value;
@@ -56,14 +62,35 @@ struct elf_symtab
         unsigned char st_info;
         unsigned char st_other;
         uint16_t	  st_shndx;
-};
+} elf_symtab_t;
 
-typedef struct elf_symtab elf_symtab_t;
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
 
 /*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
+/** @brief Address of the kernel symbol table */
+extern uintptr_t _KERNEL_SYMTAB_ADDR;
+
+/** @brief Size of the kernel symbol table */
+extern uintptr_t _KERNEL_SYMTAB_SIZE;
+
+/** @brief Address of the kernel string table */
+extern uintptr_t _KERNEL_STRTAB_ADDR;
+
+/** @brief Size of the kernel string table */
+extern uintptr_t _KERNEL_STRTAB_SIZE;
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
 /** @brief Stores the current kernel panic error code. */
 static uint32_t panic_code = 0;
 
@@ -79,20 +106,8 @@ static const char* panic_module;
 /** @brief Stores the message related to the panic. */
 static const char* panic_msg;
 
-/** @brief Address of the kernel symbol table */
-extern uintptr_t _KERNEL_SYMTAB_ADDR;
-
-/** @brief Size of the kernel symbol table */
-extern uintptr_t _KERNEL_SYMTAB_SIZE;
-
-/** @brief Address of the kernel string table */
-extern uintptr_t _KERNEL_STRTAB_ADDR;
-
-/** @brief Size of the kernel string table */
-extern uintptr_t _KERNEL_STRTAB_SIZE;
-
 /*******************************************************************************
- * STATIC FUNCTIONS DELCARATIONS
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
 static void print_panic_header(uintptr_t int_id,
@@ -500,3 +515,5 @@ void kernel_panic(const uint32_t error_code,
         cpu_hlt();
     }
 }
+
+/************************************ EOF *************************************/

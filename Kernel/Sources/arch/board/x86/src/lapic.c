@@ -22,6 +22,11 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <mmio.h>                 /* Memory mapped IOs */
 #include <stdint.h>               /* Generic int types */
 #include <stddef.h>               /* Standard definitions */
@@ -35,10 +40,8 @@
 #include <panic.h>                /* Kernel panic */
 #include <kernel_error.h>         /* Kernel error codes */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
-
-/* Tests header file */
 #include <test_bank.h>
 
 /* Header file */
@@ -163,9 +166,27 @@
 /* None */
 
 /*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+#define LAPIC_ASSERT(COND, MSG, ERROR) {                    \
+    if((COND) == FALSE)                                     \
+    {                                                       \
+        PANIC(ERROR, "LAPIC", MSG, TRUE);                   \
+    }                                                       \
+}
+
+/*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
 /** @brief Local APIC controller address */
 static void* lapic_base_addr;
 
@@ -173,13 +194,13 @@ static void* lapic_base_addr;
 static bool_t initialized = FALSE;
 
 /** @brief Wait interrupt flag. */
-static volatile uint8_t  wait_int;
+static volatile uint8_t wait_int;
 
 /** @brief LAPIC frequency in Hz */
-static uint32_t          global_lapic_freq;
+static uint32_t global_lapic_freq;
 
 /** @brief Initial LAPIC frequency in Hz */
-static uint32_t          init_lapic_timer_frequency;
+static uint32_t init_lapic_timer_frequency;
 
 /** @brief LAPIC timer driver instance. */
 static kernel_timer_t lapic_timer_driver = {
@@ -195,6 +216,7 @@ static kernel_timer_t lapic_timer_driver = {
 /*******************************************************************************
  * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
+
 /**
  * @brief Read Local APIC register, the access is a memory mapped IO.
  *
@@ -241,16 +263,10 @@ static void lapic_dummy_handler(cpu_state_t* cpu_state,
 static void lapic_init_pit_handler(cpu_state_t* cpu_state,
                                    uintptr_t int_id,
                                    stack_state_t* stack_state);
+
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
-
-#define LAPIC_ASSERT(COND, MSG, ERROR) {                     \
-    if((COND) == FALSE)                                     \
-    {                                                       \
-        PANIC(ERROR, "LAPIC", MSG, TRUE);                   \
-    }                                                       \
-}
 
 inline static uint32_t lapic_read(uint32_t reg)
 {
@@ -694,3 +710,5 @@ const kernel_timer_t* lapic_timer_get_driver(void)
 {
     return &lapic_timer_driver;
 }
+
+/************************************ EOF *************************************/

@@ -17,6 +17,11 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <cpu.h>                /* CPU manamgement */
 #include <stdint.h>             /* Generic int types */
 #include <kernel_output.h>      /* Kernel output methods */
@@ -25,10 +30,8 @@
 #include <kernel_error.h>       /* Kernel error codes */
 #include <interrupt_settings.h> /* Interrupt settings */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
-
-/* Tests header file */
 #include <test_bank.h>
 
 /* Header file */
@@ -98,9 +101,27 @@
 /* None */
 
 /*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+#define PIC_ASSERT(COND, MSG, ERROR) {                      \
+    if((COND) == FALSE)                                     \
+    {                                                       \
+        PANIC(ERROR, "PIC", MSG, TRUE);                     \
+    }                                                       \
+}
+
+/*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
 /** @brief PIC driver instance. */
 static interrupt_driver_t pic_driver = {
     .driver_set_irq_mask     = pic_set_irq_mask,
@@ -118,13 +139,6 @@ static interrupt_driver_t pic_driver = {
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
-
-#define PIC_ASSERT(COND, MSG, ERROR) {                      \
-    if((COND) == FALSE)                                     \
-    {                                                       \
-        PANIC(ERROR, "PIC", MSG, TRUE);                     \
-    }                                                       \
-}
 
 void pic_init(void)
 {
@@ -345,3 +359,5 @@ const interrupt_driver_t* pic_get_driver(void)
 {
     return &pic_driver;
 }
+
+/************************************ EOF *************************************/

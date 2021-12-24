@@ -17,6 +17,11 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <stdint.h>               /* Generic int types */
 #include <string.h>               /* Memcpy */
 #include <stddef.h>               /* Standard definitions */
@@ -34,9 +39,8 @@
 #include <ctrl_block.h>           /* Kernel process structure */
 #include <sys/syscall_api.h>      /* System call API */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
-
 #include <test_bank.h>
 
 /* Header file */
@@ -52,10 +56,19 @@
  * STRUCTURES AND TYPES
  ******************************************************************************/
 
+/** @brief Defines the memory allocation starting point (begining or end of the
+ * memory space).
+ */
+typedef enum
+{
+    MEM_ALLOC_BEGINING,
+    MEM_ALLOC_END
+} MEM_ALLOC_START_E;
+
 /** @brief Defines a memory range with its type as defined by the multiboot
  * standard.
  */
-struct mem_range
+typedef struct
 {
     /** @brief Range's base address. */
     uintptr_t base;
@@ -65,32 +78,12 @@ struct mem_range
 
     /** @brief Range's memory type. */
     uint32_t type;
-};
-
-/**
- * @brief Defines mem_range_t type as a shorcut for struct mem_range.
- */
-typedef struct mem_range mem_range_t;
-
-/** @brief Defines the memory allocation starting point (begining or end of the
- * memory space).
- */
-enum MEM_ALLOC_START
-{
-    MEM_ALLOC_BEGINING,
-    MEM_ALLOC_END
-};
-
-/**
- * @brief Defines MEM_ALLOCATION_START_E type as a shorcut for
- * enum MEM_ALLOCATION_START.
- */
-typedef enum MEM_ALLOC_START MEM_ALLOC_START_E;
+} mem_range_t;
 
 /** @brief Defines the structure used when copying the memory image of a
  * process.
  */
-struct mem_copy_self_data
+typedef struct
 {
     /** @brief The PGDir frame address */
     uintptr_t*  new_pgdir_frame;
@@ -102,21 +95,41 @@ struct mem_copy_self_data
     uintptr_t*  new_data_page;
 
     /** @brief Tells if the PGDir was mapped. */
-    bool_t      mapped_pgdir;
+    bool_t mapped_pgdir;
     /** @brief Tells if the PGDir frame was acquired. */
-    bool_t      acquired_ref_pgdir;
-};
+    bool_t acquired_ref_pgdir;
+} mem_copy_self_data_t;
 
-/**
- * @brief Defines mem_copy_self_data_t type as a shorcut for
- * struct mem_copy_self_data.
- */
-typedef struct mem_copy_self_data mem_copy_self_data_t;
+/*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+#define MEMMGT_ASSERT(COND, MSG, ERROR) {                   \
+    if((COND) == FALSE)                                     \
+    {                                                       \
+        PANIC(ERROR, "MEMMGT", MSG, TRUE);                  \
+    }                                                       \
+}
+
+#define INVAL_PAGE(virt_addr)                       \
+{                                                   \
+    __asm__ __volatile__(                           \
+        "invlpg (%0)": :"r"(virt_addr) : "memory"   \
+    );                                              \
+}
+
+#define INVAL_TLB()                                         \
+{                                                           \
+    __asm__ __volatile__(                                   \
+        "mov %%cr3, %%eax\n\tmov %%eax, %%cr3": : : "eax"   \
+    );                                                      \
+}
 
 /*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
 /** @brief Kernel symbols mapping: Low startup address start. */
 extern uint8_t _START_LOW_STARTUP_ADDR;
 /** @brief Kernel symbols mapping: Low startup address end. */
@@ -168,6 +181,10 @@ extern uint32_t _KERNEL_RECUR_PG_TABLE_BASE;
 /** @brief Kernel recursive mapping address for page directory */
 extern uint8_t *_KERNEL_RECUR_PG_DIR_BASE;
 
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
 /** @brief Hardware memory map storage linked list. */
 static kqueue_t* hw_memory_map;
 
@@ -190,10 +207,10 @@ static uintptr_t min_pgtable[KERNEL_RESERVED_PAGING][KERNEL_PGDIR_SIZE]
 /** @brief Stores the frame reference table directory */
 static uintptr_t frame_ref_dir[FRAME_REF_DIR_SIZE];
 
-
 /*******************************************************************************
  * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
+
 /**
  * @brief Kernel memory frame allocation.
  *
@@ -509,27 +526,6 @@ static uint32_t get_free_mem(kqueue_t* mem_pool);
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
-
-#define MEMMGT_ASSERT(COND, MSG, ERROR) {                   \
-    if((COND) == FALSE)                                     \
-    {                                                       \
-        PANIC(ERROR, "MEMMGT", MSG, TRUE);                  \
-    }                                                       \
-}
-
-#define INVAL_PAGE(virt_addr)                       \
-{                                                   \
-    __asm__ __volatile__(                           \
-        "invlpg (%0)": :"r"(virt_addr) : "memory"   \
-    );                                              \
-}
-
-#define INVAL_TLB()                                         \
-{                                                           \
-    __asm__ __volatile__(                                   \
-        "mov %%cr3, %%eax\n\tmov %%eax, %%cr3": : : "eax"   \
-    );                                                      \
-}
 
 static void* memory_alloc_frames(const size_t frame_count, OS_RETURN_E* err)
 {
@@ -3483,3 +3479,5 @@ uint32_t memory_get_free_frames(void)
 {
     return get_free_mem(free_memory_map);
 }
+
+/************************************ EOF *************************************/

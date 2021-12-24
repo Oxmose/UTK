@@ -20,6 +20,11 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <stdint.h>        /* Generic int types */
 #include <stddef.h>        /* Standard definitions */
 #include <string.h>        /* String manipulation */
@@ -30,10 +35,8 @@
 #include <kernel_output.h> /* Kernel output manager */
 #include <interrupts.h>    /* Interrupt manager */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
-
-/* Tests header file */
 #include <test_bank.h>
 
 /* Header file */
@@ -52,9 +55,23 @@
 /* None */
 
 /*******************************************************************************
+ * MACROS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
  * GLOBAL VARIABLES
  ******************************************************************************/
 
+/************************* Imported global variables **************************/
+/** @brief NULL timer driver. */
+extern kernel_timer_t null_timer;
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
 /** @brief Stores the number of main kernel's timer tick since the
  * initialization of the time manager.
  */
@@ -83,13 +100,10 @@ void (*schedule_routine)(cpu_state_t*, uintptr_t, stack_state_t*) = NULL;
 /** @brief RTC interrupt managet */
 void (*rtc_int_manager)(void) = NULL;
 
-/** @brief NULL timer driver. */
-extern kernel_timer_t null_timer;
-
-
 /*******************************************************************************
- * STATIC FUNCTIONS DECLARATION
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
+
 /**
  * @brief The kernel's main timer interrupt handler.
  *
@@ -368,3 +382,5 @@ OS_RETURN_E time_register_rtc_manager(void (*rtc_manager)(void))
 
     return OS_NO_ERR;
 }
+
+/************************************ EOF *************************************/

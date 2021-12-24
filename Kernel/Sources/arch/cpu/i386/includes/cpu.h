@@ -51,13 +51,13 @@
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -271,4 +271,4 @@ void validate_architecture(void);
 
 #endif /* #ifndef __I386_CPU_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

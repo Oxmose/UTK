@@ -54,13 +54,13 @@
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -372,4 +372,4 @@ OS_RETURN_E sched_thread_remove_resource(kernel_thread_t* thread,
 
 #endif /* #ifndef __CORE_SCHEDULER_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

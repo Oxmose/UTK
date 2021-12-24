@@ -77,13 +77,13 @@ typedef struct
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -99,8 +99,8 @@ typedef struct
  * @param[in] intnum The interrupt number to raise.
  * @param[in] regs The array containing the registers values for the call.
  */
-void bios_call(const uint32_t intnum, bios_int_regs_t* regs);
+void bios_call(const uint8_t intnum, bios_int_regs_t* regs);
 
 #endif /* #ifndef __X86_BIOS_CALL_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/

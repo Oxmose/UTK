@@ -17,6 +17,11 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <stdint.h>             /* Generic int types */
 #include <stddef.h>             /* Standard definitions */
 #include <string.h>             /* String manipulation */
@@ -26,10 +31,8 @@
 #include <cpu_settings.h>       /* CPU structures */
 #include <interrupts.h>         /* Interrupt manager */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
-
-/* Tests header file */
 #include <test_bank.h>
 
 /* Header file */
@@ -38,6 +41,7 @@
 /*******************************************************************************
  * CONSTANTS
  ******************************************************************************/
+
 
 /** @brief CPU flags interrupt enabled flag. */
 #define CPU_EFLAGS_IF 0x000000200
@@ -365,13 +369,7 @@
 /* None */
 
 /*******************************************************************************
- * GLOBAL VARIABLES
- ******************************************************************************/
-
-/* None */
-
-/*******************************************************************************
- * FUNCTIONS
+ * MACROS
  ******************************************************************************/
 
 #define CPU_ASSERT(COND, MSG, ERROR) {                      \
@@ -381,11 +379,33 @@
     }                                                       \
 }
 
-#define CONCAT_STR(buff, idx, str) \
-    {                              \
-        strcpy(buff + idx, str);   \
-        idx += strlen(str);        \
-    }
+#define CONCAT_STR(buff, idx, str) {                        \
+        strcpy(buff + idx, str);                            \
+        idx += strlen(str);                                 \
+}
+
+/*******************************************************************************
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
+/* None */
+
+/*******************************************************************************
+ * STATIC FUNCTIONS DECLARATIONS
+ ******************************************************************************/
+
+/* None */
+
+/*******************************************************************************
+ * FUNCTIONS
+ ******************************************************************************/
 
 OS_RETURN_E cpu_raise_interrupt(const uint32_t interrupt_line)
 {
@@ -1660,3 +1680,5 @@ void cpu_atomic_store(volatile int32_t* memory, const int32_t val)
     /* x86 guarantees that aligned loads and stores up to 64 bits are atomic */
     *memory = val;
 }
+
+/************************************ EOF *************************************/

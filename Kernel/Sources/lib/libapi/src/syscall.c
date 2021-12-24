@@ -17,6 +17,11 @@
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
 
+/*******************************************************************************
+ * INCLUDES
+ ******************************************************************************/
+
+/* Included headers */
 #include <stdint.h>             /* Generic int types */
 #include <interrupt_settings.h> /* Interrupt settings */
 #include <cpu_api.h>            /* CPU API */
@@ -25,8 +30,9 @@
 #include <kernel_error.h>       /* Kernel error codes */
 #include <panic.h>              /* Kernel panic */
 
-/* UTK configuration file */
+/* Configuration files */
 #include <config.h>
+#include <test_bank.h>
 
 /* Header file */
 #include <syscall.h>
@@ -44,13 +50,26 @@
 /* None */
 
 /*******************************************************************************
- * GLOBAL VARIABLES
+ * MACROS
  ******************************************************************************/
 
 /* None */
 
 /*******************************************************************************
- * STATIC FUNCTIONS DECLARATION
+ * GLOBAL VARIABLES
+ ******************************************************************************/
+
+/************************* Imported global variables **************************/
+/* None */
+
+/************************* Exported global variables **************************/
+/* None */
+
+/************************** Static global variables ***************************/
+/* None */
+
+/*******************************************************************************
+ * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
 /* None */
@@ -72,3 +91,5 @@ OS_RETURN_E syscall_do(const SYSCALL_FUNCTION_E func, void* params)
 
     return OS_NO_ERR;
 }
+
+/************************************ EOF *************************************/

@@ -62,13 +62,13 @@ typedef struct
  * GLOBAL VARIABLES
  ******************************************************************************/
 
-/* Imported global variables */
+/************************* Imported global variables **************************/
 /* None */
 
-/* Exported global variables */
+/************************* Exported global variables **************************/
 /* None */
 
-/* Static global variables */
+/************************** Static global variables ***************************/
 /* None */
 
 /*******************************************************************************
@@ -164,4 +164,4 @@ OS_RETURN_E initrd_flush(const vfs_device_t* device,
 
 #endif /* #ifndef __FS_INIT_RD_H_ */
 
-/* EOF */
+/************************************ EOF *************************************/
