@@ -82,12 +82,12 @@ struct vfs_device
 {
     OS_RETURN_E (*read_blocks)(const struct vfs_device* device,
                                const uint32_t block_id,
-	                           void* buffer,
+                               void* buffer,
                                const size_t size,
                                const size_t offset);
     OS_RETURN_E (*write_blocks)(const struct vfs_device* device,
                                 const uint32_t block_id,
-	                            const void* buffer,
+                                const void* buffer,
                                 const size_t size,
                                 const size_t offset);
     OS_RETURN_E (*flush_blocks)(const struct vfs_device* device,

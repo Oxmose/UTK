@@ -90,28 +90,28 @@ extern void __bios_call(uint8_t intnum, bios_int_regs_t* regs);
 
 void bios_call(uint8_t intnum, bios_int_regs_t* regs)
 {
-	uint32_t int_state;
+    uint32_t int_state;
 
-	ENTER_CRITICAL(int_state);
+    ENTER_CRITICAL(int_state);
 
-	/* Map the RM core */
-	memory_mmap_direct((void*)&_KERNEL_BIOS_MEMORY_BASE,
-					   (void*)&_KERNEL_BIOS_MEMORY_BASE,
-					   (size_t)&_KERNEL_BIOS_MEMORY_SIZE,
-					   0,
-					   1,
-					   1,
-					   1,
-					   NULL);
+    /* Map the RM core */
+    memory_mmap_direct((void*)&_KERNEL_BIOS_MEMORY_BASE,
+                       (void*)&_KERNEL_BIOS_MEMORY_BASE,
+                       (size_t)&_KERNEL_BIOS_MEMORY_SIZE,
+                       0,
+                       1,
+                       1,
+                       1,
+                       NULL);
 
-	__bios_call(intnum, regs);
+    __bios_call(intnum, regs);
 
-	/* Unmap RM core */
-	memory_munmap((void*)&_KERNEL_BIOS_MEMORY_BASE,
-	              (size_t)&_KERNEL_BIOS_MEMORY_SIZE,
-				  NULL);
+    /* Unmap RM core */
+    memory_munmap((void*)&_KERNEL_BIOS_MEMORY_BASE,
+                  (size_t)&_KERNEL_BIOS_MEMORY_SIZE,
+                  NULL);
 
-	EXIT_CRITICAL(int_state);
+    EXIT_CRITICAL(int_state);
 }
 
 /************************************ EOF *************************************/

@@ -86,7 +86,7 @@ OS_RETURN_E graphic_set_selected_driver(const kernel_graphic_driver_t* driver)
         return OS_ERR_NULL_POINTER;
     }
 
-	graphic_driver = *driver;
+    graphic_driver = *driver;
 
     /* On driver change, clear the output */
     graphic_clear_screen();
@@ -98,7 +98,7 @@ void graphic_clear_screen(void)
 {
     if(graphic_driver.clear_screen != NULL)
     {
-	    graphic_driver.clear_screen();
+        graphic_driver.clear_screen();
     }
 }
 
@@ -106,56 +106,56 @@ void graphic_put_cursor_at(const uint32_t line, const uint32_t column)
 {
     if(graphic_driver.put_cursor_at != NULL)
     {
-	    graphic_driver.put_cursor_at(line, column);
+        graphic_driver.put_cursor_at(line, column);
     }
 }
 
 void graphic_save_cursor(cursor_t* buffer)
 {
-	if(graphic_driver.save_cursor != NULL)
+    if(graphic_driver.save_cursor != NULL)
     {
-	    return graphic_driver.save_cursor(buffer);
+        return graphic_driver.save_cursor(buffer);
     }
 }
 
 void graphic_restore_cursor(const cursor_t buffer)
 {
-	if(graphic_driver.restore_cursor != NULL)
+    if(graphic_driver.restore_cursor != NULL)
     {
-	    return graphic_driver.restore_cursor(buffer);
+        return graphic_driver.restore_cursor(buffer);
     }
 }
 
 void graphic_scroll(const SCROLL_DIRECTION_E direction,
                     const uint32_t lines_count)
 {
-	if(graphic_driver.scroll != NULL)
+    if(graphic_driver.scroll != NULL)
     {
-	    graphic_driver.scroll(direction, lines_count);
+        graphic_driver.scroll(direction, lines_count);
     }
 }
 
 void graphic_set_color_scheme(colorscheme_t color_scheme)
 {
-	if(graphic_driver.set_color_scheme != NULL)
+    if(graphic_driver.set_color_scheme != NULL)
     {
-	    graphic_driver.set_color_scheme(color_scheme);
+        graphic_driver.set_color_scheme(color_scheme);
     }
 }
 
 void graphic_save_color_scheme(colorscheme_t* buffer)
 {
-	if(graphic_driver.save_color_scheme != NULL)
+    if(graphic_driver.save_color_scheme != NULL)
     {
-	    return graphic_driver.save_color_scheme(buffer);
+        return graphic_driver.save_color_scheme(buffer);
     }
 }
 
 void graphic_put_string(const char* str)
 {
-	if(graphic_driver.put_string != NULL)
+    if(graphic_driver.put_string != NULL)
     {
-	    graphic_driver.put_string(str);
+        graphic_driver.put_string(str);
     }
 }
 
@@ -163,15 +163,15 @@ void graphic_put_char(const char character)
 {
     if(graphic_driver.put_char != NULL)
     {
-	    graphic_driver.put_char(character);
+        graphic_driver.put_char(character);
     }
 }
 
 void graphic_console_write_keyboard(const char* str, const size_t len)
 {
-	if(graphic_driver.console_write_keyboard != NULL)
+    if(graphic_driver.console_write_keyboard != NULL)
     {
-	    graphic_driver.console_write_keyboard(str, len);
+        graphic_driver.console_write_keyboard(str, len);
     }
 }
 

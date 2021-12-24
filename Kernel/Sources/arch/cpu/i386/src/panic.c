@@ -57,11 +57,11 @@
 typedef struct
 {
         uint32_t      st_name;
-        uint32_t	  st_value;
+        uint32_t      st_value;
         uint32_t      st_size;
         unsigned char st_info;
         unsigned char st_other;
-        uint16_t	  st_shndx;
+        uint16_t      st_shndx;
 } elf_symtab_t;
 
 /*******************************************************************************

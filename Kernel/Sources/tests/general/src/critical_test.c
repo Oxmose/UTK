@@ -33,7 +33,7 @@ static void* print_th_pre(void*args)
             val = '=';
     }
 
- 	ENTER_CRITICAL(word);
+    ENTER_CRITICAL(word);
 
     for(i = 0; i < 100000000; ++i)
     {

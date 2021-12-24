@@ -174,25 +174,25 @@ static void uitoa(uint32_t i, char* buf, uint32_t base)
     char tmp[64] = {0};
 
     uint32_t pos  = 0;
- 	uint32_t opos = 0;
- 	uint32_t top  = 0;
+    uint32_t opos = 0;
+    uint32_t top  = 0;
     uint32_t idx;
 
- 	if (i == 0 || base > 16)
+    if (i == 0 || base > 16)
     {
- 		*buf++ = '0';
- 		*buf = '\0';
- 		return;
- 	}
+        *buf++ = '0';
+        *buf = '\0';
+        return;
+    }
 
     /* Fill temp buffer */
- 	while (i != 0)
+    while (i != 0)
     {
- 		tmp[pos++] = hex_table[i % base];
- 		i /= base;
- 	}
+        tmp[pos++] = hex_table[i % base];
+        i /= base;
+    }
 
- 	top = pos--;
+    top = pos--;
     idx = 0;
     /* Fill buffer */
     if(top < 8)
@@ -202,13 +202,13 @@ static void uitoa(uint32_t i, char* buf, uint32_t base)
             buf[idx++] = '0';
         }
     }
- 	for (opos = 0; opos < top; --pos, ++opos)
+    for (opos = 0; opos < top; --pos, ++opos)
     {
- 		buf[idx++] = tmp[pos];
+        buf[idx++] = tmp[pos];
     }
 
     /* Null termitate */
- 	buf[idx] = 0;
+    buf[idx] = 0;
 }
 
 static void copy_module(struct multiboot_tag_module* module_tag,

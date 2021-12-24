@@ -65,15 +65,15 @@
 #define PIC_ICW1_INIT      0x10
 
 /** @brief PIC 8086/88 (MCS-80/85) mode flag. */
-#define PIC_ICW4_8086	    0x01
+#define PIC_ICW4_8086        0x01
 /** @brief PIC auto (normal) EOI flag. */
-#define PIC_ICW4_AUTO	    0x02
+#define PIC_ICW4_AUTO        0x02
 /** @brief PIC buffered mode/slave flag. */
-#define PIC_ICW4_BUF_SLAVE	0x08
+#define PIC_ICW4_BUF_SLAVE   0x08
 /** @brief PIC buffered mode/master flag. */
-#define PIC_ICW4_BUF_MASTER	0x0C
+#define PIC_ICW4_BUF_MASTER  0x0C
 /** @brief PIC special fully nested (not) flag. */
-#define PIC_ICW4_SFNM	    0x10
+#define PIC_ICW4_SFNM        0x10
 
 /** @brief Read ISR command value */
 #define PIC_READ_ISR 0x0B

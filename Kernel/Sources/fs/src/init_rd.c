@@ -155,7 +155,7 @@ OS_RETURN_E initrd_get_device(initrd_device_t* device)
 
 OS_RETURN_E initrd_read_blocks(const vfs_device_t* device,
                                const uint32_t block_id,
-	                           void* buffer,
+                               void* buffer,
                                const size_t size,
                                const size_t offset)
 {
@@ -200,7 +200,7 @@ OS_RETURN_E initrd_read_blocks(const vfs_device_t* device,
 
 OS_RETURN_E initrd_write_blocks(const vfs_device_t* device,
                                 const uint32_t block_id,
-	                            const void* buffer,
+                                const void* buffer,
                                 const size_t size,
                                 const size_t offset)
 {

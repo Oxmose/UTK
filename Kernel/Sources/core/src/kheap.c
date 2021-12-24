@@ -80,8 +80,8 @@ typedef struct
      * mem.
      */
     union {
-	       uint8_t* data;
-	       list_t   free;
+           uint8_t* data;
+           list_t   free;
     };
 } mem_chunk_t;
 

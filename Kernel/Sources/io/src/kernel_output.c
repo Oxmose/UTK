@@ -50,10 +50,10 @@
 /** @brief Output descriptor, used to define the handlers that manage outputs */
 typedef struct
 {
-	/** @brief The handler used to print character. */
-	void (*putc)(const char);
-	/** @brief The handler used to print string. */
-	void (*puts)(const char*);
+    /** @brief The handler used to print character. */
+    void (*putc)(const char);
+    /** @brief The handler used to print string. */
+    void (*puts)(const char*);
 } output_t;
 
 /*******************************************************************************
@@ -275,31 +275,31 @@ static void formater(const char* str,
 
                 /* Specifier mods */
                 case 's':
-					args_value = __builtin_va_arg(args, char*);
-					used_output.puts(args_value);
+                    args_value = __builtin_va_arg(args, char*);
+                    used_output.puts(args_value);
                     break;
                 case 'd':
                 case 'i':
                     GET_SEQ_VAL(seq_val, args, length_mod);
-					memset(tmp_seq, 0, sizeof(tmp_seq));
-					itoa(seq_val, tmp_seq, 10);
+                    memset(tmp_seq, 0, sizeof(tmp_seq));
+                    itoa(seq_val, tmp_seq, 10);
                     PAD_SEQ
-					used_output.puts(tmp_seq);
+                    used_output.puts(tmp_seq);
                     break;
                 case 'u':
                     GET_SEQ_VAL(seq_val, args, length_mod);
-					memset(tmp_seq, 0, sizeof(tmp_seq));
-					uitoa(seq_val, tmp_seq, 10);
+                    memset(tmp_seq, 0, sizeof(tmp_seq));
+                    uitoa(seq_val, tmp_seq, 10);
                     PAD_SEQ
-					used_output.puts(tmp_seq);
+                    used_output.puts(tmp_seq);
                     break;
                 case 'X':
                     upper_mod = TRUE;
                     __attribute__ ((fallthrough));
                 case 'x':
                     GET_SEQ_VAL(seq_val, args, length_mod);
-					memset(tmp_seq, 0, sizeof(tmp_seq));
-					uitoa(seq_val, tmp_seq, 16);
+                    memset(tmp_seq, 0, sizeof(tmp_seq));
+                    uitoa(seq_val, tmp_seq, 16);
                     PAD_SEQ
                     if(upper_mod == TRUE)
                     {
@@ -309,7 +309,7 @@ static void formater(const char* str,
                     {
                         tolower(tmp_seq);
                     }
-					used_output.puts(tmp_seq);
+                    used_output.puts(tmp_seq);
                     break;
                 case 'P':
                     upper_mod = TRUE;
@@ -319,8 +319,8 @@ static void formater(const char* str,
                     pad_char_mod = '0';
                     length_mod = sizeof(uintptr_t);
                     GET_SEQ_VAL(seq_val, args, length_mod);
-					memset(tmp_seq, 0, sizeof(tmp_seq));
-					uitoa(seq_val, tmp_seq, 16);
+                    memset(tmp_seq, 0, sizeof(tmp_seq));
+                    uitoa(seq_val, tmp_seq, 16);
                     PAD_SEQ
                     if(upper_mod == TRUE)
                     {
@@ -330,12 +330,12 @@ static void formater(const char* str,
                     {
                         tolower(tmp_seq);
                     }
-					used_output.puts(tmp_seq);
+                    used_output.puts(tmp_seq);
                     break;
                 case 'c':
                     length_mod = sizeof(char);
                     GET_SEQ_VAL(tmp_seq[0], args, length_mod);
-					used_output.putc(tmp_seq[0]);
+                    used_output.putc(tmp_seq[0]);
                     break;
 
                 /* Padding mods */
