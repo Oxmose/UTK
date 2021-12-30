@@ -423,7 +423,7 @@ void uart_console_write_keyboard(const char* string, const size_t len)
     size_t i;
     for(i = 0; i < len; ++i)
     {
-        uart_write(SERIAL_OUTPUT_PORT, str[i]);
+        uart_write(SERIAL_OUTPUT_PORT, string[i]);
     }
 }
 

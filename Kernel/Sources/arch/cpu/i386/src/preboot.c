@@ -74,57 +74,120 @@ typedef struct
  ******************************************************************************/
 
 /************************* Imported global variables **************************/
+
+/** @brief Kernel Multiboot pointer in low memory, saved by the kernel init. */
 extern uintptr_t _kernel_multiboot_ptr;
 
+/** @brief Kernel's memory region used to save the multibot structures. */
 extern uint8_t* _KERNEL_MULTIBOOT_MEM_BASE;
-
+/** @brief Kernel's multiboot save region size. */
 extern uint8_t _KERNEL_MULTIBOOT_MEM_SIZE;
 
+/** @brief Kernel's INITRD memory region. */
 extern uint8_t* _KERNEL_INITRD_MEM_BASE;
-
+/** @brief Kernel's INITRD memory region size. */
 extern uint8_t _KERNEL_INITRD_MEM_SIZE;
 
 
-
+/** @brief Kernel's symbol table memory region. */
 extern uintptr_t _KERNEL_SYMTAB_ADDR;
+/** @brief Kernel's symbol table memory region size. */
 extern uintptr_t _KERNEL_SYMTAB_SIZE;
+/** @brief Kernel's string table memory region. */
 extern uintptr_t _KERNEL_STRTAB_ADDR;
+/** @brief Kernel's string table memory region size. */
 extern uintptr_t _KERNEL_STRTAB_SIZE;
 
+/** @brief Kernel's symbol table free memory region. */
 extern uint8_t* _KERNEL_SYMTAB_FREE_START;
 
 /************************* Exported global variables **************************/
 /* None */
 
 /************************** Static global variables ***************************/
+/** @brief Hexadecimal characters table. */
 static char hex_table[] =
      {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 
+/** @brief Stores the current cursor address of the VGA frame buffer. */
 static uint16_t* current_framebuffer_addr = (uint16_t*)VGA_TEXT_FRAMEBUFFER;
 
+/** @brief Stores the INITRD found state. */
 static bool_t initrd_found;
 
 /*******************************************************************************
  * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
+
+/**
+ * @brief Convert a unsigned integer value to a string.
+ *
+ * @details Convert a unsigned integer value to a string and inject the
+ * conversion result in the buffer given as parameter.
+ *
+ * @param[in] value The value to convert.
+ * @param[out] buf The buffer to receive the convertion's result.
+ * @param[in] base The base of the unsigned integer to convert.
+ */
 static void uitoa(uint32_t i, char* buf, uint32_t base);
 
+/**
+ * @brief Copies the multiboot memory structures for future uses.
+ */
 static void copy_multiboot(void);
 
+/**
+ * @brief Prints a message to the VGA framebuffer.
+ *
+ * @param[in] str The string to print.
+ * @param[in] size The size of the string to printf.
+ */
 static void printf_vga(const char* str, const size_t size);
 
+/**
+ * @brief Clears the VGA framebuffer.
+ */
 static void clear_vga(void);
 
+/**
+ * @brief Compares two strings.
+ *
+ * @brief Compares two string in the lexicographic order.
+ *
+ * @param[in] str1 The first string to compare.
+ * @param[in] str2 The second string to compare.
+ * @param[in] size The size of the string to compare.
+ *
+ * @return 1 is returned if the string are not equal. 0 is returned otherwise.
+ */
 static uint8_t cmp_str(const char* str1, const char* str2, uint32_t size);
 
-void kernel_preboot(void);
-
+/**
+ * @brief Copies the multiboot modules loaded by multiboot.
+ *
+ * @param[in] module_tag The module structure.
+ * @param[in,out] module_start_addr The start address of the module save region.
+ * @param[in,out] mem_size The size of the free memory.
+ * @param[in,out] save_addr The address to save the module to.
+ */
 static void copy_module(struct multiboot_tag_module* module_tag,
                         uint8_t** module_start_addr,
                         uint32_t* mem_size,
                         uint32_t* save_addr);
 
+/**
+ * @brief Copies the symbols loaded by multiboot.
+ *
+ * @param[in] elf_tag The elf tab loaded by multiboot and used to copy the
+ * symbols.
+ */
 static void copy_symbols(struct multiboot_tag_elf_sections* elf_tag);
+
+/**
+ * @brief Kernel's preboot routine. This function should be called from the init
+ * assembly routine.
+ */
+void kernel_preboot(void);
 
 /*******************************************************************************
  * FUNCTIONS
@@ -177,7 +240,6 @@ static void printf_vga(const char* str, const size_t size)
 
 static void uitoa(uint32_t i, char* buf, uint32_t base)
 {
-
     char tmp[64] = {0};
 
     uint32_t pos  = 0;
@@ -449,14 +511,14 @@ static void copy_multiboot(void)
     src_addr = (uint8_t*)multiboot_tag;
 
     uitoa((uintptr_t)multiboot_tag, buff, 16);
-    printf_vga("Multiboot (P): 0x", 17);
+    printf_vga("Multiboot: 0x", 13);
     printf_vga(buff, 8);
     multiboot_info_size = *(uint32_t*)multiboot_tag;
     uitoa(multiboot_info_size, buff, 16);
     printf_vga(" Size: 0x", 9);
-    printf_vga(buff, 46);
+    printf_vga(buff, 50);
 
-    printf_vga("Load (P): 0x", 12);
+    printf_vga("Load: 0x", 8);
     uitoa((uintptr_t)copy_addr, buff, 16);
     printf_vga(buff, 8);
     printf_vga(" Size: 0x", 9);
@@ -470,8 +532,8 @@ static void copy_multiboot(void)
     multiboot_tag = (struct multiboot_tag*)((uintptr_t)multiboot_tag + 8);
 
     uitoa((uintptr_t)module_start_addr, buff, 16);
-    printf_vga(" Mod Load (P): 0x", 17);
-    printf_vga(buff, 26);
+    printf_vga(" Mod Load: 0x", 13);
+    printf_vga(buff, 34);
 
     /* Check bounds */
     if(mem_size < multiboot_info_size)
@@ -510,19 +572,24 @@ static void copy_multiboot(void)
 void kernel_preboot(void)
 {
     clear_vga();
-    printf_vga("Kernel pre-boot v0.1", 80);
+    printf_vga("Kernel pre-boot v0.2", 80);
+    printf_vga(" ", 80);
 
     /* Copy multiboot structure somewhere in the reserved kernel area */
     copy_multiboot();
 
     printf_vga(" ", 80);
-    printf_vga("Copied Multiboot structures", 80);
+    printf_vga("Copied multiboot structures", 80);
 
+    /* We must ensure that the INITRD was found */
     if(initrd_found == FALSE)
     {
         printf_vga(" ", 80);
-        printf_vga("ERROR: Could not find init ram disk", 80);
-        while(1);
+        printf_vga("ERROR: Could not find INIT RAM Disk", 80);
+        while(1)
+        {
+            __asm__ __volatile__("cli\n\thlt");
+        }
     }
 }
 

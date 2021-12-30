@@ -2383,7 +2383,7 @@ static OS_RETURN_E memory_copy_self_clean(mem_copy_self_data_t* data,
         memory_release_ref((uintptr_t)data->new_pgdir_frame);
     }
 
-    kernel_error("Could not copy process mapping\n");
+    KERNEL_ERROR("Could not copy process mapping\n");
 
     return past_err;
 }

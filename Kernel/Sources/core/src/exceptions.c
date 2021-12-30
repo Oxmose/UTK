@@ -129,6 +129,8 @@ static void div_by_zero_handler(cpu_state_t* cpu_state,
                "Divide by zero invocated with wrong exception line.",
                OS_ERR_INCORRECT_VALUE);
 
+    KERNEL_TEST_POINT(kill_qemu);
+
     proc = sched_get_current_process();
 
     EXC_ASSERT(proc != NULL,

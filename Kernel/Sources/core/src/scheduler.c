@@ -339,6 +339,8 @@ static void create_main_kprocess(void)
     main_kprocess->page_dir = cpu_get_current_pgdir();
     strncpy(main_kprocess->name, "UTK-Kernel\0", 11);
 
+    ++process_count;
+
     active_process = main_kprocess;
 }
 
@@ -512,6 +514,8 @@ void sched_init(void)
 
     /* Init scheduler settings */
     last_given_tid = 0;
+    last_given_pid = 0;
+    process_count  = 0;
     thread_count   = 0;
     schedule_count = 0;
 
@@ -696,6 +700,13 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
     if(func != SYSCALL_FORK)
     {
         *(int32_t*)new_pid = -1;
+        return;
+    }
+
+    if(process_count >= KERNEL_MAX_PROCESS)
+    {
+        *(int32_t*)new_pid = -1;
+        return;
     }
 
     /* Allocate memory for the new process */
@@ -801,6 +812,8 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
     new_proc->pid            = last_given_pid++;
     new_proc->parent_process = active_process;
 
+    ++process_count;
+
     KERNEL_DEBUG(SCHED_DEBUG_ENABLED,
                  "[SCHED] Forked current process %d to %d",
                  active_process->pid,
@@ -887,6 +900,8 @@ void sched_wait_process_pid(const SYSCALL_FUNCTION_E func, void* params)
     sched_clean_process(child);
 
     kqueue_remove(active_process->children, child_node, TRUE);
+
+    --process_count;
 
     EXIT_CRITICAL(int_state);
 

@@ -17,7 +17,6 @@
  *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
-
 /*******************************************************************************
  * INCLUDES
  ******************************************************************************/
@@ -87,6 +86,36 @@ static uint32_t spurious_interrupt;
  ******************************************************************************/
 
 /**
+ * @brief Initial placeholder for the IRQ mask driver.
+ *
+ * @param irq_number Unused.
+ * @param enabled Unused.
+ */
+static void init_driver_set_irq_mask(const uint32_t irq_number,
+                                     const bool_t enabled);
+
+/**
+ * @brief Initial placeholder for the IRQ EOI driver.
+ *
+ * @param irq_number Unused.
+ */
+static void init_driver_set_irq_eoi(const uint32_t irq_number);
+
+/**
+ * @brief Initial placeholder for the spurious handler driver.
+ *
+ * @param int_number Unused.
+ */
+static INTERRUPT_TYPE_E init_driver_handle_spurious(const uint32_t int_number);
+
+/**
+ * @brief Initial placeholder for the get int line driver.
+ *
+ * @param irq_number Unused.
+ */
+static int32_t init_driver_get_irq_int_line(const uint32_t irq_number);
+
+/**
  * @brief Kernel's spurious interrupt handler.
  *
  * @details Spurious interrupt handler. This function should only be
@@ -98,6 +127,30 @@ static void spurious_handler(void);
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
+
+static void init_driver_set_irq_mask(const uint32_t irq_number,
+                                     const bool_t enabled)
+{
+    (void)irq_number;
+    (void)enabled;
+}
+
+static void init_driver_set_irq_eoi(const uint32_t irq_number)
+{
+    (void)irq_number;
+}
+
+static INTERRUPT_TYPE_E init_driver_handle_spurious(const uint32_t int_number)
+{
+    (void)int_number;
+    return INTERRUPT_TYPE_REGULAR;
+}
+
+static int32_t init_driver_get_irq_int_line(const uint32_t irq_number)
+{
+    (void)irq_number;
+    return 0;
+}
 
 static void spurious_handler(void)
 {
@@ -190,10 +243,10 @@ void kernel_interrupt_init(void)
     spurious_interrupt = 0;
 
     /* Init driver */
-    interrupt_driver.driver_get_irq_int_line = NULL;
-    interrupt_driver.driver_handle_spurious  = NULL;
-    interrupt_driver.driver_set_irq_eoi      = NULL;
-    interrupt_driver.driver_set_irq_mask     = NULL;
+    interrupt_driver.driver_get_irq_int_line = init_driver_get_irq_int_line;
+    interrupt_driver.driver_handle_spurious  = init_driver_handle_spurious;
+    interrupt_driver.driver_set_irq_eoi      = init_driver_set_irq_eoi;
+    interrupt_driver.driver_set_irq_mask     = init_driver_set_irq_mask;
 
     KERNEL_TEST_POINT(interrupt_test);
 }
