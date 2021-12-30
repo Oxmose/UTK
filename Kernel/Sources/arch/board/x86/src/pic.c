@@ -172,7 +172,7 @@ void pic_init(void)
     cpu_outb(0xFF, PIC_MASTER_DATA_PORT);
     cpu_outb(0xFF, PIC_SLAVE_DATA_PORT);
 
-    KERNEL_DEBUG(PIC_DEBUG_ENABLED, "[PIC] Initialization end");
+    KERNEL_DEBUG(PIC_DEBUG_ENABLED, "PIC", "PIC Initialization end");
 
     KERNEL_TEST_POINT(pic_test);
     KERNEL_TEST_POINT(pic_test2);
@@ -256,10 +256,8 @@ void pic_set_irq_mask(const uint32_t irq_number, const bool_t enabled)
         }
     }
 
-    KERNEL_DEBUG(PIC_DEBUG_ENABLED,
-                 "[PIC] Mask M: 0x%02x S: 0x%02x",
-                 cpu_inb(PIC_MASTER_DATA_PORT),
-                 cpu_inb(PIC_SLAVE_DATA_PORT));
+    KERNEL_DEBUG(PIC_DEBUG_ENABLED, "PIC", "New PIC Mask M: 0x%02x S: 0x%02x",
+                 cpu_inb(PIC_MASTER_DATA_PORT), cpu_inb(PIC_SLAVE_DATA_PORT));
 
     EXIT_CRITICAL(int_state);
 }
@@ -277,7 +275,7 @@ void pic_set_irq_eoi(const uint32_t irq_number)
     }
     cpu_outb(PIC_EOI, PIC_MASTER_COMM_PORT);
 
-    KERNEL_DEBUG(PIC_DEBUG_ENABLED, "[PIC] IRQ EOI");
+    KERNEL_DEBUG(PIC_DEBUG_ENABLED, "PIC", "PIC IRQ EOI");
 }
 
 INTERRUPT_TYPE_E pic_handle_spurious_irq(const uint32_t int_number)
@@ -287,7 +285,7 @@ INTERRUPT_TYPE_E pic_handle_spurious_irq(const uint32_t int_number)
 
     irq_number = int_number - INT_PIC_IRQ_OFFSET;
 
-   KERNEL_DEBUG(PIC_DEBUG_ENABLED, "[PIC] Spurious handling %d", irq_number);
+   KERNEL_DEBUG(PIC_DEBUG_ENABLED, "PIC", "Spurious handling %d", irq_number);
 
     /* Check if regular soft interrupt */
     if(irq_number > PIC_MAX_IRQ_LINE)
@@ -350,7 +348,7 @@ void pic_disable(void)
     cpu_outb(0xFF, PIC_MASTER_DATA_PORT);
     cpu_outb(0xFF, PIC_SLAVE_DATA_PORT);
 
-    KERNEL_DEBUG(PIC_DEBUG_ENABLED, "[PIC] Disabled");
+    KERNEL_DEBUG(PIC_DEBUG_ENABLED, "PIC", "PIC Disabled");
 
     EXIT_CRITICAL(int_state);
 }

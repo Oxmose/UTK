@@ -416,8 +416,8 @@ static void select_thread(void)
     /* Wake up the sleeping threads */
     do
     {
-        KERNEL_DEBUG(SCHED_ELECT_DEBUG_ENABLED,
-                     "[SCHED] Checking threads to wakeup");
+        KERNEL_DEBUG(SCHED_ELECT_DEBUG_ENABLED, "SCHED",
+                     "Checking threads to wakeup");
 
         sleeping_node = kqueue_pop(sleeping_threads_table);
 
@@ -432,8 +432,7 @@ static void select_thread(void)
         /* If we should wakeup the thread */
         if(sleeping != NULL && sleeping->wakeup_time < current_time)
         {
-            KERNEL_DEBUG(SCHED_ELECT_DEBUG_ENABLED,
-                         "[SCHED] Waking up %d",
+            KERNEL_DEBUG(SCHED_ELECT_DEBUG_ENABLED, "SCHED", "Waking up %d",
                          sleeping->tid);
 
             sleeping->state = THREAD_STATE_READY;
@@ -467,8 +466,7 @@ static void select_thread(void)
     active_process       = active_thread->process;
     active_thread->state = THREAD_STATE_RUNNING;
 
-    KERNEL_DEBUG(SCHED_ELECT_DEBUG_ENABLED,
-                 "[SCHED] Elected new thread: %d",
+    KERNEL_DEBUG(SCHED_ELECT_DEBUG_ENABLED, "SCHED", "Elected new thread: %d",
                  active_thread->tid);
 }
 
@@ -489,15 +487,9 @@ static void schedule_int(cpu_state_t* cpu_state,
 
     ++schedule_count;
 
-#if KERNEL_LOG_LEVEL >= DEBUG_LOG_LEVEL
-    if(old_tid != active_thread->tid)
-    {
-        KERNEL_DEBUG(SCHED_SWITCH_DEBUG_ENABLED,
-                    "[SCHED] CPU Sched %d -> %d",
-                    old_tid,
-                    active_thread->tid);
-    }
-#endif
+    KERNEL_DEBUG((SCHED_SWITCH_DEBUG_ENABLED &&
+                  old_tid != active_thread->tid),
+                 "SCHED", "CPU Sched %d -> %d", old_tid, active_thread->tid);
 
      /* Restore thread context, we should never return from here  */
     cpu_restore_context(cpu_state, stack_state, active_thread);
@@ -549,7 +541,7 @@ void sched_init(void)
                  "Could not register scheduler interrupt",
                  err);
 
-    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "[SCHED] Init scheduler");
+    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "SCHED", "Initialized scheduler");
 
     cpu_restore_context(NULL, NULL, idle_thread);
 }
@@ -580,11 +572,9 @@ OS_RETURN_E sched_sleep(const unsigned int time_ms)
     active_thread->wakeup_time = curr_time + (uint64_t)time_ms * 1000000ULL;
     active_thread->state = THREAD_STATE_SLEEPING;
 
-    KERNEL_DEBUG(SCHED_DEBUG_ENABLED,
-                 "[SCHED] Thread %d asleep from %llu until %llu (%dms)",
-                 active_thread->tid,
-                 curr_time,
-                 active_thread->wakeup_time,
+    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "SCHED",
+                 "Thread %d asleep from %llu until %llu (%dms)",
+                 active_thread->tid, curr_time, active_thread->wakeup_time,
                  time_ms);
 
     sched_schedule();
@@ -637,7 +627,7 @@ static void sched_clean_process(kernel_process_t* process)
 
     ENTER_CRITICAL(int_state);
 
-    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "Cleaning process");
+    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "SCHED", "Cleaning process");
 
     /* Clean the process threads, note that the call to clean_thread will
      * remove the thread's node from the process' threads queue
@@ -650,7 +640,7 @@ static void sched_clean_process(kernel_process_t* process)
         thread_process = process->threads->head;
     }
 
-    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "Cleaned process threads");
+    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "SCHED", "Cleaned process threads");
 
     /* Make all children process inherit INIT */
     thread_process = kqueue_pop(process->children);
@@ -814,9 +804,8 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
 
     ++process_count;
 
-    KERNEL_DEBUG(SCHED_DEBUG_ENABLED,
-                 "[SCHED] Forked current process %d to %d",
-                 active_process->pid,
+    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "SCHED",
+                 "Forked current process %d to %d", active_process->pid,
                  new_proc->pid);
 
     EXIT_CRITICAL(int_state);
@@ -855,9 +844,9 @@ void sched_wait_process_pid(const SYSCALL_FUNCTION_E func, void* params)
      */
     ENTER_CRITICAL(int_state);
 
-    KERNEL_DEBUG(SCHED_DEBUG_ENABLED,
-                 "[SCHED] Process %d waiting for process %d",
-                 active_process->pid, func_params->pid);
+    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "SCHED",
+                 "Process %d waiting for process %d", active_process->pid,
+                 func_params->pid);
 
     child_node = active_process->children->head;
     child = NULL;
@@ -921,8 +910,7 @@ static void thread_exit(const THREAD_TERMINATE_CAUSE_E cause,
 
     joining_thread = NULL;
 
-    KERNEL_DEBUG(SCHED_DEBUG_ENABLED,
-                 "[SCHED] Exit thread %d",
+    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "SCHED", "Exit thread %d",
                  active_thread->tid);
 
     /* Cannot exit idle thread */
@@ -942,9 +930,8 @@ static void thread_exit(const THREAD_TERMINATE_CAUSE_E cause,
 
         if(joining_thread->state == THREAD_STATE_JOINING)
         {
-            KERNEL_DEBUG(SCHED_DEBUG_ENABLED,
-                         "Woke up joining thread %d",
-                         joining_thread->tid);
+            KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "SCHED",
+                         "Woke up joining thread %d", joining_thread->tid);
 
             joining_thread->state = THREAD_STATE_READY;
 
@@ -1018,10 +1005,8 @@ static OS_RETURN_E sched_copy_kernel_thread(kernel_thread_t* dst_thread)
     /* Set new  TID */
     dst_thread->tid = last_given_tid++;
 
-    KERNEL_DEBUG(SCHED_DEBUG_ENABLED,
-                 "[SCHED] Copied thread %d to %d",
-                 active_thread->tid,
-                 dst_thread->tid);
+    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "SCHED",
+                 "Copied thread %d to %d", active_thread->tid, dst_thread->tid);
 
     EXIT_CRITICAL(int_state);
 
@@ -1040,7 +1025,7 @@ static void sched_clean_thread(kernel_thread_t* thread)
 
     ENTER_CRITICAL(int_state);
 
-    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "Cleaning thread");
+    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "SCHED", "Cleaning thread");
 
     /* Clean thread's resources */
     sched_clean_thread_resources(thread);
@@ -1067,7 +1052,7 @@ static void sched_clean_thread(kernel_thread_t* thread)
                      err);
     }
 
-    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "Cleaned thread stacks");
+    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "SCHED", "Cleaned thread stacks");
 
     /* Remove from active thread table */
     thread_node = kqueue_find(active_threads_table[thread->priority], thread);
@@ -1120,7 +1105,7 @@ kqueue_node_t* sched_lock_thread(const THREAD_WAIT_TYPE_E block_type)
     active_thread->state      = THREAD_STATE_WAITING;
     active_thread->block_type = block_type;
 
-    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "Thread %d locked, reason: %d\n",
+    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "SCHED", "Thread %d locked, reason: %d\n",
                  active_thread->tid, block_type);
 
     return current_thread_node;
@@ -1154,8 +1139,9 @@ OS_RETURN_E sched_unlock_thread(kqueue_node_t* node,
     thread->state = THREAD_STATE_READY;
     kqueue_push(node, active_threads_table[thread->priority]);
 
-    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "Thread %d unlocked, reason: %d\n",
-                 active_thread->tid, block_type);
+    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "SCHED",
+                 "Thread %d unlocked, reason: %d\n", active_thread->tid,
+                 block_type);
 
     if(do_schedule == TRUE)
     {
@@ -1222,9 +1208,8 @@ OS_RETURN_E sched_join_thread(kernel_thread_t* thread,
         return OS_ERR_NULL_POINTER;
     }
 
-    KERNEL_DEBUG(SCHED_DEBUG_ENABLED,
-                 "[SCHED] Thread %d waiting for thread %d",
-                 active_thread->tid,
+    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "SCHED",
+                 "Thread %d waiting for thread %d", active_thread->tid,
                  thread->tid);
 
     /* If there is already a joined thread, we cannot accept a new one. */
@@ -1363,7 +1348,7 @@ OS_RETURN_E sched_create_kernel_thread(kernel_thread_t** thread,
     kqueue_push(new_thread_node_table,
                 active_threads_table[new_thread->priority]);
 
-    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "[SCHED] Kernel thread created");
+    KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "SCHED", "Kernel thread created");
 
     new_thread->tid = last_given_tid++;
     ++thread_count;

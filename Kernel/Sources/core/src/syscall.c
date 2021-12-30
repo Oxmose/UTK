@@ -135,7 +135,7 @@ static void syscall_handler(cpu_state_t *cpu_state,
 
     cpu_get_syscall_data(cpu_state, stack_state, &func, &params);
 
-    KERNEL_DEBUG(SYSCALL_DEBUG_ENABLED, "[SYSCALL] Request syscall %d", func);
+    KERNEL_DEBUG(SYSCALL_DEBUG_ENABLED, "SYSCALL", "Request syscall %u", func);
 
     SYSCALL_ASSERT((func < SYSCALL_MAX_ID &&
                     kernel_interrupt_handlers[func].handler != NULL),

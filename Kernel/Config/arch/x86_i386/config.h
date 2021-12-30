@@ -78,7 +78,7 @@
 #define KERNEL_RTC_TIMER_FREQ 5
 
 /** @brief Current year */
-#define CURRENT_YEAR 2021
+#define CURRENT_YEAR 2022
 
 /** @brief Thread's private storage size in bytes */
 #define THREAD_PRIVATE_STORAGE_SIZE 0x200

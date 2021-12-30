@@ -179,7 +179,7 @@ static void time_main_timer_handler(cpu_state_t* cpu_state,
         }
     }
 
-    KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED, "[TIME] Time manager main handler");
+    KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED, "TIME", "Time manager main handler");
 }
 
 static void time_rtc_timer_handler(cpu_state_t* cpu_state,
@@ -195,7 +195,7 @@ static void time_rtc_timer_handler(cpu_state_t* cpu_state,
         rtc_int_manager();
     }
 
-    KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED, "[TIME] Time manager RTC handler");
+    KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED, "TIME", "Time manager RTC handler");
 
     /* EOI */
     kernel_interrupt_set_irq_eoi(sys_rtc_timer.get_irq());
@@ -241,7 +241,7 @@ OS_RETURN_E time_init(const kernel_timer_t* main_timer,
         }
     }
 
-    KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED, "[TIME] Time manager Initialization");
+    KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED, "TIME", "Time manager Initialization");
 
     /* Init the system's values */
     cpu_count = get_cpu_count();
@@ -269,7 +269,7 @@ OS_RETURN_E time_init(const kernel_timer_t* main_timer,
         return err;
     }
 
-    KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED, "[TIME] Initialized main timer");
+    KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED, "TIME", "Initialized main timer");
 
     if(sys_rtc_timer.set_frequency != NULL)
     {
@@ -284,7 +284,7 @@ OS_RETURN_E time_init(const kernel_timer_t* main_timer,
         }
     }
 
-    KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED, "[TIME] Initialized RTC timer");
+    KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED, "TIME", "Initialized RTC timer");
 
     /* Enables all the possible timers */
     sys_main_timer.enable();
@@ -358,9 +358,8 @@ OS_RETURN_E time_register_scheduler(void(*scheduler_call)(
     }
 
 
-    KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED,
-                 "[TIME] Registered scheduler routine at 0x%p",
-                 scheduler_call);
+    KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED, "TIME",
+                 "Registered scheduler routine at 0x%p", scheduler_call);
 
     schedule_routine = scheduler_call;
 
@@ -374,9 +373,8 @@ OS_RETURN_E time_register_rtc_manager(void (*rtc_manager)(void))
         return OS_ERR_NULL_POINTER;
     }
 
-    KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED,
-                 "[TIME] Registered RTC routine at 0x%p",
-                 rtc_manager);
+    KERNEL_DEBUG(TIME_MGT_DEBUG_ENABLED, "TIME",
+                 "Registered RTC routine at 0x%p", rtc_manager);
 
     rtc_int_manager = rtc_manager;
 

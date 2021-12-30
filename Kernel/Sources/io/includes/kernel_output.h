@@ -60,10 +60,11 @@
 #endif
 
 #if KERNEL_LOG_LEVEL >= DEBUG_LOG_LEVEL
-#define KERNEL_DEBUG(MODULE, STR, ...) {                                       \
-    if(MODULE)                                                                 \
+#define KERNEL_DEBUG(ENABLED, MODULE, STR, ...) {                              \
+    if(ENABLED)                                                                \
     {                                                                          \
-        kernel_uart_debug(STR " | " __FILE__ ":%d\n", ##__VA_ARGS__, __LINE__);\
+        kernel_uart_debug(MODULE " | " STR " | " __FILE__ ":%d\n",             \
+                          ##__VA_ARGS__, __LINE__);                            \
     }                                                                          \
 }
 #else

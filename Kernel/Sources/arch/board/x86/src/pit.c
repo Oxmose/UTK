@@ -162,7 +162,7 @@ void pit_init(void)
     err = kernel_interrupt_register_irq_handler(PIT_IRQ_LINE, dummy_handler);
     PIT_ASSERT(err == OS_NO_ERR, "Could not set PIT handler", err);
 
-    KERNEL_DEBUG(PIT_DEBUG_ENABLED, "[PIT] Initialization end");
+    KERNEL_DEBUG(PIT_DEBUG_ENABLED, "PIT", "PIT Initialization end");
 
     KERNEL_TEST_POINT(pit_test);
     KERNEL_TEST_POINT(pit_test2);
@@ -183,8 +183,7 @@ void pit_enable(void)
         --disabled_nesting;
     }
 
-    KERNEL_DEBUG(PIT_DEBUG_ENABLED,
-                 "[PIT] Enable (nesting %d)",
+    KERNEL_DEBUG(PIT_DEBUG_ENABLED, "PIT", "Enable (nesting %d)",
                  disabled_nesting);
 
     if(disabled_nesting == 0)
@@ -206,8 +205,7 @@ void pit_disable(void)
         ++disabled_nesting;
     }
 
-    KERNEL_DEBUG(PIT_DEBUG_ENABLED,
-                 "[PIT] Disable (nesting %d)",
+    KERNEL_DEBUG(PIT_DEBUG_ENABLED, "PIT", "Disable (nesting %d)",
                  disabled_nesting);
     kernel_interrupt_set_irq_mask(PIT_IRQ_LINE, 0);
 
@@ -235,9 +233,7 @@ void pit_set_frequency(const uint32_t freq)
     cpu_outb(tick_freq & 0x00FF, PIT_DATA_PORT);
     cpu_outb(tick_freq >> 8, PIT_DATA_PORT);
 
-    KERNEL_DEBUG(PIT_DEBUG_ENABLED,
-                 "[PIT] New PIT frequency set (%d)",
-                 freq);
+    KERNEL_DEBUG(PIT_DEBUG_ENABLED, "PIT", "New PIT frequency set (%d)", freq);
 
     EXIT_CRITICAL(int_state);
 
@@ -285,9 +281,7 @@ OS_RETURN_E pit_set_handler(void(*handler)(
         return err;
     }
 
-    KERNEL_DEBUG(PIT_DEBUG_ENABLED,
-                 "[PIT] New PIT handler set at 0x%p",
-                 handler);
+    KERNEL_DEBUG(PIT_DEBUG_ENABLED, "PIT", "New PIT handler set 0x%p", handler);
 
     EXIT_CRITICAL(int_state);
     pit_enable();
@@ -297,8 +291,7 @@ OS_RETURN_E pit_set_handler(void(*handler)(
 
 OS_RETURN_E pit_remove_handler(void)
 {
-    KERNEL_DEBUG(PIT_DEBUG_ENABLED,
-                 "[PIT] Default PIT handler set at 0x%p",
+    KERNEL_DEBUG(PIT_DEBUG_ENABLED, "PIT", "Default PIT handler set 0x%p",
                  dummy_handler);
 
     return pit_set_handler(dummy_handler);

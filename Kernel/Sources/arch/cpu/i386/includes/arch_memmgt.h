@@ -131,7 +131,7 @@
 /** @brief Frame reference table hardware flag */
 #define FRAME_REF_IS_HW      0x40000000
 /** @brief Frame reference table reference count mask */
-#define FRAME_REF_COUNT_MASK 0x0000FFFF
+#define FRAME_REF_COUNT_MASK 0x00FFFFFF
 
 /*******************************************************************************
  * STRUCTURES AND TYPES

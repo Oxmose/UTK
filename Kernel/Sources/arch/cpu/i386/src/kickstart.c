@@ -141,7 +141,7 @@ void kernel_kickstart(void)
     KERNEL_TEST_POINT(boot_test);
     KERNEL_TEST_POINT(output_test);
 
-    KERNEL_DEBUG(KICKSTART_DEBUG_ENABLED, "[KICKSTART] Kickstarting kernel");
+    KERNEL_DEBUG(KICKSTART_DEBUG_ENABLED, "KICKSTART", "Kickstarting kernel");
 
     /* Validate architecture support */
     validate_architecture();

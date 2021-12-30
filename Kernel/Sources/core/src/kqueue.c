@@ -160,10 +160,8 @@ void kqueue_delete_queue(kqueue_t** queue)
 
 void kqueue_push(kqueue_node_t* node, kqueue_t* queue)
 {
-    KERNEL_DEBUG(KQUEUE_DEBUG_ENABLED,
-                 "[KQUEUE] KQueue try push knode 0x%p in kqueue 0x%p",
-                 node,
-                 queue);
+    KERNEL_DEBUG(KQUEUE_DEBUG_ENABLED, "KQUEUE",
+                 "KQueue try push knode 0x%p in kqueue 0x%p", node, queue);
 
     KQUEUE_ASSERT((node != NULL && queue != NULL),
                   "Cannot push with NULL knode or NULL kqueue",
@@ -196,10 +194,8 @@ void kqueue_push(kqueue_node_t* node, kqueue_t* queue)
                   "Cycle detected in KQueue",
                   OS_ERR_NULL_POINTER);
 
-    KERNEL_DEBUG(KQUEUE_DEBUG_ENABLED,
-                 "[KQUEUE] KQueue pushed knode 0x%p in kqueue 0x%p",
-                 node,
-                 queue);
+    KERNEL_DEBUG(KQUEUE_DEBUG_ENABLED,  "KQUEUE",
+                 "KQueue pushed knode 0x%p in kqueue 0x%p", node, queue);
 }
 
 
@@ -209,10 +205,8 @@ void kqueue_push_prio(kqueue_node_t* node,
 {
     kqueue_node_t* cursor;
 
-    KERNEL_DEBUG(KQUEUE_DEBUG_ENABLED,
-                 "[KQUEUE] KQueue try push prio knode 0x%p in kqueue 0x%p",
-                 node,
-                 queue);
+    KERNEL_DEBUG(KQUEUE_DEBUG_ENABLED, "KQUEUE",
+                 "KQueue try push prio knode 0x%p in kqueue 0x%p", node, queue);
 
     KQUEUE_ASSERT((node != NULL && queue != NULL),
                   "Cannot push with NULL knode or NULL kqueue",
@@ -269,19 +263,16 @@ void kqueue_push_prio(kqueue_node_t* node,
                   "Cycle detected in KQueue",
                   OS_ERR_NULL_POINTER);
 
-    KERNEL_DEBUG(KQUEUE_DEBUG_ENABLED,
-                 "[KQUEUE] KQueue pushed knode 0x%p in kqueue 0x%p",
-                 node,
-                 queue);
+    KERNEL_DEBUG(KQUEUE_DEBUG_ENABLED, "KQUEUE",
+                 "KQueue pushed knode 0x%p in kqueue 0x%p", node, queue);
 }
 
 kqueue_node_t* kqueue_pop(kqueue_t* queue)
 {
     kqueue_node_t* node;
 
-    KERNEL_DEBUG(KQUEUE_DEBUG_ENABLED,
-                 "[KQUEUE] KQueue try pop knode from kqueue 0x%p",
-                 queue);
+    KERNEL_DEBUG(KQUEUE_DEBUG_ENABLED, "KQUEUE",
+                 "KQueue try pop knode from kqueue 0x%p", queue);
 
     KQUEUE_ASSERT(queue != NULL,
                   "Cannot pop NULL kqueue",
@@ -296,10 +287,8 @@ kqueue_node_t* kqueue_pop(kqueue_t* queue)
     /* Dequeue the last item */
     node = queue->tail;
 
-    KERNEL_DEBUG(KQUEUE_DEBUG_ENABLED,
-                 "[KQUEUE] Pop knode 0x%p from kqueue 0x%p",
-                 node,
-                 queue);
+    KERNEL_DEBUG(KQUEUE_DEBUG_ENABLED, "KQUEUE",
+                 "Pop knode 0x%p from kqueue 0x%p", node, queue);
 
     if(node->prev != NULL)
     {
@@ -325,10 +314,8 @@ kqueue_node_t* kqueue_find(kqueue_t* queue, void* data)
 {
     kqueue_node_t* node;
 
-    KERNEL_DEBUG(KQUEUE_DEBUG_ENABLED,
-                 "[KQUEUE] KQueue try find data 0x%p from kqueue 0x%p",
-                 data,
-                 queue);
+    KERNEL_DEBUG(KQUEUE_DEBUG_ENABLED, "KQUEUE",
+                 "KQueue try find data 0x%p from kqueue 0x%p", data, queue);
 
     KQUEUE_ASSERT(queue != NULL,
                   "Cannot find in NULL kqueue",
@@ -341,10 +328,8 @@ kqueue_node_t* kqueue_find(kqueue_t* queue, void* data)
         node = node->next;
     }
 
-    KERNEL_DEBUG(KQUEUE_DEBUG_ENABLED,
-                 "[KQUEUE] KQueue found node 0x%p from kqueue 0x%p",
-                 node,
-                 queue);
+    KERNEL_DEBUG(KQUEUE_DEBUG_ENABLED, "KQUEUE",
+                 "KQueue found node 0x%p from kqueue 0x%p", node, queue);
 
     return node;
 }
@@ -353,10 +338,8 @@ void kqueue_remove(kqueue_t* queue, kqueue_node_t* node, const bool_t panic)
 {
     kqueue_node_t* cursor;
 
-    KERNEL_DEBUG(KQUEUE_DEBUG_ENABLED,
-                 "[KQUEUE] KQueue try renove knode 0x%p from kqueue 0x%p",
-                 node,
-                 queue);
+    KERNEL_DEBUG(KQUEUE_DEBUG_ENABLED, "KQUEUE",
+                 "KQueue try renove knode 0x%p from kqueue 0x%p", node, queue);
 
     KQUEUE_ASSERT((node != NULL && queue != NULL),
                   "Cannot remove with NULL knode or NULL kqueue",
@@ -400,10 +383,8 @@ void kqueue_remove(kqueue_t* queue, kqueue_node_t* node, const bool_t panic)
 
     node->enlisted = FALSE;
 
-    KERNEL_DEBUG(KQUEUE_DEBUG_ENABLED,
-                 "[KQUEUE] KQueue renoved knode 0x%p from kqueue 0x%p",
-                 node,
-                 queue);
+    KERNEL_DEBUG(KQUEUE_DEBUG_ENABLED, "KQUEUE",
+                 "KQueue renoved knode 0x%p from kqueue 0x%p", node, queue);
 }
 
 /************************************ EOF *************************************/

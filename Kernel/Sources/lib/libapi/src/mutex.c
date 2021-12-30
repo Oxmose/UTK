@@ -130,7 +130,7 @@ OS_RETURN_E mutex_init(mutex_t* mutex,
     mutex->owner = sched_params.tid;
     mutex->state = MUTEX_STATE_UNLOCKED;
 
-    KERNEL_DEBUG(MUTEX_DEBUG_ENABLED, "Mutex 0x%p initialized", mutex);
+    KERNEL_DEBUG(MUTEX_DEBUG_ENABLED, "MUTEX", "Mutex 0x%p initialized", mutex);
 
     return OS_NO_ERR;
 }
@@ -165,7 +165,7 @@ OS_RETURN_E mutex_destroy(mutex_t* mutex)
     ATOMIC_STORE(&mutex->state, MUTEX_STATE_DESTROYED);
     syscall_do(SYSCALL_FUTEX_WAKE, &futex);
 
-    KERNEL_DEBUG(MUTEX_DEBUG_ENABLED, "Mutex 0x%p destroyed", mutex);
+    KERNEL_DEBUG(MUTEX_DEBUG_ENABLED, "MUTEX", "Mutex 0x%p destroyed", mutex);
 
     return futex.error;
 }
@@ -283,7 +283,7 @@ OS_RETURN_E mutex_lock(mutex_t* mutex)
         }
     }
 
-    KERNEL_DEBUG(MUTEX_DEBUG_ENABLED, "Mutex 0x%p aquired", mutex);
+    KERNEL_DEBUG(MUTEX_DEBUG_ENABLED, "MUTEX", "Mutex 0x%p aquired", mutex);
 
     return OS_NO_ERR;
 }
@@ -356,7 +356,7 @@ OS_RETURN_E mutex_unlock(mutex_t* mutex)
         return OS_ERR_NOT_INITIALIZED;
     }
 
-    KERNEL_DEBUG(MUTEX_DEBUG_ENABLED, "Mutex 0x%p released", mutex);
+    KERNEL_DEBUG(MUTEX_DEBUG_ENABLED, "MUTEX", "Mutex 0x%p released", mutex);
 
     return OS_NO_ERR;
 }
@@ -444,7 +444,7 @@ OS_RETURN_E mutex_trylock(mutex_t* mutex, int32_t* value)
         }
     }
 
-    KERNEL_DEBUG(MUTEX_DEBUG_ENABLED, "Mutex 0x%p aquired", mutex);
+    KERNEL_DEBUG(MUTEX_DEBUG_ENABLED, "MUTEX", "Mutex 0x%p aquired", mutex);
 
     return OS_NO_ERR;
 }

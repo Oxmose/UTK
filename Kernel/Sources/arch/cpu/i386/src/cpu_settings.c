@@ -908,7 +908,7 @@ void cpu_setup_gdt(void)
 {
     uint32_t i;
 
-    KERNEL_DEBUG(CPU_DEBUG_ENABLED, "[CPU] Setting CPU GDT");
+    KERNEL_DEBUG(CPU_DEBUG_ENABLED, "CPU", "Setting CPU GDT");
 
     /************************************
      * KERNEL GDT ENTRIES
@@ -1050,7 +1050,7 @@ void cpu_setup_idt(void)
 {
     uint32_t i;
 
-    KERNEL_DEBUG(CPU_DEBUG_ENABLED, "[CPU] Setting CPU IDT");
+    KERNEL_DEBUG(CPU_DEBUG_ENABLED, "CPU", "Setting CPU IDT");
 
     /* Blank the IDT */
     memset(cpu_idt, 0, sizeof(uint64_t) * IDT_ENTRY_COUNT);
@@ -1082,7 +1082,7 @@ void cpu_setup_tss(void)
 {
     int32_t i;
 
-    KERNEL_DEBUG(CPU_DEBUG_ENABLED, "[CPU] Setting CPU TSS");
+    KERNEL_DEBUG(CPU_DEBUG_ENABLED, "CPU", "Setting CPU TSS");
 
     /* Blank the TSS */
     memset(cpu_tss, 0, sizeof(cpu_tss_entry_t) * MAX_CPU_COUNT);

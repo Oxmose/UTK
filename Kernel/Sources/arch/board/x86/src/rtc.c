@@ -241,7 +241,7 @@ void rtc_init(void)
     KERNEL_TEST_POINT(rtc_test2);
     KERNEL_TEST_POINT(rtc_test3);
 
-    KERNEL_DEBUG(RTC_DEBUG_ENABLED, "[RTC] Initialized");
+    KERNEL_DEBUG(RTC_DEBUG_ENABLED, "RTC", "RTC Initialized");
 }
 
 void rtc_enable(void)
@@ -255,8 +255,7 @@ void rtc_enable(void)
         --disabled_nesting;
     }
 
-    KERNEL_DEBUG(RTC_DEBUG_ENABLED,
-                 "[RTC] Enable RTC (nesting %d)",
+    KERNEL_DEBUG(RTC_DEBUG_ENABLED, "RTC", "Enable RTC (nesting %d)",
                  disabled_nesting);
     if(disabled_nesting == 0)
     {
@@ -277,8 +276,7 @@ void rtc_disable(void)
         ++disabled_nesting;
     }
 
-    KERNEL_DEBUG(RTC_DEBUG_ENABLED,
-                 "[RTC] Disable RTC (nesting %d)",
+    KERNEL_DEBUG(RTC_DEBUG_ENABLED, "RTC", "Disable RTC (nesting %d)",
                  disabled_nesting);
     kernel_interrupt_set_irq_mask(RTC_IRQ_LINE, 0);
 
@@ -363,9 +361,7 @@ void rtc_set_frequency(const uint32_t frequency)
 
     rtc_frequency = (RTC_QUARTZ_FREQ >> (rate - 1));
 
-    KERNEL_DEBUG(RTC_DEBUG_ENABLED,
-                 "[RTC] New RTC rate set (%d: %dHz)",
-                 rate,
+    KERNEL_DEBUG(RTC_DEBUG_ENABLED, "RTC", "New RTC rate set (%d: %dHz)", rate,
                  rtc_frequency);
 
     EXIT_CRITICAL(int_state);
@@ -413,8 +409,7 @@ OS_RETURN_E rtc_set_handler(void(*handler)(
         return err;
     }
 
-    KERNEL_DEBUG(RTC_DEBUG_ENABLED,
-                 "[RTC] New RTC handler set (0x%p)",
+    KERNEL_DEBUG(RTC_DEBUG_ENABLED, "RTC", "New RTC handler set (0x%p)",
                  handler);
 
     EXIT_CRITICAL(int_state);
@@ -426,7 +421,7 @@ OS_RETURN_E rtc_set_handler(void(*handler)(
 
 OS_RETURN_E rtc_remove_handler(void)
 {
-    KERNEL_DEBUG(RTC_DEBUG_ENABLED, "Default RTC handler set");
+    KERNEL_DEBUG(RTC_DEBUG_ENABLED, "RTC", "Default RTC handler set");
     return rtc_set_handler(dummy_handler);
 }
 
@@ -533,7 +528,7 @@ void rtc_update_time(void)
     cpu_outb(CMOS_REG_C, CMOS_COMM_PORT);
     cpu_inb(CMOS_DATA_PORT);
 
-    KERNEL_DEBUG(RTC_DEBUG_ENABLED, "[RTC] Updated RTC");
+    KERNEL_DEBUG(RTC_DEBUG_ENABLED, "RTC", "Updated RTC");
 }
 
 uint32_t rtc_get_irq(void)

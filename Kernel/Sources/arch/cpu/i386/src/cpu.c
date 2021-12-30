@@ -432,6 +432,9 @@
 
 OS_RETURN_E cpu_raise_interrupt(const uint32_t interrupt_line)
 {
+    KERNEL_DEBUG(CPU_DEBUG_ENABLED, "CPU",
+                 "Requesting interrupt raise %d", interrupt_line);
+
     if(interrupt_line > MAX_INTERRUPT_LINE)
     {
         return OS_ERR_UNAUTHORIZED_ACTION;
@@ -1331,6 +1334,8 @@ void cpu_restore_context(cpu_state_t* cpu_state,
 
 void cpu_syscall(uint32_t syscall_id, void* params)
 {
+    KERNEL_DEBUG(CPU_DEBUG_ENABLED, "CPU",
+                 "Requesting syscall %d", syscall_id);
     __asm__ __volatile__(
         "mov %0, %%ecx\n\t"
         "mov %1, %%edx\n\t"
@@ -1360,6 +1365,8 @@ void cpu_get_syscall_data(const cpu_state_t* cpu_state,
 
 void cpu_switch_user_mode(void)
 {
+    KERNEL_DEBUG(CPU_DEBUG_ENABLED, "CPU", "Switching to user mode");
+
     /* Setup stack requirement and performs switch to user mode */
     __asm__ __volatile__(
         "cli                             \n\t"
@@ -1399,7 +1406,7 @@ void validate_architecture(void)
     output_buff_index = 0;
 #endif
 
-    KERNEL_DEBUG(KICKSTART_DEBUG_ENABLED, "[KICKSTART] Detecting cpu");
+    KERNEL_DEBUG(CPU_DEBUG_ENABLED, "CPU", "Detecting cpu capabilities");
 
     ret = cpu_cpuid(CPUID_GETVENDORSTRING, (uint32_t*)regs);
 
@@ -1661,9 +1668,6 @@ void validate_architecture(void)
 
     /* Might be used in future to check extended features */
     (void)regs_ext;
-
-    KERNEL_DEBUG(CPU_DEBUG_ENABLED,
-                 "[CPU] Validating architecture end");
 }
 
 int32_t cpu_compare_and_swap(volatile int32_t* memory,

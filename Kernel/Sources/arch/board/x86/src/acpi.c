@@ -615,9 +615,8 @@ static void acpi_map_data(const void* start_addr, size_t size)
     addr_align = (uintptr_t)start_addr & PAGE_ALIGN_MASK;
     size       = size + (uintptr_t)start_addr - addr_align;
 
-    KERNEL_DEBUG(ACPI_DEBUG_ENABLED,
-                         "[ACPI] Mapping request: 0x%p (%d)",
-                         addr_align, size);
+    KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "ACPI", "Mapping request: 0x%p (%d)",
+                 addr_align, size);
 
     /* Search for mapping for each pages */
     while(size)
@@ -625,8 +624,7 @@ static void acpi_map_data(const void* start_addr, size_t size)
         /* Try to map, if already mapped skip */
         if(is_page_mapped(addr_align) == 0)
         {
-            KERNEL_DEBUG(ACPI_DEBUG_ENABLED,
-                         "[ACPI] Mapping: 0x%p",
+            KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "ACPI", "Mapping: 0x%p",
                          addr_align);
 
             err = memory_declare_hw(addr_align, KERNEL_PAGE_SIZE);
@@ -679,7 +677,7 @@ static void acpi_parse_apic(acpi_madt_t* madt_ptr)
 
     acpi_map_data(madt_ptr, sizeof(acpi_madt_t));
 
-    KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "[ACPI] Parsing MADT at 0x%p", madt_ptr);
+    KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "ACPI", "Parsing MADT at 0x%p", madt_ptr);
 
     /* Verify checksum */
     sum = 0;
@@ -711,8 +709,8 @@ static void acpi_parse_apic(acpi_madt_t* madt_ptr)
         /* Check entry type */
         if(type == APIC_TYPE_LOCAL_APIC)
         {
-            KERNEL_DEBUG(ACPI_DEBUG_ENABLED,
-                "[ACPI] Found LAPIC: CPU #%d | ID #%d | FLAGS %x",
+            KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "ACPI",
+                "Found LAPIC: CPU #%d | ID #%d | FLAGS %x",
                 ((local_apic_t*)madt_entry)->acpi_cpu_id,
                 ((local_apic_t*)madt_entry)->apic_id,
                 ((local_apic_t*)madt_entry)->flags);
@@ -737,8 +735,8 @@ static void acpi_parse_apic(acpi_madt_t* madt_ptr)
         }
         else if(type == APIC_TYPE_IO_APIC)
         {
-            KERNEL_DEBUG(ACPI_DEBUG_ENABLED,
-                "[ACPI] Found IO-APIC ADDR 0x%p | ID #%d | GSIB %x",
+            KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "ACPI",
+                "Found IO-APIC ADDR 0x%p | ID #%d | GSIB %x",
                 ((io_apic_t*)madt_entry)->io_apic_addr,
                 ((io_apic_t*)madt_entry)->apic_id,
                 ((io_apic_t*)madt_entry)->
@@ -775,7 +773,7 @@ static void acpi_parse_dsdt(acpi_dsdt_t* dsdt_ptr)
 
     acpi_map_data(dsdt_ptr, sizeof(acpi_dsdt_t));
 
-    KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "[ACPI] Parsing DSDT at 0x%p", dsdt_ptr);
+    KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "ACPI", "Parsing DSDT at 0x%p", dsdt_ptr);
 
     acpi_map_data(dsdt_ptr, dsdt_ptr->header.length);
 
@@ -807,7 +805,7 @@ static void acpi_parse_fadt(acpi_fadt_t* fadt_ptr)
 
     acpi_map_data(fadt_ptr, sizeof(acpi_fadt_t));
 
-    KERNEL_DEBUG(ACPI_DEBUG_ENABLED,"[ACPI] Parsing FADT at 0x%p", fadt_ptr);
+    KERNEL_DEBUG(ACPI_DEBUG_ENABLED,"ACPI", "Parsing FADT at 0x%p", fadt_ptr);
 
     /* Verify checksum */
     sum = 0;
@@ -838,12 +836,12 @@ static void acpi_parse_dt(acpi_header_t* header)
 
     acpi_map_data(header, sizeof(acpi_header_t));
 
-    KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "[ACPI] Parsing SDT at 0x%p", header);
+    KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "ACPI", "Parsing SDT at 0x%p", header);
 
     memcpy(sig_str, header->signature, 4);
     sig_str[4] = 0;
 
-    KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "[ACPI] Signature: %s", sig_str);
+    KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "ACPI", "Signature: %s", sig_str);
 
     if(*((uint32_t*)header->signature) == ACPI_FACP_SIG)
     {
@@ -856,7 +854,7 @@ static void acpi_parse_dt(acpi_header_t* header)
     }
     else
     {
-        KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "[ACPI] Not supported: %s", sig_str);
+        KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "ACPI", "Not supported: %s", sig_str);
     }
 }
 
@@ -874,7 +872,7 @@ static void acpi_parse_rsdt(rsdt_descriptor_t* rsdt_ptr)
 
     acpi_map_data(rsdt_ptr, sizeof(rsdt_descriptor_t));
 
-    KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "[ACPI] Parsing RSDT at 0x%p", rsdt_ptr);
+    KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "ACPI", "Parsing RSDT at 0x%p", rsdt_ptr);
 
     /* Verify checksum */
     sum = 0;
@@ -919,7 +917,7 @@ static void acpi_parse_xsdt(xsdt_descriptor_t* xsdt_ptr)
 
     acpi_map_data(xsdt_ptr, sizeof(xsdt_descriptor_t));
 
-    KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "[ACPI] Parsing XSDT at 0x%p", xsdt_ptr);
+    KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "ACPI", "Parsing XSDT at 0x%p", xsdt_ptr);
 
     /* Verify checksum */
     sum = 0;
@@ -961,7 +959,7 @@ static void acpi_parse_rsdp(rsdp_descriptor_t* rsdp_desc)
                 "Tried to parse a NULL RSDP",
                 OS_ERR_NULL_POINTER);
 
-    KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "[ACPI] Parsing RSDP at 0x%p", rsdp_desc);
+    KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "ACPI", "Parsing RSDP at 0x%p", rsdp_desc);
 
     acpi_map_data(rsdp_desc, sizeof(rsdp_descriptor_t));
 
@@ -976,9 +974,8 @@ static void acpi_parse_rsdp(rsdp_descriptor_t* rsdp_desc)
                 "RSDP Checksum failed",
                 OS_ERR_CHECKSUM_FAILED);
 
-    KERNEL_DEBUG(ACPI_DEBUG_ENABLED,
-                    "[ACPI] Revision %d detected",
-                    rsdp_desc->revision);
+    KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "ACPI", "Revision %d detected",
+                 rsdp_desc->revision);
 
     ACPI_ASSERT((rsdp_desc->revision == 0 || rsdp_desc->revision == 2),
                 "Unsupported ACPI version",
@@ -1060,8 +1057,7 @@ void acpi_init(void)
         /* Checking the RSDP signature */
         if(signature == ACPI_RSDP_SIG)
         {
-            KERNEL_DEBUG(ACPI_DEBUG_ENABLED,
-                         "[ACPI] RSDP found at 0x%p",
+            KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "ACPI", "RSDP found at 0x%p",
                          range_begin);
 
             /* Parse RSDP */
@@ -1140,8 +1136,8 @@ int32_t acpi_get_remaped_irq(const uint32_t irq_number)
             /* Return remaped IRQ number */
             if(int_override->source == irq_number)
             {
-                KERNEL_DEBUG(ACPI_DEBUG_ENABLED,
-                             "[ACPI] Interrupt override found %d -> %d",
+                KERNEL_DEBUG(ACPI_DEBUG_ENABLED, "ACPI",
+                             "Interrupt override found %d -> %d",
                              int_override->source,
                              int_override->interrupt);
 

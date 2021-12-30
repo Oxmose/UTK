@@ -96,7 +96,8 @@ OS_RETURN_E sem_init(semaphore_t* sem, const int32_t init_level)
     sem->lock    = SPINLOCK_INIT_VALUE;
     sem->init    = TRUE;
 
-    KERNEL_DEBUG(SEMAPHORE_DEBUG_ENABLED, "Semaphore 0x%p initialized.", sem);
+    KERNEL_DEBUG(SEMAPHORE_DEBUG_ENABLED, "SEM", "Semaphore 0x%p initialized.",
+                 sem);
 
     return OS_NO_ERR;
 }
@@ -139,7 +140,8 @@ OS_RETURN_E sem_destroy(semaphore_t* sem)
         SPINLOCK_UNLOCK(sem->lock);
     }
 
-    KERNEL_DEBUG(SEMAPHORE_DEBUG_ENABLED, "Semaphore 0x%p destroyed.", sem);
+    KERNEL_DEBUG(SEMAPHORE_DEBUG_ENABLED, "SEM", "Semaphore 0x%p destroyed.",
+                 sem);
 
     return OS_NO_ERR;
 }
@@ -198,7 +200,8 @@ OS_RETURN_E sem_pend(semaphore_t* sem)
 
     SPINLOCK_UNLOCK(sem->lock);
 
-    KERNEL_DEBUG(SEMAPHORE_DEBUG_ENABLED, "Semaphore 0x%p acquired.", sem);
+    KERNEL_DEBUG(SEMAPHORE_DEBUG_ENABLED, "SEM", "Semaphore 0x%p acquired.",
+                 sem);
 
     return OS_NO_ERR;
 }
@@ -238,7 +241,8 @@ OS_RETURN_E sem_post(semaphore_t* sem)
 
     SPINLOCK_UNLOCK(sem->lock);
 
-    KERNEL_DEBUG(SEMAPHORE_DEBUG_ENABLED, "Semaphore 0x%p released.", sem);
+    KERNEL_DEBUG(SEMAPHORE_DEBUG_ENABLED, "SEM", "Semaphore 0x%p released.",
+                 sem);
 
     return OS_NO_ERR;
 }
@@ -278,7 +282,8 @@ OS_RETURN_E sem_trypend(semaphore_t* sem, int32_t* value)
 
     SPINLOCK_UNLOCK(sem->lock);
 
-    KERNEL_DEBUG(SEMAPHORE_DEBUG_ENABLED, "Semaphore 0x%p acquired.", sem);
+    KERNEL_DEBUG(SEMAPHORE_DEBUG_ENABLED, "SEM", "Semaphore 0x%p acquired.",
+                 sem);
 
     return OS_NO_ERR;
 }

@@ -481,9 +481,8 @@ void kheap_init(void)
 
     init = TRUE;
 
-    KERNEL_DEBUG(KHEAP_DEBUG_ENABLED,
-                 "[KHEAP] Kernel Heap Initialized at 0x%p",
-                 mem_start);
+    KERNEL_DEBUG(KHEAP_DEBUG_ENABLED, "KHEAP",
+                 "Kernel Heap Initialized at 0x%p", mem_start);
 
     KERNEL_TEST_POINT(kheap_test);
 }
@@ -554,11 +553,9 @@ void* kmalloc(size_t size)
 
     mem_free -= size2;
 
-    KERNEL_DEBUG(KHEAP_DEBUG_ENABLED,
-                 "[KHEAP] Kheap allocated 0x%p -> %uB (%uB free, %uB used)",
-                 chunk->data,
-                 size2 - len - HEADER_SIZE,
-                 mem_free,
+    KERNEL_DEBUG(KHEAP_DEBUG_ENABLED, "KHEAP",
+                 "Kheap allocated 0x%p -> %uB (%uB free, %uB used)",
+                 chunk->data, size2 - len - HEADER_SIZE, mem_free,
                  kheap_init_free - mem_free);
 
     EXIT_CRITICAL(int_state);
@@ -612,10 +609,8 @@ void kfree(void* ptr)
         push_free(chunk);
     }
 
-    KERNEL_DEBUG(KHEAP_DEBUG_ENABLED,
-                 "[KHEAP] Kheap freed 0x%p -> %uB",
-                 ptr,
-                 used);
+    KERNEL_DEBUG(KHEAP_DEBUG_ENABLED, "KHEAP",
+                 "[KHEAP] Kheap freed 0x%p -> %uB", ptr, used);
 
     EXIT_CRITICAL(int_state);
 }

@@ -359,7 +359,7 @@ void lapic_init(void)
     /* Spurious Interrupt Vector Register */
     lapic_write(LAPIC_SVR, 0x100 | LAPIC_SPURIOUS_INT_LINE);
 
-    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "[LAPIC] Initialized");
+    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "LAPIC", " LAPIC Initialized");
 
     KERNEL_TEST_POINT(lapic_test);
     KERNEL_TEST_POINT(lapic_test2);
@@ -493,7 +493,7 @@ void lapic_set_int_eoi(const uint32_t interrupt_line)
 
     lapic_write(LAPIC_EOI, 0);
 
-    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "[LAPIC] EOI %d", interrupt_line);
+    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "LAPIC", "LAPIC EOI %d", interrupt_line);
 }
 
 void lapic_timer_init(void)
@@ -501,7 +501,7 @@ void lapic_timer_init(void)
     uint32_t    lapic_timer_tick_10ms;
     OS_RETURN_E err;
 
-    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "[LAPIC] Timer Initialization");
+    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "LAPIC", "LAPIC Timer Initialization");
 
     /* Check LAPIC support */
     LAPIC_ASSERT(initialized == TRUE,
@@ -590,8 +590,7 @@ void lapic_timer_set_frequency(const uint32_t frequency)
                  "LAPIC timer frequency out of bound",
                  OS_ERR_INCORRECT_VALUE);
 
-    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED,
-                 "[LAPIC] Timer set frequency %d",
+    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "LAPIC", "Timer set frequency %d",
                  frequency);
 
     /* Compute the new tick count */
@@ -615,7 +614,7 @@ void lapic_timer_enable(void)
                  "Tried to enable LAPIC timer before initialization",
                  OS_ERR_NOT_INITIALIZED);
 
-    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "[LAPIC] Timer enable");
+    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "LAPIC", "LAPIC timer enable");
 
     ENTER_CRITICAL(int_state);
 
@@ -635,7 +634,7 @@ void lapic_timer_disable(void)
                  "Tried to disable LAPIC timer before initialization",
                  OS_ERR_NOT_INITIALIZED);
 
-    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "[LAPIC] Timer disable");
+    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "LAPIC", "LAPIC timer disable");
 
     ENTER_CRITICAL(int_state);
 
@@ -689,9 +688,8 @@ OS_RETURN_E lapic_timer_set_handler(void(*handler)(
 
     EXIT_CRITICAL(int_state);
 
-    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED,
-                 "[LAPIC] New LAPIC timer handler set (0x%p)",
-                 handler);
+    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "LAPIC",
+                 "New LAPIC timer handler set (0x%p)", handler);
 
     lapic_timer_enable();
 
@@ -706,8 +704,7 @@ OS_RETURN_E lapic_timer_remove_handler(void)
         return OS_ERR_NOT_INITIALIZED;
     }
 
-    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED,
-                 "[LAPIC] Removed timer handler");
+    KERNEL_DEBUG(LAPIC_DEBUG_ENABLED, "LAPIC", "Removed timer handler");
 
     return lapic_timer_set_handler(lapic_dummy_handler);
 }

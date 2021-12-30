@@ -277,12 +277,10 @@ void memory_free_process_data(const void* virt_addr,
  * number of contiguous pages to the kernel pages pool.
  *
  * @param[in] page_count The number of desired pages to allocate.
- * @param[out] err The error buffer to store the operation's result. If NULL,
- * the function will raise a kernel panic in case of error.
  *
  * @return The function return the address of the first allocated page.
  */
-void* memory_alloc_kernel_pages(const size_t page_count, OS_RETURN_E* err);
+void* memory_alloc_kernel_pages(const size_t page_count);
 
 /**
  * @brief Kernel memory page release.
@@ -292,12 +290,9 @@ void* memory_alloc_kernel_pages(const size_t page_count, OS_RETURN_E* err);
  *
  * @param[in] page_addr The address of the first page to release.
  * @param[in] page_count The number of desired pages to release.
- * @param[out] err The error buffer to store the operation's result. If NULL,
- * the function will raise a kernel panic in case of error.
  */
 void memory_free_kernel_pages(const void* page_addr,
-                              const size_t page_count,
-                              OS_RETURN_E* err);
+                              const size_t page_count);
 
 /**
  * @brief System call handler to allocate memory pages.

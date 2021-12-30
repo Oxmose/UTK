@@ -346,7 +346,7 @@ void vga_init(void)
 {
     OS_RETURN_E err;
 
-    KERNEL_DEBUG(VGA_DEBUG_ENABLED, "[VGA] Initializing VGA text driver");
+    KERNEL_DEBUG(VGA_DEBUG_ENABLED, "VGA", "Initializing VGA text driver");
 
     /* Init framebuffer */
     vga_framebuffer = (uint16_t*)VGA_TEXT_FRAMEBUFFER;

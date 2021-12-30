@@ -227,8 +227,8 @@ void io_apic_init(void)
                             1,
                             NULL);
 
-        KERNEL_DEBUG(IOAPIC_DEBUG_ENABLED,
-                     "[IO-APIC] Address mapped to 0x%p on IO-APIC",
+        KERNEL_DEBUG(IOAPIC_DEBUG_ENABLED, "IO-APIC",
+                     "Address mapped to 0x%p on IO-APIC",
                      io_apics[i].base_addr, io_apics[i].id);
 
         /* Maximum entry count */
@@ -263,8 +263,8 @@ void io_apic_set_irq_mask(const uint32_t irq_number, const bool_t enabled)
            io_apics[i].gsib + io_apics[i].max_redirect_count > irq_number)
         {
             base_addr = io_apics[i].base_addr;
-            KERNEL_DEBUG(IOAPIC_DEBUG_ENABLED,
-                 "[IO-APIC] Mask IRQ on IO APIC %d",
+            KERNEL_DEBUG(IOAPIC_DEBUG_ENABLED, "IO-APIC",
+                 "Mask IRQ on IO APIC %d",
                  io_apics[i].id);
         }
     }
@@ -288,14 +288,14 @@ void io_apic_set_irq_mask(const uint32_t irq_number, const bool_t enabled)
 
     EXIT_CRITICAL(int_state);
 
-    KERNEL_DEBUG(IOAPIC_DEBUG_ENABLED,
-                 "[IO-APIC] Mask IRQ %d (%d): %d",
+    KERNEL_DEBUG(IOAPIC_DEBUG_ENABLED, "IO-APIC",
+                 "Mask IRQ %d (%d): %d",
                  irq_number, actual_irq, (uint32_t)enabled);
 }
 
 void io_apic_set_irq_eoi(const uint32_t irq_number)
 {
-    KERNEL_DEBUG(IOAPIC_DEBUG_ENABLED, "[IO-APIC] Set IRQ EOI %d", irq_number);
+    KERNEL_DEBUG(IOAPIC_DEBUG_ENABLED, "IO-APIC", "Set IRQ EOI %d", irq_number);
 
     lapic_set_int_eoi(irq_number);
 }
@@ -326,8 +326,7 @@ INTERRUPT_TYPE_E io_apic_handle_spurious_irq(const uint32_t int_number)
         }
     }
 
-    KERNEL_DEBUG(IOAPIC_DEBUG_ENABLED,
-                 "[IO-APIC] Spurious IRQ ? %d : %d",
+    KERNEL_DEBUG(IOAPIC_DEBUG_ENABLED, "IO-APIC", "Spurious IRQ ? %d : %d",
                  int_number, int_type);
 
     return int_type;

@@ -575,9 +575,8 @@ static void user_heap_init(void)
 
     init = TRUE;
 
-    KERNEL_DEBUG(USER_HEAP_DEBUG_ENABLED,
-                 "User Heap Initialized at 0x%p",
-                 mem_start);
+    KERNEL_DEBUG(USER_HEAP_DEBUG_ENABLED, "MALLOC",
+                 "User Heap Initialized at 0x%p", mem_start);
 }
 
 void* malloc(size_t size)
@@ -664,11 +663,9 @@ void* malloc(size_t size)
 
     mem_free -= size2;
 
-    KERNEL_DEBUG(USER_HEAP_DEBUG_ENABLED,
+    KERNEL_DEBUG(USER_HEAP_DEBUG_ENABLED, "MALLOC",
                  "User heap allocated 0x%p -> %uB (%uB free, %uB used)",
-                 chunk->data,
-                 size2 - len - HEADER_SIZE,
-                 mem_free,
+                 chunk->data, size2 - len - HEADER_SIZE, mem_free,
                  kheap_mem_init - mem_free);
 
     err = mutex_unlock(&lock);
@@ -728,10 +725,8 @@ void free(void* ptr)
         push_free(chunk);
     }
 
-    KERNEL_DEBUG(USER_HEAP_DEBUG_ENABLED,
-                 "Heap freed 0x%p -> %uB",
-                 ptr,
-                 used);
+    KERNEL_DEBUG(USER_HEAP_DEBUG_ENABLED, "MALLOC", "Heap freed 0x%p -> %uB",
+                 ptr, used);
 
     err = mutex_unlock(&lock);
     MALLOC_ASSERT(err == OS_NO_ERR,

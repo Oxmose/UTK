@@ -394,8 +394,8 @@ inline static OS_RETURN_E ustar_access_blocks_from_device(
     }
     first_phys_block_offset *= USTAR_BLOCK_SIZE;
 
-    KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "Reading blocks 0x%p, (%d blocks)",
-                 inode, block_counts);
+    KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "USTAR",
+                 "Reading blocks 0x%p (%d blocks)", inode, block_counts);
 
     /* Read / Write blocks */
     if(operation == USTAR_DEV_OP_WRITE)
@@ -485,7 +485,8 @@ static void ustar_get_next_file(const vfs_partition_t* partition,
     OS_RETURN_E err;
     uint32_t    size;
 
-    KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "Current file %s", block->file_name);
+    KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "USTAR", "Current file %s",
+                 block->file_name);
 
     /* We loop over all possible empty names (removed files) */
     do
@@ -524,7 +525,8 @@ static void ustar_get_next_file(const vfs_partition_t* partition,
         }
     }while(block->file_name[0] == 0);
 
-    KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "Next file %s", block->file_name);
+    KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "USTAR", "Next file %s",
+                 block->file_name);
 }
 
 inline static void ustar_get_filename(const char* path, char* buffer)
@@ -739,12 +741,13 @@ static OS_RETURN_E ustar_search_file(const vfs_partition_t* partition,
 
     if(found == TRUE)
     {
-        KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "Found file %s", path);
+        KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "USTAR", "Found file %s", path);
         return OS_NO_ERR;
     }
     else
     {
-        KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "Did not find file %s", path);
+        KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "USTAR", "Did not find file %s",
+                     path);
         return OS_ERR_FILE_NOT_FOUND;
     }
 }
@@ -896,7 +899,7 @@ OS_RETURN_E ustar_open_file(const char* path,
         return OS_ERR_FILE_NOT_FOUND;
     }
 
-    KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "Opening %s", path);
+    KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "USTAR", "Opening %s", path);
 
     /* Read the first 512 bytes (USTAR block) */
     err = ustar_access_blocks_from_device(vnode->partition,
@@ -923,8 +926,7 @@ OS_RETURN_E ustar_open_file(const char* path,
      */
     while(current_block.file_name[0] != 0)
     {
-        KERNEL_DEBUG(USTAR_DEBUG_ENABLED,
-                     "Checking %s",
+        KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "USTAR", "Checking %s",
                      current_block.file_name);
 
         if(strncmp(path,
@@ -1304,7 +1306,7 @@ OS_RETURN_E ustar_remove_file(const vfs_partition_t* part, const char* path)
     }
 
     err = ustar_search_file(part, path, &current_block, &block_id);
-    KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "Deleteing file %s at %d",
+    KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "USTAR", "Deleteing file %s at %d",
                  path, block_id);
 
     if(err == OS_NO_ERR)
@@ -1483,10 +1485,8 @@ OS_RETURN_E ustar_rename_file(const vfs_partition_t* partition,
                 strncpy(old_short_path + old_path_len, name_table + i,
                         strlen(name_table + i) + 1);
 
-                KERNEL_DEBUG(USTAR_DEBUG_ENABLED,
-                             "Renaming %s to %s",
-                             old_short_path,
-                             short_path);
+                KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "USTAR", "Renaming %s to %s",
+                             old_short_path, short_path);
 
                 err = ustar_rename_file(partition, old_short_path, short_path);
                 USTAR_ASSERT(err == OS_NO_ERR,
@@ -1558,8 +1558,7 @@ OS_RETURN_E ustar_truncate_file(const vfs_partition_t* partition,
         }
         /* Set the new size */
         uint2oct(current_block.size, new_size, USTAR_FSIZE_FIELD_LENGTH);
-        KERNEL_DEBUG(USTAR_DEBUG_ENABLED,
-                     "Truncated file to %s",
+        KERNEL_DEBUG(USTAR_DEBUG_ENABLED, "USTAR", "Truncated file to %u",
                      current_block.size);
 
         return ustar_access_blocks_from_device(partition,

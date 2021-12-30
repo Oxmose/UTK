@@ -84,7 +84,7 @@ SECTIONS
     {
         *(.eh_frame)
 
-        _END_RODATA_ADDR = .;
+        _END_RO_DATA_ADDR = .;
     } > KERNEL_RO_DATA
 
     /* Contains the kernel data */
