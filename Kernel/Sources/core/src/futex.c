@@ -100,6 +100,18 @@ typedef struct
  * MACROS
  ******************************************************************************/
 
+/**
+ * @brief Assert macro used by the futex to ensure correctness of
+ * execution.
+ *
+ * @details Assert macro used by the futex to ensure correctness of
+ * execution. Due to the critical nature of the futex, any error
+ * generates a kernel panic.
+ *
+ * @param[in] COND The condition that should be true.
+ * @param[in] MSG The message to display in case of kernel panic.
+ * @param[in] ERROR The error code to use in case of kernel panic.
+ */
 #define FUTEX_ASSERT(COND, MSG, ERROR) {                    \
     if((COND) == FALSE)                                     \
     {                                                       \
@@ -107,10 +119,19 @@ typedef struct
     }                                                       \
 }
 
-#define CHECK_ERROR_STATE(err, condition) {                         \
-    if(err != OS_NO_ERR || (condition))                             \
+/**
+ * @brief Checks the futex state and recover in case of error.
+ *
+ * @details Checks the futex state and recover in case of error. This macro
+ * makes the function return after executing futex recovery.
+ *
+ * @param[in] COND The condition that should be true.
+ * @param[in] ERR The error value to check.
+ */
+#define CHECK_ERROR_STATE(ERR, COND) {                              \
+    if(ERR != OS_NO_ERR || (COND))                                  \
     {                                                               \
-        futex_recover(func_params, &recover_data, err);             \
+        futex_recover(func_params, &recover_data, ERR);             \
         EXIT_CRITICAL(int_state)                                    \
         return;                                                     \
     }                                                               \

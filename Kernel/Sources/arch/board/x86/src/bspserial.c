@@ -281,7 +281,7 @@ static void set_baudrate(SERIAL_BAUDRATE_E rate, const uint8_t com);
  * @param[in] port The desired port to write the data to.
  * @param[in] data The byte to write to the uart port.
  */
-void uart_write(const uint32_t port, const uint8_t data);
+static void uart_write(const uint32_t port, const uint8_t data);
 
 /*******************************************************************************
  * FUNCTIONS
@@ -316,7 +316,7 @@ static void set_baudrate(SERIAL_BAUDRATE_E rate, const uint8_t com)
                  com, rate);
 }
 
-void uart_write(const uint32_t port, const uint8_t data)
+static void uart_write(const uint32_t port, const uint8_t data)
 {
     uint32_t int_state;
     /* Wait for empty transmit */
@@ -418,7 +418,7 @@ void uart_scroll(const SCROLL_DIRECTION_E direction,
     }
 }
 
-void uart_console_write_keyboard(const char* str, const size_t len)
+void uart_console_write_keyboard(const char* string, const size_t len)
 {
     size_t i;
     for(i = 0; i < len; ++i)

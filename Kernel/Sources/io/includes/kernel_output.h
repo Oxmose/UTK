@@ -66,7 +66,6 @@
         kernel_uart_debug(STR " | " __FILE__ ":%d\n", ##__VA_ARGS__, __LINE__);\
     }                                                                          \
 }
-
 #else
 #define KERNEL_DEBUG(...)
 #endif
@@ -106,7 +105,7 @@ void kernel_printf(const char *fmt, ...);
  * the beggining of the string before printing it. This uses the generic
  * graphic driver to output data.
  *
- * @param fmt The format string to output.
+ * @param[in] fmt The format string to output.
  * @param[in] ... format's parameters.
  */
 void kernel_error(const char *fmt, ...);
@@ -118,7 +117,7 @@ void kernel_error(const char *fmt, ...);
  * the beggining of the string before printing it. This uses the generic
  * graphic driver to output data.
  *
- * @param fmt The format string to output.
+ * @param[in] fmt The format string to output.
  * @param[in] ... format's parameters.
  */
 void kernel_success(const char *fmt, ...);
@@ -130,7 +129,7 @@ void kernel_success(const char *fmt, ...);
  * the beggining of the string before printing it. This uses the generic
  * graphic driver to output data.
  *
- * @param fmt The format string to output.
+ * @param[in] fmt The format string to output.
  * @param[in] ... format's parameters.
  */
 void kernel_info(const char *fmt, ...);
@@ -141,7 +140,7 @@ void kernel_info(const char *fmt, ...);
  * @details Prints the desired string to the uart port. Adds a [DEBUG] tag at
  * the beggining of the string before outputing it.
  *
- * @param fmt The format string to output.
+ * @param[in] fmt The format string to output.
  * @param[in] ... format's parameters.
  */
 void kernel_uart_debug(const char *fmt, ...);

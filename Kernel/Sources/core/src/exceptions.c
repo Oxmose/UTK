@@ -26,6 +26,7 @@
 /* Included headers */
 #include <stdint.h>             /* Generic int types */
 #include <stddef.h>             /* Standard definitions */
+#include <string.h>             /* Memory manipulation */
 #include <panic.h>              /* Kernel panic */
 #include <cpu_settings.h>       /* CPU settings */
 #include <interrupt_settings.h> /* CPU interrupts settings */
@@ -58,6 +59,18 @@
  * MACROS
  ******************************************************************************/
 
+/**
+ * @brief Assert macro used by the exception manager to ensure correctness of
+ * execution.
+ *
+ * @details Assert macro used by the exception manager to ensure correctness of
+ * execution. Due to the critical nature of the exception manager, any error
+ * generates a kernel panic.
+ *
+ * @param[in] COND The condition that should be true.
+ * @param[in] MSG The message to display in case of kernel panic.
+ * @param[in] ERROR The error code to use in case of kernel panic.
+ */
 #define EXC_ASSERT(COND, MSG, ERROR) {                      \
     if((COND) == FALSE)                                     \
     {                                                       \
@@ -89,10 +102,10 @@ extern custom_handler_t kernel_interrupt_handlers[INT_ENTRY_COUNT];
  * @details Handles a divide by zero exception raised by the cpu. The thread
  * will just be killed.
  *
- * @param cpu_state The cpu registers structure.
- * @param int_id The exception number.
- * @param stack_state The stack state before the exception that contain cs, eip,
- * error code and the eflags register value.
+ * @param[in] cpu_state The cpu registers structure.
+ * @param[in] int_id The exception number.
+ * @param[in] stack_state The stack state before the exception that contain cs,
+ * eip, error code and the eflags register value.
  */
 static void div_by_zero_handler(cpu_state_t* cpu_state, uintptr_t int_id,
                                 stack_state_t* stack_state);
@@ -171,7 +184,6 @@ OS_RETURN_E kernel_exception_register_handler(const uint32_t exception_line,
     }
 
     kernel_interrupt_handlers[exception_line].handler = handler;
-    kernel_interrupt_handlers[exception_line].enabled = TRUE;
 
     KERNEL_DEBUG(EXCEPTIONS_DEBUG_ENABLED,
                  "[EXCEPTIONS] Added exception %u handler at 0x%p",
@@ -201,7 +213,6 @@ OS_RETURN_E kernel_exception_remove_handler(const uint32_t exception_line)
     }
 
     kernel_interrupt_handlers[exception_line].handler = NULL;
-    kernel_interrupt_handlers[exception_line].enabled = FALSE;
 
     KERNEL_DEBUG(EXCEPTIONS_DEBUG_ENABLED,
                  "[EXCEPTIONS] Removed exception %u handle",

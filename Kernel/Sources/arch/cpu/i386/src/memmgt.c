@@ -104,6 +104,19 @@ typedef struct
  * MACROS
  ******************************************************************************/
 
+/**
+ * @brief Assert macro used by the memory manager to ensure correctness of
+ * execution.
+ *
+ * @details Assert macro used by the memory manager to ensure correctness of
+ * execution.
+ * Due to the critical nature of the memory manager, any error generates a
+ * kernel panic.
+ *
+ * @param[in] COND The condition that should be true.
+ * @param[in] MSG The message to display in case of kernel panic.
+ * @param[in] ERROR The error code to use in case of kernel panic.
+ */
 #define MEMMGT_ASSERT(COND, MSG, ERROR) {                   \
     if((COND) == FALSE)                                     \
     {                                                       \
@@ -111,13 +124,30 @@ typedef struct
     }                                                       \
 }
 
-#define INVAL_PAGE(virt_addr)                       \
+/**
+ * @brief Invalidates a page in the TLB that contains the virtual address given
+ * as parameter.
+ *
+ * @details Invalidates a page in the TLB that contains the virtual address
+ * given as parameter. This macro uses inline assembly to invocate the INVLPG
+ * instruction.
+ *
+ * @param[in] VIRT_ADDR The virtual address contained in the page to invalidate.
+ */
+#define INVAL_PAGE(VIRT_ADDR)                       \
 {                                                   \
     __asm__ __volatile__(                           \
-        "invlpg (%0)": :"r"(virt_addr) : "memory"   \
+        "invlpg (%0)": :"r"(VIRT_ADDR) : "memory"   \
     );                                              \
 }
 
+/**
+ * @brief Invalidates the TLB.
+ *
+ * @details Invalidates the complete TLB. This macro modifies the content of
+ * CR3 by replacing its value with the same value, which causes a TLB
+ * invalidation on i386 processors.
+ */
 #define INVAL_TLB()                                         \
 {                                                           \
     __asm__ __volatile__(                                   \
@@ -278,17 +308,6 @@ static void memory_free_pages_to(kqueue_t* page_table,
                                  const size_t page_count,
                                  OS_RETURN_E* err);
 
-static void memory_acquire_ref(uintptr_t phys_addr);
-
-static void memory_release_ref(uintptr_t phys_addr);
-
-static uint32_t memory_get_ref_count(const uintptr_t phys_addr);
-
-static void memory_set_ref_count(const uintptr_t phys_addr,
-                                 const uint32_t count);
-
-static void init_frame_ref_table(uintptr_t next_free_mem);
-
 /**
  * @brief Retrieves the start and end address of the kernel high startup
  * section.
@@ -411,22 +430,6 @@ static void memory_get_initrd_range(uintptr_t* start, uintptr_t* end);
  */
 static void memory_get_symtab_range(uintptr_t* start, uintptr_t* end);
 
-static void print_kernel_map(void);
-
-static void detect_memory(void);
-
-static void setup_mem_table(void);
-
-static void* get_block(kqueue_t* list,
-                       const size_t length,
-                       const MEM_ALLOC_START_E start_pt,
-                       OS_RETURN_E* err);
-
-static void add_block(kqueue_t* list,
-                      uintptr_t first_frame,
-                      const size_t length,
-                      OS_RETURN_E* err);
-
 /**
  * @brief Maps a kernel section to the memory.
  *
@@ -510,17 +513,211 @@ static void kernel_mmap_internal(const void* virt_addr,
  */
 static void paging_init(void);
 
+/**
+ * @brief Enables paging features.
+ *
+ * @details Enables paging features. This function enables paging ony, the page
+ * directory must be set before calling it.
+ */
 static void memory_paging_enable(void);
 
-/* TODO Document */
+/**
+ * @brief Prints the kernel memory map.
+ *
+ * @details Prints the kernel memory map using the standard kernel output
+ * methods. This function only shows the virtual memory ranges used by the
+ * kernel.
+ */
+static void print_kernel_map(void);
+
+/**
+ * @brief Detects the hardware memory and MMIO present in the system.
+ *
+ * @details Detects the hardware memory and MMIO present in the system. Each
+ * memory range is tagged as memory of IO. This function uses the GRUB memory
+ * information structures to detect the available hardware resources.
+ */
+static void detect_memory(void);
+
+/**
+ * @brief Setups the memory tables used in the kernel.
+ *
+ * @details Setups the memory tables used in the kernel. The memory map is
+ * generated, the pages and frames lists are also created.
+ */
+static void setup_mem_table(void);
+
+/**
+ * @brief Returns the base address of a block of memory extracted from a given
+ * memory list.
+ *
+ * @details Returns the base address of a block of memory. The user can choose
+ * the size and growing direction of the region (from the end of the free memory
+ * or from the begining). In all cases, the base address (aka the lowest address
+ * of the block) is returned.
+ *
+ * @param[in,out] list The memory list to extract the block from.
+ * @param[in] length The size, in bytes of the memory region to extract.
+ * @param[in] start_pt The allocation direction, from the start of the free
+ * region or from the end of it.
+ * @param[out] err The error buffer to contains the error status.
+ *
+ * @return The base address of the extracted region is returned.
+ */
+static void* get_block(kqueue_t* list,
+                       const size_t length,
+                       const MEM_ALLOC_START_E start_pt,
+                       OS_RETURN_E* err);
+
+/**
+ * @brief Adds a free memory block to a memory list.
+ *
+ * @details Adds a free memory block to a memory list. The list will be kept
+ * sorted by base address in a ascending fashion.
+ *
+ * @param[out] list The memory list to extract the block from.
+ * @param[in] first_frame The first address of the memory block to add.
+ * @param[in] length The size, in bytes of the memory region to add.
+ * @param[out] err The error buffer to contains the error status.
+ */
+static void add_block(kqueue_t* list,
+                      uintptr_t first_frame,
+                      const size_t length,
+                      OS_RETURN_E* err);
+
+/**
+ * @brief Aquires a reference to a physical address.
+ *
+ * @details Aquires a reference to a physical address. The reference is actually
+ * acquired for the complete frame that contains the physical address.
+ *
+ * @param[in] phys_addr The physical address to acquire the reference of.
+ */
+static void memory_acquire_ref(uintptr_t phys_addr);
+
+/**
+ * @brief Releases a reference to a physical address.
+ *
+ * @details Releases a reference to a physical address. The reference is
+ * actually released for the complete frame that contains the physical address.
+ *
+ * @param[in] phys_addr The physical address to release the reference of.
+ */
+static void memory_release_ref(uintptr_t phys_addr);
+
+/**
+ * @brief Returns the number of references on the frame that contains the
+ * address provided as parameter.
+ *
+ * @details Returns the number of references on the frame that contains the
+ * address provided as parameter.
+ *
+ * @param[in] phys_addr The physical address that is contained in the frame to
+ * get the number of reference of.
+ * @return The number of references on the frame is returned.
+ */
+static uint32_t memory_get_ref_count(const uintptr_t phys_addr);
+
+/**
+ * @brief Sets the number of references on the frame that contains the address
+ * provided as parameter.
+ *
+ * @details Sets the number of references on the frame that contains the address
+ * provided as parameter.
+ *
+ * @param[in] phys_addr The physical address that is contained in the frame to
+ * set the number of reference of.
+ * @param[in] count The number of reference to set.
+ */
+static void memory_set_ref_count(const uintptr_t phys_addr,
+                                 const uint32_t count);
+
+/**
+ * @brief Initializes the reference table.
+ *
+ * @details Initializes the reference table. Each physical frames will be set to
+ * zero. The frames used by the kernel prior to this call will receive a
+ * reference count of one.
+ *
+ * @param[in] next_free_mem The address of the first free frame after the kernel
+ * memory. This is the first address that will receive 0 as number of
+ * references.
+ */
+static void init_frame_ref_table(uintptr_t next_free_mem);
+
+/**
+ * @brief Copies the current thread's stack.
+ *
+ * @details Copies the current thread's stack to a buffer given as parameter.
+ * All the data are copied as-is.
+ *
+ * @param[in] data The data used to copy the stacks (destination's page table,
+ * free frames list, etc.).
+ * @param[in] kstack_addr The address of the stack that receives the copied
+ * data.
+ * @param[in] kstack_size The maximal copy size allowed.
+ *
+ * @return The status code is returned.
+ */
 static OS_RETURN_E memory_copy_self_stack(mem_copy_self_data_t* data,
                                           const void* kstack_addr,
                                           const size_t kstack_size);
+
+/**
+ * @brief Copies the current process' page table.
+ *
+ * @details Copies the current process's pages table to a page table structure
+ * given in the parameters.
+ *
+ * @param[in] data The structure that contains the page table to fill with the
+ * copy of the current process' page table.
+ *
+ * @return The status code is returned.
+ */
 static OS_RETURN_E memory_copy_self_pgtable(mem_copy_self_data_t* data);
+
+/**
+ * @brief Creates a new empty page table structure.
+ *
+ * @details Creates a new empty page table structure. Only the page directory
+ * is created as no page table is available when the directory is empty.
+ *
+ * @param[in] data The structure that contains the page table to fill with the
+ * newly created page directory.
+ *
+ * @return The status code is returned.
+ */
 static OS_RETURN_E memory_create_new_pagedir(mem_copy_self_data_t* data);
+
+/**
+ * @brief Recovers resources in case of error during a process memory image
+ * copy.
+ *
+ * @details Recovers resources in case of error during a process memory image
+ * copy. All the temporary data and the newly created structures (stack, page
+ * table, frame table, etc.) are released.
+ *
+ * @param[in] data The structure that contains all the data manipulated during
+ * the copy process and that will be used to free the resources.
+ *
+ * @param[in] past_err The error that triggered the recovery.
+ *
+ * @return The error that triggered the recovery is returned.
+ */
 static OS_RETURN_E memory_copy_self_clean(mem_copy_self_data_t* data,
                                           OS_RETURN_E past_err);
 
+/**
+ * @brief Returns the amount of free memory in bytes contained in a memory list.
+ *
+ * @details Returns the amount of free memory in bytes contained in a memory
+ * list.
+ *
+ * @param[in] mem_pool
+ *
+ * @return The amount of free memory in bytes contained in a memory list is
+ * returned.
+ */
 static uint32_t get_free_mem(kqueue_t* mem_pool);
 
 /*******************************************************************************
@@ -2118,10 +2315,6 @@ static void paging_init(void)
 
 static void memory_paging_enable(void)
 {
-    uint32_t int_state;
-
-    ENTER_CRITICAL(int_state);
-
     /* Enable paging, write protect */
     __asm__ __volatile__("mov %%cr0, %%eax\n\t"
                          "or $0x80010000, %%eax\n\t"
@@ -2129,8 +2322,6 @@ static void memory_paging_enable(void)
                          : : : "eax");
 
     KERNEL_DEBUG(MEMMGT_DEBUG_ENABLED, "[MEMMGT] Paging enabled");
-
-    EXIT_CRITICAL(int_state);
 }
 
 static OS_RETURN_E memory_copy_self_clean(mem_copy_self_data_t* data,

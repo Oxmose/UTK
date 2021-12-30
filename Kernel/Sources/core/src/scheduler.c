@@ -93,6 +93,18 @@ typedef struct
  * MACROS
  ******************************************************************************/
 
+/**
+ * @brief Assert macro used by the scheduler to ensure correctness of
+ * execution.
+ *
+ * @details Assert macro used by the scheduler to ensure correctness of
+ * execution. Due to the critical nature of the scheduler, any error
+ * generates a kernel panic.
+ *
+ * @param[in] COND The condition that should be true.
+ * @param[in] MSG The message to display in case of kernel panic.
+ * @param[in] ERROR The error code to use in case of kernel panic.
+ */
 #define SCHED_ASSERT(COND, MSG, ERROR) {                    \
     if((COND) == FALSE)                                     \
     {                                                       \
@@ -172,7 +184,7 @@ static kqueue_t* sleeping_threads_table;
  * state.
  *
  * @param[in] cause The thread termination cause.
- * @param[in] ret_cause The thread return state.
+ * @param[in] ret_state The thread return state.
  * @param[in] ret_val The thread return value.
  */
 static void thread_exit(const THREAD_TERMINATE_CAUSE_E cause,
@@ -190,7 +202,15 @@ static void thread_exit(const THREAD_TERMINATE_CAUSE_E cause,
  */
 static void sched_clean_thread(kernel_thread_t* thread);
 
-/* TODO: Document */
+/**
+ * @brief Cleans the resources used by a thread.
+ *
+ * @details Cleans the resources used by a thread. The thread's resource queue
+ * is walked and the resource cleanup function called for each resource. The
+ * resources are then removed from the resource list.
+ *
+ * @param[in,out] thread The thread to clean.
+ */
 static void sched_clean_thread_resources(kernel_thread_t* thread);
 
 /**
@@ -198,9 +218,9 @@ static void sched_clean_thread_resources(kernel_thread_t* thread);
  *
  * @details Cleans a process memory and resources. The process will be removed
  * from the memory. Before calling this function, the user must ensure the
- * thread is not used in any place in the system.
+ * process is not used in any place in the system.
  *
- * @param[in] thread The thread to clean.
+ * @param[in] process The process to clean.
  */
 static void sched_clean_process(kernel_process_t* process);
 

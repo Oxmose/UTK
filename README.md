@@ -39,7 +39,8 @@
 * Futex based synchronization.
 * Mutex: Non recursive/Recursive - Priority inheritance capable. Futex based.
 * Semaphore: FIFO based, priority of the locking thread is not relevant to select the next thread to unlock. Futex based.
-* Spinlocks: Disables interrupt on single-core architecture.
+* Spinlocks.
+* Kernel critical section by disabling interrupts.
 
 ### Scheduler
 
@@ -54,8 +55,8 @@
 
 ### BSP Support: i386/x86_64
 
-* PIC and IO-APIC support (PIC is used as a fallback when IO-APIC is disabled or not present).
-* Local APIC support (can be disabled manually of is disabled if not detected or IO-APIC is disabled),
+* PIC and IO-APIC support (PIC supported but IO APIC required).
+* Local APIC support with timers.
 * PIT support (can be used as an auxiliary timer source).
 * RTC support.
 * Basic ACPI support (simple parsing used to enable multicore features).

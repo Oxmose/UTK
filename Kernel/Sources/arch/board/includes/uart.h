@@ -115,7 +115,7 @@ bool_t uart_received(const uint32_t port);
  * call is blocking until the data has been received by the uart port
  * controler.
  *
- * @param port The port on whichthe data should be read.
+ * @param[in] port The port on which the data should be read.
  *
  * @return The byte that has been read on the uart port.
  */
@@ -136,9 +136,9 @@ void uart_clear_screen(void);
  * This function can only be called with parameter direction to
  * SCROLL_DOWN. Otherwise, this function has no effect.
  *
- * @param direction Should always be SCROLL_DOWN.
+ * @param[in] direction Should always be SCROLL_DOWN.
  *
- * @param lines_count The amount of lines to scroll down.
+ * @param[in] lines_count The amount of lines to scroll down.
  */
 void uart_scroll(const SCROLL_DIRECTION_E direction,
                  const uint32_t lines_count);
@@ -153,7 +153,7 @@ void uart_scroll(const SCROLL_DIRECTION_E direction,
  * @param[in] string The string to write to the uart port.
  * @param[in] len The length of the string to print.
  */
-void uart_console_write_keyboard(const char* str, const size_t len);
+void uart_console_write_keyboard(const char* string, const size_t len);
 
 /**
  * @brief Returns the UART graphic driver.

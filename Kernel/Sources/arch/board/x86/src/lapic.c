@@ -169,6 +169,16 @@
  * MACROS
  ******************************************************************************/
 
+/**
+ * @brief Assert macro used by the LAPIC to ensure correctness of execution.
+ *
+ * @details Assert macro used by the LAPIC to ensure correctness of execution.
+ * Due to the critical nature of the LAPIC, any error generates a kernel panic.
+ *
+ * @param[in] COND The condition that should be true.
+ * @param[in] MSG The message to display in case of kernel panic.
+ * @param[in] ERROR The error code to use in case of kernel panic.
+ */
 #define LAPIC_ASSERT(COND, MSG, ERROR) {                    \
     if((COND) == FALSE)                                     \
     {                                                       \
@@ -220,7 +230,7 @@ static kernel_timer_t lapic_timer_driver = {
 /**
  * @brief Read Local APIC register, the access is a memory mapped IO.
  *
- * @param reg[in] The register of the Local APIC to read.
+ * @param[in] reg The register of the Local APIC to read.
  *
  * @return The value contained in the Local APIC register.
  */
@@ -229,8 +239,8 @@ inline static uint32_t lapic_read(uint32_t reg);
 /**
  * @brief Write Local APIC register, the acces is a memory mapped IO.
  *
- * @param reg[in] The register of the Local APIC to write.
- * @param data[in] The value to write in the register.
+ * @param[in] reg The register of the Local APIC to write.
+ * @param[in] data The value to write in the register.
  */
 inline static void lapic_write(uint32_t reg, uint32_t data);
 
@@ -239,9 +249,9 @@ inline static void lapic_write(uint32_t reg, uint32_t data);
  *
  * @details LAPIC dummy handler. This handler simply acknowledge the interrut.
  *
- * @param cpu_state[in] The cpu registers structure.
- * @param int_id[in] The interrupt number.
- * @param stack_state[in] The stack state before the interrupt that contain cs,
+ * @param[in] cpu_state The cpu registers structure.
+ * @param[in] int_id The interrupt number.
+ * @param[in] stack_state The stack state before the interrupt that contain cs,
  * eip, error code and the eflags register value.
  */
 static void lapic_dummy_handler(cpu_state_t* cpu_state,
@@ -255,9 +265,9 @@ static void lapic_dummy_handler(cpu_state_t* cpu_state,
  * interrupts to init the LAPIC timer. This is used to get the LAPIC timer
  * frequency.
  *
- * @param cpu_state[in] The cpu registers structure.
- * @param int_id[in] The interrupt number.
- * @param stack_state[in] The stack state before the interrupt that contain cs,
+ * @param[in] cpu_state The cpu registers structure.
+ * @param[in] int_id The interrupt number.
+ * @param[in] stack_state The stack state before the interrupt that contain cs,
  * eip, error code and the eflags register value.
  */
 static void lapic_init_pit_handler(cpu_state_t* cpu_state,

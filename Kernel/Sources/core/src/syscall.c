@@ -55,6 +55,18 @@
  * MACROS
  ******************************************************************************/
 
+/**
+ * @brief Assert macro used by the syscall manager to ensure correctness of
+ * execution.
+ *
+ * @details Assert macro used by the syscall manager to ensure correctness of
+ * execution. Due to the critical nature of the syscall manager, any error
+ * generates a kernel panic.
+ *
+ * @param[in] COND The condition that should be true.
+ * @param[in] MSG The message to display in case of kernel panic.
+ * @param[in] ERROR The error code to use in case of kernel panic.
+ */
 #define SYSCALL_ASSERT(COND, MSG, ERROR) {                    \
     if((COND) == FALSE)                                       \
     {                                                         \
@@ -125,18 +137,12 @@ static void syscall_handler(cpu_state_t *cpu_state,
 
     KERNEL_DEBUG(SYSCALL_DEBUG_ENABLED, "[SYSCALL] Request syscall %d", func);
 
-    if(func < SYSCALL_MAX_ID)
-    {
-        SYSCALL_ASSERT(kernel_interrupt_handlers[func].handler != NULL,
-                       "Tried to call un unknown SYSCALL",
-                       OS_ERR_SYSCALL_UNKNOWN);
+    SYSCALL_ASSERT((func < SYSCALL_MAX_ID &&
+                    kernel_interrupt_handlers[func].handler != NULL),
+                   "Tried to call un unknown SYSCALL",
+                   OS_ERR_SYSCALL_UNKNOWN);
 
-        kernel_interrupt_handlers[func].handler(func, params);
-    }
-    else
-    {
-        KERNEL_ERROR("Unknown system call ID %d\n", func);
-    }
+    kernel_interrupt_handlers[func].handler(func, params);
 }
 
 void syscall_init(void)

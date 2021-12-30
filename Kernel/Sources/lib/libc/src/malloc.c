@@ -162,6 +162,18 @@ __extension__                                           \
 
 #define LIST_ITERATOR_REMOVE_FROM(h, it, l) LIST_REMOVE_FROM(h, iter_##it, l)
 
+/**
+ * @brief Assert macro used by the malloc manager to ensure correctness of
+ * execution.
+ *
+ * @details Assert macro used by the malloc manager to ensure correctness of
+ * execution. Due to the critical nature of the malloc manager, any error
+ * generates a kernel panic.
+ *
+ * @param[in] COND The condition that should be true.
+ * @param[in] MSG The message to display in case of kernel panic.
+ * @param[in] ERROR The error code to use in case of kernel panic.
+ */
 #define MALLOC_ASSERT(COND, MSG, ERROR) {                     \
     if((COND) == FALSE)                                       \
     {                                                         \
@@ -198,7 +210,7 @@ static uint32_t kheap_mem_init;
 /** @brief Quantity of memory used to store meta data in the Heap. */
 static uint32_t mem_meta;
 
-/* Malloc mutex */
+/** @brief Malloc mutex */
 static mutex_t lock;
 
 
@@ -206,22 +218,91 @@ static mutex_t lock;
  * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
+/**
+ * @brief Initializes the memory list.
+ *
+ * @details Initializes the memory list with the basic node value.
+ *
+ * @param[out] node The list's node to initialize.
+ */
 inline static void list_init(list_t* node);
 
+/**
+ * @brief Inserts a node before the current node in the list.
+ *
+ * @details Inserts a node before the current node in the list.
+ *
+ * @param[in,out] current The current node.
+ * @param[in,out] new The new node to insert before the current node.
+ */
 inline static void insert_before(list_t* current, list_t* new);
 
+/**
+ * @brief Inserts a node after the current node in the list.
+ *
+ * @param[in,out] current The current node.
+ * @param[in,out] new The new node to insert after the current node.
+ */
 inline static void insert_after(list_t* current, list_t* new);
 
+/**
+ * @brief Removes a node from the list.
+ *
+ * @details Removes a node from the list.
+ *
+ * @param[out] node The node to remove from the list.
+ */
 inline static void remove(list_t* node);
 
+/**
+ * @brief Pushes a node at the end of the list.
+ *
+ * @details Pushes a node at the end of the list.
+ *
+ * @param[out] list The list to be pushed.
+ * @param[in] node The node to push to the list.
+ */
 inline static void push(list_t** list, list_t* node);
 
+/**
+ * @brief Pops a node from the list.
+ *
+ * @details Pops a node from the list and returns it.
+ *
+ * @param[out] list The list to be poped from.
+ *
+ * @return The node poped from the list is returned.
+ */
 inline static list_t* pop(list_t** list);
 
+
+/**
+ * @brief Removes a node from the list.
+ *
+ * @details Removes a node from the list.
+ *
+ * @param[out] list The list to remove the node from.
+ * @param[out] node The node to remove from the list.
+ */
 inline static void remove_from(list_t** list, list_t* node);
 
+
+/**
+ * @brief Initializes a memory chunk structure.
+ *
+ * @details Initializes a memory chunk structure.
+ *
+ * @param[out] chunk The chunk structure to initialize.
+ */
 inline static void memory_chunk_init(mem_chunk_t* chunk);
 
+/**
+ * @brief Returns the size of a memory chunk.
+ *
+ * @param chunk The chunk to get the size of.
+ *
+ * @return The size of the memory chunk is returned.
+ */
 inline static uint32_t memory_chunk_size(const mem_chunk_t* chunk);
 
 /**
@@ -252,6 +333,23 @@ inline static void remove_free(mem_chunk_t* chunk);
  * @param[in, out] chunk The chunk to be placed in the list.
  */
 inline static void push_free(mem_chunk_t *chunk);
+
+/**
+ * @brief Pushes a memory chunk in the free memory chunks list.
+ *
+ * @details Pushes a memory chunk in the free memory chunks list.
+ *
+ * @param[in, out] chunk The chunk to be placed in the list.
+ */
+inline static void push_free(mem_chunk_t *chunk);
+
+/**
+ * @brief Initializes the user heap.
+ *
+ * @details Initializes the user heap. Mmeory is requested to the kernel and
+ * mapped for the process.
+ */
+static void user_heap_init(void);
 
 /*******************************************************************************
  * FUNCTIONS

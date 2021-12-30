@@ -27,6 +27,7 @@
 #include <stddef.h>        /* Standard definitions */
 #include <string.h>        /* Memory manipulation */
 #include <kernel_output.h> /* Kernel output mathods */
+#include <memmgt.h>        /* Memory management API */
 
 /* Configuration files */
 #include <config.h>
@@ -46,12 +47,16 @@
  * STRUCTURES AND TYPES
  ******************************************************************************/
 
+/** @brief Init RAM Disk magic block as define in UTK. */
 typedef struct
 {
+    /** @brief Magic value */
     uint64_t magic;
 
+    /** @brief Size of the Init RAM Disk */
     uint32_t size;
 
+    /** @brief Unused, free for use. */
     uint8_t padding[500];
 } initrd_master_block_t;
 
@@ -66,14 +71,17 @@ typedef struct
  ******************************************************************************/
 
 /************************* Imported global variables **************************/
+/** @brief INITRD base address in memory. */
 extern initrd_master_block_t _KERNEL_INITRD_MEM_BASE;
 
+/** @brief INITRD memory region size. */
 extern uint32_t _KERNEL_INITRD_MEM_SIZE;
 
 /************************* Exported global variables **************************/
 /* None */
 
 /************************** Static global variables ***************************/
+/** @brief Current devise that stores the INITRD. */
 static initrd_device_t current_dev;
 
 /*******************************************************************************

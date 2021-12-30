@@ -183,32 +183,59 @@ typedef struct
  */
 typedef struct
 {
+    /** @brief Not used: previous TSS selector. */
     uint32_t prev_tss;
+    /** @brief ESP for RING0 value. */
     uint32_t esp0;
+    /** @brief SS for RING0 value. */
     uint32_t ss0;
+    /** @brief ESP for RING1 value. */
     uint32_t esp1;
+    /** @brief SS for RING1 value. */
     uint32_t ss1;
+    /** @brief ESP for RING2 value. */
     uint32_t esp2;
+    /** @brief SS for RING2 value. */
     uint32_t ss2;
+    /** @brief Not used: task's context CR3 value. */
     uint32_t cr3;
+    /** @brief Not used: task's context EIP value. */
     uint32_t eip;
+    /** @brief Not used: task's context EFLAGS value. */
     uint32_t eflags;
+    /** @brief Not used: task's context EAX value. */
     uint32_t eax;
+    /** @brief Not used: task's context ECX value. */
     uint32_t ecx;
+    /** @brief Not used: task's context EDX value. */
     uint32_t edx;
+    /** @brief Not used: task's context EBX value. */
     uint32_t ebx;
+    /** @brief Not used: task's context ESP value. */
     uint32_t esp;
+    /** @brief Not used: task's context EBP value. */
     uint32_t ebp;
+    /** @brief Not used: task's context ESI value. */
     uint32_t esi;
+    /** @brief Not used: task's context EDI value. */
     uint32_t edi;
+    /** @brief Not used: task's context ES value. */
     uint32_t es;
+    /** @brief Not used: task's context CS value. */
     uint32_t cs;
+    /** @brief Not used: task's context SS value. */
     uint32_t ss;
+    /** @brief Not used: task's context DS value. */
     uint32_t ds;
+    /** @brief Not used: task's context FS value. */
     uint32_t fs;
+    /** @brief Not used: task's context GS value. */
     uint32_t gs;
+    /** @brief Not used: task's context LDT value. */
     uint32_t ldt;
-    uint16_t trap;
+    /** @brief Not used: reserved */
+    uint16_t reserved;
+    /** @brief Not used: IO Priviledges map */
     uint16_t iomap_base;
 } __attribute__((__packed__)) cpu_tss_entry_t;
 

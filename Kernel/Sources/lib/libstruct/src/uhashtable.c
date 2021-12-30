@@ -110,9 +110,9 @@ inline static uint64_t uhash_64(const uintptr_t key);
  * @warning This function does not perform any check on the data, the key or the
  * table itself.
  *
- * @param table The table to set the value.
- * @param key The key to associate the data with.
- * @param data The data to set.
+ * @param[in,out] table The table to set the value.
+ * @param[in] key The key to associate the data with.
+ * @param[in] data The data to set.
  *
  * @return The error status is returned.
  */

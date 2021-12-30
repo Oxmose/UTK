@@ -56,10 +56,6 @@
 /* Kernel log on UART */
 #define DEBUG_LOG_UART 1
 
-/* Defines the kernel frame and page size */
-#define KERNEL_FRAME_SIZE 0x1000
-#define KERNEL_PAGE_SIZE  KERNEL_FRAME_SIZE
-
 /* Defines the limit address allocable by the kernel */
 #define KERNEL_VIRTUAL_ADDR_MAX 0x100000000
 #define KERNEL_VIRTUAL_ADDR_MAX_MASK 0xFFFFFFFF

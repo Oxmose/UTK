@@ -17,6 +17,7 @@
  *
  * @copyright Alexy Torres Aurora Dugo
  ******************************************************************************/
+
 /*******************************************************************************
  * INCLUDES
  ******************************************************************************/
@@ -85,15 +86,6 @@ static uint32_t spurious_interrupt;
  * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
-static void init_driver_set_irq_mask(const uint32_t irq_number,
-                                     const bool_t enabled);
-
-static void init_driver_set_irq_eoi(const uint32_t irq_number);
-
-static INTERRUPT_TYPE_E init_driver_handle_spurious(const uint32_t int_number);
-
-static int32_t init_driver_get_irq_int_line(const uint32_t irq_number);
-
 /**
  * @brief Kernel's spurious interrupt handler.
  *
@@ -106,30 +98,6 @@ static void spurious_handler(void);
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/
-
-static void init_driver_set_irq_mask(const uint32_t irq_number,
-                                     const bool_t enabled)
-{
-    (void)irq_number;
-    (void)enabled;
-}
-
-static void init_driver_set_irq_eoi(const uint32_t irq_number)
-{
-    (void)irq_number;
-}
-
-static INTERRUPT_TYPE_E init_driver_handle_spurious(const uint32_t int_number)
-{
-    (void) int_number;
-    return INTERRUPT_TYPE_REGULAR;
-}
-
-static int32_t init_driver_get_irq_int_line(const uint32_t irq_number)
-{
-    (void)irq_number;
-    return 0;
-}
 
 static void spurious_handler(void)
 {
@@ -191,7 +159,6 @@ void kernel_interrupt_handler(cpu_state_t cpu_state,
 
     /* Select custom handlers */
     if(int_id < INT_ENTRY_COUNT &&
-       kernel_interrupt_handlers[int_id].enabled == TRUE &&
        kernel_interrupt_handlers[int_id].handler != NULL)
     {
         handler = kernel_interrupt_handlers[int_id].handler;
@@ -216,7 +183,6 @@ void kernel_interrupt_init(void)
            sizeof(custom_handler_t) * INT_ENTRY_COUNT);
 
     /* Attach the special PANIC interrupt for when we don't know what to do */
-    kernel_interrupt_handlers[PANIC_INT_LINE].enabled = TRUE;
     kernel_interrupt_handlers[PANIC_INT_LINE].handler = panic_handler;
 
     /* Init state */
@@ -224,10 +190,10 @@ void kernel_interrupt_init(void)
     spurious_interrupt = 0;
 
     /* Init driver */
-    interrupt_driver.driver_get_irq_int_line = init_driver_get_irq_int_line;
-    interrupt_driver.driver_handle_spurious  = init_driver_handle_spurious;
-    interrupt_driver.driver_set_irq_eoi      = init_driver_set_irq_eoi;
-    interrupt_driver.driver_set_irq_mask     = init_driver_set_irq_mask;
+    interrupt_driver.driver_get_irq_int_line = NULL;
+    interrupt_driver.driver_handle_spurious  = NULL;
+    interrupt_driver.driver_set_irq_eoi      = NULL;
+    interrupt_driver.driver_set_irq_mask     = NULL;
 
     KERNEL_TEST_POINT(interrupt_test);
 }
@@ -288,7 +254,6 @@ OS_RETURN_E kernel_interrupt_register_int_handler(const uint32_t interrupt_line,
     }
 
     kernel_interrupt_handlers[interrupt_line].handler = handler;
-    kernel_interrupt_handlers[interrupt_line].enabled = TRUE;
 
     KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED,
                  "[INTERRUPTS] Added INT %u handler at 0x%p",
@@ -319,7 +284,6 @@ OS_RETURN_E kernel_interrupt_remove_int_handler(const uint32_t interrupt_line)
     }
 
     kernel_interrupt_handlers[interrupt_line].handler = NULL;
-    kernel_interrupt_handlers[interrupt_line].enabled = FALSE;
 
     KERNEL_DEBUG(INTERRUPTS_DEBUG_ENABLED,
                  "[INTERRUPTS] Removed INT %u handle",

@@ -307,7 +307,7 @@ void sched_set_thread_params(const SYSCALL_FUNCTION_E func, void* params);
  * @details Removes the active thread from the active threads table, the thread
  * might be contained in an other structure such as a mutex.
  *
- * @param block_type The type of block (mutex, sem, ...)
+ * @param[in] block_type The type of block (mutex, sem, ...)
  *
  * @return The current thread system's node is returned on success. If the call
  * failed, NULL is returned.

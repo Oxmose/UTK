@@ -79,7 +79,7 @@ typedef uint32_t uintptr_t;
  * variables.
  *
  * @param[in] x The first value to compare.
- * @param[in] x The second value to compare.
+ * @param[in] y The second value to compare.
  *
  * @return The smallest value.
  */
@@ -89,7 +89,7 @@ typedef uint32_t uintptr_t;
  * variables.
  *
  * @param[in] x The first value to compare.
- * @param[in] x The second value to compare.
+ * @param[in] y The second value to compare.
  *
  * @return The biggest value.
  */

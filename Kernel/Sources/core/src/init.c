@@ -54,6 +54,18 @@
  * MACROS
  ******************************************************************************/
 
+/**
+ * @brief Assert macro used by the init module to ensure correctness of
+ * execution.
+ *
+ * @details Assert macro used by the init module to ensure correctness of
+ * execution. Due to the critical nature of the init module, any error
+ * generates a kernel panic.
+ *
+ * @param[in] COND The condition that should be true.
+ * @param[in] MSG The message to display in case of kernel panic.
+ * @param[in] ERROR The error code to use in case of kernel panic.
+ */
 #define INIT_ASSERT(COND, MSG, ERROR) {                     \
     if((COND) == FALSE)                                     \
     {                                                       \
@@ -179,19 +191,18 @@ void* init_sys(void* args)
     else
     {
         /* Here we should load an elf and start another program */
-        while(1)
-        {
-            kernel_printf("\n");
-            kernel_printf("\rCannot find any process panic in 3");
-            sched_sleep(1000);
-            kernel_printf("\rCannot find any process panic in 2");
-            sched_sleep(1000);
-            kernel_printf("\rCannot find any process panic in 1");
-            sched_sleep(1000);
-            INIT_ASSERT(FALSE,
-                        "No process to launch",
-                        OS_ERR_UNAUTHORIZED_ACTION);
-        }
+        kernel_printf("\n");
+        kernel_printf("\rCannot find any process panic in 3");
+        sched_sleep(1000);
+        kernel_printf("\rCannot find any process panic in 2");
+        sched_sleep(1000);
+        kernel_printf("\rCannot find any process panic in 1");
+        sched_sleep(1000);
+        kernel_printf("\n");
+        INIT_ASSERT(FALSE,
+                    "No process to launch",
+                    OS_ERR_UNAUTHORIZED_ACTION);
+        return (void*)OS_ERR_UNAUTHORIZED_ACTION;
     }
 
     /* If we return better go away and cry in a corner */

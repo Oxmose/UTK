@@ -74,11 +74,6 @@
  * @details Initializes the CPU Local APIC. The function initializes the LAPIC
  * interrupts (enables them), set the LAPIC destination mode and sets the
  * spurious vector.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - OS_ERR_NOT_SUPPORTED is returned if the LAPIC is not supported by the
- * current system.
  */
 void lapic_init(void);
 
@@ -91,11 +86,6 @@ void lapic_init(void);
  *
  * @warning This function is not to be used by Application Processors, please
  * use lapic_ap_timer_init for this purpose.
- *
- * @return The success state or the error code.
- * - OS_NO_ERR is returned if no error is encountered.
- * - OS_ERR_NOT_SUPPORTED is returned if the LAPIC is not supported by the
- * current system.
  */
 void lapic_timer_init(void);
 

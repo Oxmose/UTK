@@ -51,7 +51,7 @@
 /** @brief Chink minimal size. */
 #define MIN_SIZE sizeof(list_t)
 
-    /** @brief Header size. */
+/** @brief Header size. */
 #define HEADER_SIZE __builtin_offsetof(mem_chunk_t, data)
 
 /*******************************************************************************
@@ -88,6 +88,7 @@ typedef struct
 /*******************************************************************************
  * MACROS
  ******************************************************************************/
+
 
 #define CONTAINER(C, l, v) ((C*)(((char*)v) - (uintptr_t)&(((C*)0)->l)))
 
@@ -143,15 +144,15 @@ __extension__                                           \
       list_t* last_##it = h_->l.prev, *iter_##it = &h_->l, *next_##it;      \
     do                                                                      \
     {                                                                       \
-           if (iter_##it == last_##it)                                      \
-         {                                                                  \
-             next_##it = NULL;                                              \
-           }                                                                \
-         else                                                               \
-         {                                                                  \
-             next_##it = iter_##it->next;                                   \
-         }                                                                  \
-         __typeof__(*h)* it = CONTAINER(__typeof__(*h), l, iter_##it);      \
+        if (iter_##it == last_##it)                                         \
+        {                                                                   \
+            next_##it = NULL;                                               \
+        }                                                                   \
+        else                                                                \
+        {                                                                   \
+            next_##it = iter_##it->next;                                    \
+        }                                                                   \
+        __typeof__(*h)* it = CONTAINER(__typeof__(*h), l, iter_##it);       \
 
 #define LIST_ITERATOR_END(it)                       \
     }while((iter_##it = next_##it));                \
@@ -195,22 +196,91 @@ static uint32_t mem_meta;
  * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
+/**
+ * @brief Initializes the memory list.
+ *
+ * @details Initializes the memory list with the basic node value.
+ *
+ * @param[out] node The list's node to initialize.
+ */
 inline static void list_init(list_t* node);
 
+/**
+ * @brief Inserts a node before the current node in the list.
+ *
+ * @details Inserts a node before the current node in the list.
+ *
+ * @param[in,out] current The current node.
+ * @param[in,out] new The new node to insert before the current node.
+ */
 inline static void insert_before(list_t* current, list_t* new);
 
+/**
+ * @brief Inserts a node after the current node in the list.
+ *
+ * @param[in,out] current The current node.
+ * @param[in,out] new The new node to insert after the current node.
+ */
 inline static void insert_after(list_t* current, list_t* new);
 
+/**
+ * @brief Removes a node from the list.
+ *
+ * @details Removes a node from the list.
+ *
+ * @param[out] node The node to remove from the list.
+ */
 inline static void remove(list_t* node);
 
+/**
+ * @brief Pushes a node at the end of the list.
+ *
+ * @details Pushes a node at the end of the list.
+ *
+ * @param[out] list The list to be pushed.
+ * @param[in] node The node to push to the list.
+ */
 inline static void push(list_t** list, list_t* node);
 
+/**
+ * @brief Pops a node from the list.
+ *
+ * @details Pops a node from the list and returns it.
+ *
+ * @param[out] list The list to be poped from.
+ *
+ * @return The node poped from the list is returned.
+ */
 inline static list_t* pop(list_t** list);
 
+
+/**
+ * @brief Removes a node from the list.
+ *
+ * @details Removes a node from the list.
+ *
+ * @param[out] list The list to remove the node from.
+ * @param[out] node The node to remove from the list.
+ */
 inline static void remove_from(list_t** list, list_t* node);
 
+
+/**
+ * @brief Initializes a memory chunk structure.
+ *
+ * @details Initializes a memory chunk structure.
+ *
+ * @param[out] chunk The chunk structure to initialize.
+ */
 inline static void memory_chunk_init(mem_chunk_t* chunk);
 
+/**
+ * @brief Returns the size of a memory chunk.
+ *
+ * @param chunk The chunk to get the size of.
+ *
+ * @return The size of the memory chunk is returned.
+ */
 inline static uint32_t memory_chunk_size(const mem_chunk_t* chunk);
 
 /**
@@ -284,10 +354,9 @@ inline static void remove(list_t* node)
 
 inline static void push(list_t** list, list_t* node)
 {
-
     if (*list != NULL)
     {
-           insert_before(*list, node);
+        insert_before(*list, node);
     }
 
     *list = node;
@@ -317,11 +386,11 @@ inline static void remove_from(list_t** list, list_t* node)
 {
     if (*list == node)
     {
-           pop(list);
+        pop(list);
     }
     else
     {
-           remove(node);
+        remove(node);
     }
 }
 
@@ -340,15 +409,6 @@ inline static uint32_t memory_chunk_size(const mem_chunk_t* chunk)
     return (end - start) - HEADER_SIZE;
 }
 
-/**
- * @brief Returns the slot of a memory chunk for the desired size.
- *
- * @details Returns the slot of a memory chunk for the desired size.
- *
- * @param[in] size The size of the chunk to get the slot of.
- *
- * @return The slot of a memory chunk for the desired size.
- */
 inline static int32_t memory_chunk_slot(uint32_t size)
 {
     int32_t n = -1;
@@ -360,13 +420,6 @@ inline static int32_t memory_chunk_slot(uint32_t size)
     return n;
 }
 
-/**
- * @brief Removes a memory chunk in the free memory chunks list.
- *
- * @details Removes a memory chunk in the free memory chunks list.
- *
- * @param[in, out] chunk The chunk to be removed from the list.
- */
 inline static void remove_free(mem_chunk_t* chunk)
 {
     uint32_t len = memory_chunk_size(chunk);
@@ -376,13 +429,6 @@ inline static void remove_free(mem_chunk_t* chunk)
     mem_free -= len;
 }
 
-/**
- * @brief Pushes a memory chunk in the free memory chunks list.
- *
- * @details Pushes a memory chunk in the free memory chunks list.
- *
- * @param[in, out] chunk The chunk to be placed in the list.
- */
 inline static void push_free(mem_chunk_t *chunk)
 {
     uint32_t len = memory_chunk_size(chunk);

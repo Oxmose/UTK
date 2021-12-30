@@ -60,6 +60,9 @@ typedef struct
  * MACROS
  ******************************************************************************/
 
+/**
+ * @brief Adds a padding sequence before a formated input.
+ */
 #define PAD_SEQ                         \
 {                                       \
     str_size = strlen(tmp_seq);         \
@@ -71,6 +74,9 @@ typedef struct
     }                                   \
 }
 
+/**
+ * @brief Get a sequence value argument.
+ */
 #define GET_SEQ_VAL(val, args, length_mod)                     \
 {                                                              \
                                                                \

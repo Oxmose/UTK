@@ -308,7 +308,7 @@ typedef struct acpi_page_tree
     /** @brief Right node. */
     struct acpi_page_tree* right;
 
-    /** @brief Address storedi n this node. */
+    /** @brief Address stored in this node. */
     uintptr_t address;
 } acpi_page_tree_t;
 
@@ -316,6 +316,16 @@ typedef struct acpi_page_tree
  * MACROS
  ******************************************************************************/
 
+/**
+ * @brief Assert macro used by the ACPI to ensure correctness of execution.
+ *
+ * @details Assert macro used by the ACPI to ensure correctness of execution.
+ * Due to the critical nature of the ACPI, any error generates a kernel panic.
+ *
+ * @param[in] COND The condition that should be true.
+ * @param[in] MSG The message to display in case of kernel panic.
+ * @param[in] ERROR The error code to use in case of kernel panic.
+ */
 #define ACPI_ASSERT(COND, MSG, ERROR) {                     \
     if((COND) == FALSE)                                     \
     {                                                       \
@@ -437,7 +447,7 @@ static void acpi_parse_apic(acpi_madt_t* madt_ptr);
  *
  * @details The function will save the DSDT table address in for further use.
  *
- * @param dsdt_ptr[in] The address of the DSDT entry to parse.
+ * @param[in] dsdt_ptr The address of the DSDT entry to parse.
  */
 static void acpi_parse_dsdt(acpi_dsdt_t* dsdt_ptr);
 
@@ -480,7 +490,7 @@ static void acpi_parse_rsdt(rsdt_descriptor_t* rsdt_ptr);
  * @details The function will detect the read each entries of the XSDT and call
  * the corresponding functions to parse the entries correctly.
  *
- * @param xsdt_ptr[in] The address of the XSDT entry to parse.
+ * @param[in] xsdt_ptr The address of the XSDT entry to parse.
  */
 static void acpi_parse_xsdt(xsdt_descriptor_t* xsdt_ptr);
 

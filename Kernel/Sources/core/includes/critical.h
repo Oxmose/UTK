@@ -45,25 +45,25 @@
 /**
  * @brief Enters a critical section in the kernel.
  *
- * @param[out] x The critical state at section's entrance.
+ * @param[out] int_state The critical state at section's entrance.
  *
  * @details Enters a critical section in the kernel. Save interrupt state and
  * disables interrupts.
  */
-#define ENTER_CRITICAL(x) {         \
-    x = kernel_interrupt_disable(); \
+#define ENTER_CRITICAL(int_state) {         \
+    int_state = kernel_interrupt_disable(); \
 }
 
 /**
  * @brief Exits a critical section in the kernel.
  *
- * @param[in] x The critical state at section's entrance.
+ * @param[in] int_state The critical state at section's entrance.
  *
  * @details Exits a critical section in the kernel. Restore the previous
  * interrupt state.
  */
-#define EXIT_CRITICAL(x) {           \
-    kernel_interrupt_restore(x);     \
+#define EXIT_CRITICAL(int_state) {           \
+    kernel_interrupt_restore(int_state);     \
 }
 
 /*******************************************************************************

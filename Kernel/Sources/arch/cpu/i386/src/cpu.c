@@ -373,6 +373,16 @@
  * MACROS
  ******************************************************************************/
 
+/**
+ * @brief Assert macro used by the CPU to ensure correctness of execution.
+ *
+ * @details Assert macro used by the CPU to ensure correctness of execution.
+ * Due to the critical nature of the CPU, any error generates a kernel panic.
+ *
+ * @param[in] COND The condition that should be true.
+ * @param[in] MSG The message to display in case of kernel panic.
+ * @param[in] ERROR The error code to use in case of kernel panic.
+ */
 #define CPU_ASSERT(COND, MSG, ERROR) {                      \
     if((COND) == FALSE)                                     \
     {                                                       \
@@ -380,9 +390,21 @@
     }                                                       \
 }
 
-#define CONCAT_STR(buff, idx, str) {                        \
-        strcpy(buff + idx, str);                            \
-        idx += strlen(str);                                 \
+/**
+ * @brief Concatenates two string starting from a given index.
+ *
+ * @details Concatenates two string starting from a given index. The macro will
+ * copy the string contained in the STR to BUFF starting with an offset of IDX.
+ * IDX is updated to be equal to the position of the last chacacter copied
+ * to the buffer.
+ *
+ * @param[out] BUFF The buffer used to receive the string.
+ * @param[in, out] IDX The offset in BUFF to start copying the string to.
+ * @param[in] STR The string to concatenate to BUFF.
+ */
+#define CONCAT_STR(BUFF, IDX, STR) {                        \
+        strcpy(BUFF + IDX, STR);                            \
+        IDX += strlen(STR);                                 \
 }
 
 /*******************************************************************************

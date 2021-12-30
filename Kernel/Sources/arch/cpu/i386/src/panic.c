@@ -54,6 +54,7 @@
  * STRUCTURES AND TYPES
  ******************************************************************************/
 
+/* TODO: Remove this once we have a proper ELF loader */
 typedef struct
 {
         uint32_t      st_name;
@@ -110,13 +111,50 @@ static const char* panic_msg;
  * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
+/**
+ * @brief Prints the kernel panic screen header.
+ *
+ * @details Prints the kernel panic screen header. The header contains the
+ * title, the interrupt number, the error code and the error string that caused
+ * the panic.
+ *
+ * @param[in] int_id The interrupt number that generated the panic.
+ * @param[in] stack_state The stack state at the moment of the panic.
+ * @param[in] error_code The error code of the kernel panic.
+ */
 static void print_panic_header(uintptr_t int_id,
                                stack_state_t* stack_state,
                                uint32_t error_code);
 
+/**
+ * @brief Prints the CPU state at the moment of the panic.
+ *
+ * @details Prints the CPU state at the moment of the panic. All CPU registers
+ * are dumped.
+ *
+ * @param[in] cpu_state The CPU state at the moment of the panic.
+ * @param[in] stack_state The stack state at the moment of the panic.
+ */
 static void print_cpu_state(cpu_state_t* cpu_state, stack_state_t* stack_state);
 
+/**
+ * @brief Prints the CPU flags at the moment of the panic.
+ *
+ * @details Prints the CPU flags at the moment of the panic. The flags are
+ * pretty printed for better reading.
+ *
+ * @param[in] stack_state The stack state at the moment of the panic.
+ */
 static void print_cpu_flags(stack_state_t* stack_state);
+
+/**
+ * @brief Prints the stack frame rewind at the moment of the panic.
+ *
+ * @details Prints the stack frame rewind at the moment of the panic. The frames
+ * will be unwinded and the symbols printed based on the information passed by
+ * multiboot at initialization time.
+ */
+static void print_stack_trace(void);
 
 /*******************************************************************************
  * FUNCTIONS

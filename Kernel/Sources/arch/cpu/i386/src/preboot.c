@@ -119,6 +119,13 @@ static uint8_t cmp_str(const char* str1, const char* str2, uint32_t size);
 
 void kernel_preboot(void);
 
+static void copy_module(struct multiboot_tag_module* module_tag,
+                        uint8_t** module_start_addr,
+                        uint32_t* mem_size,
+                        uint32_t* save_addr);
+
+static void copy_symbols(struct multiboot_tag_elf_sections* elf_tag);
+
 /*******************************************************************************
  * FUNCTIONS
  ******************************************************************************/

@@ -142,7 +142,7 @@ void cpu_init_thread_context(void (*entry_point)(void),
  * Registers (and other data) should be saved here.
  *
  * @param[in] cpu_state The current CPU state.
- * @param[in] stack_stack The current thread's stack state.
+ * @param[in] stack_state The current thread's stack state.
  * @param[out] thread The thread structure to save the data to.
  */
 void cpu_save_context(const cpu_state_t* cpu_state,

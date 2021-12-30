@@ -104,6 +104,16 @@
  * MACROS
  ******************************************************************************/
 
+/**
+ * @brief Assert macro used by the PIC to ensure correctness of execution.
+ *
+ * @details Assert macro used by the PIC to ensure correctness of execution.
+ * Due to the critical nature of the PIC, any error generates a kernel panic.
+ *
+ * @param[in] COND The condition that should be true.
+ * @param[in] MSG The message to display in case of kernel panic.
+ * @param[in] ERROR The error code to use in case of kernel panic.
+ */
 #define PIC_ASSERT(COND, MSG, ERROR) {                      \
     if((COND) == FALSE)                                     \
     {                                                       \

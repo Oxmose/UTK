@@ -40,56 +40,99 @@
  * CONSTANTS
  ******************************************************************************/
 
+/** @brief USTAR magic value. */
 #define USTAR_MAGIC "ustar "
+/** @brief USTAR maximal filename length. */
 #define USTAR_FILENAME_MAX_LENGTH 100
+/** @brief USTAR block size. */
 #define USTAR_BLOCK_SIZE 512
+/** @brief USTAR file size maximal length. */
 #define USTAR_FSIZE_FIELD_LENGTH 12
+/** @brief USTAR last edit maximal length. */
 #define USTAR_LEDIT_FIELD_LENGTH 12
+/** @brief USTAR file user ID maximal length. */
 #define USTAR_UID_FIELD_LENGTH 8
+/** @brief USTAR file mode maximal length. */
 #define USTAR_MODE_FIELD_LENGTH 8
+/** @brief USTAR file prefix maximal length. */
 #define USTAR_PREFIX_NAME_LENGTH 155
 
+/** @brief USTAR User read permission bitmask. */
 #define T_UREAD  0x100
+/** @brief USTAR User write permission bitmask. */
 #define T_UWRITE 0x080
+/** @brief USTAR User execute permission bitmask. */
 #define T_UEXEC  0x040
 
+/** @brief USTAR Group read permission bitmask. */
 #define T_GREAD  0x020
+/** @brief USTAR Group write permission bitmask. */
 #define T_GWRITE 0x010
+/** @brief USTAR Group execute permission bitmask. */
 #define T_GEXEC  0x008
 
+/** @brief USTAR Other read permission bitmask. */
 #define T_OREAD  0x004
+/** @brief USTAR Other write permission bitmask. */
 #define T_OWRITE 0x002
+/** @brief USTAR Other execute permission bitmask. */
 #define T_OEXEC  0x001
 
 /*******************************************************************************
  * STRUCTURES AND TYPES
  ******************************************************************************/
 
+/**
+ * @brief Defines the USTAR operation allowed on the devise.
+ */
 typedef enum
 {
+    /** @brief Write operation */
     USTAR_DEV_OP_WRITE,
+    /** @brief Read operation */
     USTAR_DEV_OP_READ,
+    /** @brief Flush operation */
     USTAR_DEV_OP_FLUSH
 } USTAR_DEV_OP_E;
 
+/**
+ * @brief USTAR header block definition as per USTAR standard.
+ */
 typedef struct
 {
+    /** @brief USTAR file name */
     char file_name[USTAR_FILENAME_MAX_LENGTH];
+    /** @brief USTAR file mode */
     char mode[8];
+    /** @brief USTAR owner user id */
     char user_id[8];
+    /** @brief USTAR owner group id */
     char group_id[8];
+    /** @brief Length of the file in bytes */
     char size[USTAR_FSIZE_FIELD_LENGTH];
+    /** @brief Modify time of file */
     char last_edited[12];
+    /** @brief Checksum for header */
     char checksum[8];
+    /** @brief Type of file */
     char type;
+    /** @brief Name of linked file */
     char linked_file_name[USTAR_FILENAME_MAX_LENGTH];
+    /** @brief USTAR magic value */
     char magic[6];
+    /** @brief USTAR version */
     char ustar_version[2];
+    /** @brief Owner user name */
     char user_name[32];
+    /** @brief Owner group name */
     char group_name[32];
+    /** @brief Device major number */
     char dev_major[8];
+    /** @brief Device minor number */
     char dev_minor[8];
+    /** @brief Prefix for file name */
     char prefix[USTAR_PREFIX_NAME_LENGTH];
+    /** @brief Unused padding */
     char padding[12];
 } ustar_block_t;
 
@@ -97,6 +140,18 @@ typedef struct
  * MACROS
  ******************************************************************************/
 
+/**
+ * @brief Assert macro used by the USTAR driver to ensure correctness of
+ * execution.
+ *
+ * @details Assert macro used by the USTAR driver to ensure correctness of
+ * execution. Due to the critical nature of the USTAR driver, any error
+ * generates a kernel panic.
+ *
+ * @param[in] COND The condition that should be true.
+ * @param[in] MSG The message to display in case of kernel panic.
+ * @param[in] ERROR The error code to use in case of kernel panic.
+ */
 #define USTAR_ASSERT(COND, MSG, ERROR) {                      \
     if((COND) == FALSE)                                       \
     {                                                         \
@@ -121,40 +176,187 @@ typedef struct
  * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
+/**
+ * @brief Get the number of items in a directory.
+ *
+ * @details Get the number of items in a directory. This function parses the
+ * USTAR partition to find all the items in a directory.
+ *
+ * @param[in] partition The USTAR partition to use.
+ * @param[in] path The directory path.
+ * @param[out] item_count The buffer to receive the number of items.
+ *
+ * @return The success or error status is returned.
+ */
 static OS_RETURN_E ustar_get_item_count(const vfs_partition_t* partition,
                                         const char* path,
                                         size_t* item_count);
 
+/**
+ * @brief Searches a file for a given path.
+ *
+ * @details Searches a file for the given path and fills the USTAR block once
+ * found.
+ *
+ * @param[in] partition The USTAR partition to use.
+ * @param[in] path The file path.
+ * @param[out] block The USTAR glock to use for the search.
+ * @param[out] block_id The USTAR block id buffer to receive the block id of the
+ * file.
+ *
+ * @return The success or error status is returned.
+ */
 static OS_RETURN_E ustar_search_file(const vfs_partition_t* partition,
                                      const char* path,
                                      ustar_block_t* block,
                                      uint32_t* block_id);
 
+/**
+ * @brief Fills a virtual node from a USTAR header block.
+ *
+ * @details Fills a virtual node from a USTAR header block. This function will
+ * fill the virtual node by parsing the USTAR block header given as parameter.
+ *
+ * @param[out] vnode The virtual node to fill with the parsed data.
+ * @param[in] block The USTAR header block containing the file information.
+ * @param[in] block_id The USTAR block id corresponding to the file.
+ * @param[in] path The path of the file.
+ */
 static void ustar_set_vnode(vfs_vnode_t* vnode,
                             ustar_block_t* block,
                             const uint32_t block_id,
                             const char* path);
 
+/**
+ * @brief Tranlates the USTAR permission coding to the VFS permission coding.
+ *
+ * @details Tranlates the USTAR permission coding to the VFS permission coding.
+ *
+ * @param[in] mode The USTAR string mode.
+ *
+ * @return The VFS permission value is returned.
+ */
 inline static vfs_access_right_t ustar_to_vfs_rights(const char* mode);
 
+/**
+ * @brief Tranlates the USTAR type coding to the VFS type coding.
+ *
+ * @details Tranlates the USTAR type coding to the VFS type coding.
+ *
+ * @param[in] type The USTAR string type.
+ *
+ * @return The VFS type value is returned.
+ */
 inline static VFS_FILE_TYPE_E ustar_to_vfs_type(const char type);
 
+/**
+ * @brief Returns if the current path and file is in the root of the USTAR
+ * partition.
+ *
+ * @details Returns if the current path and file is in the root of the USTAR
+ * partition.
+ *
+ * @param[in] path The path to the file to check.
+ * @param[in] file The name of the file to check.
+ *
+ * @return Returns TRUE if the current path and file is in the root of the USTAR
+ * partition, FALSE otherwise.
+ */
 inline static bool_t is_root(const char* path, const char* file);
 
+/**
+ * @brief Extract the path to a file from a given string.
+ *
+ * @details Extract the path to a file from a given string. The path does not
+ * contain the file name.
+ *
+ * @param[in] path The path to analyse.
+ * @param[out] buffer The buffer to receive only the extracted path without the
+ * filename.
+ */
 inline static void ustar_get_path(const char* path, char* buffer);
 
+/**
+ * @brief Extract the filename of a file from a given string.
+ *
+ * @details Extract the filename of a file from a given string.
+ *
+ * @param[in] path The path to analyse.
+ * @param[out] buffer The buffer to receive only the extracted filename.
+ */
 inline static void ustar_get_filename(const char* path, char* buffer);
 
+/**
+ * @brief Fills the USTAR block with the next file in the partition.
+ *
+ * @details Fills the USTAR block with the next file in the partition. This
+ * file might not be in the same folder as the previous file.
+ *
+ * @param[in] partition The USTAR partition to use.
+ * @param[in,out] block The filer header's block to use to get the next header.
+ * This will be filled with the next header once the operation completed.
+ * @param[in,out] inode The inode of the current file. This will be filled with
+ * the inode of the next file in the partition.
+ */
 static void ustar_get_next_file(const vfs_partition_t* partition,
                                 ustar_block_t* block,
                                 uint32_t* inode);
 
+/**
+ * @brief Translates the decimal value given as parameter to an octal value
+ * stored in a string.
+ *
+ * @details Translates the decimal value given as parameter to an octal value
+ * stored in a string.
+ *
+ * @param[out] oct The buffer used to store the octal value.
+ * @param[in] value The value to translate.
+ * @param[in] size The size of the buffer used to receive the octal value.
+ */
 inline static void uint2oct(char* oct, uint32_t value, size_t size);
 
+/**
+ * @brief Translates the octal value giben as parameter to its decimal value.
+ *
+ * @details Translates the octal value giben as parameter to its decimal value.
+ *
+ * @param[in] oct The octal value to translated.
+ * @param[in] size The dize of the buffer that contains the octal value.
+ *
+ * @return The decimal value of the octal value stored in the string is
+ * returned.
+ */
 inline static uint32_t oct2uint(const char* oct, size_t size);
 
+/**
+ * @brief Checks if a USTAR header block is valid.
+ *
+ * @details Checks if a USTAR header block is valid. The integrity of the header
+ * is validated with the checksum, magix and other values contained in the
+ * header block.
+ *
+ * @param[in] block The header block to check.
+ *
+ * @return OS_NO_ERR is retuned is the block is valid. Otherwise, an error is
+ * returned.
+ */
 inline static OS_RETURN_E ustar_check_block(const ustar_block_t* block);
 
+/**
+ * @brief Accesses a block to from the USTAR partition.
+ *
+ * @details Accesses a block to from the USTAR partition. This function allows
+ * to perform different operations on the USTAR block.
+ *
+ * @param[in] partition The USTAR partition to use.
+ * @param[in,out] buffer The buffer used to read or write the USTAR block.
+ * @param[in] inode The inode to access.
+ * @param[in] block_counts The number of block to access.
+ * @param[in] operation The operation to perform. Refer to the USTAR_DEV_OP_E
+ * values to know which operations are possible.
+ *
+ * @return The success or error status is returned.
+ */
 inline static OS_RETURN_E ustar_access_blocks_from_device(
                                             const vfs_partition_t* partition,
                                             void* buffer,
@@ -1349,7 +1551,7 @@ OS_RETURN_E ustar_truncate_file(const vfs_partition_t* partition,
             return OS_ERR_FILE_NOT_FOUND;
         }
 
-        /* USTAR cannot gros files larger */
+        /* USTAR cannot grow files larger */
         if(new_size > oct2uint(current_block.size, USTAR_FSIZE_FIELD_LENGTH))
         {
             return OS_ERR_UNAUTHORIZED_ACTION;

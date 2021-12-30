@@ -97,6 +97,12 @@ typedef unsigned int    qshift_t;
 
 static void shl(digit *p, int len, int sh);
 
+uint64_t __qdivrem(uint64_t uq, uint64_t vq, uint64_t *arq);
+
+uint64_t __umoddi3(uint64_t a, uint64_t b);
+
+uint64_t __udivdi3(uint64_t a, uint64_t b);
+
 /*
  * __qdivrem(u, v, rem) returns u/v and, optionally, sets *rem to u%v.
  *

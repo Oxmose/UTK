@@ -56,8 +56,6 @@ typedef enum
 /** @brief Custom interrupt handler structure. */
 typedef struct
 {
-    /** @brief Handler's state.*/
-    bool_t enabled;
     /** @brief Handler's entry point. */
     void(*handler)(cpu_state_t*, uintptr_t, stack_state_t*);
 } custom_handler_t;

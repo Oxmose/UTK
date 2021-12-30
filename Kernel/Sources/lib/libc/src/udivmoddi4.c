@@ -65,7 +65,17 @@
  * STATIC FUNCTIONS DECLARATIONS
  ******************************************************************************/
 
-/* None */
+/**
+ * @brief This function returns the quotient of the unsigned division of num
+ * and den.
+ *
+ * @param[in] num The numerator.
+ * @param[in] den The denominator.
+ * @param[out] rem_p The reminder buffer.
+ *
+ * @return The quotient of the unsigned division of num and den is returned.
+ */
+uint64_t __udivmoddi4(uint64_t num, uint64_t den, uint64_t* rem_p);
 
 /*******************************************************************************
  * FUNCTIONS

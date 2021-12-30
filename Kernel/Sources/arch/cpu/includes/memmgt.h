@@ -31,6 +31,12 @@
 #include <ctrl_block.h>      /* Kernel process structure */
 #include <sys/syscall_api.h> /* System call API */
 
+#ifdef ARCH_I386
+#include <../i386/includes/arch_memmgt.h> /* Architecture memory management */
+#else
+#error Unknown CPU architecture
+#endif
+
 /*******************************************************************************
  * CONSTANTS
  ******************************************************************************/
@@ -243,7 +249,7 @@ void memory_delete_free_page_table(kqueue_t* page_table);
  * walks the page directory and release memory frames and hardware. The page
  *  directory itself is removed from memory.
  *
- * @param[in] pd_dir The page directory to clean.
+ * @param[in] pg_dir The page directory to clean.
  */
 void memory_clean_process_memory(uintptr_t pg_dir);
 
@@ -316,7 +322,7 @@ void memory_alloc_page(const SYSCALL_FUNCTION_E func, void* params);
 uint32_t memory_get_free_kpages(void);
 
 /**
- * @brief @brief Returns the amount of free pages memory (in bytes) for the
+ * @brief Returns the amount of free pages memory (in bytes) for the
  * current process.
  *
  * @return The amount of free pages memory (in bytes) for the
@@ -325,7 +331,7 @@ uint32_t memory_get_free_kpages(void);
 uint32_t memory_get_free_pages(void);
 
 /**
- * @brief @brief Returns the amount of free frames memory (in bytes).
+ * @brief Returns the amount of free frames memory (in bytes).
  *
  * @return the amount of free frames memory (in bytes).
  */

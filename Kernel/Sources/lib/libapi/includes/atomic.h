@@ -63,7 +63,7 @@ typedef volatile uint32_t spinlock_t;
  * @details Lock the spinlock if possible. If not, the calling thread will wait
  * in this function until the lock is free.
  *
- * @param lock The spinlock to use.
+ * @param[in,out] lock The spinlock to use.
  */
 #define SPINLOCK_LOCK(lock) { \
     cpu_lock_spinlock(&lock); \
@@ -74,7 +74,7 @@ typedef volatile uint32_t spinlock_t;
  *
  * @details Unlock the spinlock.This function is non blocking.
  *
- * @param lock The spinlock to use.
+ * @param[in,out] lock The spinlock to use.
  */
 #define SPINLOCK_UNLOCK(lock) { \
     lock = 0;                   \
