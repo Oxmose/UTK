@@ -276,6 +276,18 @@ OS_RETURN_E sched_join_thread(kernel_thread_t* thread, void** ret_val,
 void sched_wait_process_pid(const SYSCALL_FUNCTION_E func, void* params);
 
 /**
+ * @brief System call handler to exit a process.
+ *
+ * @details System call handler to exit a process. The function will terminate
+ * all the process' threads and clean its resources.
+ *
+ * @param[in] func The syscall function ID, must correspond to the exit_process
+ * call.
+ * @param[in] ret_value The proess desired return value.
+ */
+void sched_exit_process(const SYSCALL_FUNCTION_E func, void* ret_value);
+
+/**
  * @brief System call handler to get the current thread parameters.
  *
  * @details System call handler to get the current thread parameters. This

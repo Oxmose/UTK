@@ -323,21 +323,14 @@ void futex_wait(const SYSCALL_FUNCTION_E func, void* params)
 
     func_params = (futex_t*)params;
 
-    if(func_params == NULL)
-    {
-        return;
-    }
+    FUTEX_ASSERT(func == SYSCALL_FUTEX_WAIT,
+                 "Wrong system call invocated", OS_ERR_INCORRECT_VALUE);
 
-    if(func != SYSCALL_FUTEX_WAIT || is_init == FALSE)
-    {
+    FUTEX_ASSERT(func_params != NULL,
+                 "NULL system call parameters", OS_ERR_NULL_POINTER);
 
-        func_params->addr  = NULL;
-        func_params->val   = 0;
-        func_params->error = is_init ?
-                                OS_ERR_UNAUTHORIZED_ACTION :
-                                OS_ERR_NOT_INITIALIZED;
-        return;
-    }
+    FUTEX_ASSERT(is_init != FALSE,
+                 "Futex have not been initialized", OS_ERR_NOT_INITIALIZED);
 
     /* Initialize data */
     memset(&recover_data, 0, sizeof(recover_data_t));
@@ -437,21 +430,14 @@ void futex_wake(const SYSCALL_FUNCTION_E func, void* params)
 
     func_params = (futex_t*)params;
 
-    if(func_params == NULL)
-    {
-        return;
-    }
+    FUTEX_ASSERT(func == SYSCALL_FUTEX_WAKE,
+                 "Wrong system call invocated", OS_ERR_INCORRECT_VALUE);
 
-    if(func != SYSCALL_FUTEX_WAKE || is_init == FALSE)
-    {
+    FUTEX_ASSERT(func_params != NULL,
+                 "NULL system call parameters", OS_ERR_NULL_POINTER);
 
-        func_params->addr  = NULL;
-        func_params->val   = 0;
-        func_params->error = is_init ?
-                                OS_ERR_UNAUTHORIZED_ACTION :
-                                OS_ERR_NOT_INITIALIZED;
-        return;
-    }
+    FUTEX_ASSERT(is_init != FALSE,
+                 "Futex have not been initialized", OS_ERR_NOT_INITIALIZED);
 
     /* Initialize data */
     memset(&recover_data, 0, sizeof(recover_data_t));

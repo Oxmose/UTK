@@ -3051,18 +3051,11 @@ void memory_alloc_page(const SYSCALL_FUNCTION_E func, void* params)
 
     func_params = (memmgt_page_alloc_param_t*)params;
 
-    if(func != SYSCALL_PAGE_ALLOC)
-    {
-        if(func_params != NULL)
-        {
-            func_params->error = OS_ERR_UNAUTHORIZED_ACTION;
-        }
-        return;
-    }
-    if(func_params == NULL)
-    {
-        return;
-    }
+    MEMMGT_ASSERT(func == SYSCALL_PAGE_ALLOC,
+                  "Wrong system call invocated", OS_ERR_INCORRECT_VALUE);
+
+    MEMMGT_ASSERT(func_params != NULL,
+                  "NULL system call parameters", OS_ERR_NULL_POINTER);
 
     curr_proc = sched_get_current_process();
 

@@ -113,4 +113,8 @@ int32_t waitpid(const int32_t pid,
     return params.pid;
 }
 
+void exit(int32_t ret_value)
+{
+    syscall_do(SYSCALL_EXIT, (void*)ret_value);
+}
 /************************************ EOF *************************************/

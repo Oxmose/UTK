@@ -99,6 +99,7 @@ void lapic_timer_test(void);
 #define MUTEX_TEST 0
 #define SEMAPHORE_TEST 0
 #define SPINLOCK_TEST 0
+#define EXIT_TEST 0
 
 void output_test(void);
 void kheap_test(void);
@@ -120,6 +121,7 @@ void futex_test(void);
 void mutex_test(void);
 void semaphore_test(void);
 void spinlock_test(void);
+void exit_test(void);
 
 #else
 #define KERNEL_TEST_POINT(func)

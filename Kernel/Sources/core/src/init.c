@@ -170,6 +170,7 @@ void* init_sys(void* args)
 
     KERNEL_TEST_POINT(ustar_test);
     KERNEL_TEST_POINT(fork_test);
+    KERNEL_TEST_POINT(exit_test);
     KERNEL_TEST_POINT(user_heap_test);
     KERNEL_TEST_POINT(memory_usage_test);
     KERNEL_TEST_POINT(critical_test);

@@ -104,6 +104,9 @@ typedef struct kernel_process
     /** @brief Process identifier. */
     int32_t pid;
 
+    /** @brief Process' return value. */
+    int32_t return_val;
+
     /** @brief Parent process pointer. */
     struct kernel_process* parent_process;
 
@@ -115,6 +118,9 @@ typedef struct kernel_process
 
     /** @brief Process children list. */
     kqueue_t* children;
+
+    /** @brief Process dead children list. */
+    kqueue_t* dead_children;
 
     /** @brief Process free page table queue. */
     kqueue_t* free_page_table;

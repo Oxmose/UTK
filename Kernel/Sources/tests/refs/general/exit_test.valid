@@ -1,0 +1,4 @@
+[TESTMODE] Process 1 returned 42, 0
+[TESTMODE] Testing exit in thread
+[TESTMODE] Process 2 returned 123, 0
+[TESTMODE] Exit tests passed

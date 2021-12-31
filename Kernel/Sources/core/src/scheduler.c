@@ -333,6 +333,7 @@ static void create_main_kprocess(void)
     main_kprocess->parent_process  = NULL;
     main_kprocess->pid             = last_given_pid++;
     main_kprocess->children        = kqueue_create_queue();
+    main_kprocess->dead_children   = kqueue_create_queue();
     main_kprocess->threads         = kqueue_create_queue();
     main_kprocess->free_page_table = memory_create_free_page_table();
 
@@ -654,8 +655,7 @@ static void sched_clean_process(kernel_process_t* process)
         thread_process = kqueue_pop(process->children);
     }
 
-    /* Update the INIT wait process queue if needed with current wait queue*/
-    /* TODO */
+    /* TODO Update the INIT wait process queue if needed with current wait queue*/
 
     /* Clean page directory and frames */
     memory_delete_free_page_table(process->free_page_table);
@@ -683,15 +683,11 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
     uint32_t          int_state;
     OS_RETURN_E       err;
 
-    SCHED_ASSERT(new_pid != NULL,
-                 "Internal error while forking process",
-                 OS_ERR_NULL_POINTER);
+    SCHED_ASSERT(func == SYSCALL_FORK,
+                 "Wrong system call invocated", OS_ERR_INCORRECT_VALUE);
 
-    if(func != SYSCALL_FORK)
-    {
-        *(int32_t*)new_pid = -1;
-        return;
-    }
+    SCHED_ASSERT(new_pid != NULL,
+                 "NULL system call parameters", OS_ERR_NULL_POINTER);
 
     if(process_count >= KERNEL_MAX_PROCESS)
     {
@@ -715,8 +711,9 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
     kqueue_push(new_proc_node, active_process->children);
 
     /* Set the process control block */
-    new_proc->children = kqueue_create_queue();
-    new_proc->threads  = kqueue_create_queue();
+    new_proc->children      = kqueue_create_queue();
+    new_proc->dead_children = kqueue_create_queue();
+    new_proc->threads       = kqueue_create_queue();
 
     strncpy(new_proc->name,
             active_process->name,
@@ -769,7 +766,7 @@ void sched_fork_process(const SYSCALL_FUNCTION_E func, void* new_pid)
                 active_threads_table[main_thread->priority]);
 
     /* Update the main thread */
-    new_proc->main_thread = main_thread_node_th;
+    new_proc->main_thread = main_thread_node;
 
     /* Create new free page table and page directory */
     err = memory_copy_self_mapping(new_proc,
@@ -825,19 +822,11 @@ void sched_wait_process_pid(const SYSCALL_FUNCTION_E func, void* params)
 
     func_params = (waitpid_params_t*)params;
 
-    if(func != SYSCALL_WAITPID)
-    {
-        if(func_params != NULL)
-        {
-            func_params->pid   = -1;
-            func_params->error = OS_ERR_UNAUTHORIZED_ACTION;
-        }
-        return;
-    }
-    if(func_params == NULL)
-    {
-        return;
-    }
+    SCHED_ASSERT(func == SYSCALL_WAITPID,
+                 "Wrong system call invocated", OS_ERR_INCORRECT_VALUE);
+
+    SCHED_ASSERT(func_params != NULL,
+                 "NULL system call parameters", OS_ERR_NULL_POINTER);
 
     /* First we check if the PID is indeed one of the children of the current
      * process
@@ -848,6 +837,7 @@ void sched_wait_process_pid(const SYSCALL_FUNCTION_E func, void* params)
                  "Process %d waiting for process %d", active_process->pid,
                  func_params->pid);
 
+    /* Search in the active list */
     child_node = active_process->children->head;
     child = NULL;
     while(child_node != NULL)
@@ -860,19 +850,37 @@ void sched_wait_process_pid(const SYSCALL_FUNCTION_E func, void* params)
         child_node = child_node->next;
     }
 
-    EXIT_CRITICAL(int_state);
-
+    /* If null check the dead children */
     if(child_node == NULL)
     {
+        child_node = active_process->dead_children->head;
+        child = NULL;
+        while(child_node != NULL)
+        {
+            child = (kernel_process_t*)child_node->data;
+            if(child->pid == func_params->pid)
+            {
+                break;
+            }
+            child_node = child_node->next;
+        }
 
-        func_params->pid = -1;
-        func_params->error = OS_ERR_NO_SUCH_ID;
-        return;
+        /* If still null, PID not found */
+        if(child_node == NULL)
+        {
+            func_params->pid = -1;
+            func_params->error = OS_ERR_NO_SUCH_ID;
+
+            EXIT_CRITICAL(int_state);
+            return;
+        }
     }
     term_cause = THREAD_TERMINATE_CORRECTLY;
     err = sched_join_thread(child->main_thread->data,
                             (void**)&status,
                             &term_cause);
+
+    EXIT_CRITICAL(int_state);
     if(err != OS_NO_ERR)
     {
         func_params->pid = -1;
@@ -881,14 +889,14 @@ void sched_wait_process_pid(const SYSCALL_FUNCTION_E func, void* params)
     }
     else
     {
-        func_params->status = status;
+        func_params->status     = child->return_val;
         func_params->term_cause = (int32_t)term_cause;
-        func_params->error = OS_NO_ERR;
+        func_params->error      = OS_NO_ERR;
     }
 
     sched_clean_process(child);
 
-    kqueue_remove(active_process->children, child_node, TRUE);
+    kqueue_remove(active_process->dead_children, child_node, TRUE);
 
     --process_count;
 
@@ -897,6 +905,92 @@ void sched_wait_process_pid(const SYSCALL_FUNCTION_E func, void* params)
     kqueue_delete_node(&child_node);
 }
 
+void sched_exit_process(const SYSCALL_FUNCTION_E func, void* ret_value)
+{
+    uint32_t          int_state;
+    kqueue_node_t*    dead_node;
+    kqueue_node_t*    thread_node;
+    kernel_process_t* parent;
+    kernel_thread_t*  thread;
+    kernel_thread_t*  joining_thread;
+
+    SCHED_ASSERT(func == SYSCALL_EXIT, "Wrong system call invocated",
+                 OS_ERR_INCORRECT_VALUE);
+
+    ENTER_CRITICAL(int_state);
+
+    /* Set the return value */
+    active_process->return_val = (int32_t)ret_value;
+
+    /* Set all threads as stopped and remove then from the ready list */
+    dead_node = active_process->threads->head;
+    while(dead_node != NULL)
+    {
+        thread        = (kernel_thread_t*)dead_node->data;
+        thread->state = THREAD_STATE_ZOMBIE;
+
+        /* Remove from active thread table */
+        thread_node = kqueue_find(active_threads_table[thread->priority],
+                                  thread);
+        if(thread_node != NULL)
+        {
+            kqueue_remove(active_threads_table[thread->priority], thread_node,
+                          TRUE);
+            kqueue_delete_node(&thread_node);
+        }
+
+        /* Remove from sleeping table */
+        thread_node = kqueue_find(sleeping_threads_table, thread);
+        if(thread_node != NULL)
+        {
+            kqueue_remove(sleeping_threads_table, thread_node,
+                          TRUE);
+            kqueue_delete_node(&thread_node);
+        }
+        dead_node = dead_node->next;
+    }
+
+    /* Set the process as dead in the parent's dead children queue */
+    parent = active_process->parent_process;
+    dead_node = kqueue_find(parent->children, active_process);
+
+    SCHED_ASSERT(dead_node != NULL, "Could not get current process' node",
+                 OS_ERR_NULL_POINTER);
+
+    kqueue_remove(parent->children, dead_node, TRUE);
+    kqueue_push(dead_node, parent->dead_children);
+
+    /* If a process already waits for the main thread to finish, wake it */
+    thread = (kernel_thread_t*)active_process->main_thread->data;
+    if(thread->joining_thread != NULL)
+    {
+        joining_thread = (kernel_thread_t*)thread->joining_thread->data;
+
+        if(joining_thread->state == THREAD_STATE_JOINING)
+        {
+            KERNEL_DEBUG(SCHED_DEBUG_ENABLED, "SCHED",
+                         "Woke up joining thread %d", joining_thread->tid);
+
+            joining_thread->state = THREAD_STATE_READY;
+
+            kqueue_push(thread->joining_thread,
+                        active_threads_table[joining_thread->priority]);
+        }
+    }
+
+    /* Clear the active thread node, it should not be in any queue at this point
+     */
+    kqueue_delete_node(&active_thread_node);
+
+    /* Schedule, we should never come back from here */
+    sched_schedule();
+
+    SCHED_ASSERT(FALSE, "Returned execution to an exited thread",
+                 OS_ERR_UNAUTHORIZED_ACTION);
+
+    EXIT_CRITICAL(int_state);
+
+}
 /******************************************************************************
  * THREADS MANAGEMENT
  *****************************************************************************/
@@ -1410,20 +1504,11 @@ void sched_get_thread_params(const SYSCALL_FUNCTION_E func, void* params)
 
     func_params = (sched_param_t*)params;
 
-    if(func != SYSCALL_SCHED_GET_PARAMS)
-    {
-        if(func_params != NULL)
-        {
-            func_params->pid   = -1;
-            func_params->tid   = -1;
-            func_params->error = OS_ERR_UNAUTHORIZED_ACTION;
-        }
-        return;
-    }
-    if(func_params == NULL)
-    {
-        return;
-    }
+    SCHED_ASSERT(func == SYSCALL_SCHED_GET_PARAMS,
+                 "Wrong system call invocated", OS_ERR_INCORRECT_VALUE);
+
+    SCHED_ASSERT(func_params != NULL,
+                 "NULL system call parameters", OS_ERR_NULL_POINTER);
 
     /* Fills the structure. Here we will add new parameters when needed */
     func_params->pid = active_process->pid;
@@ -1439,20 +1524,11 @@ void sched_set_thread_params(const SYSCALL_FUNCTION_E func, void* params)
 
     func_params = (sched_param_t*)params;
 
-    if(func != SYSCALL_SCHED_SET_PARAMS)
-    {
-        if(func_params != NULL)
-        {
-            func_params->pid   = -1;
-            func_params->tid   = -1;
-            func_params->error = OS_ERR_UNAUTHORIZED_ACTION;
-        }
-        return;
-    }
-    if(func_params == NULL)
-    {
-        return;
-    }
+    SCHED_ASSERT(func == SYSCALL_SCHED_SET_PARAMS,
+                 "Wrong system call invocated", OS_ERR_INCORRECT_VALUE);
+
+    SCHED_ASSERT(func_params != NULL,
+                 "NULL system call parameters", OS_ERR_NULL_POINTER);
 
     func_params->error = OS_NO_ERR;
 

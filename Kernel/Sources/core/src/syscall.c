@@ -89,7 +89,7 @@
 static syscall_handler_t kernel_interrupt_handlers[SYSCALL_MAX_ID] = {
     {sched_fork_process},             /* SYSCALL_FORK */
     {sched_wait_process_pid},         /* SYSCALL_WAITPID */
-    {NULL},                           /* SYSCALL_EXIT */
+    {sched_exit_process},             /* SYSCALL_EXIT */
     {futex_wait},                     /* SYSCALL_FUTEX_WAIT */
     {futex_wake},                     /* SYSCALL_FUTEX_WAKE */
     {sched_get_thread_params},        /* SYSCALL_SCHED_GET_PARAMS */

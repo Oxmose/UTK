@@ -94,6 +94,15 @@ int32_t waitpid(const int32_t pid,
                 int32_t* term_cause,
                 OS_RETURN_E* err);
 
+/**
+ * @brief Exits the current process.
+ *
+ * @details Exists the current process and removes all its active threads.
+ *
+ * @param[in] ret_value The return value of the process.
+ */
+void exit(int32_t ret_value);
+
 #endif /* #ifndef __LIB_PROCESS_H_ */
 
 /************************************ EOF *************************************/
