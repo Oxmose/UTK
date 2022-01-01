@@ -200,6 +200,7 @@ void* init_sys(void* args)
         kernel_printf("\rCannot find any process panic in 1");
         sched_sleep(1000);
         kernel_printf("\n");
+
         INIT_ASSERT(FALSE,
                     "No process to launch",
                     OS_ERR_UNAUTHORIZED_ACTION);
@@ -214,10 +215,6 @@ void* init_sys(void* args)
 void* idle_sys(void* args)
 {
     (void)args;
-
-    KERNEL_INFO("IDLE Started | PID: %d | TID: %d\n",
-                sched_get_pid(),
-                sched_get_tid());
 
     while(1)
     {

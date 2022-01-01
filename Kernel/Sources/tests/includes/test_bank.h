@@ -91,6 +91,7 @@ void lapic_timer_test(void);
 #define MEMORY_USAGE_TEST 0
 #define VECTOR_TEST 0
 #define UHASHTABLE_TEST 0
+#define SHASHTABLE_TEST 0
 #define CRITICAL_TEST 0
 #define SCHEDULER_LOAD_TEST 0
 #define SCHEDULER_PREEMPT_TEST 0
@@ -113,6 +114,7 @@ void user_heap_test(void);
 void memory_usage_test(void);
 void vector_test(void);
 void uhashtable_test(void);
+void shashtable_test(void);
 void critical_test(void);
 void scheduler_load_test(void);
 void scheduler_preempt_test(void);

@@ -192,7 +192,7 @@ typedef struct vfs_ftable_entry
 OS_RETURN_E vfs_mount(const char* part_path,
                       const char* mount_pt);
 
-OS_RETURN_E vfs_umount(const char* part_path);
+OS_RETURN_E vfs_umount(const char* mount_pt);
 
 OS_RETURN_E vfs_open_file(const char* path,
                           vfs_ftable_entry_t* file_descriptor);

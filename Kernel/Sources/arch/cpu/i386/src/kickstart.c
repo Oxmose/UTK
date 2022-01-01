@@ -46,7 +46,7 @@
 #include <bsp_api.h>               /* BSP API */
 #include <scheduler.h>             /* Kernel scheduler */
 #include <syscall.h>               /* System calls manager */
-#include <init_rd.h>               /* Init ram disk */
+#include <dev_manager.h>           /* Device manager */
 #include <futex.h>                 /* FUtex API */
 
 /* Configuration files */
@@ -127,7 +127,6 @@ void kernel_kickstart(void);
 void kernel_kickstart(void)
 {
     OS_RETURN_E     err;
-    initrd_device_t initrd_device;
 
     /* Init uart for basic log */
     graphic_set_selected_driver(uart_get_driver());
@@ -153,6 +152,7 @@ void kernel_kickstart(void)
     KERNEL_TEST_POINT(kqueue_test);
     KERNEL_TEST_POINT(vector_test);
     KERNEL_TEST_POINT(uhashtable_test);
+    KERNEL_TEST_POINT(shashtable_test);
 
     kernel_interrupt_init();
     KERNEL_SUCCESS("Interrupt manager initialized\n");
@@ -209,9 +209,9 @@ void kernel_kickstart(void)
     futex_init();
     KERNEL_SUCCESS("Futex initialized\n");
 
-    /* Initialize the init ram disk */
-    err = initrd_init_device(&initrd_device);
-    KICKSTART_ASSERT(err == OS_NO_ERR, "Could not init INITRD", err);
+    /* Initialize the devices (INITRD and other devices) */
+    dev_manager_init();
+    KERNEL_SUCCESS("Device manager initialized\n");
 
     /* First schedule, we should never return from here */
     sched_init();

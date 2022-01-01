@@ -33,7 +33,8 @@
  * CONSTANTS
  ******************************************************************************/
 
-/* None */
+/** @brief Init RAM Disk block size */
+#define INITRD_BLOCK_SIZE sizeof(uint8_t)
 
 /*******************************************************************************
  * STRUCTURES AND TYPES

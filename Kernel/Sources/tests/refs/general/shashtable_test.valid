@@ -1,0 +1,104 @@
+[TESTMODE] Size: 0, Capacity: 16
+[TESTMODE] ==== Set
+[TESTMODE] Size: 26, Capacity: 64
+[TESTMODE] ==== Get
+[TESTMODE] Key: TEST000000 | Value: 0
+[TESTMODE] Key: TEST000001 | Value: 10
+[TESTMODE] Key: TEST000002 | Value: 20
+[TESTMODE] Key: TEST000003 | Value: 30
+[TESTMODE] Key: TEST000004 | Value: 40
+[TESTMODE] Key: TEST000005 | Value: 50
+[TESTMODE] Key: TEST000006 | Value: 60
+[TESTMODE] Key: TEST000007 | Value: 70
+[TESTMODE] Key: TEST000008 | Value: 80
+[TESTMODE] Key: TEST000009 | Value: 90
+[TESTMODE] Key: TEST000010 | Value: 100
+[TESTMODE] Key: TEST000011 | Value: 110
+[TESTMODE] Key: TEST000012 | Value: 120
+[TESTMODE] Key: TEST000013 | Value: 130
+[TESTMODE] Key: TEST000014 | Value: 140
+[TESTMODE] Key: TEST000015 | Value: 150
+[TESTMODE] Key: TEST000016 | Value: 160
+[TESTMODE] Key: TEST000017 | Value: 170
+[TESTMODE] Key: TEST000018 | Value: 180
+[TESTMODE] Key: TEST000019 | Value: 190
+[TESTMODE] Key: TEST000020 | Value: 200
+[TESTMODE] Key: TEST000021 | Value: 210
+[TESTMODE] Key: TEST000022 | Value: 220
+[TESTMODE] Key: TEST000023 | Value: 230
+[TESTMODE] Key: TEST000024 | Value: 240
+[TESTMODE] Key: TEST000025 | Value: 250
+[TESTMODE] Size: 26, Capacity: 64
+[TESTMODE] ==== Set
+[TESTMODE] Size: 26, Capacity: 64
+[TESTMODE] ==== Get
+[TESTMODE] Key: TEST000000 | Value: 0
+[TESTMODE] Key: TEST000001 | Value: 200
+[TESTMODE] Key: TEST000002 | Value: 400
+[TESTMODE] Key: TEST000003 | Value: 600
+[TESTMODE] Key: TEST000004 | Value: 800
+[TESTMODE] Key: TEST000005 | Value: 1000
+[TESTMODE] Key: TEST000006 | Value: 1200
+[TESTMODE] Key: TEST000007 | Value: 1400
+[TESTMODE] Key: TEST000008 | Value: 1600
+[TESTMODE] Key: TEST000009 | Value: 1800
+[TESTMODE] Key: TEST000010 | Value: 2000
+[TESTMODE] Key: TEST000011 | Value: 2200
+[TESTMODE] Key: TEST000012 | Value: 2400
+[TESTMODE] Key: TEST000013 | Value: 0
+[TESTMODE] Key: TEST000014 | Value: 2000
+[TESTMODE] Key: TEST000015 | Value: 4000
+[TESTMODE] Key: TEST000016 | Value: 6000
+[TESTMODE] Key: TEST000017 | Value: 8000
+[TESTMODE] Key: TEST000018 | Value: 10000
+[TESTMODE] Key: TEST000019 | Value: 12000
+[TESTMODE] Key: TEST000020 | Value: 14000
+[TESTMODE] Key: TEST000021 | Value: 16000
+[TESTMODE] Key: TEST000022 | Value: 18000
+[TESTMODE] Key: TEST000023 | Value: 20000
+[TESTMODE] Key: TEST000024 | Value: 22000
+[TESTMODE] Key: TEST000025 | Value: 24000
+[TESTMODE] Size: 26, Capacity: 64
+[TESTMODE] ==== Remove
+[TESTMODE] Size: 13, Capacity: 64
+[TESTMODE] ==== Get
+[TESTMODE] Removed / Not found correctly
+[TESTMODE] Key: TEST000001 | Value: 200
+[TESTMODE] Removed / Not found correctly
+[TESTMODE] Key: TEST000003 | Value: 600
+[TESTMODE] Removed / Not found correctly
+[TESTMODE] Key: TEST000005 | Value: 1000
+[TESTMODE] Removed / Not found correctly
+[TESTMODE] Key: TEST000007 | Value: 1400
+[TESTMODE] Removed / Not found correctly
+[TESTMODE] Key: TEST000009 | Value: 1800
+[TESTMODE] Removed / Not found correctly
+[TESTMODE] Key: TEST000011 | Value: 2200
+[TESTMODE] Removed / Not found correctly
+[TESTMODE] Key: TEST000013 | Value: 0
+[TESTMODE] Removed / Not found correctly
+[TESTMODE] Key: TEST000015 | Value: 4000
+[TESTMODE] Removed / Not found correctly
+[TESTMODE] Key: TEST000017 | Value: 8000
+[TESTMODE] Removed / Not found correctly
+[TESTMODE] Key: TEST000019 | Value: 12000
+[TESTMODE] Removed / Not found correctly
+[TESTMODE] Key: TEST000021 | Value: 16000
+[TESTMODE] Removed / Not found correctly
+[TESTMODE] Key: TEST000023 | Value: 20000
+[TESTMODE] Removed / Not found correctly
+[TESTMODE] Key: TEST000025 | Value: 24000
+[TESTMODE] Removed / Not found correctly
+[TESTMODE] Removed / Not found correctly
+[TESTMODE] Removed / Not found correctly
+[TESTMODE] Removed / Not found correctly
+[TESTMODE] Size: 13, Capacity: 64
+[TESTMODE] ==== Destroy
+[TESTMODE] Size: 0, Capacity: 0
+[TESTMODE] ==== Get
+[TESTMODE] Size: 0, Capacity: 0
+[TESTMODE] Size: 0, Capacity: 16
+[TESTMODE] Size: 20000, Capacity: 32768
+[TESTMODE] ==== Destroy
+[TESTMODE] Size: 0, Capacity: 0
+[TESTMODE] Passed
